@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Title: JBoss OSGi tests
+Implementation-Version: test
+Implementation-Vendor: jboss.org
+Bundle-Name: Service3
+Bundle-SymbolicName: org.jboss.test.osgi.service3
+Import-Package: org.jboss.test.osgi.service.support.a,org.jboss.test.osgi.service.support.c

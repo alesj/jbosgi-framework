@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Implementation-Title: JBoss OSGi tests
+Implementation-Version: test
+Implementation-Vendor: jboss.org
+Bundle-Name: Smoke
+Bundle-SymbolicName: org.jboss.test.osgi.smoke

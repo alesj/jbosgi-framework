@@ -1,0 +1,74 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+
+  <id>all</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+
+  <!-- Dependency Sets -->
+  <dependencySets>
+    <dependencySet>
+      <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+      <includes>
+        <include>*:args4j:jar</include>
+        <include>*:jaxb-api:jar</include>
+        <include>*:jboss-classloader:jar</include>
+        <include>*:jboss-classloading:jar</include>
+        <include>*:jboss-classloading-spi:jar</include>
+        <include>*:jboss-classloading-vfs:jar</include>
+        <include>*:jboss-common-core:jar</include>
+        <include>*:jboss-dependency:jar</include>
+        <include>*:jboss-deployers-client:jar</include>
+        <include>*:jboss-deployers-client-spi:jar</include>
+        <include>*:jboss-deployers-core:jar</include>
+        <include>*:jboss-deployers-core-spi:jar</include>
+        <include>*:jboss-deployers-impl:jar</include>
+        <include>*:jboss-deployers-spi:jar</include>
+        <include>*:jboss-deployers-structure-spi:jar</include>
+        <include>*:jboss-deployers-vfs:jar</include>
+        <include>*:jboss-deployers-vfs-spi:jar</include>
+        <include>*:jboss-kernel:jar</include>
+        <include>*:jboss-logging-spi:jar</include>
+        <include>*:jboss-managed:jar</include>
+        <include>*:jboss-mdr:jar</include>
+        <include>*:jboss-metatype:jar</include>
+        <include>*:jboss-osgi-deployers:jar</include>
+        <include>*:jboss-osgi-spi:jar</include>
+        <include>*:jboss-reflect:jar</include>
+        <include>*:jboss-vfs:jar</include>
+        <include>*:jbossxb:jar</include>
+        <include>*:org.osgi.core:jar</include>
+        <include>*:org.osgi.compendium:jar</include>
+      </includes>
+      <useStrictFiltering>true</useStrictFiltering>
+      <scope>compile</scope>
+      <unpack>true</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+      <includes>
+        <include>*:jboss-logging-log4j:jar</include>
+      </includes>
+      <useStrictFiltering>true</useStrictFiltering>
+      <scope>test</scope>
+      <unpack>true</unpack>
+    </dependencySet>
+  </dependencySets>
+  
+  <fileSets>
+    <fileSet>
+      <directory>target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>src/etc/osgitck</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>jboss-osgi-bootstrap.xml</include>
+        <include>log4j.xml</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>
