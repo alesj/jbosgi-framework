@@ -54,8 +54,6 @@ public class GetUnGetServiceUnitTestCase extends FrameworkTest
 
    public void testGetUnServiceErrors() throws Exception
    {
-      String OBJCLASS = BundleContext.class.getName();
-      
       Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
       try
       {
@@ -93,8 +91,6 @@ public class GetUnGetServiceUnitTestCase extends FrameworkTest
    
    public void testGetService() throws Exception
    {
-      String OBJCLASS = BundleContext.class.getName();
-      
       Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
       try
       {
@@ -120,8 +116,6 @@ public class GetUnGetServiceUnitTestCase extends FrameworkTest
    
    public void testGetServiceAfterStop() throws Exception
    {
-      String OBJCLASS = BundleContext.class.getName();
-      
       Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
       try
       {
