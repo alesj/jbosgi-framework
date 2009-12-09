@@ -1,0 +1,4 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: bundle-classpath
+Bundle-ClassPath: .,WEB-INF/classes
+

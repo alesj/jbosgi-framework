@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Title: JBoss OSGi tests
+Implementation-Version: test
+Implementation-Vendor: jboss.org
+Bundle-Name: NotSingleton
+Bundle-SymbolicName: org.jboss.test.osgi.singleton
+Bundle-Version: 2.0.0

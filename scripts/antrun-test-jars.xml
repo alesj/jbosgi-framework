@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ============================================================ -->
+<!--  JBoss, the OpenSource J2EE webOS                            -->
+<!--  Distributable under LGPL license.                           -->
+<!--  See terms of license at http://www.gnu.org.                 -->
+<!-- ============================================================ -->
+
+<!-- $Id$ -->
+
+<project default="build-test-jars">
+
+  <description>OSGi test archive builder</description>
+
+  <!-- ================================================================== -->
+  <!-- Init                                                               -->
+  <!-- ================================================================== -->
+
+  <target name="init">
+
+    <!-- Property override when not called from maven -->
+    <property name="maven.runtime.classpath" value="/usr/java/bnd.jar" />
+    <property name="tests.output.dir" value="${basedir}/../target" />
+
+    <mkdir dir="${tests.output.dir}/test-libs" />
+    <property name="tests.classes.dir" value="${tests.output.dir}/test-classes" />
+    <property name="tests.resources.dir" value="${tests.output.dir}/test-classes" />
+
+    <taskdef resource="aQute/bnd/ant/taskdef.properties">
+      <classpath>
+        <pathelement path="${maven.runtime.classpath}" />
+      </classpath>
+    </taskdef>
+
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Building                                                           -->
+  <!-- ================================================================== -->
+
+  <target name="build-test-jars" depends="init" description="Build the test deployments">
+
+    <!-- Please add alphabetically -->
+
+    <!-- bundle-classpath -->
+    <war destfile="${tests.output.dir}/test-libs/bundle-classpath.war"
+      manifest="${tests.resources.dir}/bundles/classloader/bundleclasspath/MANIFEST.MF"
+      webxml="${tests.resources.dir}/bundles/classloader/bundleclasspath/web.xml">
+      <classes dir="${tests.classes.dir}">
+        <include name="**/classloader/support/a/A.class"/>
+      </classes>
+      <fileset dir="${tests.resources.dir}/bundles/classloader/bundleclasspath">
+        <include name="message.txt"/>
+      </fileset>
+    </war> 
+    
+    <!-- simple -->
+    <bnd classpath="${tests.classes.dir}" output="${tests.output.dir}/test-libs/simple-bundle.jar" files="${tests.resources.dir}/integration/simple/simple.bnd" />
+    <bnd classpath="${tests.classes.dir}" output="${tests.output.dir}/test-libs/simple-logservice-bundle.jar" files="${tests.resources.dir}/integration/simple/simple-logservice.bnd" />
+  	
+    <!-- Please add alphabetically -->
+
+  </target>
+
+</project>

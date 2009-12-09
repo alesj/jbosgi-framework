@@ -1,0 +1,179 @@
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+  <!-- 
+  ********************************
+  *                              *  
+  *  OSGi Framework              *
+  *                              *
+  ********************************
+  -->
+  
+  <bean name="OSGiBundleManager" class="org.jboss.osgi.framework.bundle.OSGiBundleManager">
+    <constructor>
+      <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
+      <parameter><inject bean="MainDeployer" /></parameter>
+    </constructor>
+    <property name="properties">
+      <map keyClass="java.lang.String" valueClass="java.lang.String">
+        <entry><key>org.osgi.framework.storage</key><value>${log4j.output.dir}/osgi-store</value></entry>
+        <entry><key>org.osgi.framework.storage.clean</key><value>onFirstInit</value></entry>
+        <entry><key>org.osgi.framework.system.packages.extra</key><value>
+        
+          org.jboss.logging;version=2.0,
+          
+          org.jboss.osgi.spi;version=1.0,
+          org.jboss.osgi.spi.capability;version=1.0,
+          org.jboss.osgi.spi.management;version=1.0,
+          org.jboss.osgi.spi.service;version=1.0,
+          org.jboss.osgi.spi.util;version=1.0,
+          
+          org.osgi.framework,
+          org.osgi.framework.launch,
+          org.osgi.service.startlevel,
+          org.osgi.service.packageadmin
+        </value></entry>
+      </map>
+    </property>
+    <incallback method="addPlugin" />
+    <uncallback method="removePlugin" />
+  </bean>
+  
+  <!-- 
+  ********************************
+  *                              *  
+  *  OSGi Framework Plugins      *
+  *                              *
+  ********************************
+  -->
+  
+  <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="OSGiSystemPackages" class="org.jboss.osgi.framework.plugins.internal.SystemPackagesPluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  
+  <!-- 
+  ********************************
+  *                              *  
+  *  OSGi Service Plugins        *
+  *                              *
+  ********************************
+  -->
+  
+  <bean name="MicrocontainerService" class="org.jboss.osgi.framework.service.internal.MicrocontainerServiceImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="StartLevelService" class="org.jboss.osgi.framework.service.internal.StartLevelImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="PackageAdminService" class="org.jboss.osgi.framework.service.internal.PackageAdminImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="DeployerService" class="org.jboss.osgi.framework.service.internal.DeployerServiceImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="LifecycleInterceptorService" class="org.jboss.osgi.framework.service.internal.LifecycleInterceptorServiceImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  
+  <!--
+  ********************************
+  *                              *  
+  *  OSGi Deployment             *
+  *                              *
+  ********************************
+  -->
+  
+  <!-- The MainDeployer -->
+  <bean name="MainDeployer" class="org.jboss.deployers.plugins.main.MainDeployerImpl">
+    <property name="structuralDeployers"><inject bean="StructuralDeployers" /></property>
+    <property name="deployers"><inject bean="Deployers" /></property>
+  </bean>
+
+  <!-- The holder for deployers that determine structure -->
+  <bean name="StructuralDeployers" class="org.jboss.deployers.vfs.plugins.structure.VFSStructuralDeployersImpl">
+    <property name="structureBuilder">
+      <!-- The consolidator of the structure information -->
+      <bean name="StructureBuilder" class="org.jboss.deployers.vfs.plugins.structure.VFSStructureBuilder" />
+    </property>
+    <!-- Accept any implementor of structure deployer -->
+    <incallback method="addDeployer" />
+    <uncallback method="removeDeployer" />
+  </bean>
+
+  <!-- The holder for deployers that do real deployment -->
+  <bean name="Deployers" class="org.jboss.deployers.plugins.deployers.DeployersImpl">
+    <constructor><parameter><inject bean="jboss.kernel:service=KernelController" /></parameter></constructor>
+    <!-- Accept any implementor of deployer -->
+    <incallback method="addDeployer" />
+    <uncallback method="removeDeployer" />
+  </bean>
+
+  <!-- Bundle Structure -->
+  <bean name="BundleStructure" class="org.jboss.osgi.deployer.BundleStructureDeployer" />
+  
+  <!-- JAR & File Structure (needed for negative testing) -->
+  <bean name="JARStructure" class="org.jboss.deployers.vfs.plugins.structure.jar.JARStructure" />
+  <bean name="FileStructure" class="org.jboss.deployers.vfs.plugins.structure.file.FileStructure" />
+
+  <!-- POJO Deployment -->
+  <bean name="BeanDeployer" class="org.jboss.deployers.vfs.deployer.kernel.BeanDeployer" />
+  <bean name="KernelDeploymentDeployer" class="org.jboss.deployers.vfs.deployer.kernel.KernelDeploymentDeployer" />
+  <bean name="BeanMetaDataDeployer" class="org.jboss.deployers.vfs.deployer.kernel.BeanMetaDataDeployer">
+    <constructor>
+      <parameter class="org.jboss.dependency.spi.Controller"><inject bean="jboss.kernel:service=KernelController" /></parameter>
+    </constructor>
+  </bean>
+
+  <!-- OSGI Deployment -->
+  <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
+  <bean name="OSGiBundleStateDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleStateDeployer">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="OSGiBundleActivatorDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer" />
+
+  <!--
+  ********************************
+  *                              *  
+  *  OSGi Classloading           *
+  *                              *
+  ********************************
+  -->
+  
+  <bean name="OSGiClassLoaderSystem" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderSystem" />
+  <bean name="OSGiClassLoaderDomain" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderDomain" >
+    <constructor><parameter>OSGiClassLoaderDomain</parameter></constructor>
+    <property name="classLoaderSystem"><inject bean="OSGiClassLoaderSystem"/></property>
+    <property name="bundleManager"><inject bean="OSGiBundleManager" /></property>
+  </bean>
+  <bean name="OSGiClassLoaderFactory" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderFactory" >
+    <property name="system"><inject bean="OSGiClassLoaderSystem"/></property>
+  </bean>
+  <bean name="OSGiBundleClassLoadingDeployer" class="org.jboss.osgi.framework.classloading.OSGiBundleClassLoadingDeployer">
+    <property name="domain"><inject bean="OSGiClassLoaderDomain"/></property>
+    <property name="factory"><inject bean="OSGiClassLoaderFactory"/></property>
+  </bean>
+   
+  <bean name="ClassLoading" class="org.jboss.classloading.spi.dependency.ClassLoading">
+    <incallback method="addModule" state="Configured" />
+    <uncallback method="removeModule" state="Configured" />
+  </bean>
+  <bean name="ClassLoadingDefaultDeployer" class="org.jboss.deployers.plugins.classloading.ClassLoadingDefaultDeployer">
+    <property name="defaultMetaData">
+      <classloading xmlns="urn:jboss:classloading:1.0" export-all="NON_EMPTY" import-all="true" />
+    </property>
+  </bean>
+  <bean name="ClassLoaderClassPathDeployer" class="org.jboss.deployers.vfs.plugins.classloader.VFSClassLoaderClassPathDeployer" />
+  <bean name="ClassLoaderDescribeDeployer" class="org.jboss.deployers.vfs.plugins.classloader.VFSClassLoaderDescribeDeployer">
+    <property name="classLoading"><inject bean="ClassLoading" /></property>
+  </bean>
+  <bean name="ClassLoaderDeployer" class="org.jboss.deployers.plugins.classloading.AbstractLevelClassLoaderSystemDeployer">
+    <property name="classLoading"><inject bean="ClassLoading" /></property>
+    <property name="system"><inject bean="OSGiClassLoaderSystem" /></property>
+  </bean>
+
+</deployment>

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Implementation-Title: JBoss OSGi tests
+Implementation-Version: test
+Implementation-Vendor: jboss.org
+Bundle-Name: BundleB
+Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
+Require-Bundle: org.jboss.test.osgi.classloader.bundleA;visibility:=reexport
+Export-Package: org.jboss.test.osgi.classloader.support.b
