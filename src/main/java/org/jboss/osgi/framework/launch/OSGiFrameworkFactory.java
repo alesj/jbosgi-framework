@@ -63,7 +63,7 @@ public class OSGiFrameworkFactory implements FrameworkFactory
    /** The system property used to get a bootstrap path loaded from a classloader */
    public static final String BOOTSTRAP_PATH = "org.jboss.osgi.framework.launch.bootstrapPath";
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public Framework newFramework(Map configuration)
    {
       // Bootstrap the kernel
@@ -117,6 +117,7 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       try
       {
          deployer.deploy(url);
+         deployer.validate();
       }
       catch (Throwable ex)
       {
@@ -127,7 +128,11 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       if (managerContext == null)
          throw new IllegalStateException("Cannot obtain installed bean: " + OSGiBundleManager.BEAN_BUNDLE_MANAGER);
 
+      // Get the manger and copy the configuration
       OSGiBundleManager manager = (OSGiBundleManager)managerContext.getTarget();
+      if (configuration != null)
+         manager.setProperties(configuration);
+      
       return new OSGiFramework(manager);
    }
 

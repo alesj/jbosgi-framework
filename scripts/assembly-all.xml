@@ -34,11 +34,13 @@
         <include>*:jboss-managed:jar</include>
         <include>*:jboss-mdr:jar</include>
         <include>*:jboss-metatype:jar</include>
+        <include>*:jboss-osgi-deployment:jar</include>
         <include>*:jboss-osgi-deployers:jar</include>
         <include>*:jboss-osgi-spi:jar</include>
         <include>*:jboss-reflect:jar</include>
         <include>*:jboss-vfs:jar</include>
         <include>*:jbossxb:jar</include>
+        <include>*:mcann-core:jar</include>
         <include>*:org.osgi.core:jar</include>
         <include>*:org.osgi.compendium:jar</include>
       </includes>
@@ -52,7 +54,7 @@
         <include>*:jboss-logging-log4j:jar</include>
       </includes>
       <useStrictFiltering>true</useStrictFiltering>
-      <scope>test</scope>
+      <scope>provided</scope>
       <unpack>true</unpack>
     </dependencySet>
   </dependencySets>

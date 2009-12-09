@@ -132,6 +132,7 @@
     <constructor>
       <parameter class="org.jboss.dependency.spi.Controller"><inject bean="jboss.kernel:service=KernelController" /></parameter>
     </constructor>
+    <property name="deploymentRegistry"><inject bean="DeploymentRegistry"/></property>
   </bean>
 
   <!-- OSGI Deployment -->

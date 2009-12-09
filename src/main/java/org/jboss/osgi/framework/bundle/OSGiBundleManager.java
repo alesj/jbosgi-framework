@@ -433,10 +433,10 @@ public class OSGiBundleManager
     *
     * @param properties the properties
     */
-   public void setProperties(Map<String, Object> properties)
+   public void setProperties(Map<String, Object> props)
    {
-      this.properties = properties;
-
+      properties.putAll(props);
+      
       // Init default framework properties
       if (getProperty(Constants.FRAMEWORK_VERSION) == null)
          setProperty(Constants.FRAMEWORK_VERSION, OSGi_FRAMEWORK_VERSION);

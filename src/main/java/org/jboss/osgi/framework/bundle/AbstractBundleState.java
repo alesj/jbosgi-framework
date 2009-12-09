@@ -660,8 +660,9 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       // Invoke the bundle lifecycle interceptors
       if (getBundleManager().isFrameworkActive() && getBundleId() != 0)
       {
-         LifecycleInterceptorServicePlugin plugin = getBundleManager().getPlugin(LifecycleInterceptorServicePlugin.class);
-         plugin.handleStateChange(state, getBundleInternal());
+         LifecycleInterceptorServicePlugin plugin = getBundleManager().getOptionalPlugin(LifecycleInterceptorServicePlugin.class);
+         if (plugin != null)
+            plugin.handleStateChange(state, getBundleInternal());
       }
       
       this.state.set(state);
