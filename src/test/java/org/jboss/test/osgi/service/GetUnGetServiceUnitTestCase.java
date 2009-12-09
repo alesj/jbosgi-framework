@@ -157,7 +157,7 @@ public class GetUnGetServiceUnitTestCase extends FrameworkTest
 
          bundleContext.addFrameworkListener(this);
          
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), new BrokenServiceFactory(bundleContext, true), null);
+         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, new BrokenServiceFactory(bundleContext, true), null);
          ServiceReference reference = registration.getReference();
          Object actual = bundleContext.getService(reference);
          assertNull("" + actual, actual);
@@ -181,7 +181,7 @@ public class GetUnGetServiceUnitTestCase extends FrameworkTest
 
          bundleContext.addFrameworkListener(this);
          
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), new BrokenServiceFactory(bundleContext, false), null);
+         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, new BrokenServiceFactory(bundleContext, false), null);
          ServiceReference reference = registration.getReference();
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
@@ -206,7 +206,7 @@ public class GetUnGetServiceUnitTestCase extends FrameworkTest
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
 
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, bundleContext, null);
          ServiceReference reference = registration.getReference();
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
