@@ -21,6 +21,8 @@
 */
 package org.jboss.test.osgi;
 
+import static org.junit.Assert.assertEquals;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -242,6 +244,13 @@ public abstract class FrameworkTest extends MicrocontainerTest implements Framew
       getDelegate().addPath(dir, path, name);
    }
 
+   protected void assertBundleState(int expState, int wasState)
+   {
+      String expstr = ConstantsHelper.bundleState(expState);
+      String wasstr = ConstantsHelper.bundleState(wasState);
+      assertEquals("Bundle " + expstr, expstr, wasstr);
+   }
+   
    protected void assertClassEquality(Class<?> expected, Class<?> actual)
    {
       assertTrue("Should be the same " + ClassLoaderUtils.classToString(expected) + " and " + ClassLoaderUtils.classToString(actual), expected == actual);

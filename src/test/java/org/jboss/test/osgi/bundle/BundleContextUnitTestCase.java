@@ -22,6 +22,7 @@
 package org.jboss.test.osgi.bundle;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.jboss.osgi.testing.OSGiTestHelper;
 import org.jboss.test.osgi.FrameworkTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -212,7 +214,49 @@ public class BundleContextUnitTestCase extends FrameworkTest
    
    public void testInstallBundle() throws Exception
    {
-      // TODO testInstallBundle
+      OSGiTestHelper helper = new OSGiTestHelper();
+      BundleContext context = getBundleManager().getSystemContext();
+      
+      // Test URL location
+      URL url = helper.getTestArchiveURL("bundles/jboss-osgi-common.jar");
+      Bundle bundle = context.installBundle(url.toExternalForm());
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundle.getState());
+         assertEquals(url.toExternalForm(), bundle.getLocation());
+      }
+      finally
+      {
+         bundle.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundle.getState());
+      }
+      
+      // Test file location
+      String location = helper.getTestArchivePath("bundles/jboss-osgi-common.jar");
+      bundle = context.installBundle(location);
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundle.getState());
+         assertEquals(location, bundle.getLocation());
+      }
+      finally
+      {
+         bundle.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundle.getState());
+      }
+      
+      // Test symbolic location
+      bundle = context.installBundle("/symbolic/location", url.openStream());
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundle.getState());
+         assertEquals("/symbolic/location", bundle.getLocation());
+      }
+      finally
+      {
+         bundle.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundle.getState());
+      }
    }
    
    public void testServiceListener() throws Exception

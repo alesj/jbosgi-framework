@@ -118,9 +118,6 @@ public class OSGiBundleManager
    /** The bundle manager's bean name: OSGiBundleManager */
    public static final String BEAN_BUNDLE_MANAGER = "OSGiBundleManager";
 
-   /** The string representation of this bundle's location identifier. */
-   public static final String PROPERTY_BUNDLE_LOCATION = "org.jboss.osgi.bundle.location";
-
    /** The framework version */
    private static String OSGi_FRAMEWORK_VERSION = "r4v42"; // [TODO] externalise
 
@@ -833,9 +830,10 @@ public class OSGiBundleManager
          osgiMetaData = new AbstractOSGiMetaData(manifest);
       }
 
-      String location = (String)unit.getAttachment(PROPERTY_BUNDLE_LOCATION);
-      if (location == null)
-         location = unit.getName();
+      // The bundle location is not necessarily the bundle root url
+      // The framework is expected to preserve the location passed into installBundle(String)
+      Deployment dep = unit.getAttachment(Deployment.class);
+      String location = (dep != null ? dep.getLocation() : unit.getName());
 
       OSGiBundleState bundleState = new OSGiBundleState(location, osgiMetaData, unit);
       addBundle(bundleState);
