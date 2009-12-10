@@ -215,11 +215,10 @@ public class BundleContextUnitTestCase extends FrameworkTest
    public void testInstallBundle() throws Exception
    {
       OSGiTestHelper helper = new OSGiTestHelper();
-      BundleContext context = getBundleManager().getSystemContext();
       
       // Test URL location
       URL url = helper.getTestArchiveURL("bundles/jboss-osgi-common.jar");
-      Bundle bundle = context.installBundle(url.toExternalForm());
+      Bundle bundle = installBundle(url.toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -233,7 +232,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
       
       // Test file location
       String location = helper.getTestArchivePath("bundles/jboss-osgi-common.jar");
-      bundle = context.installBundle(location);
+      bundle = installBundle(location);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -246,7 +245,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
       }
       
       // Test symbolic location
-      bundle = context.installBundle("/symbolic/location", url.openStream());
+      bundle = installBundle("/symbolic/location", url.openStream());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -258,7 +257,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
          assertBundleState(Bundle.UNINSTALLED, bundle.getState());
       }
    }
-   
+
    public void testServiceListener() throws Exception
    {
       Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");

@@ -21,8 +21,7 @@
 */
 package org.jboss.test.osgi;
 
-import static org.junit.Assert.assertEquals;
-
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -168,6 +167,18 @@ public abstract class FrameworkTest extends MicrocontainerTest implements Framew
       return getDelegate().deployBundle(file);
    }
 
+   protected Bundle installBundle(String location) throws BundleException
+   {
+      BundleContext context = getBundleManager().getSystemContext();
+      return context.installBundle(location);
+   }
+
+   protected Bundle installBundle(String location, InputStream instream) throws BundleException
+   {
+      BundleContext context = getBundleManager().getSystemContext();
+      return context.installBundle(location, instream);
+   }
+   
    /**
     * Remove a bundle 
     * 
@@ -584,7 +595,7 @@ public abstract class FrameworkTest extends MicrocontainerTest implements Framew
       assertEquals(reference, event.getServiceReference());
    }
 
-   @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
+   @SuppressWarnings("rawtypes")
    private void waitForEvent(List events, int type) throws InterruptedException
    {
 	  // Timeout for event delivery: 3 sec 
