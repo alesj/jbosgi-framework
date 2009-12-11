@@ -26,12 +26,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.jar.Manifest;
 
+import org.jboss.osgi.testing.OSGiTestHelper;
 import org.jboss.test.BaseTestCase;
 
 /**
  * Uses Manifest.mf file for actual tests.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
  */
 public abstract class AbstractManifestTestCase extends BaseTestCase
 {
@@ -44,11 +46,12 @@ public abstract class AbstractManifestTestCase extends BaseTestCase
    {
       if (prefix == null)
          prefix = "";
-      return prefix + "Manifest.mf";
+      return "bundles/metadata/" + prefix + "Manifest.mf";
    }
 
    protected Manifest getManifest(String name) throws IOException
    {
+
       InputStream is = getManifestInputStream(name);
       try
       {
@@ -62,7 +65,7 @@ public abstract class AbstractManifestTestCase extends BaseTestCase
 
    protected InputStream getManifestInputStream(String name) throws IOException
    {
-      URL url = getResource(name);
+      URL url = new OSGiTestHelper().getResourceURL(name);
       if (url == null)
          fail(name + " not found");
       return url.openStream();

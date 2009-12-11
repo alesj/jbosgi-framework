@@ -238,11 +238,4 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
          assertEquals(vr1, vr2);
       }
    }
-
-   public void testIllegalManifest() throws Exception
-   {
-      getManifest(createName("Illegal"));
-      // TDO
-   }
-
 }
