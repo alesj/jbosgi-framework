@@ -79,16 +79,12 @@ public class OSGiFramework extends OSGiBundleWrapper implements Framework
    @Override
    public void stop() throws BundleException
    {
-      // [TODO] The method returns immediately to the caller after initiating the following steps
-
       bundleManager.stopFramework();
    }
 
    @Override
    public void stop(int options) throws BundleException
    {
-      // [TODO] The method returns immediately to the caller after initiating the following steps
-
       bundleManager.stopFramework();
    }
 
@@ -144,11 +140,11 @@ public class OSGiFramework extends OSGiBundleWrapper implements Framework
       throw new BundleException("The system bundle cannot be uninstalled");
    }
 
+   /**
+    * Wait until this Framework has completely stopped. 
+    */
    public FrameworkEvent waitForStop(long timeout) throws InterruptedException
    {
-      // [TODO] Wait until this Framework has completely stopped.
-
-      // [TODO] A Framework Event indicating the reason this method returned
-      return new FrameworkEvent(FrameworkEvent.STOPPED, this, null);
+      return bundleManager.waitForStop(timeout);
    }
 }

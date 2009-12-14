@@ -38,6 +38,10 @@ import org.osgi.framework.ServiceListener;
  */
 public interface FrameworkEventsPlugin extends Plugin
 {
+   boolean isActive();
+   
+   void setActive(boolean active);
+   
    void addBundleListener(Bundle bundle, BundleListener listener);
 
    void removeBundleListener(Bundle bundle, BundleListener listener);

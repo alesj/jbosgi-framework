@@ -65,6 +65,8 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
    // Provide logging
    final Logger log = Logger.getLogger(FrameworkEventsPluginImpl.class);
 
+   /** The active state of this plugin */
+   private boolean active;
    /** The bundle listeners */
    private final Map<Bundle, List<BundleListener>> bundleListeners = new ConcurrentHashMap<Bundle, List<BundleListener>>();
    /** The framework listeners */
@@ -92,6 +94,16 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
    public void setSynchronous(boolean synchronous)
    {
       this.synchronous = synchronous;
+   }
+
+   public boolean isActive()
+   {
+      return active;
+   }
+
+   public void setActive(boolean active)
+   {
+      this.active = active;
    }
 
    public void addBundleListener(Bundle bundle, BundleListener listener)

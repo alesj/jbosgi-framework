@@ -43,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
@@ -117,54 +118,40 @@ public class OSGiBundleManager
 
    /** The bundle manager's bean name: OSGiBundleManager */
    public static final String BEAN_BUNDLE_MANAGER = "OSGiBundleManager";
-
    /** The framework version */
    private static String OSGi_FRAMEWORK_VERSION = "r4v42"; // [TODO] externalise
-
    /** The framework vendor */
    private static String OSGi_FRAMEWORK_VENDOR = "jboss.org"; // [TODO] externalise
-
    /** The framework language */
    private static String OSGi_FRAMEWORK_LANGUAGE = Locale.getDefault().getISO3Language(); // REVIEW correct?
-
    /** The os name */
    private static String OSGi_FRAMEWORK_OS_NAME;
-
    /** The os version */
    private static String OSGi_FRAMEWORK_OS_VERSION;
-
    /** The os version */
    private static String OSGi_FRAMEWORK_PROCESSOR;
-
    /** The bundles by id */
    private List<AbstractBundleState> bundles = new CopyOnWriteArrayList<AbstractBundleState>();
-
    /** The kernel */
    private Kernel kernel;
-
    /** The main deployer */
    private DeployerClient deployerClient;
-
    /** The deployment structure */
    private MainDeployerStructure deployerStructure;
-
    /** The deployment registry */
    private DeploymentRegistry registry;
-
    /** The instance metadata factory */
    private MetaDataRetrievalFactory factory;
-
    /** The executor */
    private Executor executor;
-
    /** The system bundle */
    private OSGiSystemState systemBundle;
-
    /** The registered manager plugins */
    private Map<Class<?>, Plugin> plugins = Collections.synchronizedMap(new LinkedHashMap<Class<?>, Plugin>());
-
    /** The frame work properties */
    private Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+   /** The framework stop monitor*/
+   private AtomicInteger stopMonitor = new AtomicInteger(0);
 
    static
    {
@@ -433,7 +420,7 @@ public class OSGiBundleManager
    public void setProperties(Map<String, Object> props)
    {
       properties.putAll(props);
-      
+
       // Init default framework properties
       if (getProperty(Constants.FRAMEWORK_VERSION) == null)
          setProperty(Constants.FRAMEWORK_VERSION, OSGi_FRAMEWORK_VERSION);
@@ -693,7 +680,7 @@ public class OSGiBundleManager
       BundleInfo info = BundleInfo.createBundleInfo(root, location);
       Deployment dep = DeploymentFactory.createDeployment(info);
       dep.setAutoStart(autoStart);
-      
+
       return installBundle(dep);
    }
 
@@ -1537,7 +1524,19 @@ public class OSGiBundleManager
    }
 
    /**
-    * Init the Framework
+    * Initialize this Framework. 
+    * 
+    * After calling this method, this Framework must:
+    * - Be in the Bundle.STARTING state.
+    * - Have a valid Bundle Context.
+    * - Be at start level 0.
+    * - Have event handling enabled.
+    * - Have reified Bundle objects for all installed bundles.
+    * - Have registered any framework services. For example, PackageAdmin, ConditionalPermissionAdmin, StartLevel.
+    * 
+    * This Framework will not actually be started until start is called.
+    * 
+    * This method does nothing if called when this Framework is in the Bundle.STARTING, Bundle.ACTIVE or Bundle.STOPPING states. 
     */
    public void initFramework()
    {
@@ -1555,9 +1554,24 @@ public class OSGiBundleManager
       // Put into the STARTING state
       systemBundle.changeState(Bundle.STARTING);
 
+      // Create the system bundle context
+      systemBundle.createBundleContext();
+
       // [TODO] Be at start level 0
 
-      // [TODO] Have event handling enabled
+      // Have event handling enabled
+      FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
+      eventsPlugin.setActive(true);
+
+      // Have registered any framework services.
+      for (Plugin plugin : plugins.values())
+      {
+         if (plugin instanceof ServicePlugin)
+         {
+            ServicePlugin servicePlugin = (ServicePlugin)plugin;
+            servicePlugin.startService();
+         }
+      }
 
       // Cleanup the storage area
       String storageClean = getProperty(Constants.FRAMEWORK_STORAGE_CLEAN);
@@ -1576,19 +1590,6 @@ public class OSGiBundleManager
       // If this Framework is not in the STARTING state, initialize this Framework
       if (systemBundle.getState() != Bundle.STARTING)
          initFramework();
-
-      // Create the system bundle context
-      systemBundle.createBundleContext();
-
-      // Start registered service plugins
-      for (Plugin plugin : plugins.values())
-      {
-         if (plugin instanceof ServicePlugin)
-         {
-            ServicePlugin servicePlugin = (ServicePlugin)plugin;
-            servicePlugin.startService();
-         }
-      }
 
       // All installed bundles must be started
       AutoInstallPlugin autoInstall = getOptionalPlugin(AutoInstallPlugin.class);
@@ -1612,44 +1613,132 @@ public class OSGiBundleManager
    }
 
    /**
-    * Stop the framework
+    * Stop this Framework.
+    * 
+    * The method returns immediately to the caller after initiating the following steps to be taken on another thread.
+    * 
+    * 1. This Framework's state is set to Bundle.STOPPING.
+    * 2. All installed bundles must be stopped without changing each bundle's persistent autostart setting. 
+    * 3. Unregister all services registered by this Framework.
+    * 4. Event handling is disabled.
+    * 5. This Framework's state is set to Bundle.RESOLVED.
+    * 6. All resources held by this Framework are released. This includes threads, bundle class loaders, open files, etc.
+    * 7. Notify all threads that are waiting at waitForStop that the stop operation has completed.
+    * 
+    * After being stopped, this Framework may be discarded, initialized or started. 
     */
    public void stopFramework()
    {
-      AbstractBundleState systemBundle = getSystemBundle();
-      if (systemBundle.getState() != Bundle.ACTIVE)
-         return;
-
-      systemBundle.changeState(Bundle.STOPPING);
-      for (AbstractBundleState bundleState : getBundles())
+      int beforeCount = stopMonitor.get();
+      Runnable stopcmd = new Runnable()
       {
-         if (bundleState != systemBundle)
+         public void run()
          {
-            try
+            synchronized (stopMonitor)
             {
-               // [TODO] don't change the  persistent state
-               bundleState.stop();
+               // Start the stop process
+               stopMonitor.addAndGet(1);
+
+               // This Framework's state is set to Bundle.STOPPING
+               systemBundle.changeState(Bundle.STOPPING);
+
+               // If this Framework implements the optional Start Level Service Specification, 
+               // then the start level of this Framework is moved to start level zero (0), as described in the Start Level Service Specification. 
+
+               // All installed bundles must be stopped without changing each bundle's persistent autostart setting
+               for (AbstractBundleState bundleState : getBundles())
+               {
+                  if (bundleState != systemBundle)
+                  {
+                     try
+                     {
+                        // [TODO] don't change the  persistent state
+                        bundleState.stop();
+                     }
+                     catch (Exception ex)
+                     {
+                        // Any exceptions that occur during bundle stopping must be wrapped in a BundleException and then 
+                        // published as a framework event of type FrameworkEvent.ERROR
+                        fireError(bundleState, "stopping bundle", ex);
+                     }
+                  }
+               }
+
+               // Stop registered service plugins
+               List<Plugin> reverseServicePlugins = new ArrayList<Plugin>(plugins.values());
+               Collections.reverse(reverseServicePlugins);
+               for (Plugin plugin : reverseServicePlugins)
+               {
+                  if (plugin instanceof ServicePlugin)
+                  {
+                     ServicePlugin servicePlugin = (ServicePlugin)plugin;
+                     servicePlugin.stopService();
+                  }
+               }
+
+               // Event handling is disabled
+               FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
+               eventsPlugin.setActive(false);
+
+               // This Framework's state is set to Bundle.RESOLVED
+               systemBundle.changeState(Bundle.RESOLVED);
+
+               // All resources held by this Framework are released
+               systemBundle.destroyBundleContext();
+
+               // Notify all threads that are waiting at waitForStop that the stop operation has completed
+               stopMonitor.notifyAll();
             }
-            catch (Throwable t)
-            {
-               fireWarning(bundleState, "stopping bundle", t);
-            }
+         }
+      };
+      executor.execute(stopcmd);
+
+      // Wait for the stop thread
+      while (stopMonitor.get() == beforeCount)
+      {
+         try
+         {
+            Thread.sleep(100);
+         }
+         catch (InterruptedException ex)
+         {
+            // ignore
+         }
+      }
+   }
+
+   /**
+    * Wait until this Framework has completely stopped. 
+    * 
+    * The stop and update methods on a Framework performs an asynchronous stop of the Framework. 
+    * This method can be used to wait until the asynchronous stop of this Framework has completed. 
+    * This method will only wait if called when this Framework is in the Bundle.STARTING, Bundle.ACTIVE, or Bundle.STOPPING states. 
+    * Otherwise it will return immediately.
+    * 
+    * A Framework Event is returned to indicate why this Framework has stopped.
+    */
+   public FrameworkEvent waitForStop(long timeout) throws InterruptedException
+   {
+      int state = systemBundle.getState();
+
+      // Only wait when this Framework is in Bundle.STARTING, Bundle.ACTIVE, or Bundle.STOPPING state
+      if (state != Bundle.STARTING && state != Bundle.ACTIVE && state != Bundle.STOPPING)
+         return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
+
+      long timeoutTime = System.currentTimeMillis() + timeout;
+      synchronized (stopMonitor)
+      {
+         while (state != Bundle.RESOLVED && System.currentTimeMillis() < timeoutTime)
+         {
+            stopMonitor.wait(timeout);
+            state = systemBundle.getState();
          }
       }
 
-      // Stop registered service plugins
-      List<Plugin> reverseServicePlugins = new ArrayList<Plugin>(plugins.values());
-      Collections.reverse(reverseServicePlugins);
-      for (Plugin plugin : reverseServicePlugins)
-      {
-         if (plugin instanceof ServicePlugin)
-         {
-            ServicePlugin servicePlugin = (ServicePlugin)plugin;
-            servicePlugin.stopService();
-         }
-      }
+      if (System.currentTimeMillis() > timeoutTime)
+         return new FrameworkEvent(FrameworkEvent.WAIT_TIMEDOUT, systemBundle, null);
 
-      systemBundle.changeState(Bundle.RESOLVED);
+      return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
    }
 
    /**
