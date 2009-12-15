@@ -1,0 +1,4 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.jboss.test.osgi.failstart
+Bundle-Activator: org.jboss.test.osgi.bundle.support.a.FailOnStartActivator
+

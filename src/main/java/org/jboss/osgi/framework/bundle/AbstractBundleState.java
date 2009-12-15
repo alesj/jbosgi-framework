@@ -224,13 +224,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return osgiMetaData;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Dictionary getHeaders()
    {
       return getHeaders(null);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Dictionary getHeaders(String locale)
    {
       checkAdminPermission(AdminPermission.METADATA);
@@ -408,7 +408,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return getBundleManager().getServiceReferences(this, clazz, filter, true);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes" })
    public ServiceRegistration registerService(String clazz, Object service, Dictionary properties)
    {
       if (clazz == null)
@@ -416,7 +416,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return registerService(new String[] { clazz }, service, properties);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties)
    {
       checkValidBundleContext();

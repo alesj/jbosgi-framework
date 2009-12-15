@@ -658,6 +658,12 @@
               <value>${project.build.directory}/test-libs</value>
             </property>
           </systemProperties>
+          <excludes>
+            <!-- http://community.jboss.org/thread/145863 -->
+            <exclude>org/jboss/test/osgi/service/ServiceMixUnitTestCase.class</exclude>
+            <!-- [JBOSGI-204] Failure in Bundle.start() uninstalls the bundle -->
+            <exclude>org/jboss/test/osgi/bundle/BundleLifecycleTestCase</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

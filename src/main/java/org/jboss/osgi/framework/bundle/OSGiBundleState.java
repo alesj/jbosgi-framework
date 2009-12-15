@@ -129,7 +129,7 @@ public class OSGiBundleState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration getEntryPaths(String path)
    {
       checkInstalled();
@@ -158,7 +158,7 @@ public class OSGiBundleState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration findEntries(String path, String filePattern, boolean recurse)
    {
       if (path == null)
@@ -232,7 +232,7 @@ public class OSGiBundleState extends AbstractBundleState
       return getDeploymentUnit().getClassLoader().getResource(name);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration getResources(String name) throws IOException
    {
       checkInstalled();
@@ -281,12 +281,51 @@ public class OSGiBundleState extends AbstractBundleState
     * 
     * @throws Throwable for any error
     */
-   public void startInternal() throws Throwable
+   public void startInternal() throws BundleException
    {
-      // Bundle extenders catch the STARTING event and might expect a valid context
+      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
+      if (getState() == Bundle.UNINSTALLED)
+         throw new IllegalStateException("Bundle already uninstalled: " + this);
+      
+      // [TODO] If this bundle is in the process of being activated or deactivated then this method must wait for activation or deactivation 
+      // to complete before continuing. If this does not occur in a reasonable time, a BundleException is thrown to indicate this bundle was 
+      // unable to be started.
+      
+      // If this bundle's state is ACTIVE then this method returns immediately. 
+      if (getState() == Bundle.ACTIVE)
+         return;
+
+      // [TODO] If the START_TRANSIENT option is not set then set this bundle's autostart setting to Started with declared activation  
+      // if the START_ACTIVATION_POLICY option is set or Started with eager activation if not set. When the Framework is restarted 
+      // and this bundle's autostart setting is not Stopped, this bundle must be automatically started.
+      
+      // If this bundle's state is not RESOLVED, an attempt is made to resolve this bundle. If the Framework cannot resolve this bundle, 
+      // a BundleException is thrown.
+      if (getState() != Bundle.RESOLVED)
+      {
+         try
+         {
+            getBundleManager().resolveBundle(this, true);
+         }
+         catch (RuntimeException ex)
+         {
+            throw new BundleException("Cannot resolve bundle: " + this, ex);
+         }
+      }
+      
+      // [TODO] If the START_ACTIVATION_POLICY option is set and this bundle's declared activation policy is lazy then:
+      //    * If this bundle's state is STARTING then this method returns immediately.
+      //    * This bundle's state is set to STARTING.
+      //    * A bundle event of type BundleEvent.LAZY_ACTIVATION is fired.
+      //    * This method returns immediately and the remaining steps will be followed when this bundle's activation is later triggered.
+      
+      
+      // This bundle's state is set to STARTING
+      // A bundle event of type BundleEvent.STARTING is fired
       createBundleContext();
       changeState(STARTING);
 
+      // The BundleActivator.start(org.osgi.framework.BundleContext) method of this bundle's BundleActivator, if one is specified, is called. 
       try
       {
          OSGiMetaData metaData = getOSGiMetaData();
@@ -301,6 +340,7 @@ public class OSGiBundleState extends AbstractBundleState
             if (result instanceof BundleActivator == false)
                throw new BundleException(bundleActivatorClassName + " is not an implementation of " + BundleActivator.class.getName());
 
+            // Attach so we can call BundleActivator.stop() on this instance
             BundleActivator bundleActivator = (BundleActivator)result;
             unit.addAttachment(BundleActivator.class, bundleActivator);
 
@@ -312,77 +352,125 @@ public class OSGiBundleState extends AbstractBundleState
 
          changeState(ACTIVE);
       }
+      
+      // If the BundleActivator is invalid or throws an exception then:
+      //   * This bundle's state is set to STOPPING.
+      //   * A bundle event of type BundleEvent.STOPPING is fired.
+      //   * Any services registered by this bundle must be unregistered.
+      //   * Any services used by this bundle must be released.
+      //   * Any listeners registered by this bundle must be removed.
+      //   * This bundle's state is set to RESOLVED.
+      //   * A bundle event of type BundleEvent.STOPPED is fired.
+      //   * A BundleException is then thrown.
       catch (Throwable t)
       {
+         // This bundle's state is set to STOPPING
+         // A bundle event of type BundleEvent.STOPPING is fired
          changeState(STOPPING);
-         // TODO stop the bundle
+         
+         // Any services registered by this bundle must be unregistered.
+         // Any services used by this bundle must be released.
+         // Any listeners registered by this bundle must be removed.
+         stopInternal();
+         
          destroyBundleContext();
          changeState(RESOLVED);
-         throw t;
+         
+         // A bundle event of type BundleEvent.STOPPED is fired
+         
+         if (t instanceof BundleException)
+            throw (BundleException)t;
+         
+         throw new BundleException("Cannot start bundle: " + this, t);
       }
    }
 
    /**
     * Stop Internal
-    * 
-    * [TODO] Start Level Service & STOP_TRANSIENT? [TODO] locks [TODO] options
-    * 
-    * @throws Throwable for any error
     */
-   public void stopInternal() throws Throwable
+   public void stopInternal() throws BundleException
    {
+      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
+      if (getState() == Bundle.UNINSTALLED)
+         throw new IllegalStateException("Bundle already uninstalled: " + this);
+
+      // [TODO] If this bundle is in the process of being activated or deactivated then this method must wait for activation or deactivation 
+      // to complete before continuing. If this does not occur in a reasonable time, a BundleException is thrown to indicate this bundle 
+      // was unable to be stopped.
+      
+      // [TODO] If the STOP_TRANSIENT option is not set then then set this bundle's persistent autostart setting to to Stopped. 
+      // When the Framework is restarted and this bundle's autostart setting is Stopped, this bundle must not be automatically started. 
+
+      // If this bundle's state is not STARTING or ACTIVE then this method returns immediately
+      if (getState() != Bundle.STARTING && getState() != Bundle.ACTIVE)
+         return;
+
+      // This bundle's state is set to STOPPING
+      // A bundle event of type BundleEvent.STOPPING is fired
+      int priorState = getState();
       changeState(STOPPING);
 
+      // If this bundle's state was ACTIVE prior to setting the state to STOPPING, 
+      // the BundleActivator.stop(org.osgi.framework.BundleContext) method of this bundle's BundleActivator, if one is specified, is called. 
+      // If that method throws an exception, this method must continue to stop this bundle and a BundleException must be thrown after completion 
+      // of the remaining steps.
       Throwable rethrow = null;
-      try
+      if (priorState == Bundle.ACTIVE)
       {
-         BundleActivator bundleActivator = getDeploymentUnit().getAttachment(BundleActivator.class);
-         BundleContext bundleContext = getBundleContext();
-         if (bundleActivator != null && bundleContext != null)
-         {
-            try
-            {
-               bundleActivator.stop(bundleContext);
-            }
-            catch (Throwable t)
-            {
-               rethrow = t;
-            }
-         }
-
-         for (ControllerContext context : getUsedContexts(this))
-         {
-            int count = getUsedByCount(context, this);
-            while (count > 0)
+            BundleActivator bundleActivator = getDeploymentUnit().getAttachment(BundleActivator.class);
+            BundleContext bundleContext = getBundleContext();
+            if (bundleActivator != null && bundleContext != null)
             {
                try
                {
-                  getBundleManager().ungetContext(this, context);
+                  bundleActivator.stop(bundleContext);
                }
                catch (Throwable t)
                {
-                  log.debug("Error ungetting service: " + context, t);
+                  rethrow = t;
                }
-               count--;
             }
-         }
-
-         // unregister bundle's contexts
-         getBundleManager().unregisterContexts(this);
-
-         if (getState() != STOPPING)
-            throw new BundleException("Bundle has been uninstalled: " + getCanonicalName());
       }
-      finally
+      
+      // Any services registered by this bundle must be unregistered
+      getBundleManager().unregisterContexts(this);
+
+      // Any services used by this bundle must be released
+      for (ControllerContext context : getUsedContexts(this))
       {
-         if (getState() == STOPPING)
-            changeState(RESOLVED);
-         destroyBundleContext();
-         getDeploymentUnit().removeAttachment(BundleActivator.class);
+         int count = getUsedByCount(context, this);
+         while (count > 0)
+         {
+            try
+            {
+               getBundleManager().ungetContext(this, context);
+            }
+            catch (Throwable t)
+            {
+               log.debug("Error ungetting service: " + context, t);
+            }
+            count--;
+         }
       }
 
+      // [TODO] Any listeners registered by this bundle must be removed
+      
+      // If this bundle's state is UNINSTALLED, because this bundle was uninstalled while the 
+      // BundleActivator.stop method was running, a BundleException must be thrown
+      if (getState() == Bundle.UNINSTALLED)
+         throw new BundleException("Bundle uninstalled during activator stop: " + this);
+      
+      // This bundle's state is set to RESOLVED
+      destroyBundleContext();
+      changeState(RESOLVED);
+      
+      if (priorState != STOPPING)
+         throw new BundleException("Bundle has been uninstalled: " + getCanonicalName());
+
+      // [TODO] A bundle event of type BundleEvent.STOPPED is fired
+      
       if (rethrow != null)
-         throw rethrow;
+         throw new BundleException("Error during stop of bundle: " + this, rethrow);
    }
 
    public void update(InputStream in) throws BundleException
