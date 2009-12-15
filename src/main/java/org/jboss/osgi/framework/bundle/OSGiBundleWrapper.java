@@ -70,7 +70,7 @@ public class OSGiBundleWrapper implements Bundle
       return bundleState;
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration findEntries(String path, String filePattern, boolean recurse)
    {
       return bundleState.findEntries(path, filePattern, recurse);
@@ -91,19 +91,19 @@ public class OSGiBundleWrapper implements Bundle
       return bundleState.getEntry(path);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration getEntryPaths(String path)
    {
       return bundleState.getEntryPaths(path);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Dictionary getHeaders()
    {
       return bundleState.getHeaders();
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Dictionary getHeaders(String locale)
    {
       return bundleState.getHeaders(locale);
@@ -129,7 +129,7 @@ public class OSGiBundleWrapper implements Bundle
       return bundleState.getResource(name);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration getResources(String name) throws IOException
    {
       return bundleState.getResources(name);
@@ -165,7 +165,7 @@ public class OSGiBundleWrapper implements Bundle
       return bundleState.hasPermission(permission);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Class loadClass(String name) throws ClassNotFoundException
    {
       return bundleState.loadClass(name);

@@ -25,6 +25,7 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.osgi.framework.BundleException;
 
 /**
  * OSGiBundleActivatorDeployer.
@@ -48,9 +49,12 @@ public class OSGiBundleActivatorDeployer extends AbstractSimpleRealDeployer<OSGi
       {
          bundleState.startInternal();
       }
-      catch (Throwable t)
+      catch (BundleException ex)
       {
-         throw DeploymentException.rethrowAsDeploymentException("Error starting bundle: " + bundleState, t);
+         // We do not rethrow this exception to the deployer framework.
+         // An exception during Bundle.start() is regarded as a normal deployemtn condition and handeled internally by the OSGi layer.
+         // The OSGiBundleManager picks up this BundleException and rethrows it if available.
+         unit.addAttachment(BundleException.class, ex);
       }
    }
 
@@ -61,9 +65,9 @@ public class OSGiBundleActivatorDeployer extends AbstractSimpleRealDeployer<OSGi
       {
          deployment.stopInternal();
       }
-      catch (Throwable t)
+      catch (BundleException ex)
       {
-         log.warn("Error stopping bundle: " + deployment, t);
+         log.warn("Error stopping bundle: " + deployment, ex);
       }
    }
 }

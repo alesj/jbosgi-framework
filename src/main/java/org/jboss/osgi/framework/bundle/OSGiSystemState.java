@@ -123,7 +123,7 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration getEntryPaths(String path)
    {
       log.warn("[JBOSGI-138] getEntryPaths(" + path + ")");
@@ -136,7 +136,7 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public Enumeration getResources(String name) throws IOException
    {
       log.warn("[JBOSGI-138] getResources(" + name + ")");
