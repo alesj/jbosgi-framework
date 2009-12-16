@@ -67,7 +67,6 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-@SuppressWarnings({"ThrowableInstanceNeverThrown"})
 public class OSGiServiceState extends AbstractControllerContext implements ServiceReference, ServiceRegistration, InvokeDispatchContext
 {
    /** The alias constant */
@@ -118,7 +117,7 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
     * @param properties the properties
     * @throws IllegalArgumentException for a null parameter
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes", "unchecked" })
    public OSGiServiceState(AbstractBundleState bundleState, String[] clazzes, Object service, Dictionary properties)
    {
       // name is random / unique, we use aliases
@@ -517,7 +516,7 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
       return result.toArray(new String[result.size()]);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public void setProperties(Dictionary properties)
    {
       checkUnregistered();
