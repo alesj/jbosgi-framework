@@ -1269,6 +1269,13 @@ public class OSGiBundleManager
          DeploymentUnit unit = bundleState.getDeploymentUnit();
          deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
          deployerClient.checkComplete(unit.getName());
+         
+         // The potential BundleException is attached by the OSGiBundleActivatorDeployer
+         BundleException stopEx = unit.removeAttachment(BundleException.class);
+         if (stopEx != null)
+         {
+            throw stopEx;
+         }
       }
       catch (DeploymentException ex)
       {

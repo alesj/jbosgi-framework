@@ -52,22 +52,25 @@ public class OSGiBundleActivatorDeployer extends AbstractSimpleRealDeployer<OSGi
       catch (BundleException ex)
       {
          // We do not rethrow this exception to the deployer framework.
-         // An exception during Bundle.start() is regarded as a normal deployemtn condition and handeled internally by the OSGi layer.
+         // An exception during Bundle.start() is regarded as a normal deployment condition and handeled internally by the OSGi layer.
          // The OSGiBundleManager picks up this BundleException and rethrows it if available.
          unit.addAttachment(BundleException.class, ex);
       }
    }
 
    @Override
-   public void undeploy(DeploymentUnit unit, OSGiBundleState deployment)
+   public void undeploy(DeploymentUnit unit, OSGiBundleState bundleState)
    {
       try
       {
-         deployment.stopInternal();
+         bundleState.stopInternal();
       }
       catch (BundleException ex)
       {
-         log.warn("Error stopping bundle: " + deployment, ex);
+         // We do not rethrow this exception to the deployer framework.
+         // An exception during Bundle.start() is regarded as a normal deployment condition and handeled internally by the OSGi layer.
+         // The OSGiBundleManager picks up this BundleException and rethrows it if available.
+         unit.addAttachment(BundleException.class, ex);
       }
    }
 }

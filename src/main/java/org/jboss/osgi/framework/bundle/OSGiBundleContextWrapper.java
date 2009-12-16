@@ -21,6 +21,8 @@
 */
 package org.jboss.osgi.framework.bundle;
 
+// $Id: $
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.Dictionary;
@@ -38,15 +40,18 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * OSGiBundleContextImpl.
+ * A wrapper around the bundle state that just exposes the BundleContext API.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
 public class OSGiBundleContextWrapper implements BundleContext
 {
    /** The bundle state */
    private AbstractBundleState bundleState;
+   /** The bundles canonical name */
+   private String canonicalName;
    
    /**
     * Create a new OSGiBundleContextWrapper.
@@ -58,129 +63,169 @@ public class OSGiBundleContextWrapper implements BundleContext
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle state");
+      
       this.bundleState = bundleState;
+      this.canonicalName = bundleState.getCanonicalName();
    }
 
+   void destroyBundleContext()
+   {
+      bundleState = null;
+   }
+   
    public void addBundleListener(BundleListener listener)
    {
+      checkValidBundleContext();
       bundleState.addBundleListener(listener);
    }
 
    public void addFrameworkListener(FrameworkListener listener)
    {
+      checkValidBundleContext();
       bundleState.addFrameworkListener(listener);
    }
 
    public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException
    {
+      checkValidBundleContext();
       bundleState.addServiceListener(listener, filter);
    }
 
    public void addServiceListener(ServiceListener listener)
    {
+      checkValidBundleContext();
       bundleState.addServiceListener(listener);
    }
 
    public Filter createFilter(String filter) throws InvalidSyntaxException
    {
+      checkValidBundleContext();
       return bundleState.createFilter(filter);
    }
 
    public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException
    {
+      checkValidBundleContext();
       return bundleState.getAllServiceReferences(clazz, filter);
    }
 
    public Bundle getBundle()
    {
+      checkValidBundleContext();
       return bundleState.getBundle();
    }
 
    public Bundle getBundle(long id)
    {
+      checkValidBundleContext();
       return bundleState.getBundle(id);
    }
 
    public Bundle[] getBundles()
    {
+      checkValidBundleContext();
       return bundleState.getBundles();
    }
 
    public File getDataFile(String filename)
    {
+      checkValidBundleContext();
       return bundleState.getDataFile(filename);
    }
 
    public String getProperty(String key)
    {
+      checkValidBundleContext();
       return bundleState.getProperty(key);
    }
 
    public Object getService(ServiceReference reference)
    {
+      checkValidBundleContext();
       return bundleState.getService(reference);
    }
 
    public ServiceReference getServiceReference(String clazz)
    {
+      checkValidBundleContext();
       return bundleState.getServiceReference(clazz);
    }
 
    public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException
    {
+      checkValidBundleContext();
       return bundleState.getServiceReferences(clazz, filter);
    }
 
    public Bundle installBundle(String location, InputStream input) throws BundleException
    {
+      checkValidBundleContext();
       return bundleState.installBundle(location, input);
    }
 
    public Bundle installBundle(String location) throws BundleException
    {
+      checkValidBundleContext();
       return bundleState.installBundle(location);
    }
 
    public Bundle install(VirtualFile root) throws BundleException
    {
+      checkValidBundleContext();
       return bundleState.installBundle(root);
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public ServiceRegistration registerService(String clazz, Object service, Dictionary properties)
    {
+      checkValidBundleContext();
       return bundleState.registerService(clazz, service, properties);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties)
    {
+      checkValidBundleContext();
       return bundleState.registerService(clazzes, service, properties);
    }
 
    public void removeBundleListener(BundleListener listener)
    {
+      checkValidBundleContext();
       bundleState.removeBundleListener(listener);
    }
 
    public void removeFrameworkListener(FrameworkListener listener)
    {
+      checkValidBundleContext();
       bundleState.removeFrameworkListener(listener);
    }
 
    public void removeServiceListener(ServiceListener listener)
    {
+      checkValidBundleContext();
       bundleState.removeServiceListener(listener);
    }
 
    public boolean ungetService(ServiceReference reference)
    {
+      checkValidBundleContext();
       return bundleState.ungetService(reference);
    }
 
    @Override
    public String toString()
    {
-      return bundleState.toString();
+      return canonicalName;
+   }
+
+   /**
+    * Check a bundle context is still valid
+    * @throws IllegalStateException when the context is no longer valid
+    */
+   protected synchronized void checkValidBundleContext()
+   {
+      if (bundleState == null)
+         throw new IllegalStateException("Invalid bundle context: " + canonicalName);
    }
 }

@@ -166,6 +166,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    public synchronized void destroyBundleContext()
    {
+      if (bundleContext != null)
+         ((OSGiBundleContextWrapper)bundleContext).destroyBundleContext();
       bundleContext = null;
    }
 
@@ -689,16 +691,12 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    /**
     * Check a bundle context is still valid
-    * 
-    * @return the bundle context
-    * @throws IllegalArgumentException when the context is no longer valid
+    * @throws IllegalStateException when the context is no longer valid
     */
-   protected synchronized BundleContext checkValidBundleContext()
+   protected synchronized void checkValidBundleContext()
    {
-      BundleContext result = this.bundleContext;
-      if (result == null)
-         throw new IllegalStateException("Bundle context is no longer valid: " + getCanonicalName());
-      return result;
+      if (bundleContext == null)
+         throw new IllegalStateException("Invalid bundle context: " + getCanonicalName());
    }
 
    /**

@@ -298,49 +298,49 @@ public class BundleContextUnitTestCase extends FrameworkTest
          }
          
          bundleContext.addServiceListener(this);
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, true);
+         bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
          
          bundleContext.addServiceListener(this);
          bundleContext.removeServiceListener(this);
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, false);
+         bundleContext = assertServiceLifecycle(bundle, false);
          
          bundleContext.addServiceListener(this);
          bundleContext.addServiceListener(this);
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, true);
+         bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
          
          bundleContext.addServiceListener(this, null);
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, true);
+         bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
          
          bundleContext.addServiceListener(this, null);
          bundleContext.removeServiceListener(this);
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, false);
+         bundleContext = assertServiceLifecycle(bundle, false);
          
          bundleContext.addServiceListener(this, null);
          bundleContext.addServiceListener(this, null);
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, true);
+         bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
          
          Dictionary<String, Object> properties = new Hashtable<String, Object>();
          properties.put("a", "b");
          
          bundleContext.addServiceListener(this, ("(a=b)"));
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, properties, true);
+         bundleContext = assertServiceLifecycle(bundle, properties, true);
          bundleContext.removeServiceListener(this);
          
          bundleContext.addServiceListener(this, ("(c=d)"));
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, properties, false);
+         bundleContext = assertServiceLifecycle(bundle, properties, false);
          bundleContext.removeServiceListener(this);
          
          bundleContext.addServiceListener(this, "(a=b)");
          bundleContext.removeServiceListener(this);
-         bundleContext = assertServiceLifecycle(bundle, bundleContext, properties, false);
+         bundleContext = assertServiceLifecycle(bundle, properties, false);
          
          bundleContext.addServiceListener(this, "(c=d)");
          bundleContext.addServiceListener(this, "(a=b)");
-         assertServiceLifecycle(bundle, bundleContext, properties, true);
+         bundleContext = assertServiceLifecycle(bundle, properties, true);
          bundleContext.removeServiceListener(this);
       }
       finally
@@ -349,15 +349,16 @@ public class BundleContextUnitTestCase extends FrameworkTest
       }
    }
    
-   protected BundleContext assertServiceLifecycle(Bundle bundle, BundleContext bundleContext, boolean events) throws Exception
+   protected BundleContext assertServiceLifecycle(Bundle bundle, boolean events) throws Exception
    {
-      return assertServiceLifecycle(bundle, bundleContext, null, events);
+      return assertServiceLifecycle(bundle, null, events);
    }
    
-   protected BundleContext assertServiceLifecycle(Bundle bundle, BundleContext bundleContext, Dictionary<String, Object> properties, boolean events) throws Exception
+   protected BundleContext assertServiceLifecycle(Bundle bundle, Dictionary<String, Object> properties, boolean events) throws Exception
    {
       assertNoServiceEvent();
       
+      BundleContext bundleContext = bundle.getBundleContext();
       ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
       ServiceReference reference = registration.getReference();
       
@@ -404,6 +405,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
       bundle.start();
       bundleContext = bundle.getBundleContext();
       assertNotNull(bundleContext);
+      
       return bundleContext;
    }
    
@@ -438,16 +440,16 @@ public class BundleContextUnitTestCase extends FrameworkTest
          }
          
          bundleContext.addBundleListener(this);
-         bundleContext = assertBundleLifecycle(bundle, bundleContext, true);
+         bundleContext = assertBundleLifecycle(bundle, true);
          bundleContext.removeBundleListener(this);
          
          bundleContext.addBundleListener(this);
          bundleContext.removeBundleListener(this);
-         bundleContext = assertBundleLifecycle(bundle, bundleContext, false);
+         bundleContext = assertBundleLifecycle(bundle, false);
          
          bundleContext.addBundleListener(this);
          bundleContext.addBundleListener(this);
-         bundleContext = assertBundleLifecycle(bundle, bundleContext, true);
+         bundleContext = assertBundleLifecycle(bundle, true);
          bundleContext.removeBundleListener(this);
 
          bundleContext.addBundleListener(this);
@@ -464,7 +466,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
       assertBundleEvent(BundleEvent.UNINSTALLED, bundle);
    }
    
-   protected BundleContext assertBundleLifecycle(Bundle bundle, BundleContext bundleContext, boolean events) throws Exception
+   protected BundleContext assertBundleLifecycle(Bundle bundle, boolean events) throws Exception
    {
       assertNoBundleEvent();
       
@@ -490,7 +492,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
          assertNoBundleEvent();
       }
       
-      return bundleContext;
+      return bundle.getBundleContext();
    }
    
    public void testFrameworkListener() throws Exception
@@ -542,6 +544,45 @@ public class BundleContextUnitTestCase extends FrameworkTest
          File dataFile = bundleContext.getDataFile("blah");
          assertNotNull(dataFile);
          assertTrue(dataFile.toString().endsWith(File.separator + "blah"));
+      }
+      finally
+      {
+         uninstall(bundle);
+      }
+   }
+   
+   public void testStopedBundleContext() throws Exception
+   {
+      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      try
+      {
+         bundle.start();
+         BundleContext bundleContext = bundle.getBundleContext();
+         assertNotNull(bundleContext);
+
+         // The context should be illegal to use.
+         bundle.stop();
+         try
+         {
+            bundleContext.getProperty(getClass().getName());
+            fail("Should not be here!");
+         }
+         catch (Throwable t)
+         {
+            checkThrowable(IllegalStateException.class, t);
+         }
+         
+         // The context should not become reusable after we restart the bundle
+         bundle.start();
+         try
+         {
+            bundleContext.getProperty(getClass().getName());
+            fail("Should not be here!");
+         }
+         catch (Throwable t)
+         {
+            checkThrowable(IllegalStateException.class, t);
+         }
       }
       finally
       {

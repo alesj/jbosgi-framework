@@ -16,7 +16,7 @@
     </constructor>
     <property name="properties">
       <map keyClass="java.lang.String" valueClass="java.lang.String">
-        <entry><key>org.osgi.framework.storage</key><value>${log4j.output.dir}/osgi-store</value></entry>
+        <entry><key>org.osgi.framework.storage</key><value>target/osgi-store</value></entry>
         <entry><key>org.osgi.framework.storage.clean</key><value>onFirstInit</value></entry>
         <entry><key>org.osgi.framework.system.packages.extra</key><value>
         

@@ -324,10 +324,10 @@ public class OSGiBundleState extends AbstractBundleState
          // Any listeners registered by this bundle must be removed.
          stopInternal();
          
+         // This bundle's state is set to RESOLVED
+         // A bundle event of type BundleEvent.STOPPED is fired
          destroyBundleContext();
          changeState(RESOLVED);
-         
-         // A bundle event of type BundleEvent.STOPPED is fired
          
          if (t instanceof BundleException)
             throw (BundleException)t;
@@ -400,13 +400,9 @@ public class OSGiBundleState extends AbstractBundleState
          throw new BundleException("Bundle uninstalled during activator stop: " + this);
       
       // This bundle's state is set to RESOLVED
+      // A bundle event of type BundleEvent.STOPPED is fired
       destroyBundleContext();
       changeState(RESOLVED);
-      
-      if (priorState != STOPPING)
-         throw new BundleException("Bundle has been uninstalled: " + getCanonicalName());
-
-      // [TODO] A bundle event of type BundleEvent.STOPPED is fired
       
       if (rethrow != null)
          throw new BundleException("Error during stop of bundle: " + this, rethrow);
