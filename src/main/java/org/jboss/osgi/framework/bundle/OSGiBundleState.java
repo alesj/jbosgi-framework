@@ -252,9 +252,6 @@ public class OSGiBundleState extends AbstractBundleState
       checkInstalled();
       checkAdminPermission(AdminPermission.EXECUTE);
 
-      if (getState() == ACTIVE)
-         return;
-
       getBundleManager().startBundle(this);
    }
 
@@ -271,55 +268,13 @@ public class OSGiBundleState extends AbstractBundleState
    }
 
    /**
-    * Start internal
+    * Start internal.
     * 
-    * [TODO] Start Level Service & START_TRANSIENT? 
-    * [TODO] START_ACTIVATION_POLICY 
-    * [TODO] LAZY_ACTIVATION 
-    * [TODO] locks 
-    * [TODO] options
-    * 
-    * @throws Throwable for any error
+    * This method is triggered by the OSGiBundleActivatorDeployer.
+    * Preconditions are handled in OSGiBundleManager.startBundle()
     */
    public void startInternal() throws BundleException
    {
-      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
-      if (getState() == Bundle.UNINSTALLED)
-         throw new IllegalStateException("Bundle already uninstalled: " + this);
-      
-      // [TODO] If this bundle is in the process of being activated or deactivated then this method must wait for activation or deactivation 
-      // to complete before continuing. If this does not occur in a reasonable time, a BundleException is thrown to indicate this bundle was 
-      // unable to be started.
-      
-      // If this bundle's state is ACTIVE then this method returns immediately. 
-      if (getState() == Bundle.ACTIVE)
-         return;
-
-      // [TODO] If the START_TRANSIENT option is not set then set this bundle's autostart setting to Started with declared activation  
-      // if the START_ACTIVATION_POLICY option is set or Started with eager activation if not set. When the Framework is restarted 
-      // and this bundle's autostart setting is not Stopped, this bundle must be automatically started.
-      
-      // If this bundle's state is not RESOLVED, an attempt is made to resolve this bundle. If the Framework cannot resolve this bundle, 
-      // a BundleException is thrown.
-      if (getState() != Bundle.RESOLVED)
-      {
-         try
-         {
-            getBundleManager().resolveBundle(this, true);
-         }
-         catch (RuntimeException ex)
-         {
-            throw new BundleException("Cannot resolve bundle: " + this, ex);
-         }
-      }
-      
-      // [TODO] If the START_ACTIVATION_POLICY option is set and this bundle's declared activation policy is lazy then:
-      //    * If this bundle's state is STARTING then this method returns immediately.
-      //    * This bundle's state is set to STARTING.
-      //    * A bundle event of type BundleEvent.LAZY_ACTIVATION is fired.
-      //    * This method returns immediately and the remaining steps will be followed when this bundle's activation is later triggered.
-      
-      
       // This bundle's state is set to STARTING
       // A bundle event of type BundleEvent.STARTING is fired
       createBundleContext();

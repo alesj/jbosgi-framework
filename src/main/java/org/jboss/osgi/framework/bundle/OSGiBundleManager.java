@@ -1166,27 +1166,64 @@ public class OSGiBundleManager
    }
 
    /**
-    * Start a bundle
+    * Start a bundle.
     * 
-    * @param bundleState the bundle state
-    * @throws BundleException the bundle exception
+    * Stating a bundle is done in an attempt to move the bundle's DeploymentUnit to state INSTALLED.
+    * A failure to resolve the bundle is fatal, the bundle should remain in state INSTALLED.
+    * A failure in BundleActivator.start() is a normal condition not handled by the deployment layer.
     */
    public void startBundle(OSGiBundleState bundleState) throws BundleException
    {
-      // Resolve all INSTALLED bundles through the PackageAdmin
-      PackageAdmin packageAdmin = getPlugin(PackageAdminPlugin.class);
-      packageAdmin.resolveBundles(null);
+      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
+      if (bundleState.getState() == Bundle.UNINSTALLED)
+         throw new IllegalStateException("Bundle already uninstalled: " + this);
+
+      // [TODO] If this bundle is in the process of being activated or deactivated then this method must wait for activation or deactivation 
+      // to complete before continuing. If this does not occur in a reasonable time, a BundleException is thrown to indicate this bundle was 
+      // unable to be started.
+
+      // If this bundle's state is ACTIVE then this method returns immediately. 
+      if (bundleState.getState() == Bundle.ACTIVE)
+         return;
+
+      // [TODO] If the START_TRANSIENT option is not set then set this bundle's autostart setting to Started with declared activation  
+      // if the START_ACTIVATION_POLICY option is set or Started with eager activation if not set. When the Framework is restarted 
+      // and this bundle's autostart setting is not Stopped, this bundle must be automatically started.
+
+      // If this bundle's state is not RESOLVED, an attempt is made to resolve this bundle. If the Framework cannot resolve this bundle, 
+      // a BundleException is thrown.
+      if (bundleState.getState() != Bundle.RESOLVED)
+      {
+         // Resolve all INSTALLED bundles through the PackageAdmin
+         PackageAdmin packageAdmin = getPlugin(PackageAdminPlugin.class);
+         packageAdmin.resolveBundles(null);
+         
+         if (bundleState.getState() != Bundle.RESOLVED)
+            throw new BundleException("Cannot resolve bundle: " + bundleState);
+      }
+
+      // [TODO] If the START_ACTIVATION_POLICY option is set and this bundle's declared activation policy is lazy then:
+      //    * If this bundle's state is STARTING then this method returns immediately.
+      //    * This bundle's state is set to STARTING.
+      //    * A bundle event of type BundleEvent.LAZY_ACTIVATION is fired.
+      //    * This method returns immediately and the remaining steps will be followed when this bundle's activation is later triggered.
 
       try
       {
          DeploymentUnit unit = bundleState.getDeploymentUnit();
          deployerClient.change(unit.getName(), DeploymentStages.INSTALLED);
          deployerClient.checkComplete(unit.getName());
-         
+
          // The potential BundleException is attached by the OSGiBundleActivatorDeployer
          BundleException startEx = unit.removeAttachment(BundleException.class);
          if (startEx != null)
+         {
+            // Reset the deployment unit to stage classloader
+            deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
+            deployerClient.checkComplete(unit.getName());
+
             throw startEx;
+         }
       }
       catch (DeploymentException ex)
       {

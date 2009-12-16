@@ -25,8 +25,11 @@ import junit.framework.Test;
 
 import org.jboss.test.osgi.FrameworkTest;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
+import org.jboss.test.osgi.bundle.support.b.LifecycleService;
+import org.jboss.test.osgi.bundle.support.b.LifecycleServiceActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 
 /**
  * BundleLifecycleTestCase.
@@ -46,27 +49,141 @@ public class BundleLifecycleTestCase extends FrameworkTest
       super(name);
    }
 
-   public void testExceptionOnStart() throws Exception
+   /**
+    * Verifies that the service bundle can get started
+    */
+   public void testServiceBundle() throws Exception
    {
-      Bundle bundle = assembleBundle("fail-on-start", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
       try
       {
-         assertBundleState(Bundle.INSTALLED, bundle.getState());
+         assertBundleState(Bundle.INSTALLED, bundleA.getState());
+         
+         bundleA.start();
+         assertBundleState(Bundle.ACTIVE, bundleA.getState());
+         
+         ServiceReference sref = bundleA.getBundleContext().getServiceReference(LifecycleService.class.getName());
+         assertNotNull("Service available", sref);
+      }
+      finally
+      {
+         bundleA.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundleA.getState());
+      }
+   }
+   
+   /**
+    * Verifies that the bundle state is RESOLVED after a failure in BundleActivator.start()
+    */
+   public void testServiceNotAvailable() throws Exception
+   {
+      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleA.getState());
+         
+         // BundleA not started - service not available  
+         ServiceReference sref = getSystemBundle().getBundleContext().getServiceReference(LifecycleService.class.getName());
+         assertNull("Service not available", sref);
 
+         Bundle bundleB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
          try
          {
-            bundle.start();
+            assertBundleState(Bundle.INSTALLED, bundleB.getState());
+            
+            bundleB.start();
             fail("BundleException expected");
          }
          catch (BundleException ex)
          {
-            assertBundleState(Bundle.RESOLVED, bundle.getState());
+            assertBundleState(Bundle.RESOLVED, bundleB.getState());
+         }
+         finally
+         {
+            bundleB.uninstall();
+            assertBundleState(Bundle.UNINSTALLED, bundleB.getState());
          }
       }
       finally
       {
-         //bundle.uninstall();
-         //assertBundleState(Bundle.UNINSTALLED, bundle.getState());
+         bundleA.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundleA.getState());
+      }
+   }
+
+   /**
+    * Verifies that BundleB can get started when the service is available
+    */
+   public void testServiceAvailable() throws Exception
+   {
+      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
+      try
+      {
+         bundleA.start();
+         assertBundleState(Bundle.ACTIVE, bundleA.getState());
+
+         Bundle bundleB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         try
+         {
+            bundleB.start();
+            assertBundleState(Bundle.ACTIVE, bundleB.getState());
+         }
+         finally
+         {
+            bundleB.uninstall();
+            assertBundleState(Bundle.UNINSTALLED, bundleB.getState());
+         }
+      }
+      finally
+      {
+         bundleA.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundleA.getState());
+      }
+   }
+
+   /**
+    * Verifies that BundleB can get started when the service is made available 
+    */
+   public void testServiceMakeAvailable() throws Exception
+   {
+      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleA.getState());
+         
+         Bundle bundleB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         try
+         {
+            assertBundleState(Bundle.INSTALLED, bundleB.getState());
+            
+            try
+            {
+               bundleB.start();
+               fail("BundleException expected");
+            }
+            catch (BundleException ex)
+            {
+               assertBundleState(Bundle.RESOLVED, bundleB.getState());
+               
+               // Now, make the service available
+               bundleA.start();
+               assertBundleState(Bundle.ACTIVE, bundleA.getState());
+            }
+            
+            // BundleB can now be started
+            bundleB.start();
+            assertBundleState(Bundle.ACTIVE, bundleB.getState());
+         }
+         finally
+         {
+            bundleB.uninstall();
+            assertBundleState(Bundle.UNINSTALLED, bundleB.getState());
+         }
+      }
+      finally
+      {
+         bundleA.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundleA.getState());
       }
    }
 }

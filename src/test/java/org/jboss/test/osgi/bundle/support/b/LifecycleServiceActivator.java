@@ -19,26 +19,23 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.test.osgi.bundle.support.a;
+package org.jboss.test.osgi.bundle.support.b;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 /**
- * A BundleActivator that fails on start.
+ * A BundleActivator that registers the LifecycleService.
  *
  * @author thomas.Diesler@jboss.com
  * @since 15-Dec-2009
  */
-public class FailOnStartActivator implements BundleActivator
+public class LifecycleServiceActivator implements BundleActivator
 {
 
    public void start(BundleContext context) throws Exception
    {
-      ServiceReference sref = context.getServiceReference("org.jboss.test.osgi.bundle.support.b.LifecycleService");
-      if (sref == null)
-         throw new IllegalStateException("Cannot obtain: LifecycleService");
+      context.registerService(LifecycleService.class.getName(), new LifecycleService(){}, null);
    }
 
    public void stop(BundleContext context) throws Exception

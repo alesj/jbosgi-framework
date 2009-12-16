@@ -12,10 +12,10 @@
   <!-- $Id$ -->
 
   <!-- 
-     Set these VM properties in your IDE debugger 
-    
-    -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework/target}
-    -Dorg.jboss.osgi.framework.launch.bootstrapPath=bootstrap/jboss-osgi-bootstrap.xml
+     Set these VM properties in your IDE debugger
+     
+     -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework/target}
+     -Dlog4j.configuration=log4j-console.xml
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -659,8 +659,9 @@
             </property>
           </systemProperties>
           <excludes>
-            <!-- http://community.jboss.org/thread/145863 -->
+            <!-- excludes listed here need to have a jira issue associated 
             <exclude>org/jboss/test/osgi/service/ServiceMixUnitTestCase.class</exclude>
+            -->
           </excludes>
         </configuration>
       </plugin>
