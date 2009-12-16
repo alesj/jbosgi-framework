@@ -74,6 +74,7 @@ import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.ScopeKey;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.deployment.deployer.DeploymentFactory;
+import org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
@@ -1171,6 +1172,9 @@ public class OSGiBundleManager
     * Stating a bundle is done in an attempt to move the bundle's DeploymentUnit to state INSTALLED.
     * A failure to resolve the bundle is fatal, the bundle should remain in state INSTALLED.
     * A failure in BundleActivator.start() is a normal condition not handled by the deployment layer.
+    * 
+    * @see OSGiBundleActivatorDeployer
+    * @see OSGiBundleState#startInternal()
     */
    public void startBundle(OSGiBundleState bundleState) throws BundleException
    {
@@ -1238,22 +1242,41 @@ public class OSGiBundleManager
    /**
     * Stop a bundle
     * 
-    * @param bundleState the bundle state
-    * @throws BundleException the bundle exception
+    * Stopping a bundle is done in an attempt to move the bundle's DeploymentUnit to state CLASSLOADER.
+    * 
+    * @see OSGiBundleActivatorDeployer
+    * @see OSGiBundleState#stopInternal()
     */
    public void stopBundle(OSGiBundleState bundleState) throws BundleException
    {
+      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
+      if (bundleState.getState() == Bundle.UNINSTALLED)
+         throw new IllegalStateException("Bundle already uninstalled: " + this);
+
+      // [TODO] If this bundle is in the process of being activated or deactivated then this method must wait for activation or deactivation 
+      // to complete before continuing. If this does not occur in a reasonable time, a BundleException is thrown to indicate this bundle 
+      // was unable to be stopped.
+      
+      // [TODO] If the STOP_TRANSIENT option is not set then then set this bundle's persistent autostart setting to to Stopped. 
+      // When the Framework is restarted and this bundle's autostart setting is Stopped, this bundle must not be automatically started. 
+
+      // If this bundle's state is not STARTING or ACTIVE then this method returns immediately
+      if (bundleState.getState() != Bundle.STARTING && bundleState.getState() != Bundle.ACTIVE)
+         return;
+
       try
       {
-         String name = bundleState.getDeploymentUnit().getName();
-         deployerClient.change(name, DeploymentStages.CLASSLOADER);
+         DeploymentUnit unit = bundleState.getDeploymentUnit();
+         deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
+         deployerClient.checkComplete(unit.getName());
       }
-      catch (DeploymentException e)
+      catch (DeploymentException ex)
       {
-         Throwable t = e.getCause();
-         if (t instanceof BundleException)
-            throw (BundleException)t;
-         throw new BundleException("Error stopping " + bundleState, e);
+         Throwable cause = ex.getCause();
+         if (cause instanceof BundleException)
+            throw (BundleException)cause;
+         
+         throw new BundleException("Error stopping " + bundleState, (cause != null ? cause : ex));
       }
    }
 

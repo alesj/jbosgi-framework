@@ -255,14 +255,10 @@ public class OSGiBundleState extends AbstractBundleState
       getBundleManager().startBundle(this);
    }
 
-   // [TODO] options
    public void stop(int options) throws BundleException
    {
       checkInstalled();
       checkAdminPermission(AdminPermission.EXECUTE);
-
-      if (getState() != ACTIVE)
-         return;
 
       getBundleManager().stopBundle(this);
    }
@@ -341,25 +337,13 @@ public class OSGiBundleState extends AbstractBundleState
    }
 
    /**
-    * Stop Internal
+    * Stop Internal.
+    * 
+    * This method is triggered by the OSGiBundleActivatorDeployer.
+    * Preconditions are handled in OSGiBundleManager.stopBundle()
     */
    public void stopInternal() throws BundleException
    {
-      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
-      if (getState() == Bundle.UNINSTALLED)
-         throw new IllegalStateException("Bundle already uninstalled: " + this);
-
-      // [TODO] If this bundle is in the process of being activated or deactivated then this method must wait for activation or deactivation 
-      // to complete before continuing. If this does not occur in a reasonable time, a BundleException is thrown to indicate this bundle 
-      // was unable to be stopped.
-      
-      // [TODO] If the STOP_TRANSIENT option is not set then then set this bundle's persistent autostart setting to to Stopped. 
-      // When the Framework is restarted and this bundle's autostart setting is Stopped, this bundle must not be automatically started. 
-
-      // If this bundle's state is not STARTING or ACTIVE then this method returns immediately
-      if (getState() != Bundle.STARTING && getState() != Bundle.ACTIVE)
-         return;
-
       // This bundle's state is set to STOPPING
       // A bundle event of type BundleEvent.STOPPING is fired
       int priorState = getState();
