@@ -50,12 +50,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
 
    public void testSimpleRequireBundle() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("simplerequirebundleA", "/bundles/classloader/simplerequirebundleA", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("simplerequirebundleA", "/bundles/classloader/simplerequirebundleA", B.class));
          try
          {
             bundle2.start();
@@ -75,12 +75,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testSimpleRequireBundleFails() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("simplerequirebundlefails", "/bundles/classloader/simplerequirebundlefails", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("simplerequirebundlefails", "/bundles/classloader/simplerequirebundlefails", B.class));
          try
          {
             bundle2.start();
@@ -103,12 +103,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testVersionRequireBundle() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("versionrequirebundleA", "/bundles/classloader/versionrequirebundleA", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("versionrequirebundleA", "/bundles/classloader/versionrequirebundleA", B.class));
          try
          {
             bundle2.start();
@@ -128,12 +128,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testVersionRequireBundleFails() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("versionrequirebundlefails", "/bundles/classloader/versionrequirebundlefails", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("versionrequirebundlefails", "/bundles/classloader/versionrequirebundlefails", B.class));
          try
          {
             bundle2.start();
@@ -156,12 +156,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testOptionalRequireBundle() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("optionalrequirebundleA", "/bundles/classloader/optionalrequirebundleA", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("optionalrequirebundleA", "/bundles/classloader/optionalrequirebundleA", B.class));
          try
          {
             bundle2.start();
@@ -181,12 +181,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testOptionalRequireBundleFails() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("optionalrequirebundlefails", "/bundles/classloader/optionalrequirebundlefails", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("optionalrequirebundlefails", "/bundles/classloader/optionalrequirebundlefails", B.class));
          try
          {
             bundle2.start();
@@ -210,7 +210,7 @@ public class RequireBundleUnitTestCase extends FrameworkTest
       //Bundle-Version: 1.0.0
       //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleA;test=x
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       
       try
       {
@@ -221,7 +221,7 @@ public class RequireBundleUnitTestCase extends FrameworkTest
          //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
          //Require-Bundle: org.jboss.test.osgi.classloader.bundleA;visibility:=reexport
          //Export-Package: org.jboss.test.osgi.classloader.support.b
-         Bundle bundle2 = assembleBundle("reexportrequirebundleA", "/bundles/classloader/reexportrequirebundleA", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("reexportrequirebundleA", "/bundles/classloader/reexportrequirebundleA", B.class));
          
          try
          {
@@ -232,7 +232,7 @@ public class RequireBundleUnitTestCase extends FrameworkTest
             //Bundle-Name: BundleC
             //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleC
             //Require-Bundle: org.jboss.test.osgi.classloader.bundleB
-            Bundle bundle3 = assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB");
+            Bundle bundle3 = installBundle(assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB"));
             
             try
             {
@@ -257,18 +257,18 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testNoReExportRequireBundle() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("noreexportrequirebundleA", "/bundles/classloader/noreexportrequirebundleA", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("noreexportrequirebundleA", "/bundles/classloader/noreexportrequirebundleA", B.class));
          try
          {
             bundle2.start();
             assertLoadClass(bundle2, A.class, bundle1);
             assertLoadClass(bundle2, B.class, bundle2);
-            Bundle bundle3 = assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB");
+            Bundle bundle3 = installBundle(assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB"));
             try
             {
                assertLoadClassFail(bundle3, A.class);
@@ -292,12 +292,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testAttributeRequireBundle() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("attributerequirebundleA", "/bundles/classloader/attributerequirebundleA", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("attributerequirebundleA", "/bundles/classloader/attributerequirebundleA", B.class));
          try
          {
             bundle2.start();
@@ -317,12 +317,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testAttributeRequireBundleFails() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = assembleBundle("attributerequirebundlefails", "/bundles/classloader/attributerequirebundlefails", B.class);
+         Bundle bundle2 = installBundle(assembleBundle("attributerequirebundlefails", "/bundles/classloader/attributerequirebundlefails", B.class));
          try
          {
             bundle2.start();

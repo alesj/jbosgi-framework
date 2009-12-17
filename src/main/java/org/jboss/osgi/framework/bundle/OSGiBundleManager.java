@@ -92,6 +92,7 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -217,13 +218,8 @@ public class OSGiBundleManager
 
    public void start()
    {
-      // createSystemBundle
-      Manifest manifest = new Manifest();
-      Attributes attributes = manifest.getMainAttributes();
-      attributes.put(new Name(Constants.BUNDLE_NAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-      attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-      OSGiMetaData systemMetaData = new AbstractOSGiMetaData(manifest);
-      systemBundle = new OSGiSystemState(systemMetaData);
+      // Create the system Bundle
+      systemBundle = new OSGiSystemState();
       addBundle(systemBundle);
 
       applyMDRUsage(true);
@@ -594,7 +590,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public AbstractBundleState installBundle(URL url) throws BundleException
+   public OSGiBundleState installBundle(URL url) throws BundleException
    {
       if (url == null)
          throw new BundleException("Null url");
@@ -610,7 +606,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public AbstractBundleState installBundle(String location, InputStream input) throws BundleException
+   public OSGiBundleState installBundle(String location, InputStream input) throws BundleException
    {
       if (location == null)
          throw new BundleException("Null location");
@@ -620,23 +616,7 @@ public class OSGiBundleManager
       // Get the location URL
       if (input != null)
       {
-         try
-         {
-            BundleStoragePlugin plugin = getPlugin(BundleStoragePlugin.class);
-            String path = plugin.getStorageDir(getSystemBundle()).getCanonicalPath();
-
-            // [TODO] do properly
-            File file = new File(path + "/bundle-" + System.currentTimeMillis() + ".jar");
-            FileOutputStream fos = new FileOutputStream(file);
-            VFSUtils.copyStream(input, fos);
-            fos.close();
-
-            locationURL = file.toURI().toURL();
-         }
-         catch (IOException ex)
-         {
-            throw new BundleException("Cannot store bundle from input stream", ex);
-         }
+         locationURL = getBundleStorageLocation(input);
       }
       else
       {
@@ -657,6 +637,28 @@ public class OSGiBundleManager
       return install(root, location, false);
    }
 
+   private URL getBundleStorageLocation(InputStream input) throws BundleException
+   {
+      try
+      {
+         BundleStoragePlugin plugin = getPlugin(BundleStoragePlugin.class);
+         String path = plugin.getStorageDir(getSystemBundle()).getCanonicalPath();
+
+         // [TODO] do properly
+         File file = new File(path + "/bundle-" + System.currentTimeMillis() + ".jar");
+         FileOutputStream fos = new FileOutputStream(file);
+         VFSUtils.copyStream(input, fos);
+         fos.close();
+
+         URL locationURL = file.toURI().toURL();
+         return locationURL;
+      }
+      catch (IOException ex)
+      {
+         throw new BundleException("Cannot store bundle from input stream", ex);
+      }
+   }
+
    /**
     * Install a bundle from a virtual file.
     *  
@@ -665,7 +667,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public AbstractBundleState installBundle(VirtualFile root) throws BundleException
+   public OSGiBundleState installBundle(VirtualFile root) throws BundleException
    {
       return install(root, root.toString(), false);
    }
@@ -673,7 +675,7 @@ public class OSGiBundleManager
    /*
     * Installs a bundle from the given virtual file.
     */
-   private AbstractBundleState install(VirtualFile root, String location, boolean autoStart) throws BundleException
+   private OSGiBundleState install(VirtualFile root, String location, boolean autoStart) throws BundleException
    {
       if (location == null)
          throw new IllegalArgumentException("Null location");
@@ -693,7 +695,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public AbstractBundleState installBundle(Deployment dep) throws BundleException
+   public OSGiBundleState installBundle(Deployment dep) throws BundleException
    {
       // Create the deployment and deploy it
       try
@@ -731,38 +733,98 @@ public class OSGiBundleManager
       }
    }
 
-   private URL getLocationURL(String location) throws BundleException
+   /**
+    * Updates a bundle from an InputStream. 
+    */
+   public void updateBundle(OSGiBundleState bundleState, InputStream in) throws BundleException
    {
-      // Try location as URL
-      URL url = null;
-      try
-      {
-         url = new URL(location);
-      }
-      catch (MalformedURLException e)
-      {
-         // ignore
-      }
-
-      // Try location as File
-      if (url == null)
+      // If the specified InputStream is null, the Framework must create the InputStream from which to read the updated bundle by interpreting, 
+      // in an implementation dependent manner, this bundle's Bundle-UpdateLocation Manifest header, if present, or this bundle's original location.
+      URL updateURL = bundleState.getOSGiMetaData().getBundleUpdateLocation();
+      if (in == null)
       {
          try
          {
-            File file = new File(location);
-            if (file.exists())
-               url = file.toURI().toURL();
+            if (updateURL == null)
+               throw new IllegalStateException("Cannot obtain Bundle-UpdateLocation for: " + bundleState);
+
+            in = updateURL.openStream();
          }
-         catch (MalformedURLException e)
+         catch (IOException ex)
          {
-            // ignore
+            throw new BundleException("Cannot obtain update input stream for: " + bundleState, ex);
          }
       }
 
-      if (url == null)
-         throw new BundleException("Unable to handle location=" + location);
+      // If this bundle's state is ACTIVE, it must be stopped before the update and started after the update successfully completes. 
+      boolean activeBeforeUpdate = (bundleState.getState() == Bundle.ACTIVE);
 
-      return url;
+      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
+      if (bundleState.getState() == Bundle.UNINSTALLED)
+         throw new IllegalStateException("Bundle already uninstalled: " + this);
+
+      // If this bundle has exported any packages that are imported by another bundle, these packages must not be updated. 
+      // Instead, the previous package version must remain exported until the PackageAdmin.refreshPackages method has been 
+      // has been called or the Framework is relaunched. 
+
+      // If this bundle's state is ACTIVE, STARTING  or STOPPING, this bundle is stopped as described in the Bundle.stop method. 
+      // If Bundle.stop throws an exception, the exception is rethrown terminating the update.
+      if (bundleState.getState() == Bundle.ACTIVE || bundleState.getState() == Bundle.STARTING || bundleState.getState() == Bundle.STOPPING)
+      {
+         stopBundle(bundleState);
+      }
+
+      // The updated version of this bundle is read from the input stream and installed. 
+      // If the Framework is unable to install the updated version of this bundle, the original version of this bundle must be restored 
+      // and a BundleException must be thrown after completion of the remaining steps.
+      String location = (updateURL != null ? updateURL.toExternalForm() : bundleState.getCanonicalName() + "/update");
+      OSGiBundleState updatedBundleState = null;
+      BundleException throwAfterUpdate = null;
+      try
+      {
+         URL storageLocation = getBundleStorageLocation(in);
+         VirtualFile root = VFS.getRoot(storageLocation);
+
+         BundleInfo info = BundleInfo.createBundleInfo(root, location);
+         Deployment dep = DeploymentFactory.createDeployment(info);
+         dep.addAttachment(OSGiBundleState.class, bundleState);
+         dep.setBundleUpdate(true);
+         dep.setAutoStart(false);
+
+         updatedBundleState = installBundle(dep);
+      }
+      catch (Exception ex)
+      {
+         if (ex instanceof BundleException)
+            throwAfterUpdate = (BundleException)ex;
+         else
+            throwAfterUpdate = new BundleException("Cannot install updated bundle from: " + location, ex);
+
+         if (activeBeforeUpdate)
+         {
+            startBundle(bundleState);
+         }
+      }
+
+      // If the updated version of this bundle was successfully installed, a bundle event of type BundleEvent.UPDATED is fired
+      if (updatedBundleState != null)
+      {
+         FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
+         plugin.fireBundleEvent(updatedBundleState, BundleEvent.UPDATED);
+
+         // If this bundle's state was originally ACTIVE, the updated bundle is started as described in the Bundle.start method. 
+         // If Bundle.start throws an exception, a Framework event of type FrameworkEvent.ERROR is fired containing the exception
+         if (activeBeforeUpdate)
+         {
+            startBundle(updatedBundleState);
+         }
+      }
+
+      // A BundleException must be thrown after completion of the remaining steps
+      if (throwAfterUpdate != null)
+      {
+         throw throwAfterUpdate;
+      }
    }
 
    /**
@@ -780,15 +842,17 @@ public class OSGiBundleManager
       if (getBundleById(id) == null)
          throw new BundleException(bundleState + " not installed");
 
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      try
+      for (DeploymentUnit unit : bundleState.getDeploymentUnits())
       {
-         deployerClient.undeploy(unit.getName());
-         bundleState.modified();
-      }
-      catch (DeploymentException e)
-      {
-         throw new BundleException("Unable to uninstall " + bundleState, e);
+         try
+         {
+            deployerClient.undeploy(unit.getName());
+            bundleState.modified();
+         }
+         catch (DeploymentException e)
+         {
+            throw new BundleException("Unable to uninstall " + bundleState, e);
+         }
       }
    }
 
@@ -804,8 +868,8 @@ public class OSGiBundleManager
       if (unit == null)
          throw new IllegalArgumentException("Null unit");
 
-      OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
-      if (osgiMetaData == null)
+      OSGiMetaData metaData = unit.getAttachment(OSGiMetaData.class);
+      if (metaData == null)
       {
          Manifest manifest = unit.getAttachment(Manifest.class);
          // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
@@ -815,7 +879,8 @@ public class OSGiBundleManager
          Attributes attributes = manifest.getMainAttributes();
          attributes.put(new Name(Constants.BUNDLE_NAME), unit.getName());
          attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-         osgiMetaData = new AbstractOSGiMetaData(manifest);
+         metaData = new AbstractOSGiMetaData(manifest);
+         unit.addAttachment(OSGiMetaData.class, metaData);
       }
 
       // The bundle location is not necessarily the bundle root url
@@ -823,8 +888,18 @@ public class OSGiBundleManager
       Deployment dep = unit.getAttachment(Deployment.class);
       String location = (dep != null ? dep.getLocation() : unit.getName());
 
-      OSGiBundleState bundleState = new OSGiBundleState(location, osgiMetaData, unit);
-      addBundle(bundleState);
+      // In case of Bundle.update() the OSGiBundleState should be attached
+      // we add the DeploymentUnit 
+      OSGiBundleState bundleState = (dep != null ? dep.getAttachment(OSGiBundleState.class) : null);
+      if (bundleState != null)
+         bundleState.addDeploymentUnit(unit);
+
+      // Create a new OSGiBundleState and add it to the manager
+      if (bundleState == null)
+      {
+         bundleState = new OSGiBundleState(location, unit);
+         addBundle(bundleState);
+      }
       return bundleState;
    }
 
@@ -867,7 +942,16 @@ public class OSGiBundleManager
       bundleState.setBundleManager(this);
       bundles.add(bundleState);
 
-      bundleState.changeState(Bundle.INSTALLED);
+      // Only fire the INSTALLED event if this is not an update
+      boolean fireEvent = true;
+      if (bundleState instanceof OSGiBundleState)
+      {
+         DeploymentUnit unit = ((OSGiBundleState)bundleState).getDeploymentUnit();
+         Deployment dep = unit.getAttachment(Deployment.class);
+         fireEvent = (dep == null || dep.isBundleUpdate() == false);
+      }
+
+      bundleState.changeState(Bundle.INSTALLED, fireEvent);
 
       // Add the bundle to the resolver
       // Note, plugins are not registered when the system bundle is added 
@@ -887,6 +971,8 @@ public class OSGiBundleManager
    private void validateBundle(AbstractBundleState bundleState)
    {
       OSGiMetaData metaData = bundleState.getOSGiMetaData();
+      if (metaData == null)
+         return;
 
       String symbolicName = metaData.getBundleSymbolicName();
       if (symbolicName == null)
@@ -1201,7 +1287,7 @@ public class OSGiBundleManager
          // Resolve all INSTALLED bundles through the PackageAdmin
          PackageAdmin packageAdmin = getPlugin(PackageAdminPlugin.class);
          packageAdmin.resolveBundles(null);
-         
+
          if (bundleState.getState() != Bundle.RESOLVED)
             throw new BundleException("Cannot resolve bundle: " + bundleState);
       }
@@ -1256,7 +1342,7 @@ public class OSGiBundleManager
       // [TODO] If this bundle is in the process of being activated or deactivated then this method must wait for activation or deactivation 
       // to complete before continuing. If this does not occur in a reasonable time, a BundleException is thrown to indicate this bundle 
       // was unable to be stopped.
-      
+
       // [TODO] If the STOP_TRANSIENT option is not set then then set this bundle's persistent autostart setting to to Stopped. 
       // When the Framework is restarted and this bundle's autostart setting is Stopped, this bundle must not be automatically started. 
 
@@ -1269,7 +1355,7 @@ public class OSGiBundleManager
          DeploymentUnit unit = bundleState.getDeploymentUnit();
          deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
          deployerClient.checkComplete(unit.getName());
-         
+
          // The potential BundleException is attached by the OSGiBundleActivatorDeployer
          BundleException stopEx = unit.removeAttachment(BundleException.class);
          if (stopEx != null)
@@ -1282,7 +1368,7 @@ public class OSGiBundleManager
          Throwable cause = ex.getCause();
          if (cause instanceof BundleException)
             throw (BundleException)cause;
-         
+
          throw new BundleException("Error stopping " + bundleState, (cause != null ? cause : ex));
       }
    }
@@ -1845,6 +1931,40 @@ public class OSGiBundleManager
             }
          }
       }
+   }
+
+   private URL getLocationURL(String location) throws BundleException
+   {
+      // Try location as URL
+      URL url = null;
+      try
+      {
+         url = new URL(location);
+      }
+      catch (MalformedURLException e)
+      {
+         // ignore
+      }
+
+      // Try location as File
+      if (url == null)
+      {
+         try
+         {
+            File file = new File(location);
+            if (file.exists())
+               url = file.toURI().toURL();
+         }
+         catch (MalformedURLException e)
+         {
+            // ignore
+         }
+      }
+
+      if (url == null)
+         throw new BundleException("Unable to handle location=" + location);
+
+      return url;
    }
 
    /**

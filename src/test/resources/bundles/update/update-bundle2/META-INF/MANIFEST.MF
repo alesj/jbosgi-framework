@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: update-bundle2
+Bundle-Version: 1.0.1

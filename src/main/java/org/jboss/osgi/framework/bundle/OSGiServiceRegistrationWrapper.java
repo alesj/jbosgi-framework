@@ -55,7 +55,7 @@ public class OSGiServiceRegistrationWrapper implements ServiceRegistration
       return serviceState.getReference();
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public void setProperties(Dictionary properties)
    {
       serviceState.setProperties(properties);

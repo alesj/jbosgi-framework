@@ -26,9 +26,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.jar.Attributes.Name;
 
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.util.collection.ConcurrentSet;
 import org.osgi.framework.BundleException;
@@ -46,14 +50,25 @@ public class OSGiSystemState extends AbstractBundleState
 {
    /** The registred contexts */
    private Set<ControllerContext> registered = new ConcurrentSet<ControllerContext>();
+   /** The osgi metadata */
+   private OSGiMetaData osgiMetaData;
 
    /**
     * Create a new OSGiSystemBundle.
-    * @param osgiMetaData the metadata for the system bundle
     */
-   public OSGiSystemState(OSGiMetaData osgiMetaData)
+   public OSGiSystemState()
    {
-      super(osgiMetaData);
+      Manifest manifest = new Manifest();
+      Attributes attributes = manifest.getMainAttributes();
+      attributes.put(new Name(Constants.BUNDLE_NAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+      attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+      osgiMetaData = new AbstractOSGiMetaData(manifest);
+   }
+
+   @Override
+   public OSGiMetaData getOSGiMetaData()
+   {
+      return osgiMetaData;
    }
 
    protected Set<ControllerContext> getRegisteredContexts()
@@ -161,7 +176,6 @@ public class OSGiSystemState extends AbstractBundleState
       });
    }
 
-   @Override
    public void update() throws BundleException
    {
       final OSGiBundleManager bundleManager = getBundleManager();

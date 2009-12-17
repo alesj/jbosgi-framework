@@ -92,7 +92,7 @@ public class OSGiParameters
       return get(key, creator, null);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    protected <T> T get(String key, ValueCreator<T> creator, T defaultValue)
    {
       T value = (T)cachedAttributes.get(key);

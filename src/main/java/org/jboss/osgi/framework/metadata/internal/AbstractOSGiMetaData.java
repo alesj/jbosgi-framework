@@ -103,7 +103,7 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
       super(manifest);
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public Dictionary<String, String> getHeaders(String locale)
    {
       // TODO localisation

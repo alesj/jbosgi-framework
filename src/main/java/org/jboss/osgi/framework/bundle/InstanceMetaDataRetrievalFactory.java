@@ -42,6 +42,8 @@ import org.jboss.metadata.spi.scope.ScopeKey;
 public class InstanceMetaDataRetrievalFactory implements MetaDataRetrievalFactory
 {
    private Controller controller;
+   
+   @SuppressWarnings("rawtypes")
    private Set<DictionaryFactory> factories = new CopyOnWriteArraySet<DictionaryFactory>();
 
    public InstanceMetaDataRetrievalFactory(Controller controller)
@@ -51,7 +53,7 @@ public class InstanceMetaDataRetrievalFactory implements MetaDataRetrievalFactor
       this.controller = controller;
    }
 
-   @SuppressWarnings({"unchecked"})
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public MetaDataRetrieval getMetaDataRetrieval(Scope scope)
    {
       if (scope == null)
@@ -89,6 +91,7 @@ public class InstanceMetaDataRetrievalFactory implements MetaDataRetrievalFactor
     * @param factory the factory
     * @return Set#add
     */
+   @SuppressWarnings("rawtypes")
    public boolean addFactory(DictionaryFactory factory)
    {
       if (factory == null)
@@ -105,6 +108,7 @@ public class InstanceMetaDataRetrievalFactory implements MetaDataRetrievalFactor
     * @param factory the factory
     * @return Set#add
     */
+   @SuppressWarnings("rawtypes")
    public boolean removeFactory(DictionaryFactory factory)
    {
       if (factory == null)

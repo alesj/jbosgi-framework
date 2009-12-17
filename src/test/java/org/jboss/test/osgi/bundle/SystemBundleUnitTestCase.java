@@ -88,7 +88,7 @@ public class SystemBundleUnitTestCase extends FrameworkTest
       }
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public void testGetHeaders() throws Exception
    {
       Dictionary expected = new Hashtable();

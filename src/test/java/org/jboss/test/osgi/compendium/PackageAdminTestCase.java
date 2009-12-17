@@ -54,7 +54,7 @@ public class PackageAdminTestCase extends FrameworkTest
 
    public void testGetBudleFromClass() throws Exception
    {
-      Bundle bundle = assembleBundle("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
+      Bundle bundle = installBundle(assembleBundle("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class));
       try
       {
          bundle.start();
@@ -68,7 +68,7 @@ public class PackageAdminTestCase extends FrameworkTest
          Bundle notFound = pa.getBundle(getClass());
          assertNull(notFound);
 
-         Bundle other = assembleBundle("simple", "/bundles/simple/simple-bundle1", Other.class);
+         Bundle other = installBundle(assembleBundle("simple", "/bundles/simple/simple-bundle1", Other.class));
          try
          {
             other.start();

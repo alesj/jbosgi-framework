@@ -374,7 +374,7 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
    
    public void testIsAssignableToErrors() throws Exception
    {
-      Bundle bundle = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
       try
       {
          bundle.start();
@@ -415,7 +415,7 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
 
    public void testNotAssignableTo() throws Exception
    {
-      Bundle bundle = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
       try
       {
          bundle.start();
@@ -428,7 +428,7 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
 
-         Bundle bundle2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class);
+         Bundle bundle2 = installBundle(assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class));
          try
          {
             assertFalse(reference.isAssignableTo(bundle2, A.class.getName()));
@@ -454,7 +454,7 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       //Bundle-Name: Service2
       //Bundle-SymbolicName: org.jboss.test.osgi.service2
       //Export-Package: org.jboss.test.osgi.service.support.a
-      Bundle bundle2 = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      Bundle bundle2 = installBundle(assembleBundle("service2", "/bundles/service/service-bundle2", A.class));
       
       try
       {
@@ -465,7 +465,7 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          //Bundle-Name: Service1
          //Bundle-SymbolicName: org.jboss.test.osgi.service1
          //Import-Package: org.jboss.test.osgi.service.support.a
-         Bundle bundle1 = assembleBundle("service1", "/bundles/service/service-bundle1");
+         Bundle bundle1 = installBundle(assembleBundle("service1", "/bundles/service/service-bundle1"));
          
          try
          {

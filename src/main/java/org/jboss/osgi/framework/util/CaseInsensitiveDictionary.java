@@ -73,7 +73,7 @@ public class CaseInsensitiveDictionary extends Dictionary<String, Object>
       return delegate.elements();
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public synchronized boolean equals(Object obj)
    {
       if (obj == this)

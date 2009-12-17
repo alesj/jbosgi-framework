@@ -33,7 +33,7 @@ import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.classloader.spi.ParentPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
-import org.jboss.classloader.spi.filter.ClassFilter;
+import org.jboss.classloader.spi.filter.ClassFilterUtils;
 import org.jboss.classloader.spi.filter.PackageClassFilter;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
@@ -102,7 +102,7 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
       classFilter.setIncludeJava(true);
 
       // Setup the domain's parent policy
-      setParentPolicy(new ParentPolicy(classFilter, ClassFilter.NOTHING));
+      setParentPolicy(new ParentPolicy(classFilter, ClassFilterUtils.NOTHING));
 
       // Initialize the configured policy roots
       VirtualFile[] roots = new VirtualFile[classPath.size()];

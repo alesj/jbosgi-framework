@@ -57,7 +57,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
 
    public void testGetServiceReferences() throws Exception
    {
-      Bundle bundle1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
       try
       {
          bundle1.start();
@@ -174,7 +174,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
    
    public void assertGetServiceReferencesNotAssignable(String className) throws Exception
    {
-      Bundle bundle1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
       try
       {
          bundle1.start();
@@ -191,7 +191,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         Bundle bundle2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class);
+         Bundle bundle2 = installBundle(assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class));
          try
          {
             bundle2.start();
@@ -272,7 +272,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
 
    public void assertGetServiceReferencesAssignable(String className) throws Exception
    {
-      Bundle bundle1 = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("service2", "/bundles/service/service-bundle2", A.class));
       try
       {
          bundle1.start();
@@ -289,7 +289,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         Bundle bundle2 = assembleBundle("service1", "/bundles/service/service-bundle1");
+         Bundle bundle2 = installBundle(assembleBundle("service1", "/bundles/service/service-bundle1"));
          try
          {
             bundle2.start();
@@ -362,7 +362,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
    {
       String className = A.class.getName();
       
-      Bundle bundle1 = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("service2", "/bundles/service/service-bundle2", A.class));
       try
       {
          bundle1.start();
@@ -382,7 +382,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         Bundle bundle2 = assembleBundle("service1", "/bundles/service/service-bundle1");
+         Bundle bundle2 = installBundle(assembleBundle("service1", "/bundles/service/service-bundle1"));
          try
          {
             bundle2.start();
@@ -470,7 +470,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
       String className = A.class.getName();
       String wrongClassName = B.class.getName();
       
-      Bundle bundle1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
       try
       {
          bundle1.start();

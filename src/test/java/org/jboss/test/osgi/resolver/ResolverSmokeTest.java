@@ -97,9 +97,10 @@ public class ResolverSmokeTest extends OSGiTest
          }
          
          PackageAdminPlugin packageAdmin = bundleManager.getPlugin(PackageAdminPlugin.class);
-         boolean allResoved = packageAdmin.resolveBundles(null);
-         //assertTrue("All bundles resolved", allResoved);
+         packageAdmin.resolveBundles(null);
+         
          System.out.println("[JBOSGI-151] Cannot resolve circular dependencies");
+         //assertTrue("All bundles resolved", allResoved);
       }
       finally
       {

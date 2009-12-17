@@ -44,7 +44,7 @@ public class NoFilter implements Filter
    {
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public boolean match(Dictionary dictionary)
    {
       return true;
@@ -55,7 +55,7 @@ public class NoFilter implements Filter
       return true;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings("rawtypes")
    public boolean matchCase(Dictionary dictionary)
    {
       return true;

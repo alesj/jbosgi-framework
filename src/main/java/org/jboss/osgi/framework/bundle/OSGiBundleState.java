@@ -24,7 +24,10 @@ package org.jboss.osgi.framework.bundle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -59,8 +62,8 @@ public class OSGiBundleState extends AbstractBundleState
    /** The bundle location */
    private String location;
 
-   /** The deployment unit */
-   private DeploymentUnit unit;
+   /** The list of deployment units */
+   private List<DeploymentUnit> units = new ArrayList<DeploymentUnit>();
 
    /**
     * Create a new BundleState.
@@ -70,20 +73,25 @@ public class OSGiBundleState extends AbstractBundleState
     * @param unit the deployment unit
     * @throws IllegalArgumentException for a null parameter
     */
-   public OSGiBundleState(String location, OSGiMetaData osgiMetaData, DeploymentUnit unit)
+   public OSGiBundleState(String location, DeploymentUnit unit)
    {
-      super(osgiMetaData);
-      
       if (location == null)
          throw new IllegalArgumentException("Null bundle location");
       if (unit == null)
-          throw new IllegalArgumentException("Null deployment unit");
+         throw new IllegalArgumentException("Null deployment unit");
 
-      this.unit = unit;
       this.location = location;
-      
       this.bundleId = bundleIDGenerator.incrementAndGet();
-      unit.getMutableMetaData().addMetaData(unit, DeploymentUnit.class);
+      
+      addDeploymentUnit(unit);
+   }
+
+   @Override
+   public OSGiMetaData getOSGiMetaData()
+   {
+      DeploymentUnit unit = getDeploymentUnit();
+      OSGiMetaData metadata = unit.getAttachment(OSGiMetaData.class);
+      return metadata;
    }
 
    protected Set<ControllerContext> getRegisteredContexts()
@@ -97,13 +105,39 @@ public class OSGiBundleState extends AbstractBundleState
    }
 
    /**
-    * Get the unit.
+    * Get the DeploymentUnit that was added last.
     * 
-    * @return the unit.
+    * Initially, an OSGiBundleState is associated with just one DeploymentUnit.
+    * A sucessful call to {@link #update()} or its variants pushes an additional
+    * DeploymentUnit to the stack.   
+    * 
+    * @return the unit that corresponds to the last sucessful update.
     */
    public DeploymentUnit getDeploymentUnit()
    {
-      return unit;
+      int index = (units.size() - 1);
+      return units.get(index);
+   }
+
+   /**
+    * Add a DeploymentUnit to the list.
+    * 
+    * @see {@link OSGiBundleManager#updateBundle(OSGiBundleState, InputStream)}
+    */
+   void addDeploymentUnit(DeploymentUnit unit)
+   {
+      unit.getMutableMetaData().addMetaData(unit, DeploymentUnit.class);
+      units.add(unit);
+   }
+
+   /**
+    * Get the list of DeploymentUnits.
+    * 
+    * @see {@link OSGiBundleManager#uninstallBundle(OSGiBundleState)}
+    */
+   List<DeploymentUnit> getDeploymentUnits()
+   {
+      return Collections.unmodifiableList(units);
    }
 
    public String getLocation()
@@ -224,11 +258,11 @@ public class OSGiBundleState extends AbstractBundleState
       checkInstalled();
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
-      
+
       // [TODO] bundle fragment
       if (resolveBundle() == false)
          return getDeploymentUnit().getResourceLoader().getResource(name);
-      
+
       return getDeploymentUnit().getClassLoader().getResource(name);
    }
 
@@ -242,7 +276,7 @@ public class OSGiBundleState extends AbstractBundleState
       // [TODO] bundle fragment 
       if (resolveBundle() == false)
          return getDeploymentUnit().getResourceLoader().getResources(name);
-      
+
       return getDeploymentUnit().getClassLoader().getResources(name);
    }
 
@@ -293,7 +327,7 @@ public class OSGiBundleState extends AbstractBundleState
 
             // Attach so we can call BundleActivator.stop() on this instance
             BundleActivator bundleActivator = (BundleActivator)result;
-            unit.addAttachment(BundleActivator.class, bundleActivator);
+            getDeploymentUnit().addAttachment(BundleActivator.class, bundleActivator);
 
             bundleActivator.start(getBundleContext());
          }
@@ -303,7 +337,7 @@ public class OSGiBundleState extends AbstractBundleState
 
          changeState(ACTIVE);
       }
-      
+
       // If the BundleActivator is invalid or throws an exception then:
       //   * This bundle's state is set to STOPPING.
       //   * A bundle event of type BundleEvent.STOPPING is fired.
@@ -318,20 +352,20 @@ public class OSGiBundleState extends AbstractBundleState
          // This bundle's state is set to STOPPING
          // A bundle event of type BundleEvent.STOPPING is fired
          changeState(STOPPING);
-         
+
          // Any services registered by this bundle must be unregistered.
          // Any services used by this bundle must be released.
          // Any listeners registered by this bundle must be removed.
          stopInternal();
-         
+
          // This bundle's state is set to RESOLVED
          // A bundle event of type BundleEvent.STOPPED is fired
          destroyBundleContext();
          changeState(RESOLVED);
-         
+
          if (t instanceof BundleException)
             throw (BundleException)t;
-         
+
          throw new BundleException("Cannot start bundle: " + this, t);
       }
    }
@@ -356,21 +390,21 @@ public class OSGiBundleState extends AbstractBundleState
       Throwable rethrow = null;
       if (priorState == Bundle.ACTIVE)
       {
-            BundleActivator bundleActivator = getDeploymentUnit().getAttachment(BundleActivator.class);
-            BundleContext bundleContext = getBundleContext();
-            if (bundleActivator != null && bundleContext != null)
+         BundleActivator bundleActivator = getDeploymentUnit().getAttachment(BundleActivator.class);
+         BundleContext bundleContext = getBundleContext();
+         if (bundleActivator != null && bundleContext != null)
+         {
+            try
             {
-               try
-               {
-                  bundleActivator.stop(bundleContext);
-               }
-               catch (Throwable t)
-               {
-                  rethrow = t;
-               }
+               bundleActivator.stop(bundleContext);
             }
+            catch (Throwable t)
+            {
+               rethrow = t;
+            }
+         }
       }
-      
+
       // Any services registered by this bundle must be unregistered
       getBundleManager().unregisterContexts(this);
 
@@ -393,26 +427,48 @@ public class OSGiBundleState extends AbstractBundleState
       }
 
       // [TODO] Any listeners registered by this bundle must be removed
-      
+
       // If this bundle's state is UNINSTALLED, because this bundle was uninstalled while the 
       // BundleActivator.stop method was running, a BundleException must be thrown
       if (getState() == Bundle.UNINSTALLED)
          throw new BundleException("Bundle uninstalled during activator stop: " + this);
-      
+
       // This bundle's state is set to RESOLVED
       // A bundle event of type BundleEvent.STOPPED is fired
       destroyBundleContext();
       changeState(RESOLVED);
-      
+
       if (rethrow != null)
          throw new BundleException("Error during stop of bundle: " + this, rethrow);
    }
 
+   /**
+    * Updates this bundle. 
+    * 
+    * This method performs the same function as calling update(InputStream) with a null InputStream
+    */
+   public void update() throws BundleException
+   {
+      update(null);
+   }
+
+   /**
+    * Updates this bundle from an InputStream. 
+    */
    public void update(InputStream in) throws BundleException
    {
-      checkAdminPermission(AdminPermission.LIFECYCLE); // [TODO] extension bundles
-      // [TODO] update
-      throw new UnsupportedOperationException("update");
+      checkAdminPermission(AdminPermission.LIFECYCLE);
+      try
+      {
+         getBundleManager().updateBundle(this, in);
+      }
+      catch (Exception ex)
+      {
+         if (ex instanceof BundleException)
+            throw (BundleException)ex;
+
+         throw new BundleException("Cannot update bundle: " + this, ex);
+      }
    }
 
    public void uninstall() throws BundleException
@@ -424,26 +480,26 @@ public class OSGiBundleState extends AbstractBundleState
    @Override
    protected void afterServiceRegistration(OSGiServiceState service)
    {
-      getBundleManager().putContext(service, unit);
+      getBundleManager().putContext(service, getDeploymentUnit());
    }
 
    @Override
    protected void beforeServiceUnregistration(OSGiServiceState service)
    {
-      getBundleManager().removeContext(service, unit);
+      getBundleManager().removeContext(service, getDeploymentUnit());
    }
 
    public static OSGiBundleState assertBundleState(Bundle bundle)
    {
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
-      
+
       if (bundle instanceof OSGiBundleWrapper)
          bundle = ((OSGiBundleWrapper)bundle).getBundleState();
-   
+
       if (bundle instanceof OSGiBundleState == false)
          throw new IllegalArgumentException("Not an OSGiBundleState: " + bundle);
-   
+
       return (OSGiBundleState)bundle;
    }
 }

@@ -192,7 +192,7 @@ public class MDRUtils
     */
    private static ClassLoader getClassLoader(Object instance)
    {
-      return (instance instanceof Class) ? Class.class.cast(instance).getClassLoader() : instance.getClass().getClassLoader();
+      return (instance instanceof Class<?>) ? Class.class.cast(instance).getClassLoader() : instance.getClass().getClassLoader();
    }
 
    /**

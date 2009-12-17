@@ -21,13 +21,19 @@
 */
 package org.jboss.test.osgi.bundle;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import junit.framework.Test;
 
 import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -148,7 +154,37 @@ public class BundleUnitTestCase extends FrameworkTest
    
    public void testUpdate() throws Exception
    {
-      // TODO testUpdate
+      VirtualFile assemble1 = assembleBundle("bundle1", "/bundles/update/update-bundle1");
+      VirtualFile assemble2 = assembleBundle("bundle2", "/bundles/update/update-bundle2");
+      
+      Manifest manifest = VFSUtils.getManifest(assemble2);
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      new JarOutputStream(baos, manifest).close();
+      ByteArrayInputStream updateStream = new ByteArrayInputStream(baos.toByteArray());
+      
+      // [JBVFS-130] VFSUtils.temp(assembledDirectory) cannot create tmp dir
+      // assemble2 = VFSUtils.temp(assemble2);
+      
+      Bundle bundle = installBundle(assemble1);
+      try
+      {
+         int beforeCount = getBundleManager().getBundles().size();
+         
+         bundle.start();
+         assertBundleState(Bundle.ACTIVE, bundle.getState());
+         assertEquals("Bundle-Version", "1.0.0", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
+         
+         bundle.update(updateStream);
+         assertBundleState(Bundle.ACTIVE, bundle.getState());
+         assertEquals("Bundle-Version", "1.0.1", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
+         
+         int afterCount = getBundleManager().getBundles().size();
+         assertEquals("Bundle count", beforeCount, afterCount);
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
    }
    
    public void testUninstall() throws Exception
@@ -158,10 +194,10 @@ public class BundleUnitTestCase extends FrameworkTest
    
    public void testSingleton() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundle1", "/bundles/singleton/singleton1");
+      Bundle bundle1 = installBundle(assembleBundle("bundle10", "/bundles/singleton/singleton1"));
       try
       {
-         Bundle bundle2 = assembleBundle("bundle2", "/bundles/singleton/singleton2");
+         Bundle bundle2 = installBundle(assembleBundle("bundle20", "/bundles/singleton/singleton2"));
          uninstall(bundle2);
          fail("Should not be here!");
       }
@@ -177,10 +213,10 @@ public class BundleUnitTestCase extends FrameworkTest
    
    public void testNotSingleton() throws Exception
    {
-      Bundle bundle1 = assembleBundle("bundle1", "/bundles/singleton/singleton1");
+      Bundle bundle1 = installBundle(assembleBundle("bundle1", "/bundles/singleton/singleton1"));
       try
       {
-         Bundle bundle2 = assembleBundle("not-singleton", "/bundles/singleton/not-singleton");
+         Bundle bundle2 = installBundle(assembleBundle("not-singleton", "/bundles/singleton/not-singleton"));
          try
          {
             assertEquals(bundle1.getSymbolicName(), bundle2.getSymbolicName());
@@ -196,7 +232,7 @@ public class BundleUnitTestCase extends FrameworkTest
       }
    }
    
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes", "unchecked" })
    public void testGetHeaders() throws Exception
    {
       // TODO case insensistive

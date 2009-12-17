@@ -169,14 +169,17 @@ public abstract class FrameworkTest extends MicrocontainerTest implements Framew
 
    protected Bundle installBundle(String location) throws BundleException
    {
-      BundleContext context = getBundleManager().getSystemContext();
-      return context.installBundle(location);
+      return getBundleManager().installBundle(location, null).getBundleInternal();
    }
 
    protected Bundle installBundle(String location, InputStream instream) throws BundleException
    {
-      BundleContext context = getBundleManager().getSystemContext();
-      return context.installBundle(location, instream);
+      return getBundleManager().installBundle(location, instream).getBundleInternal();
+   }
+   
+   protected Bundle installBundle(VirtualFile bundleFile) throws BundleException
+   {
+      return getBundleManager().installBundle(bundleFile).getBundleInternal();
    }
    
    /**
@@ -195,12 +198,12 @@ public abstract class FrameworkTest extends MicrocontainerTest implements Framew
       return getDelegate().getDeploymentUnit(bundle);
    }
 
-   protected Bundle assembleBundle(String name, String resources, Class<?>... packages) throws Exception
+   protected VirtualFile assembleBundle(String name, String resources, Class<?>... packages) throws Exception
    {
       return getDelegate().assembleBundle(name, new String[] { resources }, packages);
    }
 
-   protected Bundle assembleBundle(String name, String[] resourcePaths, Class<?>... packages) throws Exception
+   protected VirtualFile assembleBundle(String name, String[] resourcePaths, Class<?>... packages) throws Exception
    {
       return getDelegate().assembleBundle(name, resourcePaths, packages);
    }

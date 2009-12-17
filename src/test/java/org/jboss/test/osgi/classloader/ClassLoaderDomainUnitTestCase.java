@@ -33,7 +33,7 @@ import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.classloader.spi.ParentPolicy;
-import org.jboss.classloader.spi.filter.ClassFilter;
+import org.jboss.classloader.spi.filter.ClassFilterUtils;
 import org.jboss.classloader.spi.filter.PackageClassFilter;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.logging.Logger;
@@ -74,7 +74,7 @@ public class ClassLoaderDomainUnitTestCase
       PackageClassFilter classFilter = PackageClassFilter.createPackageClassFilterFromString(filteredPackages);
       classFilter.setIncludeJava(true);
 
-      domain.setParentPolicy(new ParentPolicy(classFilter, ClassFilter.NOTHING));
+      domain.setParentPolicy(new ParentPolicy(classFilter, ClassFilterUtils.NOTHING));
 
       URL coreURL = new OSGiTestHelper().getTestArchiveURL("bundles/org.osgi.core.jar");
       VirtualFile coreVF = VFS.createNewRoot(coreURL);

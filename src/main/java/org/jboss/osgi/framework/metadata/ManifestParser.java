@@ -100,7 +100,7 @@ public class ManifestParser
     * @param list the list to create
     * @param packages whether to create packages
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes", "unchecked" })
    public static void parse(String header, List list, boolean packages)
    {
       if (header == null)

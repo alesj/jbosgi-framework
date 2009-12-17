@@ -26,7 +26,6 @@ import junit.framework.Test;
 import org.jboss.test.osgi.FrameworkTest;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
 import org.jboss.test.osgi.bundle.support.b.LifecycleService;
-import org.jboss.test.osgi.bundle.support.b.LifecycleServiceActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -54,7 +53,7 @@ public class BundleLifecycleTestCase extends FrameworkTest
     */
    public void testServiceBundle() throws Exception
    {
-      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
+      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
@@ -77,7 +76,7 @@ public class BundleLifecycleTestCase extends FrameworkTest
     */
    public void testServiceNotAvailable() throws Exception
    {
-      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
+      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
@@ -86,7 +85,7 @@ public class BundleLifecycleTestCase extends FrameworkTest
          ServiceReference sref = getSystemBundle().getBundleContext().getServiceReference(LifecycleService.class.getName());
          assertNull("Service not available", sref);
 
-         Bundle bundleB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());
@@ -116,13 +115,13 @@ public class BundleLifecycleTestCase extends FrameworkTest
     */
    public void testServiceAvailable() throws Exception
    {
-      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
+      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
       {
          bundleA.start();
          assertBundleState(Bundle.ACTIVE, bundleA.getState());
 
-         Bundle bundleB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
          try
          {
             bundleB.start();
@@ -146,12 +145,12 @@ public class BundleLifecycleTestCase extends FrameworkTest
     */
    public void testServiceMakeAvailable() throws Exception
    {
-      Bundle bundleA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class, LifecycleServiceActivator.class);
+      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
          
-         Bundle bundleB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());

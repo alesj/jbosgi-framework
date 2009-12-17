@@ -74,7 +74,7 @@ public class OSGiScopeInfo extends AbstractScopeInfo
       if (scope == null)
          return key;
       Object qualifier = scope.getQualifier();
-      if (qualifier instanceof Class)
+      if (qualifier instanceof Class<?>)
          return key;
 
       Object service = serviceState.getTarget();

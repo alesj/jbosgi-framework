@@ -21,13 +21,12 @@
 */
 package org.jboss.osgi.framework.deployers;
 
+import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
-import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
-import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
 /**
  * AbstractOSGiBundleStateDeployer.<p>
@@ -40,12 +39,6 @@ public abstract class AbstractOSGiBundleStateDeployer extends AbstractRealDeploy
    /** The bundle manager */
    protected OSGiBundleManager bundleManager;
 
-   /**
-    * Create a new BundleStateDeployer.
-    *
-    * @param bundleManager the bundleManager
-    * @throws IllegalArgumentException for a null bundle manager
-    */
    protected AbstractOSGiBundleStateDeployer(OSGiBundleManager bundleManager)
    {
       if (bundleManager == null)

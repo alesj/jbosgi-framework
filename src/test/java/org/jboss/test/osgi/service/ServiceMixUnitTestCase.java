@@ -66,7 +66,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       Deployment bean = deployBean("beanA", A.class);
       try
       {
-         Bundle bundle1 = assembleBundle("simple1", "/bundles/service/service-bundle1");
+         Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/service/service-bundle1"));
          try
          {
             bundle1.start();
@@ -134,7 +134,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
-         Bundle bundle1 = assembleBundle("simple2", "/bundles/service/service-bundle3");
+         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle3"));
          try
          {
             bundle1.start();
@@ -191,7 +191,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
-         Bundle bundle1 = assembleBundle("simple2", "/bundles/service/service-bundle3");
+         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle3"));
          try
          {
             bundle1.start();
@@ -249,7 +249,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       Deployment bean = addBean("beanA", C.class, bmd, A.class);
       try
       {
-         Bundle bundle1 = assembleBundle("simple2", "/bundles/service/service-bundle3");
+         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle3"));
          try
          {
             bundle1.start();
@@ -287,6 +287,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       }
    }
 
+   @SuppressWarnings("rawtypes")
    public void testServiceFactoryInjection() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C1", C.class.getName());
@@ -301,7 +302,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
          Deployment bean2 = addBean("beanA2", null, bmd);
          try
          {
-            Bundle bundle1 = assembleBundle("simple2", "/bundles/service/service-bundle4");
+            Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle4"));
             try
             {
                bundle1.start();
@@ -358,6 +359,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       }
    }
 
+   @SuppressWarnings("rawtypes")
    public void testServiceFactoryMix() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C1", C.class.getName());
@@ -366,7 +368,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       Deployment bean1 = addBean("beanA1", C.class, bmd, A.class, D.class);
       try
       {
-            Bundle bundle1 = assembleBundle("simple2", "/bundles/service/service-bundle4");
+            Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle4"));
             try
             {
                bundle1.start();
@@ -463,7 +465,7 @@ public class ServiceMixUnitTestCase extends DeployersTest
       Deployment bean = addBean("beanA", A.class);
       try
       {
-         Bundle bundle1 = assembleBundle("simple2", "/bundles/service/service-bundle1");
+         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle1"));
          try
          {
             bundle1.start();

@@ -73,7 +73,7 @@ public class OSGiSmokeTestCase extends FrameworkTest
 
    public void testAssembled() throws Exception
    {
-      Bundle bundle = assembleBundle("smoke-assembled", "/bundles/smoke/smoke-assembled", A.class);
+      Bundle bundle = installBundle(assembleBundle("smoke-assembled", "/bundles/smoke/smoke-assembled", A.class));
       try
       {
          testBundle(bundle, "smoke-assembled", Bundle.INSTALLED);

@@ -77,9 +77,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    /** The bundle manager */
    private OSGiBundleManager bundleManager;
 
-   /** The osgi metadata */
-   private OSGiMetaData osgiMetaData;
-
    /** The bundle context */
    private BundleContext bundleContext;
 
@@ -88,26 +85,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    /** The bundle state */
    private AtomicInteger state = new AtomicInteger(Bundle.UNINSTALLED);
-
-   /** The cached symbolic name */
-   private String symbolicName;
-   
-   /** The cached version */
-   private Version version;
-
-   /**
-    * Create a new BundleState for the system bundle.
-    * 
-    * @param osgiMetaData the osgi metadata
-    * @throws IllegalArgumentException for a null parameter
-    */
-   AbstractBundleState(OSGiMetaData osgiMetaData)
-   {
-      if (osgiMetaData == null)
-         throw new IllegalArgumentException("Null osgi metadata");
-
-      this.osgiMetaData = osgiMetaData;
-   }
 
    /**
     * Get the bundleManager.
@@ -118,26 +95,21 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    {
       if (bundleManager == null)
          throw new IllegalStateException("Bundle not installed: " + getCanonicalName());
-      
+
       return bundleManager;
    }
 
    public String getSymbolicName()
    {
+      String symbolicName = getOSGiMetaData().getBundleSymbolicName();
       if (symbolicName == null)
-      {
-         symbolicName = osgiMetaData.getBundleSymbolicName();
-         if (symbolicName == null)
-            throw new IllegalStateException("Cannot obtain " + Constants.BUNDLE_SYMBOLICNAME);
-      }
+         throw new IllegalStateException("Cannot obtain " + Constants.BUNDLE_SYMBOLICNAME);
       return symbolicName;
    }
 
    public Version getVersion()
    {
-      if (version == null)
-         version = osgiMetaData.getBundleVersion();
-      
+      Version version = getOSGiMetaData().getBundleVersion();
       return version;
    }
 
@@ -202,7 +174,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       List<Bundle> bundles = new ArrayList<Bundle>(bundleStates.size());
       for (AbstractBundleState bundleState : bundleStates)
          bundles.add(bundleState.getBundleInternal());
-      
+
       return bundles.toArray(new Bundle[bundles.size()]);
    }
 
@@ -221,10 +193,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     * 
     * @return the osgiMetaData.
     */
-   public OSGiMetaData getOSGiMetaData()
-   {
-      return osgiMetaData;
-   }
+   public abstract OSGiMetaData getOSGiMetaData();
 
    @SuppressWarnings("rawtypes")
    public Dictionary getHeaders()
@@ -376,7 +345,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       }
 
       if (references.isEmpty())
-         return null;      
+         return null;
       return references.toArray(new ServiceReference[references.size()]);
    }
 
@@ -510,13 +479,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       stop(0);
    }
 
-   public void update() throws BundleException
-   {
-      checkAdminPermission(AdminPermission.LIFECYCLE); // [TODO] extension bundles
-      // [TODO] update
-      throw new UnsupportedOperationException("update");
-   }
-
    void uninstallInternal()
    {
       changeState(Bundle.UNINSTALLED);
@@ -621,8 +583,19 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     */
    public void changeState(int state)
    {
+      changeState(state, true);
+   }
+
+   /**
+    * Change the state of the bundle
+    * 
+    * @param state the new state
+    * @param fireEvent if true the state change fires an event
+    */
+   public void changeState(int state, boolean fireEvent)
+   {
       int previous = getState();
-      
+
       // Get the corresponding bundle event type
       int bundleEventType;
       switch (state)
@@ -658,7 +631,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
          default:
             throw new IllegalArgumentException("Unknown bundle state: " + state);
       }
-      
+
       // Invoke the bundle lifecycle interceptors
       if (getBundleManager().isFrameworkActive() && getBundleId() != 0)
       {
@@ -666,12 +639,12 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
          if (plugin != null)
             plugin.handleStateChange(state, getBundleInternal());
       }
-      
+
       this.state.set(state);
       log.debug(this + " change state=" + ConstantsHelper.bundleState(state));
 
       // Fire the bundle event
-      if (getBundleManager().isFrameworkActive())
+      if (fireEvent == true && getBundleManager().isFrameworkActive())
       {
          FrameworkEventsPlugin plugin = getBundleManager().getPlugin(FrameworkEventsPlugin.class);
          plugin.fireBundleEvent(this, bundleEventType);
@@ -735,13 +708,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    {
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
-      
+
       if (bundle instanceof OSGiBundleWrapper)
          bundle = ((OSGiBundleWrapper)bundle).getBundleState();
-   
+
       if (bundle instanceof AbstractBundleState == false)
          throw new IllegalArgumentException("Not an AbstractBundleState: " + bundle);
-   
+
       return (AbstractBundleState)bundle;
    }
 }

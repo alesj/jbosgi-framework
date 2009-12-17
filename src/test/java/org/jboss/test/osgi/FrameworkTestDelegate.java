@@ -217,15 +217,15 @@ public class FrameworkTestDelegate extends MicrocontainerTestDelegate
       return deploymentUnit;
    }
 
-   public Bundle assembleBundle(String name, String resources, Class<?>... packages) throws Exception
+   public VirtualFile assembleBundle(String name, String resources, Class<?>... packages) throws Exception
    {
       return assembleBundle(name, new String[] { resources }, packages);
    }
 
-   public Bundle assembleBundle(String name, String[] resourcePaths, Class<?>... packages) throws Exception
+   public VirtualFile assembleBundle(String name, String[] resourcePaths, Class<?>... packages) throws Exception
    {
       AssembledDirectory assembledDirectory = createAssembledDirectory(name, "", resourcePaths, packages);
-      return addBundle(assembledDirectory);
+      return assembledDirectory;
    }
 
    public Bundle deployBundle(String name, OSGiMetaData metaData, String resourcePath, Class<?>... packages) throws Exception
