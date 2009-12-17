@@ -76,17 +76,17 @@ public class DeployerServiceImpl extends AbstractServicePlugin implements Deploy
       // do nothing
    }
 
-   public Deployment createDeployment(URL url)
+   public Deployment createDeployment(URL url) throws BundleException
    {
       return delegate.createDeployment(url);
    }
 
-   public Deployment createDeployment(VirtualFile file)
+   public Deployment createDeployment(VirtualFile file) throws BundleException
    {
       return delegate.createDeployment(file);
    }
 
-   public Deployment createDeployment(BundleInfo info)
+   public Deployment createDeployment(BundleInfo info) throws BundleException
    {
       return delegate.createDeployment(info);
    }
