@@ -22,7 +22,6 @@
 package org.jboss.osgi.framework.deployers;
 
 import java.util.jar.Manifest;
-import java.util.jar.Attributes.Name;
 
 import org.jboss.deployers.vfs.spi.deployer.ManifestDeployer;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
@@ -30,35 +29,38 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.jboss.osgi.spi.OSGiConstants;
 import org.jboss.virtual.VirtualFile;
-import org.osgi.framework.Constants;
 
 /**
  * OSGiManifestParsingDeployer.<p>
  * 
- * This deployer attaches OSGiMetaData to the deployment if it is a real OSGi bundle.
+ * This deployer attaches OSGiMetaData to the deployment.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
 public class OSGiManifestParsingDeployer extends ManifestDeployer<OSGiMetaData>
 {
-   /**
-    * Create a new OSGiManifestParsingDeployer.
-    */
    public OSGiManifestParsingDeployer()
    {
       super(OSGiMetaData.class);
       setTopLevelOnly(true);
    }
-   
+
    @Override
    protected OSGiMetaData createMetaData(Manifest manifest) throws Exception
    {
-      // To be a true OSGi bundle it must have a bundle symbolic name in the manfiest
-      if (manifest.getMainAttributes().get(new Name(Constants.BUNDLE_SYMBOLICNAME)) == null)
-         return null;
-
-      return new AbstractOSGiMetaData(manifest);
+      AbstractOSGiMetaData metaData = new AbstractOSGiMetaData(manifest);
+      
+      // At least one of these manifest headers must be there
+      // Note, in R3 and R4 there is no common mandatory header
+      String bundleName = metaData.getBundleName();
+      String bundleVersion = metaData.getBundleVersion();
+      String bundleSymbolicName = metaData.getBundleSymbolicName();
+      if (bundleName == null && bundleVersion == null && bundleSymbolicName == null)
+         metaData = null;
+      
+      return metaData;
    }
 
    @Override
@@ -67,9 +69,11 @@ public class OSGiManifestParsingDeployer extends ManifestDeployer<OSGiMetaData>
       super.init(unit, metaData, file);
 
       String symbolicName = metaData.getBundleSymbolicName();
-      log.debug("Bundle-SymbolicName: " + symbolicName + " in " + file);
-
-      // Add a marker that this is an OSGi deployment
-      unit.addAttachment(OSGiConstants.KEY_BUNDLE_SYMBOLIC_NAME, symbolicName);
+      if (symbolicName != null)
+      {
+         // Add a marker that this is an R4 OSGi deployment
+         log.debug("Bundle-SymbolicName: " + symbolicName);
+         unit.addAttachment(OSGiConstants.KEY_BUNDLE_SYMBOLIC_NAME, symbolicName);
+      }
    }
 }

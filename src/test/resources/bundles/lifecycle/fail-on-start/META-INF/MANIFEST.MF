@@ -1,3 +1,4 @@
+Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: lifecycle-failstart
 Import-Package: org.jboss.test.osgi.bundle.support.b

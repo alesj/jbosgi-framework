@@ -1,7 +1,4 @@
 Manifest-Version: 1.0
-Implementation-Title: JBoss OSGi tests
-Implementation-Version: test
-Implementation-Vendor: jboss.org
-Bundle-Name: Service4
+Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.jboss.test.osgi.service4
 Import-Package: org.jboss.test.osgi.service.support.a,org.jboss.test.osgi.service.support.c,org.jboss.test.osgi.service.support.d,org.osgi.framework

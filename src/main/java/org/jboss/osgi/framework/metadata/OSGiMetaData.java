@@ -26,7 +26,6 @@ import java.util.Dictionary;
 import java.util.List;
 
 import org.jboss.deployers.vfs.spi.deployer.ManifestMetaData;
-import org.osgi.framework.Version;
 
 /**
  * OSGi specific manifest meta data.
@@ -143,10 +142,12 @@ public interface OSGiMetaData extends ManifestMetaData
 
    /**
     * Get bundle's version.
-    *
+    * 
+    * Note, R3 does not define a specific syntax for Bundle-Version.
+    * 
     * @return version of this bundle
     */
-   Version getBundleVersion();
+   String getBundleVersion();
 
    /**
     * Get dynamic imports.

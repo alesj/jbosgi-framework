@@ -30,7 +30,6 @@ import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.QNAME_
 import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.STRING_LIST_VC;
 import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.STRING_VC;
 import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.URL_VC;
-import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.VERSION_VC;
 import static org.osgi.framework.Constants.BUNDLE_ACTIVATOR;
 import static org.osgi.framework.Constants.BUNDLE_CATEGORY;
 import static org.osgi.framework.Constants.BUNDLE_CLASSPATH;
@@ -190,9 +189,9 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
       return get(BUNDLE_UPDATELOCATION, URL_VC);
    }
 
-   public Version getBundleVersion()
+   public String getBundleVersion()
    {
-      return get(BUNDLE_VERSION, VERSION_VC , Version.emptyVersion);
+      return get(BUNDLE_VERSION, STRING_VC , "0.0.0");
    }
 
    public List<PackageAttribute> getDynamicImports()

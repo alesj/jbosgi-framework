@@ -90,14 +90,14 @@ public class OSGiBundleClassLoadingDeployer extends AbstractSimpleRealDeployer<O
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       
       ClassLoadingMetaData classLoadingMetaData = new ClassLoadingMetaData();
-      classLoadingMetaData.setName(osgiMetaData.getBundleSymbolicName());
-      classLoadingMetaData.setVersion(osgiMetaData.getBundleVersion());
+      classLoadingMetaData.setName(bundleState.getSymbolicName());
+      classLoadingMetaData.setVersion(bundleState.getVersion());
       classLoadingMetaData.setDomain(domain != null ? domain.getName() : null);
 
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
       
-      OSGiBundleCapability capability = OSGiBundleCapability.create(osgiMetaData);
+      OSGiBundleCapability capability = OSGiBundleCapability.create(bundleState);
       capabilities.addCapability(capability);
       
       List<ParameterizedAttribute> requireBundles = osgiMetaData.getRequireBundles();

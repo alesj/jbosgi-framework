@@ -41,7 +41,6 @@ import org.jboss.osgi.framework.metadata.internal.AbstractPackageAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.OSGiParameters;
-import org.osgi.framework.Version;
 
 /**
  * Test OSGi header values.
@@ -79,20 +78,16 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       Manifest manifest = getManifest(createName("Simple"));
       OSGiMetaData metaData = new AbstractOSGiMetaData(manifest);
 
-      assertEquals(metaData.getBundleActivator(), "org.jboss.test.osgi.bundle.metadata.BundleActivator");
-      List<String> classpath = Arrays.asList("test.jar", "mc.jar", "seam.jar");
-      assertEquals(metaData.getBundleClassPath(), classpath);
-      assertEquals(metaData.getBundleDescription(), "TestHeadersManifest");
-      assertEquals(metaData.getBundleLocalization(), "OSGI-INF/l10n/bundle");
-      assertEquals(metaData.getBundleManifestVersion(), 2);
-      assertEquals(metaData.getBundleName(), "TestBundle");
-      assertEquals(metaData.getBundleSymbolicName(), "UniqueName");
-      URL url = new URL("file://test.jar");
-      assertEquals(metaData.getBundleUpdateLocation(), url);
-      Version version = new Version("1.2.3.GA");
-      assertEquals(metaData.getBundleVersion(), version);
-      List<String> env = Arrays.asList("ena", "dva", "tri");
-      assertEquals(metaData.getRequiredExecutionEnvironment(), env);
+      assertEquals("org.jboss.test.osgi.bundle.metadata.BundleActivator", metaData.getBundleActivator());
+      assertEquals(Arrays.asList("test.jar", "mc.jar", "seam.jar"), metaData.getBundleClassPath());
+      assertEquals("TestHeadersManifest", metaData.getBundleDescription());
+      assertEquals("OSGI-INF/l10n/bundle", metaData.getBundleLocalization());
+      assertEquals(2, metaData.getBundleManifestVersion());
+      assertEquals("TestBundle", metaData.getBundleName());
+      assertEquals("UniqueName", metaData.getBundleSymbolicName());
+      assertEquals(new URL("file://test.jar"), metaData.getBundleUpdateLocation());
+      assertEquals("1.2.3.GA", metaData.getBundleVersion());
+      assertEquals(Arrays.asList("ena", "dva", "tri"), metaData.getRequiredExecutionEnvironment());
    }
 
    public void testJavaccManifest() throws Exception

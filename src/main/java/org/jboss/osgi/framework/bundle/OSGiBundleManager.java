@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
@@ -53,6 +55,9 @@ import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.dependency.spi.tracker.ContextTracker;
 import org.jboss.deployers.client.spi.DeployerClient;
+import org.jboss.deployers.client.spi.IncompleteDeploymentException;
+import org.jboss.deployers.client.spi.IncompleteDeployments;
+import org.jboss.deployers.client.spi.MissingDependency;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.deployers.spi.deployer.DeploymentStage;
@@ -720,17 +725,76 @@ public class OSGiBundleManager
             throw e;
          }
       }
+      catch (IncompleteDeploymentException ex)
+      {
+         String errorMessage = getIncompleteDeploymentInfo(dep, ex);
+         throw new BundleException(errorMessage);
+      }
       catch (Exception ex)
       {
-         Throwable cause = ex;
-         if (ex instanceof DeploymentException)
-         {
-            cause = ex.getCause();
-            if (cause instanceof BundleException)
-               throw (BundleException)cause;
-         }
-         throw new BundleException("Error installing bundle from: " + dep, (cause != null ? cause : ex));
+         throw new BundleException("Error installing bundle from: " + dep, ex);
       }
+   }
+
+   private String getIncompleteDeploymentInfo(Deployment dep, IncompleteDeploymentException ex)
+   {
+      IncompleteDeployments deployments = ex.getIncompleteDeployments();
+      
+      StringWriter stringWriter = new StringWriter();
+      PrintWriter printWriter = new PrintWriter(stringWriter);
+      printWriter.println("Error installing bundle from: " + dep);
+      
+      // Contexts in error 
+      Collection<Throwable> contextsError = deployments.getContextsInError().values();
+      if (contextsError.size() > 0)
+      {
+         printWriter.println("\nContext Errors:");
+         for (Throwable th : contextsError)
+         {
+            printWriter.println("\n");
+            th.printStackTrace(printWriter);
+         }
+      }
+
+      // Deployments in error 
+      Collection<Throwable> deploymentsInError = deployments.getDeploymentsInError().values();
+      if (deploymentsInError.size() > 0)
+      {
+         printWriter.println("\nDeployment Errors:");
+         for (Throwable th : deploymentsInError)
+         {
+            printWriter.println("\n");
+            th.printStackTrace(printWriter);
+         }
+      }
+
+      // Missing Dependencies 
+      Collection<Set<MissingDependency>> missingDependencies = deployments.getContextsMissingDependencies().values();
+      if (missingDependencies.size() > 0)
+      {
+         printWriter.println("\nMissing Dependencies:");
+         for (Set<MissingDependency> missDeps : missingDependencies)
+         {
+            for (MissingDependency missDep : missDeps)
+            {
+               printWriter.println("\n  " + missDep);
+            }
+         }
+      }
+
+      // Missing Deployers 
+      Collection<String> missingDeployers = deployments.getDeploymentsMissingDeployer();
+      if (missingDeployers.size() > 0)
+      {
+         printWriter.println("\nMissing Deployers:");
+         for (String missDep : missingDeployers)
+         {
+            printWriter.println("\n  " + missDep);
+         }
+      }
+
+      String errorMessage = stringWriter.toString();
+      return errorMessage;
    }
 
    /**
@@ -974,14 +1038,11 @@ public class OSGiBundleManager
       if (metaData == null)
          return;
 
-      String symbolicName = metaData.getBundleSymbolicName();
-      if (symbolicName == null)
-         throw new IllegalStateException("No bundle symbolic name " + bundleState);
-
       int manifestVersion = metaData.getBundleManifestVersion();
       if (manifestVersion > 2)
          throw new IllegalStateException("Unsupported manifest version " + manifestVersion + " for " + bundleState);
 
+      String symbolicName = bundleState.getSymbolicName();
       for (AbstractBundleState bundle : getBundles())
       {
          OSGiMetaData other = bundle.getOSGiMetaData();

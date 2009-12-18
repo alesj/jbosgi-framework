@@ -26,6 +26,7 @@ import java.util.Map;
 import org.jboss.classloading.plugins.metadata.ModuleCapability;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.Requirement;
+import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
@@ -45,25 +46,25 @@ public class OSGiBundleCapability extends ModuleCapability
    /** The serialVersionUID */
    private static final long serialVersionUID = 2366716668262831380L;
 
-   /** The metadata */
-   private OSGiMetaData metadata;
+   /** The bundle state */
+   private OSGiBundleState bundleState;
 
    /**
     * Create a new OSGiBundleCapability
     * 
-    * @param metadata the osgi metadata
+    * @param bundleState the bundleState
     * @return the capability
     * @throws IllegalArgumentException for a null metadata
     */
-   public static OSGiBundleCapability create(OSGiMetaData metadata)
+   public static OSGiBundleCapability create(OSGiBundleState bundleState)
    {
-      if (metadata == null)
-         throw new IllegalArgumentException("Null metadata");
+      if (bundleState == null)
+         throw new IllegalArgumentException("Null bundleState");
 
-      String name = metadata.getBundleSymbolicName();
-      Version version = metadata.getBundleVersion();
+      String symbolicName = bundleState.getSymbolicName();
+      Version version = bundleState.getVersion();
 
-      return new OSGiBundleCapability(name, version, metadata);
+      return new OSGiBundleCapability(symbolicName, version, bundleState);
    }
    
    /**
@@ -74,12 +75,12 @@ public class OSGiBundleCapability extends ModuleCapability
     * @param metadata the metadata
     * @throws IllegalArgumentException for a null name or requireBundle
     */
-   public OSGiBundleCapability(String name, Version version, OSGiMetaData metadata)
+   public OSGiBundleCapability(String name, Version version, OSGiBundleState bundleState)
    {
       super(name, version);
-      if (metadata == null)
-         throw new IllegalArgumentException("Null metadata");
-      this.metadata = metadata;
+      if (bundleState == null)
+         throw new IllegalArgumentException("Null bundleState");
+      this.bundleState = bundleState;
    }
    
    /**
@@ -89,7 +90,7 @@ public class OSGiBundleCapability extends ModuleCapability
     */
    public OSGiMetaData getMetaData()
    {
-      return metadata;
+      return bundleState.getOSGiMetaData();
    }
 
    @Override
@@ -146,7 +147,7 @@ public class OSGiBundleCapability extends ModuleCapability
    protected void toString(StringBuffer buffer)
    {
       super.toString(buffer);
-      ParameterizedAttribute parameters = metadata.getBundleParameters();
+      ParameterizedAttribute parameters = getMetaData().getBundleParameters();
       if (parameters != null)
       {
          Map<String, Parameter> params = parameters.getAttributes();

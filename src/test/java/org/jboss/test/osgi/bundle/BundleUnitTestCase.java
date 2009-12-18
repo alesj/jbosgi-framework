@@ -242,6 +242,7 @@ public class BundleUnitTestCase extends FrameworkTest
          Dictionary expected = new Hashtable();
          expected.put(Constants.BUNDLE_NAME, "Simple1");
          expected.put(Constants.BUNDLE_SYMBOLICNAME, "org.jboss.test.osgi.simple1");
+         expected.put(Constants.BUNDLE_MANIFESTVERSION, "2");
          expected.put(Attributes.Name.MANIFEST_VERSION.toString(), "1.0");
          expected.put(Attributes.Name.IMPLEMENTATION_TITLE.toString(), "JBoss OSGi tests");
          expected.put(Attributes.Name.IMPLEMENTATION_VENDOR.toString(), "jboss.org");

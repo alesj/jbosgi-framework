@@ -50,7 +50,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
@@ -103,14 +102,22 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    {
       String symbolicName = getOSGiMetaData().getBundleSymbolicName();
       if (symbolicName == null)
-         throw new IllegalStateException("Cannot obtain " + Constants.BUNDLE_SYMBOLICNAME);
+         symbolicName = "anonymous-bundle" + getBundleId();
+      
       return symbolicName;
    }
 
    public Version getVersion()
    {
-      Version version = getOSGiMetaData().getBundleVersion();
-      return version;
+      String versionstr = getOSGiMetaData().getBundleVersion();
+      try
+      {
+         return Version.parseVersion(versionstr);
+      }
+      catch (NumberFormatException ex)
+      {
+         return Version.emptyVersion;
+      }
    }
 
    public int getState()
