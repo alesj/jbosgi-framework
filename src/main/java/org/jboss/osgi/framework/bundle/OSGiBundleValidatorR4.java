@@ -30,7 +30,7 @@ import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.osgi.framework.Constants;
 
 /**
- * OSGiBundleManager.
+ * A bundle validator for OSGi R4.
  * 
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
@@ -44,12 +44,6 @@ public class OSGiBundleValidatorR4 implements OSGiBundleValidator
       this.bundleManager = bundleManager;
    }
 
-
-   /**
-    * Validate the bundle
-    * 
-    * @param bundleState the bundle state
-    */
    @SuppressWarnings("deprecation")
    public void validateBundle(AbstractBundleState bundleState)
    {
