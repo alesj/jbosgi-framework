@@ -96,6 +96,24 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    private AtomicInteger state = new AtomicInteger(Bundle.UNINSTALLED);
 
    /**
+    * Assert that the given bundle is an instance of AbstractBundleState
+    * @throws IllegalArgumentException if the given bundle is not an instance of AbstractBundleState
+    */
+   public static AbstractBundleState assertBundleState(Bundle bundle)
+   {
+      if (bundle == null)
+         throw new IllegalArgumentException("Null bundle");
+
+      if (bundle instanceof OSGiBundleWrapper)
+         bundle = ((OSGiBundleWrapper)bundle).getBundleState();
+
+      if (bundle instanceof AbstractBundleState == false)
+         throw new IllegalArgumentException("Not an AbstractBundleState: " + bundle);
+
+      return (AbstractBundleState)bundle;
+   }
+
+   /**
     * Get the bundleManager.
     * 
     * @return the bundleManager.
@@ -220,8 +238,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return getHeaders(null);
    }
 
-   @SuppressWarnings("rawtypes")
-   public Dictionary getHeaders(String locale)
+   @SuppressWarnings("unchecked")
+   public Dictionary<String, String> getHeaders(String locale)
    {
       checkAdminPermission(AdminPermission.METADATA);
 
@@ -243,33 +261,14 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       if (baseName == null)
          baseName = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
 
-      // The Framework searches for localization entries by appending suffixes to
-      // the localization base name according to a specified locale and finally
-      // appending the .properties suffix. If a translation is not found, the locale
-      // must be made more generic by first removing the variant, then the country
-      // and finally the language until an entry is found that contains a valid 
-      // translation.
-      String entryPath = baseName + "_" + locale + ".properties";
-      URL entryURL = getEntryInternal(entryPath);
-      while (entryURL == null)
+      // Get the resource bundle URL for the given base and locale
+      URL entryURL = getLocalizationEntryPath(baseName, locale);
+      
+      // If the specified locale entry could not be found fall back to the default locale entry
+      if (entryURL == null)
       {
-         if (entryPath.equals(baseName + ".properties"))
-            break;
-         
-         int lastIndex = locale.lastIndexOf('_');
-         if (lastIndex > 0)
-         {
-            locale = locale.substring(0, lastIndex);
-            entryPath = baseName + "_" + locale + ".properties";
-         }
-         else
-         {
-            entryPath = baseName + ".properties";
-         }
-         
-         // The bundle's class loader is not used to search for localization entries. Only
-         // the contents of the bundle and its attached fragments are searched.
-         entryURL = getEntryInternal(entryPath);
+         String defaultLocale = Locale.getDefault().toString();
+         entryURL = getLocalizationEntryPath(baseName, defaultLocale);
       }
 
       // Read the resource bundle
@@ -311,6 +310,39 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       }
 
       return new CaseInsensitiveDictionary(locHeaders);
+   }
+
+   private URL getLocalizationEntryPath(String baseName, String locale)
+   {
+      // The Framework searches for localization entries by appending suffixes to
+      // the localization base name according to a specified locale and finally
+      // appending the .properties suffix. If a translation is not found, the locale
+      // must be made more generic by first removing the variant, then the country
+      // and finally the language until an entry is found that contains a valid translation.
+      
+      String entryPath = baseName + "_" + locale + ".properties";
+      URL entryURL = getEntryInternal(entryPath);
+      while (entryURL == null)
+      {
+         if (entryPath.equals(baseName + ".properties"))
+            break;
+         
+         int lastIndex = locale.lastIndexOf('_');
+         if (lastIndex > 0)
+         {
+            locale = locale.substring(0, lastIndex);
+            entryPath = baseName + "_" + locale + ".properties";
+         }
+         else
+         {
+            entryPath = baseName + ".properties";
+         }
+         
+         // The bundle's class loader is not used to search for localization entries. Only
+         // the contents of the bundle and its attached fragments are searched.
+         entryURL = getEntryInternal(entryPath);
+      }
+      return entryURL;
    }
 
    // Get the entry without checking permissions and bundle state. 
@@ -636,11 +668,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return bundleState.getBundleInternal();
    }
 
-   @Override
-   public String toString()
-   {
-      return "Bundle{" + getCanonicalName() + "}";
-   }
+   public abstract void uninstall() throws BundleException;
 
    /**
     * Get the canonical name of the bundle
@@ -812,17 +840,9 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       }
    }
 
-   public static AbstractBundleState assertBundleState(Bundle bundle)
+   @Override
+   public String toString()
    {
-      if (bundle == null)
-         throw new IllegalArgumentException("Null bundle");
-
-      if (bundle instanceof OSGiBundleWrapper)
-         bundle = ((OSGiBundleWrapper)bundle).getBundleState();
-
-      if (bundle instanceof AbstractBundleState == false)
-         throw new IllegalArgumentException("Not an AbstractBundleState: " + bundle);
-
-      return (AbstractBundleState)bundle;
+      return "Bundle{" + getCanonicalName() + "}";
    }
 }

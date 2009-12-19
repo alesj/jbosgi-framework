@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
@@ -64,7 +65,10 @@ public class OSGiBundleState extends AbstractBundleState
 
    /** The list of deployment units */
    private List<DeploymentUnit> units = new ArrayList<DeploymentUnit>();
-
+   
+   /** The headers localized with the default locale */
+   Dictionary<String, String> headersOnUninstall;
+   
    /**
     * Create a new BundleState.
     * 
@@ -86,6 +90,19 @@ public class OSGiBundleState extends AbstractBundleState
       addDeploymentUnit(unit);
    }
 
+   /**
+    * Assert that the given bundle is an instance of OSGiBundleState
+    * @throws IllegalArgumentException if the given bundle is not an instance of OSGiBundleState
+    */
+   public static OSGiBundleState assertBundleState(Bundle bundle)
+   {
+      bundle = AbstractBundleState.assertBundleState(bundle);
+      if (bundle instanceof OSGiBundleState == false)
+         throw new IllegalArgumentException("Not an OSGiBundleState: " + bundle);
+
+      return (OSGiBundleState)bundle;
+   }
+   
    @Override
    public OSGiMetaData getMetaData()
    {
@@ -479,9 +496,24 @@ public class OSGiBundleState extends AbstractBundleState
       }
    }
 
+   @Override
+   public Dictionary<String, String> getHeaders(String locale)
+   {
+      // This method must continue to return Manifest header information while this bundle is in the UNINSTALLED state, 
+      // however the header values must only be available in the raw and default locale values
+      if (getState() == Bundle.UNINSTALLED)
+         return headersOnUninstall;
+      
+      return super.getHeaders(locale);
+   }
+
    public void uninstall() throws BundleException
    {
       checkAdminPermission(AdminPermission.LIFECYCLE); // [TODO] extension bundles
+      
+      // Cache the headers in the default locale 
+      headersOnUninstall = getHeaders(null);
+      
       getBundleManager().uninstallBundle(this);
    }
 
@@ -495,19 +527,5 @@ public class OSGiBundleState extends AbstractBundleState
    protected void beforeServiceUnregistration(OSGiServiceState service)
    {
       getBundleManager().removeContext(service, getDeploymentUnit());
-   }
-
-   public static OSGiBundleState assertBundleState(Bundle bundle)
-   {
-      if (bundle == null)
-         throw new IllegalArgumentException("Null bundle");
-
-      if (bundle instanceof OSGiBundleWrapper)
-         bundle = ((OSGiBundleWrapper)bundle).getBundleState();
-
-      if (bundle instanceof OSGiBundleState == false)
-         throw new IllegalArgumentException("Not an OSGiBundleState: " + bundle);
-
-      return (OSGiBundleState)bundle;
    }
 }

@@ -33,7 +33,6 @@ import java.util.jar.Attributes.Name;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
-import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.util.collection.ConcurrentSet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -167,8 +166,7 @@ public class OSGiSystemState extends AbstractBundleState
 
    public void start(int options) throws BundleException
    {
-      // [JBOSGI-138] Proper system BundleContext implementation
-      throw new NotImplementedException();
+      // do nothing
    }
 
    public void stop(int options) throws BundleException
