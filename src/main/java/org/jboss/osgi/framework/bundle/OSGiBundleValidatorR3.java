@@ -37,8 +37,8 @@ public class OSGiBundleValidatorR3 implements OSGiBundleValidator
 
    public void validateBundle(AbstractBundleState bundleState)
    {
-      OSGiMetaData metaData = bundleState.getMetaData();
-      int manifestVersion = metaData.getBundleManifestVersion();
+      OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
+      int manifestVersion = osgiMetaData.getBundleManifestVersion();
       if (manifestVersion != 1)
          throw new IllegalStateException("Unsupported manifest version " + manifestVersion + " for " + bundleState);
    }

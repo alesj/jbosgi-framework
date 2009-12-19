@@ -24,8 +24,10 @@ package org.jboss.osgi.framework.classloading;
 import org.jboss.classloader.plugins.filter.PatternClassFilter;
 import org.jboss.classloader.plugins.jdk.AbstractJDKChecker;
 import org.jboss.classloader.spi.ClassLoaderDomain;
+import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.classloader.spi.ParentPolicy;
+import org.jboss.classloader.spi.base.BaseClassLoader;
 import org.jboss.classloader.spi.filter.ClassFilterUtils;
 import org.jboss.classloader.spi.filter.RecursivePackageClassFilter;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
@@ -59,5 +61,11 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
    protected ClassLoaderDomain createDomain(String name)
    {
       return new ClassLoaderDomain(name);
+   }
+
+   @Override
+   protected BaseClassLoader createClassLoader(ClassLoaderPolicy policy)
+   {
+      return new OSGiBundleClassLoader(policy);
    }
 }

@@ -90,7 +90,7 @@ public class OSGiBundleCapability extends ModuleCapability
     */
    public OSGiMetaData getMetaData()
    {
-      return bundleState.getMetaData();
+      return bundleState.getOSGiMetaData();
    }
 
    @Override
@@ -104,8 +104,8 @@ public class OSGiBundleCapability extends ModuleCapability
       // Review its not clear to me from the spec whether attribute matching 
       // beyond the version should work for require-bundle?
       OSGiBundleRequirement bundleRequirement = (OSGiBundleRequirement) requirement;
-      OSGiMetaData metaData = getMetaData();
-      ParameterizedAttribute ourParameters = metaData.getBundleParameters();
+      OSGiMetaData osgiMetaData = getMetaData();
+      ParameterizedAttribute ourParameters = osgiMetaData.getBundleParameters();
       ParameterizedAttribute otherParameters = bundleRequirement.getRequireBundle();
       if (otherParameters != null)
       {

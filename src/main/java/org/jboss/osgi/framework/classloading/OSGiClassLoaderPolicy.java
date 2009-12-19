@@ -23,24 +23,36 @@ package org.jboss.osgi.framework.classloading;
 
 // $Id$
 
+import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.deployers.OSGiBundleNativeCodeDeployer;
 import org.jboss.virtual.VirtualFile;
 
 /**
- * OSGiClassLoaderPolicy
+ * The ClassLoaderPolicy for OSGi bundles.
+ * 
+ * This implementation supports the notion of OSGi Native Code Libraries.
+ * The library map is initialized in {@link OSGiBundleNativeCodeDeployer}.
  * 
  * @author Thomas.Diesler@jboss.com
  * @since 11-Sep-2209
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
+   private Map<String, URL> libraryMap = new HashMap<String, URL>();
+   
    public OSGiClassLoaderPolicy(OSGiBundleState bundleState, VirtualFile[] roots)
    {
       super(roots);
+      
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
 
@@ -60,5 +72,26 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
       setCacheable(vfsModule.isCacheable());
       setBlackListable(vfsModule.isBlackListable());
       setDelegates(vfsModule.getDelegates());
+   }
+
+   public Map<String, URL> getLibraryMapppings()
+   {
+      return Collections.unmodifiableMap(libraryMap);
+   }
+
+   public void addLibraryMapping(String libname, URL liburl)
+   {
+      libraryMap.put(libname, liburl);
+   }
+
+   public String findLibrary(String libname)
+   {
+      URL liburl = libraryMap.get(libname);
+      
+      // [TODO] why does the TCK use 'Native' to mean 'libNative' ? 
+      if (liburl == null)
+         liburl = libraryMap.get("lib" + libname);
+         
+      return (liburl != null ? liburl.toExternalForm() : null);
    }
 }

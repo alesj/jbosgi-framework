@@ -65,7 +65,7 @@ public class OSGiSystemState extends AbstractBundleState
    }
 
    @Override
-   public OSGiMetaData getMetaData()
+   public OSGiMetaData getOSGiMetaData()
    {
       return osgiMetaData;
    }

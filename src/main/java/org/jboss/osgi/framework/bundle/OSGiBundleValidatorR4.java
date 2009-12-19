@@ -47,7 +47,7 @@ public class OSGiBundleValidatorR4 implements OSGiBundleValidator
    @SuppressWarnings("deprecation")
    public void validateBundle(AbstractBundleState bundleState)
    {
-      OSGiMetaData metaData = bundleState.getMetaData();
+      OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       
       // Missing Bundle-SymbolicName
       String symbolicName = bundleState.getSymbolicName();
@@ -55,14 +55,14 @@ public class OSGiBundleValidatorR4 implements OSGiBundleValidator
          throw new IllegalStateException("Missing Bundle-SymbolicName in: " + bundleState);
       
       // Bundle-ManifestVersion value not equal to 2, unless the Framework specifically recognizes the semantics of a later release.
-      int manifestVersion = metaData.getBundleManifestVersion();
+      int manifestVersion = osgiMetaData.getBundleManifestVersion();
       if (manifestVersion > 2)
          throw new IllegalStateException("Unsupported manifest version " + manifestVersion + " for " + bundleState);
 
       // [TODO] Duplicate attribute or duplicate directive (except in the Bundle-Native code clause).
       
       // Multiple imports of a given package.
-      List<PackageAttribute> importPackages = metaData.getImportPackages();
+      List<PackageAttribute> importPackages = osgiMetaData.getImportPackages();
       if (importPackages != null && importPackages.isEmpty() == false)
       {
          Set<String> packages = new HashSet<String>();
@@ -84,7 +84,7 @@ public class OSGiBundleValidatorR4 implements OSGiBundleValidator
       }
       
       // Export or import of java.*.
-      List<PackageAttribute> exportPackages = metaData.getExportPackages();
+      List<PackageAttribute> exportPackages = osgiMetaData.getExportPackages();
       if (exportPackages != null && exportPackages.isEmpty() == false)
       {
          for (PackageAttribute packageAttribute : exportPackages)
@@ -100,12 +100,12 @@ public class OSGiBundleValidatorR4 implements OSGiBundleValidator
       // Installing a bundle that has the same symbolic name and version as an already installed bundle.
       for (AbstractBundleState bundle : bundleManager.getBundles())
       {
-         OSGiMetaData other = bundle.getMetaData();
+         OSGiMetaData other = bundle.getOSGiMetaData();
          if (symbolicName.equals(other.getBundleSymbolicName()))
          {
-            if (other.isSingleton() && metaData.isSingleton())
+            if (other.isSingleton() && osgiMetaData.isSingleton())
                throw new IllegalStateException("Cannot install singleton " + bundleState + " another singleton is already installed: " + bundle.getLocation());
-            if (other.getBundleVersion().equals(metaData.getBundleVersion()))
+            if (other.getBundleVersion().equals(osgiMetaData.getBundleVersion()))
                throw new IllegalStateException("Cannot install " + bundleState + " a bundle with that name and version is already installed: "
                      + bundle.getLocation());
          }

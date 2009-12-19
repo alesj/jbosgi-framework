@@ -37,16 +37,16 @@ import org.osgi.framework.Bundle;
  */
 public class ResolverBundleImpl extends AbstractResolverBundle
 {
-   private OSGiMetaData metaData;
+   private OSGiMetaData osgiMetaData;
 
    public ResolverBundleImpl(Bundle bundle)
    {
       super(bundle);
       
-      this.metaData = OSGiBundleState.assertBundleState(bundle).getMetaData();
+      this.osgiMetaData = OSGiBundleState.assertBundleState(bundle).getOSGiMetaData();
 
       // Initialize exported packages
-      List<PackageAttribute> exportPackages = metaData.getExportPackages();
+      List<PackageAttribute> exportPackages = osgiMetaData.getExportPackages();
       if (exportPackages != null)
       {
          for (PackageAttribute attr : exportPackages)
@@ -57,7 +57,7 @@ public class ResolverBundleImpl extends AbstractResolverBundle
       }
 
       // Initialize imported packages
-      List<PackageAttribute> importPackages = metaData.getImportPackages();
+      List<PackageAttribute> importPackages = osgiMetaData.getImportPackages();
       if (importPackages != null)
       {
          for (PackageAttribute attr : importPackages)
@@ -68,7 +68,7 @@ public class ResolverBundleImpl extends AbstractResolverBundle
       }
 
       // Initialize required bundles
-      List<ParameterizedAttribute> requireBundles = metaData.getRequireBundles();
+      List<ParameterizedAttribute> requireBundles = osgiMetaData.getRequireBundles();
       if (requireBundles != null)
       {
          for (ParameterizedAttribute attr : requireBundles)
@@ -82,6 +82,6 @@ public class ResolverBundleImpl extends AbstractResolverBundle
 
    public boolean isSingleton()
    {
-      return metaData.isSingleton();
+      return osgiMetaData.isSingleton();
    }
 }

@@ -71,7 +71,9 @@ public class OSGiClassLoaderFactory implements ClassLoaderFactory
             VFSDeploymentUnit vfsUnit = (VFSDeploymentUnit)unit;
             OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
             VirtualFile[] roots = getClassLoaderPolicyRoots(bundleState, vfsUnit);
-            return new OSGiClassLoaderPolicy(bundleState, roots);
+            ClassLoaderPolicy policy = new OSGiClassLoaderPolicy(bundleState, roots);
+            unit.addAttachment(ClassLoaderPolicy.class, policy);
+            return policy;
          }
 
          private VirtualFile[] getClassLoaderPolicyRoots(OSGiBundleState bundleState, VFSDeploymentUnit vfsUnit)

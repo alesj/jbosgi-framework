@@ -191,7 +191,7 @@ public class OSGiPackageCapability extends PackageCapability
       if (reqVersionRange.isInRange(capVersion) == false)
          return false;
 
-      OSGiMetaData metaData = bundleState.getMetaData();
+      OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       PackageAttribute capParameters = exportPackage;
       PackageAttribute reqParameters = packageRequirement.getPackageMetaData();
 
@@ -223,13 +223,13 @@ public class OSGiPackageCapability extends PackageCapability
 
                if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(name))
                {
-                  if (otherValue.equals(metaData.getBundleSymbolicName()) == false)
+                  if (otherValue.equals(osgiMetaData.getBundleSymbolicName()) == false)
                      validMatch = false;
                }
                else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(name))
                {
                   VersionRange range = (VersionRange)AbstractVersionRange.valueOf(otherValue);
-                  if (range.isInRange(metaData.getBundleVersion()) == false)
+                  if (range.isInRange(osgiMetaData.getBundleVersion()) == false)
                      validMatch = false;
                }
                else if (Constants.PACKAGE_SPECIFICATION_VERSION.equals(name) || Constants.VERSION_ATTRIBUTE.equals(name))

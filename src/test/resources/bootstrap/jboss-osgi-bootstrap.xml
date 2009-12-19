@@ -142,6 +142,7 @@
   <bean name="OSGiBundleStateRemoveDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleStateRemoveDeployer">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
+  <bean name="OSGiBundleNativeCodeDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleNativeCodeDeployer" />
   <bean name="OSGiBundleActivatorDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer" />
   <bean name="OSGiContextTrackerDeployer" class="org.jboss.osgi.framework.deployers.OSGiContextTrackerDeployer" />
 
@@ -162,7 +163,7 @@
   <bean name="OSGiClassLoaderFactory" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderFactory" >
     <property name="system"><inject bean="OSGiClassLoaderSystem"/></property>
   </bean>
-  <bean name="OSGiBundleClassLoadingDeployer" class="org.jboss.osgi.framework.classloading.OSGiBundleClassLoadingDeployer">
+  <bean name="OSGiBundleClassLoadingDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleClassLoadingDeployer">
     <property name="domain"><inject bean="OSGiClassLoaderDomain"/></property>
     <property name="factory"><inject bean="OSGiClassLoaderFactory"/></property>
   </bean>

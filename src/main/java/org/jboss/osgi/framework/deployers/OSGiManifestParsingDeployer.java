@@ -50,25 +50,25 @@ public class OSGiManifestParsingDeployer extends ManifestDeployer<OSGiMetaData>
    @Override
    protected OSGiMetaData createMetaData(Manifest manifest) throws Exception
    {
-      AbstractOSGiMetaData metaData = new AbstractOSGiMetaData(manifest);
+      AbstractOSGiMetaData osgiMetaData = new AbstractOSGiMetaData(manifest);
       
       // At least one of these manifest headers must be there
       // Note, in R3 and R4 there is no common mandatory header
-      String bundleName = metaData.getBundleName();
-      String bundleVersion = metaData.getBundleVersion();
-      String bundleSymbolicName = metaData.getBundleSymbolicName();
+      String bundleName = osgiMetaData.getBundleName();
+      String bundleVersion = osgiMetaData.getBundleVersion();
+      String bundleSymbolicName = osgiMetaData.getBundleSymbolicName();
       if (bundleName == null && bundleVersion == null && bundleSymbolicName == null)
-         metaData = null;
+         osgiMetaData = null;
       
-      return metaData;
+      return osgiMetaData;
    }
 
    @Override
-   protected void init(VFSDeploymentUnit unit, OSGiMetaData metaData, VirtualFile file) throws Exception
+   protected void init(VFSDeploymentUnit unit, OSGiMetaData osgiMetaData, VirtualFile file) throws Exception
    {
-      super.init(unit, metaData, file);
+      super.init(unit, osgiMetaData, file);
 
-      String symbolicName = metaData.getBundleSymbolicName();
+      String symbolicName = osgiMetaData.getBundleSymbolicName();
       if (symbolicName != null)
       {
          // Add a marker that this is an R4 OSGi deployment

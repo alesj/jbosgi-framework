@@ -117,11 +117,11 @@ public class OSGiBundleState extends AbstractBundleState
    }
 
    @Override
-   public OSGiMetaData getMetaData()
+   public OSGiMetaData getOSGiMetaData()
    {
       DeploymentUnit unit = getDeploymentUnit();
-      OSGiMetaData metadata = unit.getAttachment(OSGiMetaData.class);
-      return metadata;
+      OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
+      return osgiMetaData;
    }
 
    protected Set<ControllerContext> getRegisteredContexts()
@@ -351,12 +351,12 @@ public class OSGiBundleState extends AbstractBundleState
       // The BundleActivator.start(org.osgi.framework.BundleContext) method of this bundle's BundleActivator, if one is specified, is called. 
       try
       {
-         OSGiMetaData metaData = getMetaData();
-         if (metaData == null)
+         OSGiMetaData osgiMetaData = getOSGiMetaData();
+         if (osgiMetaData == null)
             throw new IllegalStateException("Cannot obtain OSGi meta data");
 
          // Do we have a bundle activator
-         String bundleActivatorClassName = metaData.getBundleActivator();
+         String bundleActivatorClassName = osgiMetaData.getBundleActivator();
          if (bundleActivatorClassName != null)
          {
             Object result = loadClass(bundleActivatorClassName).newInstance();

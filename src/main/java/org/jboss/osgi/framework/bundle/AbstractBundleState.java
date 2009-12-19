@@ -128,7 +128,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    public String getSymbolicName()
    {
-      String symbolicName = getMetaData().getBundleSymbolicName();
+      String symbolicName = getOSGiMetaData().getBundleSymbolicName();
       if (symbolicName == null)
          symbolicName = "anonymous-bundle" + getBundleId();
 
@@ -137,7 +137,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    public Version getVersion()
    {
-      String versionstr = getMetaData().getBundleVersion();
+      String versionstr = getOSGiMetaData().getBundleVersion();
       try
       {
          return Version.parseVersion(versionstr);
@@ -232,7 +232,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     * 
     * @return the osgiMetaData.
     */
-   public abstract OSGiMetaData getMetaData();
+   public abstract OSGiMetaData getOSGiMetaData();
 
    @SuppressWarnings("rawtypes")
    public Dictionary getHeaders()
@@ -248,7 +248,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       checkAdminPermission(AdminPermission.METADATA);
 
       // Get the raw (unlocalized) manifest headers
-      Dictionary<String, String> rawHeaders = getMetaData().getHeaders();
+      Dictionary<String, String> rawHeaders = getOSGiMetaData().getHeaders();
 
       // If the specified locale is the empty string, this method will return the 
       // raw (unlocalized) manifest headers including any leading "%"

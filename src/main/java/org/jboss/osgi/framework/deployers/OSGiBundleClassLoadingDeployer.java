@@ -19,7 +19,7 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.osgi.framework.classloading;
+package org.jboss.osgi.framework.deployers;
 
 // $Id: $
 
@@ -36,6 +36,10 @@ import org.jboss.deployers.structure.spi.ClassLoaderFactory;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
+import org.jboss.osgi.framework.classloading.OSGiBundleRequirement;
+import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
+import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;

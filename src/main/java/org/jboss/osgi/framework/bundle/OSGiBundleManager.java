@@ -127,9 +127,9 @@ public class OSGiBundleManager
    /** The bundle manager's bean name: OSGiBundleManager */
    public static final String BEAN_BUNDLE_MANAGER = "OSGiBundleManager";
    /** The framework version */
-   private static String OSGi_FRAMEWORK_VERSION = "r4v42"; // [TODO] externalise
+   private static String OSGi_FRAMEWORK_VERSION = "r4v42";
    /** The framework vendor */
-   private static String OSGi_FRAMEWORK_VENDOR = "jboss.org"; // [TODO] externalise
+   private static String OSGi_FRAMEWORK_VENDOR = "jboss.org";
    /** The framework language */
    private static String OSGi_FRAMEWORK_LANGUAGE = Locale.getDefault().getISO3Language(); // REVIEW correct?
    /** The os name */
@@ -805,7 +805,7 @@ public class OSGiBundleManager
    {
       // If the specified InputStream is null, the Framework must create the InputStream from which to read the updated bundle by interpreting, 
       // in an implementation dependent manner, this bundle's Bundle-UpdateLocation Manifest header, if present, or this bundle's original location.
-      URL updateURL = bundleState.getMetaData().getBundleUpdateLocation();
+      URL updateURL = bundleState.getOSGiMetaData().getBundleUpdateLocation();
       if (updateURL == null)
       {
          // This updates the bundle from its original location 
@@ -937,8 +937,8 @@ public class OSGiBundleManager
       if (unit == null)
          throw new IllegalArgumentException("Null unit");
 
-      OSGiMetaData metaData = unit.getAttachment(OSGiMetaData.class);
-      if (metaData == null)
+      OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
+      if (osgiMetaData == null)
       {
          Manifest manifest = unit.getAttachment(Manifest.class);
          // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
@@ -948,8 +948,8 @@ public class OSGiBundleManager
          Attributes attributes = manifest.getMainAttributes();
          attributes.put(new Name(Constants.BUNDLE_NAME), unit.getName());
          attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-         metaData = new AbstractOSGiMetaData(manifest);
-         unit.addAttachment(OSGiMetaData.class, metaData);
+         osgiMetaData = new AbstractOSGiMetaData(manifest);
+         unit.addAttachment(OSGiMetaData.class, osgiMetaData);
       }
 
       // In case of Bundle.update() the OSGiBundleState should be attached. We add the DeploymentUnit 
@@ -1033,17 +1033,17 @@ public class OSGiBundleManager
     */
    private void validateBundle(AbstractBundleState bundleState)
    {
-      OSGiMetaData metaData = bundleState.getMetaData();
-      if (metaData == null)
+      OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
+      if (osgiMetaData == null)
          return;
 
-      ParameterizedAttribute fragmentHost = metaData.getFragmentHost();
+      ParameterizedAttribute fragmentHost = osgiMetaData.getFragmentHost();
       if (fragmentHost != null)
          throw new NotImplementedException("Fragments not implemented: " + fragmentHost);
       
       // Delegate to the validator for the appropriate revision
       OSGiBundleValidator validator = new OSGiBundleValidatorR3(this);
-      if(metaData.getBundleManifestVersion() > 1)
+      if(osgiMetaData.getBundleManifestVersion() > 1)
          validator = new OSGiBundleValidatorR4(this);
 
       validator.validateBundle(bundleState);
