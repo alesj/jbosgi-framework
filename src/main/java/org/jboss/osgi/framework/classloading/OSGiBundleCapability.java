@@ -90,7 +90,7 @@ public class OSGiBundleCapability extends ModuleCapability
     */
    public OSGiMetaData getMetaData()
    {
-      return bundleState.getOSGiMetaData();
+      return bundleState.getMetaData();
    }
 
    @Override

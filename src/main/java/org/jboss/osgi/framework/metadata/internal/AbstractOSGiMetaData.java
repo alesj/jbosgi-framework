@@ -30,6 +30,7 @@ import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.QNAME_
 import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.STRING_LIST_VC;
 import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.STRING_VC;
 import static org.jboss.osgi.framework.metadata.internal.ValueCreatorUtil.URL_VC;
+import static org.osgi.framework.Constants.BUNDLE_ACTIVATIONPOLICY;
 import static org.osgi.framework.Constants.BUNDLE_ACTIVATOR;
 import static org.osgi.framework.Constants.BUNDLE_CATEGORY;
 import static org.osgi.framework.Constants.BUNDLE_CLASSPATH;
@@ -69,6 +70,7 @@ import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange.OSGiVersionToOSGiVersionComparator;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange.OSGiVersionToStringComparator;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange.OSGiVersionToVersionComparator;
+import org.jboss.osgi.framework.util.CaseInsensitiveDictionary;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -92,7 +94,7 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
    protected transient Map<String, Object> cachedAttributes = new ConcurrentHashMap<String, Object>();
 
    protected transient ParameterizedAttribute parameters;
-   
+
    public AbstractOSGiMetaData()
    {
    }
@@ -103,14 +105,14 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
    }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })
-   public Dictionary<String, String> getHeaders(String locale)
+   public Dictionary<String, String> getHeaders()
    {
-      // TODO localisation
-      Map<Name, String> attributes = (Map) getManifest().getMainAttributes();
-      Hashtable<String, String> result = new Hashtable<String, String>();
+      Map<Name, String> attributes = (Map)getManifest().getMainAttributes();
+      Dictionary<String, String> result = new Hashtable<String, String>();
       for (Entry<Name, String> entry : attributes.entrySet())
          result.put(entry.getKey().toString(), entry.getValue());
-      return result;
+
+      return new CaseInsensitiveDictionary(result);
    }
 
    public String getHeader(String key)
@@ -120,7 +122,7 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
 
    public ActivationPolicyMetaData getBundleActivationPolicy()
    {
-      return get("Bundle-ActivationPolicy", ACTIVATION_POLICY_VC);
+      return get(BUNDLE_ACTIVATIONPOLICY, ACTIVATION_POLICY_VC);
    }
 
    public String getBundleActivator()
@@ -150,7 +152,7 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
 
    public int getBundleManifestVersion()
    {
-      return get(BUNDLE_MANIFESTVERSION, INTEGER_VC, 2);
+      return get(BUNDLE_MANIFESTVERSION, INTEGER_VC, 1);
    }
 
    public String getBundleName()
@@ -171,11 +173,11 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
    public String getBundleSymbolicName()
    {
       String symbolicName = null;
-      
+
       ParameterizedAttribute parameters = parseSymbolicName();
       if (parameters != null)
          symbolicName = parameters.getAttribute();
-      
+
       return symbolicName;
    }
 
@@ -183,7 +185,7 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
    {
       return parseSymbolicName();
    }
-   
+
    public URL getBundleUpdateLocation()
    {
       return get(BUNDLE_UPDATELOCATION, URL_VC);
@@ -191,7 +193,7 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
 
    public String getBundleVersion()
    {
-      return get(BUNDLE_VERSION, STRING_VC , "0.0.0");
+      return get(BUNDLE_VERSION, STRING_VC, "0.0.0");
    }
 
    public List<PackageAttribute> getDynamicImports()

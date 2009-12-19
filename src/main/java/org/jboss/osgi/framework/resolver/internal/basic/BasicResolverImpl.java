@@ -405,7 +405,7 @@ public class BasicResolverImpl extends AbstractResolver
       // The Require-Bundle header specifies that all exported packages from
       // another bundle must be imported, effectively requiring the public interface
       // of another bundle
-      OSGiMetaData osgiMetaData = bundle.getOSGiMetaData();
+      OSGiMetaData osgiMetaData = bundle.getMetaData();
       List<ParameterizedAttribute> requireBundles = osgiMetaData.getRequireBundles();
       if (requireBundles != null)
       {

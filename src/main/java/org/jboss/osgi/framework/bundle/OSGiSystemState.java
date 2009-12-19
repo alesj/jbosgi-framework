@@ -66,7 +66,7 @@ public class OSGiSystemState extends AbstractBundleState
    }
 
    @Override
-   public OSGiMetaData getOSGiMetaData()
+   public OSGiMetaData getMetaData()
    {
       return osgiMetaData;
    }
@@ -133,6 +133,13 @@ public class OSGiSystemState extends AbstractBundleState
    }
 
    public URL getEntry(String path)
+   {
+      return getEntryInternal(path);
+   }
+
+   // Get the entry without checking permissions and bundle state. 
+   @Override
+   URL getEntryInternal(String path)
    {
       log.warn("[JBOSGI-138] getEntry(" + path + ")");
       return null;

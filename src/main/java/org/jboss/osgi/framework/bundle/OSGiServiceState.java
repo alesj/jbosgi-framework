@@ -516,7 +516,7 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
       return result.toArray(new String[result.size()]);
    }
 
-   @SuppressWarnings({ "unchecked", "rawtypes" })
+   @SuppressWarnings("rawtypes")
    public void setProperties(Dictionary properties)
    {
       checkUnregistered();
@@ -673,7 +673,7 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
                if (used.add(using)) // add so we don't do duplicate work
                {
                   int count = ct.getUsedByCount(this, using);
-                  while(count > 0)
+                  while (count > 0)
                   {
                      using.ungetContext(this); // ungetService will cleanup service cache
                      count--;

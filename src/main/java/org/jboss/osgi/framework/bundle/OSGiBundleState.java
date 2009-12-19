@@ -87,7 +87,7 @@ public class OSGiBundleState extends AbstractBundleState
    }
 
    @Override
-   public OSGiMetaData getOSGiMetaData()
+   public OSGiMetaData getMetaData()
    {
       DeploymentUnit unit = getDeploymentUnit();
       OSGiMetaData metadata = unit.getAttachment(OSGiMetaData.class);
@@ -151,6 +151,13 @@ public class OSGiBundleState extends AbstractBundleState
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
 
+      return getEntryInternal(path);
+   }
+
+   // Get the entry without checking permissions and bundle state. 
+   @Override
+   URL getEntryInternal(String path)
+   {
       DeploymentUnit unit = getDeploymentUnit();
       if (unit instanceof VFSDeploymentUnit)
       {
@@ -158,6 +165,7 @@ public class OSGiBundleState extends AbstractBundleState
 
          if (path.startsWith("/"))
             path = path.substring(1);
+         
          return vfsDeploymentUnit.getResourceLoader().getResource(path);
       }
       return null;
@@ -313,7 +321,7 @@ public class OSGiBundleState extends AbstractBundleState
       // The BundleActivator.start(org.osgi.framework.BundleContext) method of this bundle's BundleActivator, if one is specified, is called. 
       try
       {
-         OSGiMetaData metaData = getOSGiMetaData();
+         OSGiMetaData metaData = getMetaData();
          if (metaData == null)
             throw new IllegalStateException("Cannot obtain OSGi meta data");
 

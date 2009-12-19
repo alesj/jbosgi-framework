@@ -191,7 +191,7 @@ public class OSGiPackageCapability extends PackageCapability
       if (reqVersionRange.isInRange(capVersion) == false)
          return false;
 
-      OSGiMetaData metaData = bundleState.getOSGiMetaData();
+      OSGiMetaData metaData = bundleState.getMetaData();
       PackageAttribute capParameters = exportPackage;
       PackageAttribute reqParameters = packageRequirement.getPackageMetaData();
 

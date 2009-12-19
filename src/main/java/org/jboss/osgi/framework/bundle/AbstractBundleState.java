@@ -22,15 +22,23 @@
 package org.jboss.osgi.framework.bundle;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.security.Permission;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,6 +49,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.framework.plugins.LifecycleInterceptorServicePlugin;
+import org.jboss.osgi.framework.util.CaseInsensitiveDictionary;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.jboss.virtual.VirtualFile;
@@ -50,6 +59,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
@@ -100,16 +110,16 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    public String getSymbolicName()
    {
-      String symbolicName = getOSGiMetaData().getBundleSymbolicName();
+      String symbolicName = getMetaData().getBundleSymbolicName();
       if (symbolicName == null)
          symbolicName = "anonymous-bundle" + getBundleId();
-      
+
       return symbolicName;
    }
 
    public Version getVersion()
    {
-      String versionstr = getOSGiMetaData().getBundleVersion();
+      String versionstr = getMetaData().getBundleVersion();
       try
       {
          return Version.parseVersion(versionstr);
@@ -200,11 +210,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     * 
     * @return the osgiMetaData.
     */
-   public abstract OSGiMetaData getOSGiMetaData();
+   public abstract OSGiMetaData getMetaData();
 
    @SuppressWarnings("rawtypes")
    public Dictionary getHeaders()
    {
+      // If the specified locale is null then the locale returned 
+      // by java.util.Locale.getDefault is used.
       return getHeaders(null);
    }
 
@@ -212,8 +224,97 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    public Dictionary getHeaders(String locale)
    {
       checkAdminPermission(AdminPermission.METADATA);
-      return getOSGiMetaData().getHeaders(locale);
+
+      // Get the raw (unlocalized) manifest headers
+      Dictionary<String, String> rawHeaders = getMetaData().getHeaders();
+
+      // If the specified locale is the empty string, this method will return the 
+      // raw (unlocalized) manifest headers including any leading "%"
+      if ("".equals(locale))
+         return rawHeaders;
+
+      // If the specified locale is null then the locale 
+      // returned by java.util.Locale.getDefault is used
+      if (locale == null)
+         locale = Locale.getDefault().toString();
+
+      // Get the localization base name
+      String baseName = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
+      if (baseName == null)
+         baseName = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+
+      // The Framework searches for localization entries by appending suffixes to
+      // the localization base name according to a specified locale and finally
+      // appending the .properties suffix. If a translation is not found, the locale
+      // must be made more generic by first removing the variant, then the country
+      // and finally the language until an entry is found that contains a valid 
+      // translation.
+      String entryPath = baseName + "_" + locale + ".properties";
+      URL entryURL = getEntryInternal(entryPath);
+      while (entryURL == null)
+      {
+         if (entryPath.equals(baseName + ".properties"))
+            break;
+         
+         int lastIndex = locale.lastIndexOf('_');
+         if (lastIndex > 0)
+         {
+            locale = locale.substring(0, lastIndex);
+            entryPath = baseName + "_" + locale + ".properties";
+         }
+         else
+         {
+            entryPath = baseName + ".properties";
+         }
+         
+         // The bundle's class loader is not used to search for localization entries. Only
+         // the contents of the bundle and its attached fragments are searched.
+         entryURL = getEntryInternal(entryPath);
+      }
+
+      // Read the resource bundle
+      ResourceBundle resBundle = null;
+      if (entryURL != null)
+      {
+         try
+         {
+            resBundle = new PropertyResourceBundle(entryURL.openStream());
+         }
+         catch (IOException ex)
+         {
+            throw new IllegalStateException("Cannot read resouce bundle: " + entryURL, ex);
+         }
+      }
+      
+      Dictionary<String, String> locHeaders = new Hashtable<String, String>();
+      Enumeration<String> e = rawHeaders.keys();
+      while (e.hasMoreElements())
+      {
+         String key = e.nextElement();
+         String value = rawHeaders.get(key);
+         if (value.startsWith("%"))
+            value = value.substring(1);
+         
+         if (resBundle != null)
+         {
+            try
+            {
+               value = resBundle.getString(value);
+            }
+            catch (MissingResourceException ex)
+            {
+               // ignore
+            }
+         }
+         
+         locHeaders.put(key, value);
+      }
+
+      return new CaseInsensitiveDictionary(locHeaders);
    }
+
+   // Get the entry without checking permissions and bundle state. 
+   abstract URL getEntryInternal(String path);
 
    public String getProperty(String key)
    {

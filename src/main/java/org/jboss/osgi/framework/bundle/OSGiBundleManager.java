@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -81,7 +80,7 @@ import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.deployment.deployer.DeploymentFactory;
 import org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.PackageAttribute;
+import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.jboss.osgi.framework.plugins.AutoInstallPlugin;
 import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
@@ -91,6 +90,7 @@ import org.jboss.osgi.framework.plugins.Plugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.ServicePlugin;
 import org.jboss.osgi.framework.util.NoFilter;
+import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
@@ -804,7 +804,7 @@ public class OSGiBundleManager
    {
       // If the specified InputStream is null, the Framework must create the InputStream from which to read the updated bundle by interpreting, 
       // in an implementation dependent manner, this bundle's Bundle-UpdateLocation Manifest header, if present, or this bundle's original location.
-      URL updateURL = bundleState.getOSGiMetaData().getBundleUpdateLocation();
+      URL updateURL = bundleState.getMetaData().getBundleUpdateLocation();
       if (in == null)
       {
          try
@@ -1031,62 +1031,22 @@ public class OSGiBundleManager
     * 
     * @param bundleState the bundle state
     */
-   @SuppressWarnings("deprecation")
    private void validateBundle(AbstractBundleState bundleState)
    {
-      OSGiMetaData metaData = bundleState.getOSGiMetaData();
+      OSGiMetaData metaData = bundleState.getMetaData();
       if (metaData == null)
          return;
 
-      int manifestVersion = metaData.getBundleManifestVersion();
-      if (manifestVersion > 2)
-         throw new IllegalStateException("Unsupported manifest version " + manifestVersion + " for " + bundleState);
+      ParameterizedAttribute fragmentHost = metaData.getFragmentHost();
+      if (fragmentHost != null)
+         throw new NotImplementedException("Fragments not implemented: " + fragmentHost);
+      
+      // Delegate to the validator for the appropriate revision
+      OSGiBundleValidator validator = new OSGiBundleValidatorR3(this);
+      if(metaData.getBundleManifestVersion() > 1)
+         validator = new OSGiBundleValidatorR4(this);
 
-      String symbolicName = bundleState.getSymbolicName();
-      for (AbstractBundleState bundle : getBundles())
-      {
-         OSGiMetaData other = bundle.getOSGiMetaData();
-         if (symbolicName.equals(other.getBundleSymbolicName()))
-         {
-            if (other.isSingleton() && metaData.isSingleton())
-               throw new IllegalStateException("Cannot install singleton " + bundleState + " another singleton is already installed: " + bundle.getLocation());
-            if (other.getBundleVersion().equals(metaData.getBundleVersion()))
-               throw new IllegalStateException("Cannot install " + bundleState + " a bundle with that name and version is already installed: "
-                     + bundle.getLocation());
-         }
-      }
-
-      List<PackageAttribute> importPackages = metaData.getImportPackages();
-      if (importPackages != null && importPackages.isEmpty() == false)
-      {
-         Set<String> packages = new HashSet<String>();
-         for (PackageAttribute packageAttribute : importPackages)
-         {
-            String packageName = packageAttribute.getAttribute();
-            if (packages.contains(packageName))
-               throw new IllegalStateException("Duplicate import of package " + packageName + " for " + bundleState);
-            packages.add(packageName);
-
-            if (packageName.startsWith("java."))
-               throw new IllegalStateException("Not allowed to import java.* for " + bundleState);
-
-            String version = packageAttribute.getAttributeValue(Constants.VERSION_ATTRIBUTE, String.class);
-            String specificationVersion = packageAttribute.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
-            if (version != null && specificationVersion != null && version.equals(specificationVersion) == false)
-               throw new IllegalStateException(packageName + " version and specification version should be the same for " + bundleState);
-         }
-      }
-
-      List<PackageAttribute> exportPackages = metaData.getExportPackages();
-      if (exportPackages != null && exportPackages.isEmpty() == false)
-      {
-         for (PackageAttribute packageAttribute : exportPackages)
-         {
-            String packageName = packageAttribute.getAttribute();
-            if (packageName.startsWith("java."))
-               throw new IllegalStateException("Not allowed to export java.* for " + bundleState);
-         }
-      }
+      validator.validateBundle(bundleState);
    }
 
    /**

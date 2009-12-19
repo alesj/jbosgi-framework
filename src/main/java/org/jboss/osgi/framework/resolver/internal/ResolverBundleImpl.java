@@ -43,7 +43,7 @@ public class ResolverBundleImpl extends AbstractResolverBundle
    {
       super(bundle);
       
-      this.metaData = OSGiBundleState.assertBundleState(bundle).getOSGiMetaData();
+      this.metaData = OSGiBundleState.assertBundleState(bundle).getMetaData();
 
       // Initialize exported packages
       List<PackageAttribute> exportPackages = metaData.getExportPackages();

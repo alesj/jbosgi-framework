@@ -31,16 +31,16 @@ import org.jboss.deployers.vfs.spi.deployer.ManifestMetaData;
  * OSGi specific manifest meta data.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
  */
 public interface OSGiMetaData extends ManifestMetaData
 {
    /**
-    * Get the headers
+    * Get the headers in raw unlocalized format.
     * 
-    * @param locale the locale to use
     * @return the headers
     */
-   Dictionary<String, String> getHeaders(String locale);
+   Dictionary<String, String> getHeaders();
    
    /**
     * Extension point to read custom manifest headers.
