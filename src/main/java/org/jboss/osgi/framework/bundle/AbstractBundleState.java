@@ -213,12 +213,16 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return bundles.toArray(new Bundle[bundles.size()]);
    }
 
+   /**
+    * Returns the time when this bundle was last modified. 
+    * A bundle is considered to be modified when it is installed, updated or uninstalled
+    */
    public long getLastModified()
    {
       return lastModified;
    }
 
-   void modified()
+   void updateLastModified()
    {
       lastModified = System.currentTimeMillis();
    }

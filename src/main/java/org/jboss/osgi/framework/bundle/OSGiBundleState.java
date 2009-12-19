@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
+import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.virtual.VirtualFile;
@@ -62,6 +63,9 @@ public class OSGiBundleState extends AbstractBundleState
 
    /** The bundle location */
    private String location;
+   
+   /** The bundle root file */
+   private VirtualFile rootFile;
 
    /** The list of deployment units */
    private List<DeploymentUnit> units = new ArrayList<DeploymentUnit>();
@@ -72,20 +76,21 @@ public class OSGiBundleState extends AbstractBundleState
    /**
     * Create a new BundleState.
     * 
-    * @param location The string representation of this bundle's location identifier 
-    * @param osgiMetaData the osgi metadata
     * @param unit the deployment unit
     * @throws IllegalArgumentException for a null parameter
     */
-   public OSGiBundleState(String location, DeploymentUnit unit)
+   public OSGiBundleState(DeploymentUnit unit)
    {
-      if (location == null)
-         throw new IllegalArgumentException("Null bundle location");
       if (unit == null)
          throw new IllegalArgumentException("Null deployment unit");
+      
+      // The bundle location is not necessarily the bundle root url
+      // The framework is expected to preserve the location passed into installBundle(String)
+      Deployment dep = unit.getAttachment(Deployment.class);
+      location = (dep != null ? dep.getLocation() : unit.getName());
+      rootFile = (dep != null ? dep.getRoot() : ((VFSDeploymentUnit)unit).getRoot());
 
-      this.location = location;
-      this.bundleId = bundleIDGenerator.incrementAndGet();
+      bundleId = bundleIDGenerator.incrementAndGet();
       
       addDeploymentUnit(unit);
    }
@@ -103,6 +108,14 @@ public class OSGiBundleState extends AbstractBundleState
       return (OSGiBundleState)bundle;
    }
    
+   /**
+    * Get the root file for this bundle 
+    */
+   public VirtualFile getRoot()
+   {
+      return rootFile;
+   }
+
    @Override
    public OSGiMetaData getMetaData()
    {

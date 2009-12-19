@@ -90,6 +90,7 @@ import org.jboss.osgi.framework.plugins.Plugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.ServicePlugin;
 import org.jboss.osgi.framework.util.NoFilter;
+import org.jboss.osgi.framework.util.URLHelper;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.virtual.VFS;
@@ -805,13 +806,16 @@ public class OSGiBundleManager
       // If the specified InputStream is null, the Framework must create the InputStream from which to read the updated bundle by interpreting, 
       // in an implementation dependent manner, this bundle's Bundle-UpdateLocation Manifest header, if present, or this bundle's original location.
       URL updateURL = bundleState.getMetaData().getBundleUpdateLocation();
+      if (updateURL == null)
+      {
+         // This updates the bundle from its original location 
+         VirtualFile root = bundleState.getRoot();
+         updateURL = URLHelper.toURL(root);
+      }
       if (in == null)
       {
          try
          {
-            if (updateURL == null)
-               throw new IllegalStateException("Cannot obtain Bundle-UpdateLocation for: " + bundleState);
-
             in = updateURL.openStream();
          }
          catch (IOException ex)
@@ -856,6 +860,7 @@ public class OSGiBundleManager
          dep.setAutoStart(false);
 
          updatedBundleState = installBundle(dep);
+         updatedBundleState.updateLastModified();
       }
       catch (Exception ex)
       {
@@ -911,7 +916,7 @@ public class OSGiBundleManager
          try
          {
             deployerClient.undeploy(unit.getName());
-            bundleState.modified();
+            bundleState.updateLastModified();
          }
          catch (DeploymentException e)
          {
@@ -947,13 +952,8 @@ public class OSGiBundleManager
          unit.addAttachment(OSGiMetaData.class, metaData);
       }
 
-      // The bundle location is not necessarily the bundle root url
-      // The framework is expected to preserve the location passed into installBundle(String)
+      // In case of Bundle.update() the OSGiBundleState should be attached. We add the DeploymentUnit 
       Deployment dep = unit.getAttachment(Deployment.class);
-      String location = (dep != null ? dep.getLocation() : unit.getName());
-
-      // In case of Bundle.update() the OSGiBundleState should be attached
-      // we add the DeploymentUnit 
       OSGiBundleState bundleState = (dep != null ? dep.getAttachment(OSGiBundleState.class) : null);
       if (bundleState != null)
          bundleState.addDeploymentUnit(unit);
@@ -961,7 +961,7 @@ public class OSGiBundleManager
       // Create a new OSGiBundleState and add it to the manager
       if (bundleState == null)
       {
-         bundleState = new OSGiBundleState(location, unit);
+         bundleState = new OSGiBundleState(unit);
          addBundle(bundleState);
       }
       return bundleState;
