@@ -205,10 +205,6 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
       if (entryURL == null)
          throw new DeploymentException("Cannot find native library: " + nativeLib);
 
-      // Get the library name key
-      String libfile = new File(nativeLib).getName();
-      String libname = libfile.substring(0, libfile.lastIndexOf('.'));
-      
       // Copy the native library to the bundle storage area
       File nativeFileCopy;
       try
@@ -224,6 +220,10 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
       {
          throw new DeploymentException("Cannot copy native library: " + nativeLib, ex);
       }
+      
+      // Generate the key for the library mapping
+      String libfile = new File(nativeLib).getName();
+      String libname = libfile.substring(0, libfile.lastIndexOf('.'));
       
       // Add the native library mapping to the OSGiClassLoaderPolicy
       OSGiClassLoaderPolicy policy = (OSGiClassLoaderPolicy)unit.getAttachment(ClassLoaderPolicy.class);
