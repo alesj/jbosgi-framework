@@ -24,6 +24,8 @@ package org.jboss.osgi.framework.deployers;
 // $Id: $
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +45,9 @@ import org.jboss.osgi.framework.classloading.OSGiClassLoaderPolicy;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.Constants;
 
 /**
@@ -201,11 +206,27 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
          throw new DeploymentException("Cannot find native library: " + nativeLib);
 
       // Get the library name key
-      String libname = new File(nativeLib).getName();
-      libname = libname.substring(0, libname.lastIndexOf('.'));
+      String libfile = new File(nativeLib).getName();
+      String libname = libfile.substring(0, libfile.lastIndexOf('.'));
+      
+      // Copy the native library to the bundle storage area
+      File nativeFileCopy;
+      try
+      {
+         VirtualFile nativeVirtualFile = bundleState.getRoot().getChild(nativeLib);
+         BundleStoragePlugin plugin = bundleManager.getPlugin(BundleStoragePlugin.class);
+         nativeFileCopy = plugin.getDataFile(bundleState, nativeLib);
+         FileOutputStream fos = new FileOutputStream(nativeFileCopy);
+         VFSUtils.copyStream(nativeVirtualFile.openStream(), fos);
+         fos.close();
+      }
+      catch (IOException ex)
+      {
+         throw new DeploymentException("Cannot copy native library: " + nativeLib, ex);
+      }
       
       // Add the native library mapping to the OSGiClassLoaderPolicy
       OSGiClassLoaderPolicy policy = (OSGiClassLoaderPolicy)unit.getAttachment(ClassLoaderPolicy.class);
-      policy.addLibraryMapping(libname, entryURL);
+      policy.addLibraryMapping(libname, nativeFileCopy);
    }
 }

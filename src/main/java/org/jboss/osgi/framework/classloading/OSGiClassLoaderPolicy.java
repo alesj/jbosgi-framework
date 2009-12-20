@@ -23,8 +23,7 @@ package org.jboss.osgi.framework.classloading;
 
 // $Id$
 
-import java.net.URL;
-import java.util.Collections;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +46,7 @@ import org.jboss.virtual.VirtualFile;
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
-   private Map<String, URL> libraryMap = new HashMap<String, URL>();
+   private Map<String, File> libraryMap = new HashMap<String, File>();
    
    public OSGiClassLoaderPolicy(OSGiBundleState bundleState, VirtualFile[] roots)
    {
@@ -74,24 +73,19 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
       setDelegates(vfsModule.getDelegates());
    }
 
-   public Map<String, URL> getLibraryMapppings()
+   public void addLibraryMapping(String libname, File libfile)
    {
-      return Collections.unmodifiableMap(libraryMap);
-   }
-
-   public void addLibraryMapping(String libname, URL liburl)
-   {
-      libraryMap.put(libname, liburl);
+      libraryMap.put(libname, libfile);
    }
 
    public String findLibrary(String libname)
    {
-      URL liburl = libraryMap.get(libname);
+      File libfile = libraryMap.get(libname);
       
       // [TODO] why does the TCK use 'Native' to mean 'libNative' ? 
-      if (liburl == null)
-         liburl = libraryMap.get("lib" + libname);
+      if (libfile == null)
+         libfile = libraryMap.get("lib" + libname);
          
-      return (liburl != null ? liburl.toExternalForm() : null);
+      return (libfile != null ? libfile.getAbsolutePath() : null);
    }
 }
