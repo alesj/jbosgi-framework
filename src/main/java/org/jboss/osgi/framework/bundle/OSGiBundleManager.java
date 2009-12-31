@@ -91,8 +91,8 @@ import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.ServicePlugin;
 import org.jboss.osgi.framework.util.NoFilter;
 import org.jboss.osgi.framework.util.URLHelper;
-import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.osgi.spi.util.BundleInfo;
+import org.jboss.util.platform.Java;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -126,10 +126,8 @@ public class OSGiBundleManager
 
    /** The bundle manager's bean name: OSGiBundleManager */
    public static final String BEAN_BUNDLE_MANAGER = "OSGiBundleManager";
-   /** The framework version */
-   private static String OSGi_FRAMEWORK_VERSION = "r4v42";
-   /** The framework vendor */
-   private static String OSGi_FRAMEWORK_VENDOR = "jboss.org";
+   /** The framework execution environment */
+   private static String OSGi_FRAMEWORK_EXECUTIONENVIRONMENT;
    /** The framework language */
    private static String OSGi_FRAMEWORK_LANGUAGE = Locale.getDefault().getISO3Language(); // REVIEW correct?
    /** The os name */
@@ -138,8 +136,12 @@ public class OSGiBundleManager
    private static String OSGi_FRAMEWORK_OS_VERSION;
    /** The os version */
    private static String OSGi_FRAMEWORK_PROCESSOR;
+   /** The framework vendor */
+   private static String OSGi_FRAMEWORK_VENDOR = "jboss.org";
+   /** The framework version */
+   private static String OSGi_FRAMEWORK_VERSION = "r4v42";
    /** The bundles by id */
-   private List<AbstractBundleState> bundles = new CopyOnWriteArrayList<AbstractBundleState>();
+   private List<AbstractBundleState> allBundles = new CopyOnWriteArrayList<AbstractBundleState>();
    /** The kernel */
    private Kernel kernel;
    /** The main deployer */
@@ -167,6 +169,16 @@ public class OSGiBundleManager
       {
          public Object run()
          {
+            List<String> execEnvironments = new ArrayList<String>();
+            if (Java.isCompatible(Java.VERSION_1_5))
+               execEnvironments.add("J2SE-1.5");
+            if (Java.isCompatible(Java.VERSION_1_6))
+               execEnvironments.add("JavaSE-1.6");
+
+            String envlist = execEnvironments.toString();
+            envlist = envlist.substring(1, envlist.length() - 1);
+            OSGi_FRAMEWORK_EXECUTIONENVIRONMENT = envlist;
+
             OSGi_FRAMEWORK_OS_NAME = System.getProperty("os.name");
             OSGi_FRAMEWORK_OS_VERSION = System.getProperty("os.version");
             OSGi_FRAMEWORK_PROCESSOR = System.getProperty("os.arch");
@@ -359,9 +371,24 @@ public class OSGiBundleManager
             OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
             if (bundleState == null)
             {
+               OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
+               if (osgiMetaData == null)
+               {
+                  Manifest manifest = unit.getAttachment(Manifest.class);
+                  // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
+                  if (manifest == null)
+                     manifest = new Manifest();
+                  // [TODO] populate some bundle information
+                  Attributes attributes = manifest.getMainAttributes();
+                  attributes.put(new Name(Constants.BUNDLE_NAME), unit.getName());
+                  attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
+                  osgiMetaData = new AbstractOSGiMetaData(manifest);
+                  unit.addAttachment(OSGiMetaData.class, osgiMetaData);
+               }
+
                try
                {
-                  bundleState = addDeployment(unit);
+                  bundleState = (OSGiBundleState)addDeployment(unit);
                   bundleState.startInternal();
                   unit.addAttachment(OSGiBundleState.class, bundleState);
                }
@@ -425,10 +452,8 @@ public class OSGiBundleManager
       properties.putAll(props);
 
       // Init default framework properties
-      if (getProperty(Constants.FRAMEWORK_VERSION) == null)
-         setProperty(Constants.FRAMEWORK_VERSION, OSGi_FRAMEWORK_VERSION);
-      if (getProperty(Constants.FRAMEWORK_VENDOR) == null)
-         setProperty(Constants.FRAMEWORK_VENDOR, OSGi_FRAMEWORK_VENDOR);
+      if (getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT) == null)
+         setProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, OSGi_FRAMEWORK_EXECUTIONENVIRONMENT);
       if (getProperty(Constants.FRAMEWORK_LANGUAGE) == null)
          setProperty(Constants.FRAMEWORK_LANGUAGE, OSGi_FRAMEWORK_LANGUAGE);
       if (getProperty(Constants.FRAMEWORK_OS_NAME) == null)
@@ -437,6 +462,10 @@ public class OSGiBundleManager
          setProperty(Constants.FRAMEWORK_OS_VERSION, OSGi_FRAMEWORK_OS_VERSION);
       if (getProperty(Constants.FRAMEWORK_PROCESSOR) == null)
          setProperty(Constants.FRAMEWORK_PROCESSOR, OSGi_FRAMEWORK_PROCESSOR);
+      if (getProperty(Constants.FRAMEWORK_VENDOR) == null)
+         setProperty(Constants.FRAMEWORK_VENDOR, OSGi_FRAMEWORK_VENDOR);
+      if (getProperty(Constants.FRAMEWORK_VERSION) == null)
+         setProperty(Constants.FRAMEWORK_VERSION, OSGi_FRAMEWORK_VERSION);
    }
 
    /**
@@ -686,9 +715,17 @@ public class OSGiBundleManager
       if (location == null)
          throw new IllegalArgumentException("Null location");
 
-      BundleInfo info = BundleInfo.createBundleInfo(root, location);
-      Deployment dep = DeploymentFactory.createDeployment(info);
-      dep.setAutoStart(autoStart);
+      Deployment dep;
+      try
+      {
+         BundleInfo info = BundleInfo.createBundleInfo(root, location);
+         dep = DeploymentFactory.createDeployment(info);
+         dep.setAutoStart(autoStart);
+      }
+      catch (RuntimeException ex)
+      {
+         throw new BundleException("Cannot install bundle: " + root, ex);
+      }
 
       return installBundle(dep);
    }
@@ -710,11 +747,16 @@ public class OSGiBundleManager
          MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
          att.addAttachment(Deployment.class, dep);
 
+         // In case of update the OSGiBundleState is attached
+         OSGiBundleState bundleState = dep.getAttachment(OSGiBundleState.class);
+         if (bundleState != null)
+            att.addAttachment(OSGiBundleState.class, bundleState);
+
          deployerClient.deploy(deployment);
          try
          {
             DeploymentUnit unit = deployerStructure.getDeploymentUnit(deployment.getName());
-            OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+            bundleState = unit.getAttachment(OSGiBundleState.class);
             if (bundleState == null)
                throw new IllegalStateException("Unable to determine bundle state for " + deployment.getName());
 
@@ -740,11 +782,11 @@ public class OSGiBundleManager
    private String getIncompleteDeploymentInfo(Deployment dep, IncompleteDeploymentException ex)
    {
       IncompleteDeployments deployments = ex.getIncompleteDeployments();
-      
+
       StringWriter stringWriter = new StringWriter();
       PrintWriter printWriter = new PrintWriter(stringWriter);
       printWriter.println("Error installing bundle from: " + dep);
-      
+
       // Contexts in error 
       Collection<Throwable> contextsError = deployments.getContextsInError().values();
       if (contextsError.size() > 0)
@@ -905,12 +947,27 @@ public class OSGiBundleManager
    public void uninstallBundle(OSGiBundleState bundleState) throws BundleException
    {
       long id = bundleState.getBundleId();
-      if (id == 0)
-         throw new IllegalArgumentException("Cannot uninstall system bundle");
-
       if (getBundleById(id) == null)
          throw new BundleException(bundleState + " not installed");
 
+      // If this bundle's state is ACTIVE, STARTING or STOPPING, this bundle is stopped 
+      // as described in the Bundle.stop method.
+      int state = bundleState.getState();
+      if (state == Bundle.ACTIVE || state == Bundle.STARTING || state == Bundle.STOPPING)
+      {
+         try
+         {
+            stopBundle(bundleState);
+         }
+         catch (Exception ex)
+         {
+            // If Bundle.stop throws an exception, a Framework event of type FrameworkEvent.ERROR is
+            // fired containing the exception
+            fireError(bundleState, "Error stopping bundle: " + bundleState, ex);
+         }
+      }
+
+      DeploymentException depEx = null;
       for (DeploymentUnit unit : bundleState.getDeploymentUnits())
       {
          try
@@ -918,10 +975,20 @@ public class OSGiBundleManager
             deployerClient.undeploy(unit.getName());
             bundleState.updateLastModified();
          }
-         catch (DeploymentException e)
+         catch (DeploymentException ex)
          {
-            throw new BundleException("Unable to uninstall " + bundleState, e);
+            log.error("Cannot undeploy: " + unit.getName(), depEx = ex);
          }
+      }
+
+      // Rethrow deployment exception 
+      if (depEx != null)
+      {
+         Throwable cause = depEx.getCause();
+         if (cause instanceof BundleException)
+            throw (BundleException)cause;
+
+         throw new BundleException("Unable to uninstall " + bundleState, cause);
       }
    }
 
@@ -932,39 +999,41 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws IllegalArgumentException for a null parameter
     */
-   public OSGiBundleState addDeployment(DeploymentUnit unit)
+   public AbstractDeployedBundleState addDeployment(DeploymentUnit unit)
    {
       if (unit == null)
          throw new IllegalArgumentException("Null unit");
 
-      OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
-      if (osgiMetaData == null)
+      // In case of Bundle.update() the OSGiBundleState is attached
+      AbstractDeployedBundleState absBundle = unit.getAttachment(OSGiBundleState.class);
+      if (absBundle != null)
       {
-         Manifest manifest = unit.getAttachment(Manifest.class);
-         // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
-         if (manifest == null)
-            manifest = new Manifest();
-         // [TODO] populate some bundle information
-         Attributes attributes = manifest.getMainAttributes();
-         attributes.put(new Name(Constants.BUNDLE_NAME), unit.getName());
-         attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-         osgiMetaData = new AbstractOSGiMetaData(manifest);
-         unit.addAttachment(OSGiMetaData.class, osgiMetaData);
+         // Add the DeploymentUnit to the OSGiBundleState 
+         absBundle.addDeploymentUnit(unit);
+      }
+      else
+      {
+         OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
+         ParameterizedAttribute fragmentHost = osgiMetaData.getFragmentHost();
+         if (fragmentHost != null)
+         {
+            // Create a new OSGiFragmentState
+            OSGiFragmentState fragmentBundle = new OSGiFragmentState(unit);
+            unit.addAttachment(OSGiFragmentState.class, fragmentBundle);
+            absBundle = fragmentBundle;
+            addBundle(fragmentBundle);
+         }
+         else
+         {
+            // Create a new OSGiBundleState
+            OSGiBundleState bundleState = new OSGiBundleState(unit);
+            unit.addAttachment(OSGiBundleState.class, bundleState);
+            absBundle = bundleState;
+            addBundle(bundleState);
+         }
       }
 
-      // In case of Bundle.update() the OSGiBundleState should be attached. We add the DeploymentUnit 
-      Deployment dep = unit.getAttachment(Deployment.class);
-      OSGiBundleState bundleState = (dep != null ? dep.getAttachment(OSGiBundleState.class) : null);
-      if (bundleState != null)
-         bundleState.addDeploymentUnit(unit);
-
-      // Create a new OSGiBundleState and add it to the manager
-      if (bundleState == null)
-      {
-         bundleState = new OSGiBundleState(unit);
-         addBundle(bundleState);
-      }
-      return bundleState;
+      return absBundle;
    }
 
    /**
@@ -1004,7 +1073,7 @@ public class OSGiBundleManager
       validateBundle(bundleState);
 
       bundleState.setBundleManager(this);
-      bundles.add(bundleState);
+      allBundles.add(bundleState);
 
       // Only fire the INSTALLED event if this is not an update
       boolean fireEvent = true;
@@ -1037,13 +1106,9 @@ public class OSGiBundleManager
       if (osgiMetaData == null)
          return;
 
-      ParameterizedAttribute fragmentHost = osgiMetaData.getFragmentHost();
-      if (fragmentHost != null)
-         throw new NotImplementedException("Fragments not implemented: " + fragmentHost);
-      
       // Delegate to the validator for the appropriate revision
       OSGiBundleValidator validator = new OSGiBundleValidatorR3(this);
-      if(osgiMetaData.getBundleManifestVersion() > 1)
+      if (osgiMetaData.getBundleManifestVersion() > 1)
          validator = new OSGiBundleValidatorR4(this);
 
       validator.validateBundle(bundleState);
@@ -1068,7 +1133,7 @@ public class OSGiBundleManager
       if (bundleResolver != null)
          bundleResolver.removeBundle(bundleState);
 
-      bundles.remove(bundleState);
+      allBundles.remove(bundleState);
       log.debug("Removed " + bundleState.getCanonicalName());
    }
 
@@ -1119,7 +1184,7 @@ public class OSGiBundleManager
    public AbstractBundleState getBundleById(long id)
    {
       AbstractBundleState result = null;
-      for (AbstractBundleState aux : bundles)
+      for (AbstractBundleState aux : allBundles)
       {
          if (id == aux.getBundleId())
          {
@@ -1140,7 +1205,7 @@ public class OSGiBundleManager
    public AbstractBundleState getBundle(String symbolicName, Version version)
    {
       AbstractBundleState result = null;
-      for (AbstractBundleState aux : bundles)
+      for (AbstractBundleState aux : allBundles)
       {
          String auxName = aux.getSymbolicName();
          Version auxVersion = aux.getVersion();
@@ -1184,7 +1249,7 @@ public class OSGiBundleManager
 
       AbstractBundleState result = null;
 
-      for (AbstractBundleState aux : bundles)
+      for (AbstractBundleState aux : allBundles)
       {
          String auxLocation = aux.getLocation();
          if (location.equals(auxLocation))
@@ -1214,6 +1279,12 @@ public class OSGiBundleManager
     */
    public Collection<AbstractBundleState> getBundles()
    {
+      List<AbstractBundleState> bundles = new ArrayList<AbstractBundleState>();
+      for (AbstractBundleState aux : allBundles)
+      {
+         if (aux.isFragment() == false)
+            bundles.add(aux);
+      }
       return Collections.unmodifiableList(bundles);
    }
 
@@ -1226,12 +1297,12 @@ public class OSGiBundleManager
    public Collection<AbstractBundleState> getBundles(int state)
    {
       List<AbstractBundleState> bundles = new ArrayList<AbstractBundleState>();
-      for (AbstractBundleState aux : getBundles())
+      for (AbstractBundleState aux : allBundles)
       {
-         if (aux.getState() == state)
+         if (aux.isFragment() == false && aux.getState() == state)
             bundles.add(aux);
       }
-      return bundles;
+      return Collections.unmodifiableList(bundles);
    }
 
    /**
@@ -1241,11 +1312,38 @@ public class OSGiBundleManager
     * @param errorOnFail whether to throw an error if it cannot be resolved
     * @return true when resolved
     */
-   public boolean resolveBundle(OSGiBundleState bundleState, boolean errorOnFail)
+   public boolean resolveBundle(OSGiBundleState bundleState, boolean errorOnFail) throws BundleException
    {
       int state = bundleState.getState();
       if (state != Bundle.INSTALLED)
          return true;
+
+      // A bundle can only resolve if the framework is running on a VM which
+      // implements one of the listed required execution environments. 
+      List<String> reqExecEnvironments = bundleState.getOSGiMetaData().getRequiredExecutionEnvironment();
+      if (reqExecEnvironments != null)
+      {
+         boolean foundExecEnv = false;
+         String fwExecEnvs = getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+         for (String aux : reqExecEnvironments)
+         {
+            if (fwExecEnvs.contains(aux))
+            {
+               foundExecEnv = true;
+               break;
+            }
+         }
+
+         if (foundExecEnv == false)
+         {
+            String msg = "Cannot find any of the required execution environments " + reqExecEnvironments + ", we have: " + fwExecEnvs;
+            if (errorOnFail == true)
+               throw new BundleException(msg);
+
+            log.error(msg);
+            return false;
+         }
+      }
 
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       ControllerContext context = unit.getAttachment(ControllerContext.class);
@@ -1267,7 +1365,7 @@ public class OSGiBundleManager
          context.setRequiredState(requiredState);
 
          if (errorOnFail)
-            throw new IllegalStateException("Error resolving bundle: " + bundleState, ex);
+            throw new BundleException("Error resolving bundle: " + bundleState, ex);
 
          return false;
       }
@@ -1333,6 +1431,7 @@ public class OSGiBundleManager
             deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
             deployerClient.checkComplete(unit.getName());
 
+            // Rethrow the attached BundleException
             throw startEx;
          }
       }
@@ -1381,6 +1480,7 @@ public class OSGiBundleManager
          BundleException stopEx = unit.removeAttachment(BundleException.class);
          if (stopEx != null)
          {
+            // Rethrow the attached BundleException
             throw stopEx;
          }
       }

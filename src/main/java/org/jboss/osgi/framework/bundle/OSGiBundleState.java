@@ -24,18 +24,13 @@ package org.jboss.osgi.framework.bundle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
-import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.virtual.VirtualFile;
@@ -53,26 +48,8 @@ import org.osgi.framework.BundleException;
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class OSGiBundleState extends AbstractBundleState
+public class OSGiBundleState extends AbstractDeployedBundleState
 {
-   /** Used to generate a unique id */
-   private static final AtomicLong bundleIDGenerator = new AtomicLong();
-
-   /** The bundle id */
-   private long bundleId;
-
-   /** The bundle location */
-   private String location;
-   
-   /** The bundle root file */
-   private VirtualFile rootFile;
-
-   /** The list of deployment units */
-   private List<DeploymentUnit> units = new ArrayList<DeploymentUnit>();
-   
-   /** The headers localized with the default locale */
-   Dictionary<String, String> headersOnUninstall;
-   
    /**
     * Create a new BundleState.
     * 
@@ -81,18 +58,7 @@ public class OSGiBundleState extends AbstractBundleState
     */
    public OSGiBundleState(DeploymentUnit unit)
    {
-      if (unit == null)
-         throw new IllegalArgumentException("Null deployment unit");
-      
-      // The bundle location is not necessarily the bundle root url
-      // The framework is expected to preserve the location passed into installBundle(String)
-      Deployment dep = unit.getAttachment(Deployment.class);
-      location = (dep != null ? dep.getLocation() : unit.getName());
-      rootFile = (dep != null ? dep.getRoot() : ((VFSDeploymentUnit)unit).getRoot());
-
-      bundleId = bundleIDGenerator.incrementAndGet();
-      
-      addDeploymentUnit(unit);
+      super(unit);
    }
 
    /**
@@ -108,71 +74,14 @@ public class OSGiBundleState extends AbstractBundleState
       return (OSGiBundleState)bundle;
    }
    
-   /**
-    * Get the root file for this bundle 
-    */
-   public VirtualFile getRoot()
+   public boolean isFragment()
    {
-      return rootFile;
+      return false;
    }
-
-   @Override
-   public OSGiMetaData getOSGiMetaData()
-   {
-      DeploymentUnit unit = getDeploymentUnit();
-      OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
-      return osgiMetaData;
-   }
-
+   
    protected Set<ControllerContext> getRegisteredContexts()
    {
       return getBundleManager().getRegisteredContext(this);
-   }
-
-   public long getBundleId()
-   {
-      return bundleId;
-   }
-
-   /**
-    * Get the DeploymentUnit that was added last.
-    * 
-    * Initially, an OSGiBundleState is associated with just one DeploymentUnit.
-    * A sucessful call to {@link #update()} or its variants pushes an additional
-    * DeploymentUnit to the stack.   
-    * 
-    * @return the unit that corresponds to the last sucessful update.
-    */
-   public DeploymentUnit getDeploymentUnit()
-   {
-      int index = (units.size() - 1);
-      return units.get(index);
-   }
-
-   /**
-    * Add a DeploymentUnit to the list.
-    * 
-    * @see {@link OSGiBundleManager#updateBundle(OSGiBundleState, InputStream)}
-    */
-   void addDeploymentUnit(DeploymentUnit unit)
-   {
-      unit.getMutableMetaData().addMetaData(unit, DeploymentUnit.class);
-      units.add(unit);
-   }
-
-   /**
-    * Get the list of DeploymentUnits.
-    * 
-    * @see {@link OSGiBundleManager#uninstallBundle(OSGiBundleState)}
-    */
-   List<DeploymentUnit> getDeploymentUnits()
-   {
-      return Collections.unmodifiableList(units);
-   }
-
-   public String getLocation()
-   {
-      return location;
    }
 
    public URL getEntry(String path)
@@ -184,9 +93,8 @@ public class OSGiBundleState extends AbstractBundleState
       return getEntryInternal(path);
    }
 
-   // Get the entry without checking permissions and bundle state. 
    @Override
-   URL getEntryInternal(String path)
+   protected URL getEntryInternal(String path)
    {
       DeploymentUnit unit = getDeploymentUnit();
       if (unit instanceof VFSDeploymentUnit)
@@ -523,6 +431,10 @@ public class OSGiBundleState extends AbstractBundleState
    public void uninstall() throws BundleException
    {
       checkAdminPermission(AdminPermission.LIFECYCLE); // [TODO] extension bundles
+
+      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown
+      if (getState() == Bundle.UNINSTALLED)
+         throw new IllegalStateException("Bundle already uninstalled: " + this);
       
       // Cache the headers in the default locale 
       headersOnUninstall = getHeaders(null);

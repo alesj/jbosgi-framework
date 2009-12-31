@@ -376,6 +376,18 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
                {
                   listener.frameworkEvent(event);
                }
+               catch (RuntimeException ex)
+               {
+                  log.warn("Error while firing " + typeName + " for framework", ex);
+                  
+                  // The Framework must publish a FrameworkEvent.ERROR if a callback to an
+                  // event listener generates an unchecked exception - except when the callback
+                  // happens while delivering a FrameworkEvent.ERROR
+                  if (type != FrameworkEvent.ERROR)
+                  {
+                     fireFrameworkEvent(bundle, FrameworkEvent.ERROR, ex);
+                  }
+               }
                catch (Throwable t)
                {
                   log.warn("Error while firing " + typeName + " for framework", t);

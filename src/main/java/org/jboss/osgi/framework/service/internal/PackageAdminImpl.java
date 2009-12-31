@@ -47,6 +47,7 @@ import org.jboss.osgi.framework.resolver.ResolverBundle;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -229,10 +230,18 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          while (it.hasNext())
          {
             OSGiBundleState bundleState = it.next();
-            if (bundleManager.resolveBundle(bundleState, false))
+            try
             {
-               it.remove();
-               resolved++;
+               boolean bundleResolved = bundleManager.resolveBundle(bundleState, false);
+               if (bundleResolved)
+               {
+                  it.remove();
+                  resolved++;
+               }
+            }
+            catch (BundleException ex)
+            {
+               // ignore
             }
          }
       }

@@ -27,8 +27,10 @@ import org.jboss.test.osgi.FrameworkTest;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
 import org.jboss.test.osgi.bundle.support.b.LifecycleService;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * BundleLifecycleTestCase.
@@ -51,16 +53,16 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that the service bundle can get started
     */
-   public void testServiceBundle() throws Exception
+   public void testSimpleStart() throws Exception
    {
       Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
-         
+
          bundleA.start();
          assertBundleState(Bundle.ACTIVE, bundleA.getState());
-         
+
          ServiceReference sref = bundleA.getBundleContext().getServiceReference(LifecycleService.class.getName());
          assertNotNull("Service available", sref);
       }
@@ -70,17 +72,17 @@ public class BundleLifecycleTestCase extends FrameworkTest
          assertBundleState(Bundle.UNINSTALLED, bundleA.getState());
       }
    }
-   
+
    /**
     * Verifies that the bundle state is RESOLVED after a failure in BundleActivator.start()
     */
-   public void testServiceNotAvailable() throws Exception
+   public void testDependencyNotAvailable() throws Exception
    {
       Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
-         
+
          // BundleA not started - service not available  
          ServiceReference sref = getSystemBundle().getBundleContext().getServiceReference(LifecycleService.class.getName());
          assertNull("Service not available", sref);
@@ -89,7 +91,7 @@ public class BundleLifecycleTestCase extends FrameworkTest
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());
-            
+
             bundleB.start();
             fail("BundleException expected");
          }
@@ -113,7 +115,7 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that BundleB can get started when the service is available
     */
-   public void testServiceAvailable() throws Exception
+   public void testDependencyAvailable() throws Exception
    {
       Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
@@ -143,18 +145,18 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that BundleB can get started when the service is made available 
     */
-   public void testServiceMakeAvailable() throws Exception
+   public void testStartRetry() throws Exception
    {
       Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
-         
+
          Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());
-            
+
             try
             {
                bundleB.start();
@@ -163,12 +165,12 @@ public class BundleLifecycleTestCase extends FrameworkTest
             catch (BundleException ex)
             {
                assertBundleState(Bundle.RESOLVED, bundleB.getState());
-               
+
                // Now, make the service available
                bundleA.start();
                assertBundleState(Bundle.ACTIVE, bundleA.getState());
             }
-            
+
             // BundleB can now be started
             bundleB.start();
             assertBundleState(Bundle.ACTIVE, bundleB.getState());
@@ -183,6 +185,61 @@ public class BundleLifecycleTestCase extends FrameworkTest
       {
          bundleA.uninstall();
          assertBundleState(Bundle.UNINSTALLED, bundleA.getState());
+      }
+   }
+
+   /**
+    * Verifies that BundleB is still INSTALLED after a failure in PackageAdmin.resolve()
+    */
+   public void testFailToResolve() throws Exception
+   {
+      Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleB.getState());
+
+         // Get the PackageAdmin service
+         BundleContext sysContext = getSystemBundle().getBundleContext();
+         ServiceReference sref = sysContext.getServiceReference(PackageAdmin.class.getName());
+         PackageAdmin packageAdmin = (PackageAdmin)sysContext.getService(sref);
+         
+         // Attempt to explicitly resolve a bundle with missing dependency 
+         boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleB });
+         assertFalse("Resolve fails", allResolved);
+         
+         // Verify that the bundkle is still in state INSTALLED
+         assertBundleState(Bundle.INSTALLED, bundleB.getState());
+      }
+      finally
+      {
+         bundleB.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundleB.getState());
+      }
+   }
+
+   /**
+    * Verifies that we get a BundleException when an invalid bundle is installed
+    */
+   public void testInstallInvalid() throws Exception
+   {
+      try
+      {
+         installBundle(assembleBundle("missing-symbolic-name", "/bundles/lifecycle/invalid01"));
+         fail("BundleException expected");
+      }
+      catch (BundleException ex)
+      {
+         // expected
+      }
+      
+      try
+      {
+         installBundle(assembleBundle("invalid-export", "/bundles/lifecycle/invalid02"));
+         fail("BundleException expected");
+      }
+      catch (BundleException ex)
+      {
+         // expected
       }
    }
 }

@@ -29,6 +29,7 @@ import java.security.Permission;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -71,7 +72,7 @@ import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.Version;
 
 /**
- * BundleState.
+ * The abstract state of all bundles.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Thomas.Diesler@jboss.com
@@ -153,6 +154,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return state.get();
    }
 
+   public abstract boolean isFragment();
+   
    public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType)
    {
       throw new NotImplementedException();
@@ -350,7 +353,10 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    }
 
    // Get the entry without checking permissions and bundle state. 
-   abstract URL getEntryInternal(String path);
+   protected URL getEntryInternal(String path)
+   {
+      return null;
+   }
 
    public String getProperty(String key)
    {
@@ -418,7 +424,10 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     *
     * @return the registered contexts
     */
-   protected abstract Set<ControllerContext> getRegisteredContexts();
+   protected Set<ControllerContext> getRegisteredContexts()
+   {
+      return Collections.emptySet();
+   }
 
    public ServiceReference[] getRegisteredServices()
    {

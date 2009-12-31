@@ -22,11 +22,9 @@
 package org.jboss.osgi.framework.deployers;
 
 import org.jboss.deployers.spi.DeploymentException;
-import org.jboss.deployers.spi.deployer.DeploymentStage;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
 /**
@@ -43,9 +41,6 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
  */
 public class OSGiBundleStateAddDeployer extends AbstractOSGiBundleStateDeployer
 {
-   /** The required stage */
-   private DeploymentStage requiredStage;
-   
    /**
     * Create a new BundleStateDeployer.
     * 
@@ -56,26 +51,14 @@ public class OSGiBundleStateAddDeployer extends AbstractOSGiBundleStateDeployer
    {
       super(bundleManager);
       setInput(OSGiMetaData.class);
-      this.requiredStage = DeploymentStages.DESCRIBE;
    }
 
    @Override
    protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
       // [TODO] look at manifest headers and persistent state for this
-      unit.setRequiredStage(requiredStage);
+      unit.setRequiredStage(DeploymentStages.DESCRIBE);
       
-      OSGiBundleState bundleState = bundleManager.addDeployment(unit);
-      unit.addAttachment(OSGiBundleState.class, bundleState);
-   }
-
-   /**
-    * Set required stage.
-    *
-    * @param stage the required stage
-    */
-   public void setRequiredStage(String stage)
-   {
-      requiredStage = new DeploymentStage(stage);
+      bundleManager.addDeployment(unit);
    }
 }

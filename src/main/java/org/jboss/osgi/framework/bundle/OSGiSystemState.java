@@ -70,6 +70,11 @@ public class OSGiSystemState extends AbstractBundleState
       return osgiMetaData;
    }
 
+   public boolean isFragment()
+   {
+      return false;
+   }
+   
    protected Set<ControllerContext> getRegisteredContexts()
    {
       return registered;
@@ -132,13 +137,6 @@ public class OSGiSystemState extends AbstractBundleState
    }
 
    public URL getEntry(String path)
-   {
-      return getEntryInternal(path);
-   }
-
-   // Get the entry without checking permissions and bundle state. 
-   @Override
-   URL getEntryInternal(String path)
    {
       log.warn("[JBOSGI-138] getEntry(" + path + ")");
       return null;
