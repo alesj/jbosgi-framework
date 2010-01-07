@@ -282,11 +282,12 @@ public class OSGiBundleManager
 
       // osgi ldap filter parsing and matching
       FilterParserAndMatcher fpm = FilterParserAndMatcher.INSTANCE;
+      QualifierMatchers matchers = QualifierMatchers.getInstance();
 
       if (register)
       {
-         QualifierMatchers.getInstance().addParser(fpm);
-         QualifierMatchers.getInstance().addMatcher(fpm);
+         matchers.addParser(fpm);
+         matchers.addMatcher(fpm);
 
          MetaDataRetrievalFactory mdrFactory = factory;
          if (mdrFactory == null)
@@ -304,8 +305,8 @@ public class OSGiBundleManager
       {
          repository.removeMetaDataRetrievalFactory(CommonLevels.INSTANCE);
 
-         QualifierMatchers.getInstance().removeParser(fpm.getHandledContent());
-         QualifierMatchers.getInstance().removeMatcher(fpm.getHandledType());
+         matchers.removeParser(fpm.getHandledContent());
+         matchers.removeMatcher(fpm.getHandledType());
       }
    }
 
