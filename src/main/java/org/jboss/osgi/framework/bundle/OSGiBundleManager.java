@@ -46,8 +46,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
+import java.util.jar.Manifest;
 
 import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
@@ -68,6 +68,7 @@ import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
 import org.jboss.kernel.Kernel;
 import org.jboss.kernel.spi.dependency.KernelController;
+import org.jboss.kernel.spi.qualifier.QualifierMatchers;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.plugins.loader.memory.MemoryMetaDataLoader;
 import org.jboss.metadata.spi.loader.MutableMetaDataLoader;
@@ -279,8 +280,14 @@ public class OSGiBundleManager
          }
       }
 
+      // osgi ldap filter parsing and matching
+      FilterParserAndMatcher fpm = FilterParserAndMatcher.INSTANCE;
+
       if (register)
       {
+         QualifierMatchers.getInstance().addParser(fpm);
+         QualifierMatchers.getInstance().addMatcher(fpm);
+
          MetaDataRetrievalFactory mdrFactory = factory;
          if (mdrFactory == null)
          {
@@ -296,6 +303,9 @@ public class OSGiBundleManager
       else
       {
          repository.removeMetaDataRetrievalFactory(CommonLevels.INSTANCE);
+
+         QualifierMatchers.getInstance().removeParser(fpm.getHandledContent());
+         QualifierMatchers.getInstance().removeMatcher(fpm.getHandledType());
       }
    }
 
