@@ -25,17 +25,14 @@ package org.jboss.osgi.framework.deployers;
 
 import java.util.List;
 
-import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloading.spi.metadata.CapabilitiesMetaData;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.classloading.spi.metadata.RequirementsMetaData;
 import org.jboss.deployers.spi.DeploymentException;
-import org.jboss.deployers.spi.deployer.DeploymentStages;
-import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.ClassLoaderFactory;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
 import org.jboss.osgi.framework.classloading.OSGiBundleRequirement;
 import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
@@ -46,36 +43,17 @@ import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 
 /**
- * OSGiBundleClassLoadingDeployer.<p>
- * 
- * This deployer maps osgi metadata into our classloading metadata.
+ * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
+ * for non-fragment bundles.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiBundleClassLoadingDeployer extends AbstractSimpleRealDeployer<OSGiMetaData>
+public class OSGiBundleClassLoadingDeployer extends AbstractOSGiClassLoadingDeployer
 {
-   private ClassLoaderDomain domain;
    private ClassLoaderFactory factory;
    
-   /**
-    * Create a new OSGiBundleClassLoadingDeployer.
-    */
-   public OSGiBundleClassLoadingDeployer()
-   {
-      super(OSGiMetaData.class);
-      addInput(OSGiBundleState.class);
-      setOutput(ClassLoadingMetaData.class);
-      setStage(DeploymentStages.POST_PARSE);
-      setTopLevelOnly(true);
-   }
-
-   public void setDomain(ClassLoaderDomain domain)
-   {
-      this.domain = domain;
-   }
-
    public void setFactory(ClassLoaderFactory factory)
    {
       this.factory = factory;
@@ -84,20 +62,16 @@ public class OSGiBundleClassLoadingDeployer extends AbstractSimpleRealDeployer<O
    @Override
    public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
    {
-      if (unit.isAttachmentPresent(ClassLoadingMetaData.class))
+      super.deploy(unit, osgiMetaData);
+      
+      // Return if this is not a bundle state
+      AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
+      if (bundleState.isFragment())
          return;
-
-      OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
-      if (bundleState == null)
-         throw new IllegalStateException("No bundle state");
       
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       
-      ClassLoadingMetaData classLoadingMetaData = new ClassLoadingMetaData();
-      classLoadingMetaData.setName(bundleState.getSymbolicName());
-      classLoadingMetaData.setVersion(bundleState.getVersion());
-      classLoadingMetaData.setDomain(domain != null ? domain.getName() : null);
-
+      ClassLoadingMetaData classLoadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
       
@@ -145,12 +119,5 @@ public class OSGiBundleClassLoadingDeployer extends AbstractSimpleRealDeployer<O
       // Add the OSGi ClassLoaderFactory if configured
       if (factory != null)
          unit.addAttachment(ClassLoaderFactory.class, factory);
-      
-      // [TODO] dynamic imports
-      
-      unit.addAttachment(ClassLoadingMetaData.class, classLoadingMetaData);
-      
-      // AnnotationMetaDataDeployer.ANNOTATION_META_DATA_COMPLETE
-      unit.addAttachment("org.jboss.deployment.annotation.metadata.complete", Boolean.TRUE);
    }
 }

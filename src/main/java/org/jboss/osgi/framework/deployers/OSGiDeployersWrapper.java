@@ -37,6 +37,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.managed.api.ManagedObject;
 import org.jboss.osgi.deployment.deployer.Deployment;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.osgi.framework.Bundle;
@@ -110,7 +111,7 @@ public class OSGiDeployersWrapper implements Deployers
          for (DeploymentContext context : undeploy)
          {
             DeploymentUnit unit = context.getDeploymentUnit();
-            OSGiBundleState bundle = unit.getAttachment(OSGiBundleState.class);
+            AbstractBundleState bundle = unit.getAttachment(AbstractBundleState.class);
             if (bundle != null)
             {
                unresolvedBundles.remove(bundle);
@@ -125,8 +126,8 @@ public class OSGiDeployersWrapper implements Deployers
          for (DeploymentContext context : deploy)
          {
             DeploymentUnit unit = context.getDeploymentUnit();
-            OSGiBundleState bundle = unit.getAttachment(OSGiBundleState.class);
-            if (bundle == null)
+            AbstractBundleState bundle = unit.getAttachment(AbstractBundleState.class);
+            if (bundle == null || bundle.isFragment())
                continue;
             
             Deployment dep = unit.getAttachment(Deployment.class);
@@ -134,7 +135,7 @@ public class OSGiDeployersWrapper implements Deployers
             
             if (autoStart == true && bundle.getState() == Bundle.INSTALLED)
             {
-               unresolvedBundles.add(0, bundle);
+               unresolvedBundles.add(0, (OSGiBundleState)bundle);
             }
          }
          

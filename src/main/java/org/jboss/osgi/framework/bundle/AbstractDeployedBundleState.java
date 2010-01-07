@@ -33,7 +33,9 @@ import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.virtual.VirtualFile;
+import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 
 /**
  * The abstract state of a deployed bundle or fragment.
@@ -154,5 +156,19 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
          return headersOnUninstall;
 
       return super.getHeaders(locale);
+   }
+
+   public void uninstall() throws BundleException
+   {
+      checkAdminPermission(AdminPermission.LIFECYCLE); 
+
+      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown
+      if (getState() == Bundle.UNINSTALLED)
+         throw new IllegalStateException("Bundle already uninstalled: " + this);
+      
+      // Cache the headers in the default locale 
+      headersOnUninstall = getHeaders(null);
+      
+      getBundleManager().uninstallBundle(this);
    }
 }

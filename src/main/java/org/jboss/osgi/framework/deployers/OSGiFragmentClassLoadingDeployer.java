@@ -21,36 +21,31 @@
 */
 package org.jboss.osgi.framework.deployers;
 
+// $Id$
+
+import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.bundle.OSGiFragmentState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
 /**
- * This deployer removes any osgi state bundle from manager.
- *
- * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
+ * for fragment bundles.
+ * 
+ * @author Thomas.Diesler@jboss.com
+ * @since 07-Jan-2010
  */
-public class OSGiBundleStateRemoveDeployer extends AbstractOSGiBundleStateDeployer
+public class OSGiFragmentClassLoadingDeployer extends AbstractOSGiClassLoadingDeployer
 {
-   /**
-    * Create a new BundleStateDeployer.
-    *
-    * @param bundleManager the bundleManager
-    * @throws IllegalArgumentException for a null bundle manager
-    */
-   public OSGiBundleStateRemoveDeployer(OSGiBundleManager bundleManager)
-   {
-      super(bundleManager);
-      addInput(OSGiMetaData.class);
-   }
-
    @Override
-   protected void internalUndeploy(DeploymentUnit unit)
+   public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
    {
-      AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-      if (bundleState != null)
-         bundleManager.removeBundle(bundleState);
+      super.deploy(unit, osgiMetaData);
+      
+      OSGiFragmentState frgmtState = unit.getAttachment(OSGiFragmentState.class);
+      if (frgmtState == null)
+         return;
+      
+      // ClassLoadingMetaData classLoadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
    }
 }

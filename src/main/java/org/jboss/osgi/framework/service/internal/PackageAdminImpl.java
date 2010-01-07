@@ -33,8 +33,8 @@ import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.CapabilitiesMetaData;
 import org.jboss.classloading.spi.metadata.Capability;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.plugins.classloading.AbstractDeploymentClassLoaderPolicyModule;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
@@ -101,7 +101,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       {
          AbstractDeploymentClassLoaderPolicyModule deploymentModule = (AbstractDeploymentClassLoaderPolicyModule)module;
          DeploymentUnit unit = deploymentModule.getDeploymentUnit();
-         OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
          if (bundleState != null && bundleState.getState() != Bundle.INSTALLED)
             return bundleState.getBundleInternal();
       }
@@ -187,7 +187,12 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       List<Bundle> unresolvedBundles = new ArrayList<Bundle>();
       if (bundleArr == null)
       {
-         unresolvedBundles.addAll(bundleManager.getBundles(Bundle.INSTALLED));
+         for (Bundle bundle : bundleManager.getBundles(Bundle.INSTALLED))
+         {
+            AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
+            if (bundleState.isFragment() == false)
+               unresolvedBundles.add(bundleState);
+         }
       }
       else
       {
@@ -250,7 +255,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       if (resolvableBundles.isEmpty() == false)
       {
          log.error("Controller could not resolve: " + resolvableBundles);
-         for(OSGiBundleState bundleState : resolvableBundles)
+         for (OSGiBundleState bundleState : resolvableBundles)
          {
             try
             {

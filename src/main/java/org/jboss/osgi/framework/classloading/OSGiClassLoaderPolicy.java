@@ -31,7 +31,7 @@ import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.deployers.OSGiBundleNativeCodeDeployer;
 import org.jboss.virtual.VirtualFile;
 
@@ -48,7 +48,7 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
    private Map<String, File> libraryMap = new HashMap<String, File>();
    
-   public OSGiClassLoaderPolicy(OSGiBundleState bundleState, VirtualFile[] roots)
+   public OSGiClassLoaderPolicy(AbstractDeployedBundleState bundleState, VirtualFile[] roots)
    {
       super(roots);
       

@@ -27,7 +27,8 @@ import org.jboss.classloading.plugins.metadata.PackageRequirement;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
@@ -47,7 +48,7 @@ public class OSGiPackageRequirement extends PackageRequirement
    private static final long serialVersionUID = 5109907232396093061L;
 
    /** The bundle state */
-   private OSGiBundleState bundleState;
+   private AbstractBundleState bundleState;
 
    /** The attributes */
    private PackageAttribute requirePackage;
@@ -61,7 +62,7 @@ public class OSGiPackageRequirement extends PackageRequirement
     * @throws IllegalArgumentException for a null requirePackage
     */
    @SuppressWarnings("deprecation")
-   public static OSGiPackageRequirement create(OSGiBundleState bundleState, PackageAttribute requirePackage)
+   public static OSGiPackageRequirement create(AbstractBundleState bundleState, PackageAttribute requirePackage)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle");
@@ -99,7 +100,7 @@ public class OSGiPackageRequirement extends PackageRequirement
     * @param requirePackage the require package metadata
     * @throws IllegalArgumentException for a null name or requirePackage
     */
-   public OSGiPackageRequirement(OSGiBundleState bundleState, String name, VersionRange versionRange, PackageAttribute requirePackage)
+   public OSGiPackageRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, PackageAttribute requirePackage)
    {
       super(name, versionRange);
       this.bundleState = bundleState;
@@ -130,10 +131,15 @@ public class OSGiPackageRequirement extends PackageRequirement
     */
    public Module getModule()
    {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      Module module = unit.getAttachment(Module.class);
-      if (module == null)
-         throw new IllegalStateException("Cannot obtain module from: " + bundleState);
+      Module module = null;
+      if (bundleState instanceof AbstractDeployedBundleState)
+      {
+         AbstractDeployedBundleState depBundle = (AbstractDeployedBundleState)bundleState; 
+         DeploymentUnit unit = depBundle.getDeploymentUnit();
+         module = unit.getAttachment(Module.class);
+         if (module == null)
+            throw new IllegalStateException("Cannot obtain module from: " + bundleState);
+      }
       return module;
    }
    

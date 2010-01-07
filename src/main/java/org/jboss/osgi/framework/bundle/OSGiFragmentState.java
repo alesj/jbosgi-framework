@@ -87,12 +87,12 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
 
    public void start(int options) throws BundleException
    {
-      throw new NotImplementedException();
+      throw new BundleException("Cannot start fragment bundle: " + this);
    }
 
    public void stop(int options) throws BundleException
    {
-      throw new NotImplementedException();
+      throw new BundleException("Cannot stop fragment bundle: " + this);
    }
 
    public void update() throws BundleException
@@ -101,12 +101,6 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
    }
 
    public void update(InputStream input) throws BundleException
-   {
-      throw new NotImplementedException();
-   }
-
-   @Override
-   public void uninstall() throws BundleException
    {
       throw new NotImplementedException();
    }

@@ -390,7 +390,6 @@ public class OSGiBundleManager
                {
                   bundleState = (OSGiBundleState)addDeployment(unit);
                   bundleState.startInternal();
-                  unit.addAttachment(OSGiBundleState.class, bundleState);
                }
                catch (Throwable t)
                {
@@ -625,7 +624,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public OSGiBundleState installBundle(URL url) throws BundleException
+   public AbstractBundleState installBundle(URL url) throws BundleException
    {
       if (url == null)
          throw new BundleException("Null url");
@@ -641,7 +640,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public OSGiBundleState installBundle(String location, InputStream input) throws BundleException
+   public AbstractBundleState installBundle(String location, InputStream input) throws BundleException
    {
       if (location == null)
          throw new BundleException("Null location");
@@ -702,7 +701,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public OSGiBundleState installBundle(VirtualFile root) throws BundleException
+   public AbstractBundleState installBundle(VirtualFile root) throws BundleException
    {
       return install(root, root.toString(), false);
    }
@@ -710,7 +709,7 @@ public class OSGiBundleManager
    /*
     * Installs a bundle from the given virtual file.
     */
-   private OSGiBundleState install(VirtualFile root, String location, boolean autoStart) throws BundleException
+   private AbstractBundleState install(VirtualFile root, String location, boolean autoStart) throws BundleException
    {
       if (location == null)
          throw new IllegalArgumentException("Null location");
@@ -738,7 +737,7 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws BundleException for any error
     */
-   public OSGiBundleState installBundle(Deployment dep) throws BundleException
+   public AbstractBundleState installBundle(Deployment dep) throws BundleException
    {
       // Create the deployment and deploy it
       try
@@ -748,15 +747,15 @@ public class OSGiBundleManager
          att.addAttachment(Deployment.class, dep);
 
          // In case of update the OSGiBundleState is attached
-         OSGiBundleState bundleState = dep.getAttachment(OSGiBundleState.class);
+         AbstractBundleState bundleState = dep.getAttachment(AbstractBundleState.class);
          if (bundleState != null)
-            att.addAttachment(OSGiBundleState.class, bundleState);
+            att.addAttachment(AbstractBundleState.class, bundleState);
 
          deployerClient.deploy(deployment);
          try
          {
             DeploymentUnit unit = deployerStructure.getDeploymentUnit(deployment.getName());
-            bundleState = unit.getAttachment(OSGiBundleState.class);
+            bundleState = unit.getAttachment(AbstractBundleState.class);
             if (bundleState == null)
                throw new IllegalStateException("Unable to determine bundle state for " + deployment.getName());
 
@@ -888,7 +887,7 @@ public class OSGiBundleManager
       // If the Framework is unable to install the updated version of this bundle, the original version of this bundle must be restored 
       // and a BundleException must be thrown after completion of the remaining steps.
       String location = (updateURL != null ? updateURL.toExternalForm() : bundleState.getCanonicalName() + "/update");
-      OSGiBundleState updatedBundleState = null;
+      AbstractBundleState updatedBundleState = null;
       BundleException throwAfterUpdate = null;
       try
       {
@@ -897,7 +896,7 @@ public class OSGiBundleManager
 
          BundleInfo info = BundleInfo.createBundleInfo(root, location);
          Deployment dep = DeploymentFactory.createDeployment(info);
-         dep.addAttachment(OSGiBundleState.class, bundleState);
+         dep.addAttachment(AbstractBundleState.class, bundleState);
          dep.setBundleUpdate(true);
          dep.setAutoStart(false);
 
@@ -927,7 +926,8 @@ public class OSGiBundleManager
          // If Bundle.start throws an exception, a Framework event of type FrameworkEvent.ERROR is fired containing the exception
          if (activeBeforeUpdate)
          {
-            startBundle(updatedBundleState);
+            if (updatedBundleState.isFragment() == false)
+               startBundle((OSGiBundleState)updatedBundleState);
          }
       }
 
@@ -944,7 +944,7 @@ public class OSGiBundleManager
     * @param bundleState the bundle
     * @throws BundleException for any error
     */
-   public void uninstallBundle(OSGiBundleState bundleState) throws BundleException
+   public void uninstallBundle(AbstractDeployedBundleState bundleState) throws BundleException
    {
       long id = bundleState.getBundleId();
       if (getBundleById(id) == null)
@@ -957,7 +957,8 @@ public class OSGiBundleManager
       {
          try
          {
-            stopBundle(bundleState);
+            if (bundleState.isFragment() == false)
+               stopBundle((OSGiBundleState)bundleState);
          }
          catch (Exception ex)
          {
@@ -999,17 +1000,18 @@ public class OSGiBundleManager
     * @return the bundle state
     * @throws IllegalArgumentException for a null parameter
     */
-   public AbstractDeployedBundleState addDeployment(DeploymentUnit unit)
+   public AbstractBundleState addDeployment(DeploymentUnit unit)
    {
       if (unit == null)
          throw new IllegalArgumentException("Null unit");
 
       // In case of Bundle.update() the OSGiBundleState is attached
-      AbstractDeployedBundleState absBundle = unit.getAttachment(OSGiBundleState.class);
+      AbstractBundleState absBundle = unit.getAttachment(AbstractBundleState.class);
       if (absBundle != null)
       {
-         // Add the DeploymentUnit to the OSGiBundleState 
-         absBundle.addDeploymentUnit(unit);
+         // Add the DeploymentUnit to the OSGiBundleState
+         AbstractDeployedBundleState depBundle = (AbstractDeployedBundleState)absBundle;
+         depBundle.addDeploymentUnit(unit);
       }
       else
       {
@@ -1018,20 +1020,27 @@ public class OSGiBundleManager
          if (fragmentHost != null)
          {
             // Create a new OSGiFragmentState
-            OSGiFragmentState fragmentBundle = new OSGiFragmentState(unit);
-            unit.addAttachment(OSGiFragmentState.class, fragmentBundle);
-            absBundle = fragmentBundle;
-            addBundle(fragmentBundle);
+            OSGiFragmentState fragmentState = new OSGiFragmentState(unit);
+            absBundle = fragmentState;
+            addBundle(fragmentState);
          }
          else
          {
             // Create a new OSGiBundleState
             OSGiBundleState bundleState = new OSGiBundleState(unit);
-            unit.addAttachment(OSGiBundleState.class, bundleState);
             absBundle = bundleState;
             addBundle(bundleState);
          }
+         
+         // Attach the abstract bundle state
+         unit.addAttachment(AbstractBundleState.class, absBundle);
       }
+
+      // Attach the abstract bundle state
+      if (absBundle.isFragment())
+         unit.addAttachment(OSGiFragmentState.class, (OSGiFragmentState)absBundle);
+      else
+         unit.addAttachment(OSGiBundleState.class, (OSGiBundleState)absBundle);
 
       return absBundle;
    }
@@ -1120,7 +1129,7 @@ public class OSGiBundleManager
     * @param bundleState the bundle state
     * @throws IllegalArgumentException for a null bundle state
     */
-   public void removeBundle(OSGiBundleState bundleState)
+   public void removeBundle(AbstractBundleState bundleState)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle state");
@@ -1282,8 +1291,7 @@ public class OSGiBundleManager
       List<AbstractBundleState> bundles = new ArrayList<AbstractBundleState>();
       for (AbstractBundleState aux : allBundles)
       {
-         if (aux.isFragment() == false)
-            bundles.add(aux);
+         bundles.add(aux);
       }
       return Collections.unmodifiableList(bundles);
    }
@@ -1299,7 +1307,7 @@ public class OSGiBundleManager
       List<AbstractBundleState> bundles = new ArrayList<AbstractBundleState>();
       for (AbstractBundleState aux : allBundles)
       {
-         if (aux.isFragment() == false && aux.getState() == state)
+         if (aux.getState() == state)
             bundles.add(aux);
       }
       return Collections.unmodifiableList(bundles);

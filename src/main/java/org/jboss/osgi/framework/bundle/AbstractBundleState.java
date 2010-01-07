@@ -681,8 +681,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return bundleState.getBundleInternal();
    }
 
-   public abstract void uninstall() throws BundleException;
-
    /**
     * Get the canonical name of the bundle
     * 

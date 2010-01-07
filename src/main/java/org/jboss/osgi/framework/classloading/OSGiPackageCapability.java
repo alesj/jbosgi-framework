@@ -30,8 +30,8 @@ import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
@@ -56,7 +56,7 @@ public class OSGiPackageCapability extends PackageCapability
    private static final long serialVersionUID = 3940667616588052822L;
 
    /** The bundle state */
-   private OSGiBundleState bundleState;
+   private AbstractBundleState bundleState;
 
    /** The export package */
    private PackageAttribute exportPackage;
@@ -73,7 +73,7 @@ public class OSGiPackageCapability extends PackageCapability
     * @throws IllegalArgumentException for null metadata
     */
    @SuppressWarnings("deprecation")
-   public static OSGiPackageCapability create(OSGiBundleState bundleState, PackageAttribute exportPackage)
+   public static OSGiPackageCapability create(AbstractBundleState bundleState, PackageAttribute exportPackage)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle");
@@ -107,7 +107,7 @@ public class OSGiPackageCapability extends PackageCapability
       return capability;
    }
 
-   private OSGiPackageCapability(OSGiBundleState bundleState, String name, Version version, PackageAttribute exportPackage)
+   private OSGiPackageCapability(AbstractBundleState bundleState, String name, Version version, PackageAttribute exportPackage)
    {
       super(name, version);
       this.bundleState = bundleState;
@@ -171,10 +171,15 @@ public class OSGiPackageCapability extends PackageCapability
     */
    public Module getModule()
    {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      Module module = unit.getAttachment(Module.class);
-      if (module == null)
-         throw new IllegalStateException("Cannot obtain module from: " + bundleState);
+      Module module = null;
+      if (bundleState instanceof AbstractDeployedBundleState)
+      {
+         AbstractDeployedBundleState depBundle = (AbstractDeployedBundleState)bundleState; 
+         DeploymentUnit unit = depBundle.getDeploymentUnit();
+         module = unit.getAttachment(Module.class);
+         if (module == null)
+            throw new IllegalStateException("Cannot obtain module from: " + bundleState);
+      }
       return module;
    }
 

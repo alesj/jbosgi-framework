@@ -25,8 +25,8 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 
 /**
  * AbstractOSGiBundleStateDeployer.<p>
@@ -44,7 +44,7 @@ public abstract class AbstractOSGiBundleStateDeployer extends AbstractRealDeploy
       if (bundleManager == null)
          throw new IllegalArgumentException("Null bundle manager");
 
-      setOutput(OSGiBundleState.class);
+      setOutput(AbstractBundleState.class);
       setStage(DeploymentStages.POST_PARSE);
       setTopLevelOnly(true);
 

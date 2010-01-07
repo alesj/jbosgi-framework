@@ -428,20 +428,6 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return super.getHeaders(locale);
    }
 
-   public void uninstall() throws BundleException
-   {
-      checkAdminPermission(AdminPermission.LIFECYCLE); // [TODO] extension bundles
-
-      // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown
-      if (getState() == Bundle.UNINSTALLED)
-         throw new IllegalStateException("Bundle already uninstalled: " + this);
-      
-      // Cache the headers in the default locale 
-      headersOnUninstall = getHeaders(null);
-      
-      getBundleManager().uninstallBundle(this);
-   }
-
    @Override
    protected void afterServiceRegistration(OSGiServiceState service)
    {

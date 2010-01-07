@@ -26,7 +26,7 @@ import java.util.Map;
 import org.jboss.classloading.plugins.metadata.ModuleCapability;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.Requirement;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
@@ -47,7 +47,7 @@ public class OSGiBundleCapability extends ModuleCapability
    private static final long serialVersionUID = 2366716668262831380L;
 
    /** The bundle state */
-   private OSGiBundleState bundleState;
+   private AbstractBundleState bundleState;
 
    /**
     * Create a new OSGiBundleCapability
@@ -56,7 +56,7 @@ public class OSGiBundleCapability extends ModuleCapability
     * @return the capability
     * @throws IllegalArgumentException for a null metadata
     */
-   public static OSGiBundleCapability create(OSGiBundleState bundleState)
+   public static OSGiBundleCapability create(AbstractBundleState bundleState)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
@@ -75,7 +75,7 @@ public class OSGiBundleCapability extends ModuleCapability
     * @param metadata the metadata
     * @throws IllegalArgumentException for a null name or requireBundle
     */
-   public OSGiBundleCapability(String name, Version version, OSGiBundleState bundleState)
+   public OSGiBundleCapability(String name, Version version, AbstractBundleState bundleState)
    {
       super(name, version);
       if (bundleState == null)
