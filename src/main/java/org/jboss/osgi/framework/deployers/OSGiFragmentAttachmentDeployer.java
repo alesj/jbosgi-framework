@@ -59,7 +59,7 @@ public class OSGiFragmentAttachmentDeployer extends AbstractSimpleRealDeployer<C
    {
       // Return if this is not a real bundle (i.e. a fragment) 
       AbstractBundleState absBundleState = unit.getAttachment(AbstractBundleState.class);
-      if (absBundleState.isFragment())
+      if (absBundleState == null || absBundleState.isFragment())
          return;
       
       OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
