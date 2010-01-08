@@ -28,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jboss.classloading.plugins.metadata.PackageCapability;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
@@ -40,11 +41,11 @@ import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
  */
 class BundleCapability
 {
-   private OSGiBundleState bundle;
+   private AbstractDeployedBundleState bundle;
    private PackageCapability packageCapability;
    private List<BundleRequirement> wires;
    
-   BundleCapability(OSGiBundleState bundle, PackageCapability packageCapability)
+   BundleCapability(AbstractDeployedBundleState bundle, PackageCapability packageCapability)
    {
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
@@ -55,14 +56,14 @@ class BundleCapability
       this.packageCapability = packageCapability;
    }
 
-   OSGiBundleState getExportingBundle()
+   AbstractDeployedBundleState getExportingBundle()
    {
       return bundle;
    }
 
    Module getExportingModule()
    {
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       return unit.getAttachment(Module.class);
    }

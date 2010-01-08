@@ -29,8 +29,8 @@ import org.jboss.osgi.deployment.interceptor.AbstractLifecycleInterceptorService
 import org.jboss.osgi.deployment.interceptor.InvocationContext;
 import org.jboss.osgi.deployment.interceptor.LifecycleInterceptorService;
 import org.jboss.osgi.deployment.internal.InvocationContextImpl;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.plugins.LifecycleInterceptorServicePlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
 import org.jboss.osgi.framework.util.DeploymentUnitAttachments;
@@ -66,7 +66,7 @@ public class LifecycleInterceptorServiceImpl extends AbstractServicePlugin imple
          protected InvocationContext getInvocationContext(Bundle bundle)
          {
             long bundleId = bundle.getBundleId();
-            OSGiBundleState bundleState = (OSGiBundleState)bundleManager.getBundleById(bundleId);
+            AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)bundleManager.getBundleById(bundleId);
             if (bundle == null)
                throw new IllegalStateException("Cannot obtain bundle for: " + bundle);
 

@@ -36,12 +36,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHost;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
-import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -95,7 +92,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
    {
       String hostName = getSymbolicName();
       Version hostVersion = getVersion();
-      
+
       FragmentHost fragmentHost = fragmentState.getFragmentHost();
       if (hostName.equals(fragmentHost.getSymbolicName()) == false)
          return false;
@@ -103,7 +100,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       Version version = fragmentHost.getBundleVersion();
       if (version != null && hostVersion.equals(version) == false)
          return false;
-      
+
       return true;
    }
 
@@ -121,7 +118,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
       log.debug("Attach " + fragmentState + " -> " + this);
       attachedFragments.add(fragmentState);
-      
+
       // attach classloading metadata to the hosts classloading metadata
       clMetaData.attachedFragmentMetaData(fragMetaData);
    }
@@ -136,103 +133,10 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return getBundleManager().getRegisteredContext(this);
    }
 
-   public URL getEntry(String path)
-   {
-      checkInstalled();
-      if (noAdminPermission(AdminPermission.RESOURCE))
-         return null;
-
-      return getEntryInternal(path);
-   }
-
-   @Override
-   protected URL getEntryInternal(String path)
-   {
-      DeploymentUnit unit = getDeploymentUnit();
-      if (unit instanceof VFSDeploymentUnit)
-      {
-         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
-
-         if (path.startsWith("/"))
-            path = path.substring(1);
-
-         return vfsDeploymentUnit.getResourceLoader().getResource(path);
-      }
-      return null;
-   }
-
-   @SuppressWarnings("rawtypes")
-   public Enumeration getEntryPaths(String path)
-   {
-      checkInstalled();
-      if (noAdminPermission(AdminPermission.RESOURCE))
-         return null;
-
-      DeploymentUnit unit = getDeploymentUnit();
-      if (unit instanceof VFSDeploymentUnit)
-      {
-         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
-         VirtualFile root = vfsDeploymentUnit.getRoot();
-         if (path.startsWith("/"))
-            path = path.substring(1);
-         try
-         {
-            VirtualFile child = root.getChild(path);
-            if (child != null)
-               return new VFSEntryPathsEnumeration(root, child);
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException("Error determining entry paths for " + root + " path=" + path);
-         }
-
-      }
-      return null;
-   }
-
-   @SuppressWarnings("rawtypes")
-   public Enumeration findEntries(String path, String filePattern, boolean recurse)
-   {
-      if (path == null)
-         throw new IllegalArgumentException("Null path");
-
-      checkInstalled();
-      if (noAdminPermission(AdminPermission.RESOURCE))
-         return null;
-
-      // [TODO] fragments
-      resolveBundle();
-
-      if (filePattern == null)
-         filePattern = "*";
-
-      DeploymentUnit unit = getDeploymentUnit();
-      if (unit instanceof VFSDeploymentUnit)
-      {
-         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
-         VirtualFile root = vfsDeploymentUnit.getRoot();
-         if (path.startsWith("/"))
-            path = path.substring(1);
-         try
-         {
-            VirtualFile child = root.getChild(path);
-            if (child != null)
-               return new VFSFindEntriesEnumeration(root, child, filePattern, recurse);
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException("Error finding entries for " + root + " path=" + path + " pattern=" + filePattern + " recurse=" + recurse);
-         }
-
-      }
-      return null;
-   }
-
    public Class<?> loadClass(String name) throws ClassNotFoundException
    {
       checkInstalled();
       checkAdminPermission(AdminPermission.CLASS);
-      // [TODO] bundle fragment
 
       if (resolveBundle() == false)
          throw new ClassNotFoundException("Cannot load class: " + name);
@@ -241,23 +145,12 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return classLoader.loadClass(name);
    }
 
-   /**
-    * Try to resolve the bundle
-    * @return true when resolved
-    */
-   boolean resolveBundle()
-   {
-      PackageAdminPlugin packageAdmin = getBundleManager().getPlugin(PackageAdminPlugin.class);
-      return packageAdmin.resolveBundles(new Bundle[] { this });
-   }
-
    public URL getResource(String name)
    {
       checkInstalled();
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
 
-      // [TODO] bundle fragment
       if (resolveBundle() == false)
          return getDeploymentUnit().getResourceLoader().getResource(name);
 
@@ -271,7 +164,6 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
 
-      // [TODO] bundle fragment 
       if (resolveBundle() == false)
          return getDeploymentUnit().getResourceLoader().getResources(name);
 

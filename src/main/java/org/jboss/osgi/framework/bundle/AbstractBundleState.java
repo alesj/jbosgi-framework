@@ -353,7 +353,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    }
 
    // Get the entry without checking permissions and bundle state. 
-   protected URL getEntryInternal(String path)
+   URL getEntryInternal(String path)
    {
       return null;
    }

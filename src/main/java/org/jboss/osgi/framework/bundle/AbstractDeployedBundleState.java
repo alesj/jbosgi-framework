@@ -21,10 +21,13 @@
 */
 package org.jboss.osgi.framework.bundle;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -32,6 +35,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -158,6 +162,60 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       return super.getHeaders(locale);
    }
 
+   public URL getEntry(String path)
+   {
+      checkInstalled();
+      if (noAdminPermission(AdminPermission.RESOURCE))
+         return null;
+   
+      return getEntryInternal(path);
+   }
+
+   @SuppressWarnings("rawtypes")
+   public Enumeration getEntryPaths(String path)
+   {
+      checkInstalled();
+      if (noAdminPermission(AdminPermission.RESOURCE))
+         return null;
+   
+      DeploymentUnit unit = getDeploymentUnit();
+      if (unit instanceof VFSDeploymentUnit)
+      {
+         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
+         VirtualFile root = vfsDeploymentUnit.getRoot();
+         if (path.startsWith("/"))
+            path = path.substring(1);
+         try
+         {
+            VirtualFile child = root.getChild(path);
+            if (child != null)
+               return new VFSEntryPathsEnumeration(root, child);
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException("Error determining entry paths for " + root + " path=" + path);
+         }
+   
+      }
+      return null;
+   }
+   
+   @Override
+   protected URL getEntryInternal(String path)
+   {
+      DeploymentUnit unit = getDeploymentUnit();
+      if (unit instanceof VFSDeploymentUnit)
+      {
+         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
+
+         if (path.startsWith("/"))
+            path = path.substring(1);
+
+         return vfsDeploymentUnit.getResourceLoader().getResource(path);
+      }
+      return null;
+   }
+   
    public void uninstall() throws BundleException
    {
       checkAdminPermission(AdminPermission.LIFECYCLE); 
@@ -170,5 +228,53 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       headersOnUninstall = getHeaders(null);
       
       getBundleManager().uninstallBundle(this);
+   }
+
+   @SuppressWarnings("rawtypes")
+   public Enumeration findEntries(String path, String filePattern, boolean recurse)
+   {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+   
+      checkInstalled();
+      if (noAdminPermission(AdminPermission.RESOURCE))
+         return null;
+   
+      // [TODO] fragments
+      resolveBundle();
+   
+      if (filePattern == null)
+         filePattern = "*";
+   
+      DeploymentUnit unit = getDeploymentUnit();
+      if (unit instanceof VFSDeploymentUnit)
+      {
+         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
+         VirtualFile root = vfsDeploymentUnit.getRoot();
+         if (path.startsWith("/"))
+            path = path.substring(1);
+         try
+         {
+            VirtualFile child = root.getChild(path);
+            if (child != null)
+               return new VFSFindEntriesEnumeration(root, child, filePattern, recurse);
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException("Error finding entries for " + root + " path=" + path + " pattern=" + filePattern + " recurse=" + recurse);
+         }
+   
+      }
+      return null;
+   }
+
+   /**
+    * Try to resolve the bundle
+    * @return true when resolved
+    */
+   protected boolean resolveBundle()
+   {
+      PackageAdminPlugin packageAdmin = getBundleManager().getPlugin(PackageAdminPlugin.class);
+      return packageAdmin.resolveBundles(new Bundle[] { this });
    }
 }

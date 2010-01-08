@@ -54,23 +54,6 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
       return true;
    }
    
-   @SuppressWarnings("rawtypes")
-   public Enumeration findEntries(String path, String filePattern, boolean recurse)
-   {
-      throw new NotImplementedException();
-   }
-
-   public URL getEntry(String path)
-   {
-      throw new NotImplementedException();
-   }
-
-   @SuppressWarnings("rawtypes")
-   public Enumeration getEntryPaths(String path)
-   {
-      throw new NotImplementedException();
-   }
-
    public URL getResource(String name)
    {
       // Null if the resource could not be found or if this bundle is a fragment bundle

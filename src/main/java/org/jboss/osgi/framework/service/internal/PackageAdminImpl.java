@@ -37,6 +37,7 @@ import org.jboss.deployers.plugins.classloading.AbstractDeploymentClassLoaderPol
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
@@ -131,7 +132,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       if (abstractBundleState instanceof OSGiBundleState == false)
          throw new UnsupportedOperationException("FIXME: getExportedPackages for System bundle");
 
-      OSGiBundleState bundleState = (OSGiBundleState)abstractBundleState;
+      AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)abstractBundleState;
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       ClassLoadingMetaData metaData = unit.getAttachment(ClassLoadingMetaData.class);
       if (metaData == null)

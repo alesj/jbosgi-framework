@@ -22,7 +22,7 @@
 package org.jboss.osgi.framework.resolver.internal.basic;
 
 import org.jboss.classloading.plugins.metadata.PackageRequirement;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 
 /**
  * An association of bundle/requirement.
@@ -32,11 +32,11 @@ import org.jboss.osgi.framework.bundle.OSGiBundleState;
  */
 class BundleRequirement
 {
-   private OSGiBundleState bundle;
+   private AbstractDeployedBundleState bundle;
    private PackageRequirement packageRequirement;
    private BundleCapability wire;
    
-   BundleRequirement(OSGiBundleState bundle, PackageRequirement packageRequirement)
+   BundleRequirement(AbstractDeployedBundleState bundle, PackageRequirement packageRequirement)
    {
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
@@ -52,7 +52,7 @@ class BundleRequirement
       return wire;
    }
 
-   OSGiBundleState getImportingBundle()
+   AbstractDeployedBundleState getImportingBundle()
    {
       return bundle;
    }

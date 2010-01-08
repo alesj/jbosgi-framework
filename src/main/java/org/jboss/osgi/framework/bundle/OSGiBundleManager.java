@@ -842,7 +842,7 @@ public class OSGiBundleManager
    /**
     * Updates a bundle from an InputStream. 
     */
-   public void updateBundle(OSGiBundleState bundleState, InputStream in) throws BundleException
+   public void updateBundle(AbstractDeployedBundleState bundleState, InputStream in) throws BundleException
    {
       // If the specified InputStream is null, the Framework must create the InputStream from which to read the updated bundle by interpreting, 
       // in an implementation dependent manner, this bundle's Bundle-UpdateLocation Manifest header, if present, or this bundle's original location.
@@ -927,7 +927,7 @@ public class OSGiBundleManager
          if (activeBeforeUpdate)
          {
             if (updatedBundleState.isFragment() == false)
-               startBundle((OSGiBundleState)updatedBundleState);
+               startBundle((AbstractDeployedBundleState)updatedBundleState);
          }
       }
 
@@ -958,7 +958,7 @@ public class OSGiBundleManager
          try
          {
             if (bundleState.isFragment() == false)
-               stopBundle((OSGiBundleState)bundleState);
+               stopBundle((AbstractDeployedBundleState)bundleState);
          }
          catch (Exception ex)
          {
@@ -1027,7 +1027,7 @@ public class OSGiBundleManager
          else
          {
             // Create a new OSGiBundleState
-            OSGiBundleState bundleState = new OSGiBundleState(unit);
+            AbstractDeployedBundleState bundleState = new OSGiBundleState(unit);
             absBundle = bundleState;
             addBundle(bundleState);
          }
@@ -1065,7 +1065,7 @@ public class OSGiBundleManager
       boolean fireEvent = true;
       if (bundleState instanceof OSGiBundleState)
       {
-         DeploymentUnit unit = ((OSGiBundleState)bundleState).getDeploymentUnit();
+         DeploymentUnit unit = ((AbstractDeployedBundleState)bundleState).getDeploymentUnit();
          Deployment dep = unit.getAttachment(Deployment.class);
          fireEvent = (dep == null || dep.isBundleUpdate() == false);
       }
@@ -1154,7 +1154,7 @@ public class OSGiBundleManager
       if (id == 0)
          throw new IllegalArgumentException("Cannot get deployment from system bundle");
 
-      OSGiBundleState bundleState = (OSGiBundleState)getBundleById(id);
+      AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)getBundleById(id);
       if (bundleState == null)
          return null;
 
@@ -1247,7 +1247,7 @@ public class OSGiBundleManager
          // Fallback to the deployment name
          else if (aux instanceof OSGiBundleState)
          {
-            DeploymentUnit unit = ((OSGiBundleState)aux).getDeploymentUnit();
+            DeploymentUnit unit = ((AbstractDeployedBundleState)aux).getDeploymentUnit();
             if (location.equals(unit.getName()))
             {
                result = aux;
@@ -1370,7 +1370,7 @@ public class OSGiBundleManager
     * @see OSGiBundleActivatorDeployer
     * @see OSGiBundleState#startInternal()
     */
-   public void startBundle(OSGiBundleState bundleState) throws BundleException
+   public void startBundle(AbstractDeployedBundleState bundleState) throws BundleException
    {
       // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
       if (bundleState.getState() == Bundle.UNINSTALLED)
@@ -1442,7 +1442,7 @@ public class OSGiBundleManager
     * @see OSGiBundleActivatorDeployer
     * @see OSGiBundleState#stopInternal()
     */
-   public void stopBundle(OSGiBundleState bundleState) throws BundleException
+   public void stopBundle(AbstractDeployedBundleState bundleState) throws BundleException
    {
       // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
       if (bundleState.getState() == Bundle.UNINSTALLED)
@@ -1672,7 +1672,7 @@ public class OSGiBundleManager
     * @param bundleState the owning bundle
     * @return registered contexts
     */
-   Set<ControllerContext> getRegisteredContext(OSGiBundleState bundleState)
+   Set<ControllerContext> getRegisteredContext(AbstractDeployedBundleState bundleState)
    {
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       return registry.getContexts(unit);
@@ -1699,7 +1699,7 @@ public class OSGiBundleManager
     *
     * @param bundleState the stopping bundle
     */
-   void unregisterContexts(OSGiBundleState bundleState)
+   void unregisterContexts(AbstractDeployedBundleState bundleState)
    {
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       Set<ControllerContext> contexts = registry.getContexts(unit);

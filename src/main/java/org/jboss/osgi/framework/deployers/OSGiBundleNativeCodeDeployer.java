@@ -40,6 +40,7 @@ import org.jboss.deployers.structure.spi.ClassLoaderFactory;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoaderPolicy;
@@ -131,7 +132,7 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
       if ((absBundleState instanceof OSGiBundleState) == false)
          return;
       
-      OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
+      AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)absBundleState;
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       List<ParameterizedAttribute> nativeCodeParams = osgiMetaData.getBundleNativeCode();
       if (nativeCodeParams == null)

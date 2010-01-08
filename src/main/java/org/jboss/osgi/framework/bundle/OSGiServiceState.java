@@ -244,7 +244,7 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
       ScopeKey mutableScope;
       if (bundleState instanceof OSGiBundleState)
       {
-         OSGiBundleState obs = (OSGiBundleState)bundleState;
+         AbstractDeployedBundleState obs = (AbstractDeployedBundleState)bundleState;
          DeploymentUnit unit = obs.getDeploymentUnit();
          scope = unit.getScope();
          mutableScope = unit.getMutableScope();

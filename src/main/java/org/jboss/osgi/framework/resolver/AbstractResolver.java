@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
@@ -61,7 +62,7 @@ public abstract class AbstractResolver extends AbstractPlugin implements Resolve
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
       
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       return resolverBundleMap.get(bundleState);
    }
 
@@ -95,7 +96,7 @@ public abstract class AbstractResolver extends AbstractPlugin implements Resolve
 
    public ResolverBundle removeBundle(Bundle bundle)
    {
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       return resolverBundleMap.remove(bundleState);
    }
 

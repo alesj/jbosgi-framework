@@ -27,6 +27,7 @@ import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.osgi.framework.Bundle;
 
@@ -139,7 +140,7 @@ public abstract class DeployersTest extends FrameworkTest
 
    protected Bundle getBundle(DeploymentUnit unit) throws Exception
    {
-      OSGiBundleState bundle = unit.getAttachment(OSGiBundleState.class);
+      AbstractDeployedBundleState bundle = unit.getAttachment(OSGiBundleState.class);
       assertNotNull(bundle);
       return bundle.getBundleInternal();
    }

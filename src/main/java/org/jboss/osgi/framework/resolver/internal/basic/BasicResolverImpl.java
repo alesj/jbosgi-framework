@@ -36,6 +36,7 @@ import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
@@ -80,7 +81,7 @@ public class BasicResolverImpl extends AbstractResolver
    {
       ResolverBundle removedBundle = super.removeBundle(bundle);
       
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       bundleCapabilitiesMap.remove(bundleState);
 
       List<BundleRequirement> bundleRequirements = bundleRequirementsMap.remove(bundleState);
@@ -97,7 +98,7 @@ public class BasicResolverImpl extends AbstractResolver
    public List<ResolverBundle> resolve(List<Bundle> bundles)
    {
       List<ResolverBundle> resolvedBundles = new ArrayList<ResolverBundle>();
-      for (OSGiBundleState aux : resolveBundles(bundles))
+      for (AbstractDeployedBundleState aux : resolveBundles(bundles))
       {
          ResolverBundle resBundle = getBundle(aux);
          if (resBundle == null)
@@ -164,7 +165,7 @@ public class BasicResolverImpl extends AbstractResolver
       log.debug("END *****************************************************************");
 
       // Log the unresolved bundles
-      for (OSGiBundleState bundle : unresolvedBundles)
+      for (AbstractDeployedBundleState bundle : unresolvedBundles)
       {
          StringBuffer message = new StringBuffer("Unresolved bundle: " + bundle);
          message.append("\n  Cannot find exporter for");
@@ -186,17 +187,17 @@ public class BasicResolverImpl extends AbstractResolver
 
    public ExportPackage getExporter(Bundle bundle, String importPackage)
    {
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       BundleCapability match = getMatchingCapability(bundleState, importPackage);
       if (match == null)
          return null;
 
-      OSGiBundleState exportingBundle = match.getExportingBundle();
+      AbstractDeployedBundleState exportingBundle = match.getExportingBundle();
       ResolverBundle resolverBundle = getBundle(exportingBundle);
       return resolverBundle.getExportPackage(importPackage);
    }
 
-   private BundleCapability getMatchingCapability(OSGiBundleState bundle, String importPackage)
+   private BundleCapability getMatchingCapability(AbstractDeployedBundleState bundle, String importPackage)
    {
       List<BundleRequirement> requirements = bundleRequirementsMap.get(bundle);
       if (requirements == null)
@@ -258,7 +259,7 @@ public class BasicResolverImpl extends AbstractResolver
    /**
     * Logs information about a resolved bundle
     */
-   private void logResolvedBundleInfo(OSGiBundleState bundle, List<BundleCapability> bundleCapabilities, List<BundleRequirement> bundleRequirements)
+   private void logResolvedBundleInfo(AbstractDeployedBundleState bundle, List<BundleCapability> bundleCapabilities, List<BundleRequirement> bundleRequirements)
    {
       // Log the package wiring information
       StringBuffer message = new StringBuffer("Resolved: " + bundle);
@@ -350,11 +351,11 @@ public class BasicResolverImpl extends AbstractResolver
    /**
     * Get the set of bundle capabilities
     */
-   private List<BundleCapability> getBundleCapabilities(OSGiBundleState bundle)
+   private List<BundleCapability> getBundleCapabilities(AbstractDeployedBundleState bundle)
    {
       List<BundleCapability> result = new ArrayList<BundleCapability>();
 
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       ClassLoadingMetaData metadata = unit.getAttachment(ClassLoadingMetaData.class);
 
@@ -376,11 +377,11 @@ public class BasicResolverImpl extends AbstractResolver
    /**
     * Get the set of bundle requirements
     */
-   private List<BundleRequirement> getBundleRequirements(OSGiBundleState bundle)
+   private List<BundleRequirement> getBundleRequirements(AbstractDeployedBundleState bundle)
    {
       List<BundleRequirement> result = new ArrayList<BundleRequirement>();
 
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       ClassLoadingMetaData classloadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
 
@@ -400,7 +401,7 @@ public class BasicResolverImpl extends AbstractResolver
       return result;
    }
 
-   private boolean processRequiredBundle(OSGiBundleState bundle, List<BundleCapability> bundleCapabilities, List<BundleRequirement> bundleRequirements)
+   private boolean processRequiredBundle(AbstractDeployedBundleState bundle, List<BundleCapability> bundleCapabilities, List<BundleRequirement> bundleRequirements)
    {
       // The Require-Bundle header specifies that all exported packages from
       // another bundle must be imported, effectively requiring the public interface

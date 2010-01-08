@@ -41,6 +41,7 @@ import org.jboss.deployers.structure.spi.main.MainDeployerStructure;
 import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
@@ -129,7 +130,7 @@ public class FrameworkTestDelegate extends MicrocontainerTestDelegate
          {
             if (aux.getBundleId() != 0)
             {
-               OSGiBundleState bundleState = (OSGiBundleState)aux;
+               AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)aux;
                bundleManager.uninstallBundle(bundleState);
             }
          }
@@ -204,7 +205,7 @@ public class FrameworkTestDelegate extends MicrocontainerTestDelegate
    {
       if (bundle.getState() != Bundle.UNINSTALLED)
       {
-         OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+         AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
          getBundleManager().uninstallBundle(bundleState);
       }
    }
@@ -284,7 +285,7 @@ public class FrameworkTestDelegate extends MicrocontainerTestDelegate
       try
       {
          DeploymentUnit unit = deployerStructure.getDeploymentUnit(deployment.getName());
-         OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+         AbstractDeployedBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
          if (bundleState == null)
             throw new IllegalStateException("Unable to determine bundle state for " + deployment.getName());
 

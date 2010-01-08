@@ -28,6 +28,7 @@ import java.net.URL;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.virtual.VirtualFile;
@@ -50,7 +51,7 @@ public class BundleVFSContext extends AbstractVFSContext
 
       name = parseName(rootURI);
 
-      OSGiBundleState bundleState = getBundleState(rootURI, manager);
+      AbstractDeployedBundleState bundleState = getBundleState(rootURI, manager);
       String path = parsePath(rootURI);
       URL resource = bundleState.getEntry(path); // permission check
       if (resource == null)
@@ -99,7 +100,7 @@ public class BundleVFSContext extends AbstractVFSContext
     * @param manager the osgi manager
     * @return bundle state or exception if no such bundle exists
     */
-   protected OSGiBundleState getBundleState(URI uri, OSGiBundleManager manager)
+   protected AbstractDeployedBundleState getBundleState(URI uri, OSGiBundleManager manager)
    {
       String host = uri.getHost();
       long id = Long.parseLong(host);
