@@ -34,7 +34,7 @@ import org.jboss.osgi.framework.deployers.OSGiBundleNativeCodeDeployer;
  * The library map is initialized in {@link OSGiBundleNativeCodeDeployer}.
  * 
  * @author Thomas.Diesler@jboss.com
- * @since 19-Dec-2209
+ * @since 19-Dec-2009
  */
 public class OSGiBundleClassLoader extends BaseClassLoader
 {

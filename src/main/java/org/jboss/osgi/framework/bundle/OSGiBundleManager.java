@@ -1046,29 +1046,6 @@ public class OSGiBundleManager
    }
 
    /**
-    * Generate a name for the deployment unit
-    * 
-    * todo some better solution
-    * 
-    * @param unit the deployment unit
-    * @return the name
-    */
-   protected String generateName(DeploymentUnit unit)
-   {
-      StringBuilder result = new StringBuilder();
-      String name = unit.getName();
-      for (int i = 0; i < name.length(); ++i)
-      {
-         char c = name.charAt(i);
-         if (Character.isJavaIdentifierPart(c))
-            result.append(c);
-         else
-            result.append('_');
-      }
-      return result.toString();
-   }
-
-   /**
     * Add a bundle
     * 
     * @param bundleState the bundle state
@@ -1364,7 +1341,11 @@ public class OSGiBundleManager
       {
          deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
          deployerClient.checkComplete(unit.getName());
+         
          bundleState.changeState(Bundle.RESOLVED);
+         for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
+            fragment.changeState(Bundle.RESOLVED);
+            
          return true;
       }
       catch (DeploymentException ex)

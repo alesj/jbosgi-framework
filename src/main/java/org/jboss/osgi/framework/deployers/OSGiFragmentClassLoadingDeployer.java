@@ -23,10 +23,17 @@ package org.jboss.osgi.framework.deployers;
 
 // $Id$
 
+import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.osgi.framework.bundle.OSGiFragmentState;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHost;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.metadata.Parameter;
+import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 /**
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
@@ -42,10 +49,26 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractOSGiClassLoadingDe
    {
       super.deploy(unit, osgiMetaData);
       
-      OSGiFragmentState frgmtState = unit.getAttachment(OSGiFragmentState.class);
-      if (frgmtState == null)
+      // Return if this is not a bundle fragment 
+      AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
+      if (bundleState.isFragment() == false)
          return;
       
-      // ClassLoadingMetaData classLoadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
+      OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
+      if (classLoadingMetaData == null)
+         throw new IllegalStateException("Null ClassLoadingMetaData");
+      
+      // Initialize the Fragment-Host 
+      ParameterizedAttribute hostAttr = osgiMetaData.getFragmentHost();
+      FragmentHost fragmentHost = new FragmentHost(hostAttr.getAttribute());
+      classLoadingMetaData.setFragmentHost(fragmentHost);
+      
+      Parameter bundleVersionAttr = hostAttr.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+      if (bundleVersionAttr != null)
+         fragmentHost.setBundleVersion((Version)bundleVersionAttr.getValue());
+      
+      Parameter extensionDirective = hostAttr.getDirective(Constants.EXTENSION_DIRECTIVE);
+      if (extensionDirective != null)
+         fragmentHost.setExtension((String)extensionDirective.getValue());
    }
 }

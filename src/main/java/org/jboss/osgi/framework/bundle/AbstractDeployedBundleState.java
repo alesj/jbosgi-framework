@@ -38,7 +38,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 /**
- * The abstract state of a deployed bundle or fragment.
+ * The abstract state of a user deployed {@link Bundle} or Fragment.
  * 
  * @author Thomas.Diesler@jboss.com
  * @since 25-Dec-2009

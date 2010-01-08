@@ -21,16 +21,24 @@
 */
 package org.jboss.osgi.framework.bundle;
 
+// $Id: $
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHost;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.virtual.VirtualFile;
@@ -39,9 +47,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Version;
 
 /**
- * BundleState.
+ * The state of a user deployed {@link Bundle} and its associated {@link BundleContext}.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Thomas.Diesler@jboss.com
@@ -50,6 +59,9 @@ import org.osgi.framework.BundleException;
  */
 public class OSGiBundleState extends AbstractDeployedBundleState
 {
+   // The list of attached fragments
+   private List<OSGiFragmentState> attachedFragments = new CopyOnWriteArrayList<OSGiFragmentState>();
+
    /**
     * Create a new BundleState.
     * 
@@ -73,12 +85,52 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
       return (OSGiBundleState)bundle;
    }
-   
+
+   public List<OSGiFragmentState> getAttachedFragments()
+   {
+      return Collections.unmodifiableList(attachedFragments);
+   }
+
+   public boolean isFragmentAttachable(OSGiFragmentState fragmentState)
+   {
+      String hostName = getSymbolicName();
+      Version hostVersion = getVersion();
+      
+      FragmentHost fragmentHost = fragmentState.getFragmentHost();
+      if (hostName.equals(fragmentHost.getSymbolicName()) == false)
+         return false;
+
+      Version version = fragmentHost.getBundleVersion();
+      if (version != null && hostVersion.equals(version) == false)
+         return false;
+      
+      return true;
+   }
+
+   public void attachFragment(OSGiFragmentState fragmentState)
+   {
+      DeploymentUnit unit = getDeploymentUnit();
+      OSGiClassLoadingMetaData clMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
+      if (clMetaData == null)
+         throw new IllegalStateException("Cannot obtain ClassLoadingMetaData for: " + this);
+
+      DeploymentUnit fragUnit = fragmentState.getDeploymentUnit();
+      OSGiClassLoadingMetaData fragMetaData = (OSGiClassLoadingMetaData)fragUnit.getAttachment(ClassLoadingMetaData.class);
+      if (fragMetaData == null)
+         throw new IllegalStateException("Cannot obtain ClassLoadingMetaData for: " + fragmentState);
+
+      log.debug("Attach " + fragmentState + " -> " + this);
+      attachedFragments.add(fragmentState);
+      
+      // attach classloading metadata to the hosts classloading metadata
+      clMetaData.attachedFragmentMetaData(fragMetaData);
+   }
+
    public boolean isFragment()
    {
       return false;
    }
-   
+
    protected Set<ControllerContext> getRegisteredContexts()
    {
       return getBundleManager().getRegisteredContext(this);
@@ -103,7 +155,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
          if (path.startsWith("/"))
             path = path.substring(1);
-         
+
          return vfsDeploymentUnit.getResourceLoader().getResource(path);
       }
       return null;
@@ -424,7 +476,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       // however the header values must only be available in the raw and default locale values
       if (getState() == Bundle.UNINSTALLED)
          return headersOnUninstall;
-      
+
       return super.getHeaders(locale);
    }
 

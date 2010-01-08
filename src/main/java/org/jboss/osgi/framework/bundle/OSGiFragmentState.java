@@ -26,7 +26,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
+import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHost;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.osgi.framework.BundleException;
 
@@ -103,5 +106,14 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
    public void update(InputStream input) throws BundleException
    {
       throw new NotImplementedException();
+   }
+
+   public FragmentHost getFragmentHost()
+   {
+      FragmentHost fhMetaData = null;
+      ClassLoadingMetaData clMetaData = getDeploymentUnit().getAttachment(ClassLoadingMetaData.class);
+      if (clMetaData != null)
+         fhMetaData = ((OSGiClassLoadingMetaData)clMetaData).getFragmentHost();
+      return fhMetaData;
    }
 }

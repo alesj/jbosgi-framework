@@ -64,7 +64,7 @@ public class OSGiBundleClassLoadingDeployer extends AbstractOSGiClassLoadingDepl
    {
       super.deploy(unit, osgiMetaData);
       
-      // Return if this is not a bundle state
+      // Return if this is not a real bundle (i.e. a fragment) 
       AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
       if (bundleState.isFragment())
          return;

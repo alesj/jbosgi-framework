@@ -59,7 +59,7 @@ import org.osgi.framework.Constants;
  */
 public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
 {
-   /** The log */
+   // Provide logging
    private static final Logger log = Logger.getLogger(OSGiBundleNativeCodeDeployer.class);
 
    /** Maps an alias to an OSGi processor name */

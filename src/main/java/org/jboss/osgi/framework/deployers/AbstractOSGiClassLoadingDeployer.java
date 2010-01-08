@@ -30,6 +30,7 @@ import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
 /**
@@ -66,7 +67,7 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
       if (bundleState == null)
          throw new IllegalStateException("No bundle state");
       
-      ClassLoadingMetaData classLoadingMetaData = new ClassLoadingMetaData();
+      OSGiClassLoadingMetaData classLoadingMetaData = new OSGiClassLoadingMetaData();
       classLoadingMetaData.setName(bundleState.getSymbolicName());
       classLoadingMetaData.setVersion(bundleState.getVersion());
       classLoadingMetaData.setDomain(domain != null ? domain.getName() : null);
