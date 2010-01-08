@@ -88,16 +88,18 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return Collections.unmodifiableList(attachedFragments);
    }
 
-   public boolean isFragmentAttachable(OSGiFragmentState fragmentState)
+   public boolean isFragmentAttachable(OSGiFragmentState fragState)
    {
       String hostName = getSymbolicName();
       Version hostVersion = getVersion();
 
-      FragmentHost fragmentHost = fragmentState.getFragmentHost();
-      if (hostName.equals(fragmentHost.getSymbolicName()) == false)
+      DeploymentUnit fragUnit = fragState.getDeploymentUnit();
+      OSGiClassLoadingMetaData fragMetaData = (OSGiClassLoadingMetaData)fragUnit.getAttachment(ClassLoadingMetaData.class);
+      FragmentHost fragHost = fragMetaData.getFragmentHost();
+      if (hostName.equals(fragHost.getSymbolicName()) == false)
          return false;
 
-      Version version = fragmentHost.getBundleVersion();
+      Version version = fragHost.getBundleVersion();
       if (version != null && hostVersion.equals(version) == false)
          return false;
 
@@ -118,6 +120,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
       log.debug("Attach " + fragmentState + " -> " + this);
       attachedFragments.add(fragmentState);
+      fragmentState.setFragmentHost(this);
 
       // attach classloading metadata to the hosts classloading metadata
       clMetaData.attachedFragmentMetaData(fragMetaData);
@@ -141,8 +144,42 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       if (resolveBundle() == false)
          throw new ClassNotFoundException("Cannot load class: " + name);
 
+      Class<?> retClass = null;
+      
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();
-      return classLoader.loadClass(name);
+      ClassNotFoundException cnfEx = null;
+      try
+      {
+         retClass = classLoader.loadClass(name);
+      }
+      catch (ClassNotFoundException ex)
+      {
+         cnfEx = ex;
+      }
+      
+      // Try to load the class in the attached fragments
+      if (retClass == null)
+      {
+         for (OSGiFragmentState fragment : getAttachedFragments())
+         {
+            classLoader = fragment.getDeploymentUnit().getClassLoader();
+            try
+            {
+               retClass = classLoader.loadClass(name);
+               cnfEx = null;
+               break;
+            }
+            catch (ClassNotFoundException ex)
+            {
+               // ignore
+            }
+         }
+      }
+      
+      if (retClass == null && cnfEx != null)
+         throw cnfEx;
+      
+      return retClass;
    }
 
    public URL getResource(String name)
@@ -154,7 +191,22 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       if (resolveBundle() == false)
          return getDeploymentUnit().getResourceLoader().getResource(name);
 
-      return getDeploymentUnit().getClassLoader().getResource(name);
+      ClassLoader classLoader = getDeploymentUnit().getClassLoader();
+      URL resourceURL = classLoader.getResource(name);
+      
+      // Try to find the resource in the attached fragments
+      if (resourceURL == null)
+      {
+         for (OSGiFragmentState fragment : getAttachedFragments())
+         {
+            classLoader = fragment.getDeploymentUnit().getClassLoader();
+            resourceURL = classLoader.getResource(name);
+            if (resourceURL != null)
+               break;
+         }
+      }
+      
+      return resourceURL;
    }
 
    @SuppressWarnings("rawtypes")

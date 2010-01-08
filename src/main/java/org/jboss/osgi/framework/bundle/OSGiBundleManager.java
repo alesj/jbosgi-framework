@@ -1331,21 +1331,30 @@ public class OSGiBundleManager
       }
 
       DeploymentUnit unit = bundleState.getDeploymentUnit();
-      ControllerContext context = unit.getAttachment(ControllerContext.class);
+      String unitName = unit.getName();
 
+      ControllerContext context = unit.getAttachment(ControllerContext.class);
       ControllerState requiredState = context.getRequiredState();
       DeploymentStage requiredStage = unit.getRequiredStage();
 
       // TODO [JBDEPLOY-226] Allow multiple deployments to change state at once
       try
       {
-         deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
-         deployerClient.checkComplete(unit.getName());
+         deployerClient.change(unitName, DeploymentStages.CLASSLOADER);
+         deployerClient.checkComplete(unitName);
          
+         // Advance the attached fragments to CLASSLOADER 
+         for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
+         {
+            String fragUnitName = fragment.getDeploymentUnit().getName();
+            deployerClient.change(fragUnitName, DeploymentStages.CLASSLOADER);
+            deployerClient.checkComplete(fragUnitName);
+         }
+            
          bundleState.changeState(Bundle.RESOLVED);
          for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
             fragment.changeState(Bundle.RESOLVED);
-            
+         
          return true;
       }
       catch (DeploymentException ex)

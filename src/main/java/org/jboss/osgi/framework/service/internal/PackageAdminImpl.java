@@ -40,6 +40,7 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.OSGiFragmentState;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
@@ -103,8 +104,14 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          AbstractDeploymentClassLoaderPolicyModule deploymentModule = (AbstractDeploymentClassLoaderPolicyModule)module;
          DeploymentUnit unit = deploymentModule.getDeploymentUnit();
          AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-         if (bundleState != null && bundleState.getState() != Bundle.INSTALLED)
+         if (bundleState != null)
+         {
+            // Return the fragment's host bundle
+            if (bundleState.isFragment())
+               bundleState = ((OSGiFragmentState)bundleState).getFragmentHost();
+            
             return bundleState.getBundleInternal();
+         }
       }
       return null;
    }

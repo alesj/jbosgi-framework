@@ -26,34 +26,42 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
-import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHost;
 import org.jboss.osgi.spi.NotImplementedException;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 /**
- * OSGiSystemBundle.
+ * The state of a fragment {@link Bundle}.
  * 
  * @author Thomas.Diesler@jboss.com
  * @since 25-Dec-2009
  */
 public class OSGiFragmentState extends AbstractDeployedBundleState
 {
-   /**
-    * Create a new OSGiFragmentState
-    */
+   // The host that this fragment is attached to
+   private OSGiBundleState fragmentHost;
+   
    public OSGiFragmentState(DeploymentUnit unit)
    {
       super(unit);
+   }
+
+   public OSGiBundleState getFragmentHost()
+   {
+      return fragmentHost;
+   }
+
+   void setFragmentHost(OSGiBundleState fragmentHost)
+   {
+      this.fragmentHost = fragmentHost;
    }
 
    public boolean isFragment()
    {
       return true;
    }
-   
+
    public URL getResource(String name)
    {
       // Null if the resource could not be found or if this bundle is a fragment bundle
@@ -91,14 +99,5 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
    public void update(InputStream input) throws BundleException
    {
       throw new NotImplementedException();
-   }
-
-   public FragmentHost getFragmentHost()
-   {
-      FragmentHost fhMetaData = null;
-      ClassLoadingMetaData clMetaData = getDeploymentUnit().getAttachment(ClassLoadingMetaData.class);
-      if (clMetaData != null)
-         fhMetaData = ((OSGiClassLoadingMetaData)clMetaData).getFragmentHost();
-      return fhMetaData;
    }
 }
