@@ -24,6 +24,7 @@ package org.jboss.osgi.framework.classloading;
 // $Id$
 
 import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +32,8 @@ import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.OSGiFragmentState;
 import org.jboss.virtual.VirtualFile;
 
 /**
@@ -44,16 +46,20 @@ import org.jboss.virtual.VirtualFile;
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
+   // The bundle state associated with this policy
+   private OSGiBundleState bundleState;
    // Maps the lib name to native code archive
    private Map<String, File> libraryMap = new HashMap<String, File>();
    
-   public OSGiClassLoaderPolicy(AbstractDeployedBundleState bundleState, VirtualFile[] roots)
+   public OSGiClassLoaderPolicy(OSGiBundleState bundleState, VirtualFile[] roots)
    {
       super(roots);
       
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
 
+      this.bundleState = bundleState;
+      
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       Module module = unit.getAttachment(Module.class);
       if (module instanceof VFSDeploymentClassLoaderPolicyModule == false)
@@ -86,5 +92,25 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
          libfile = libraryMap.get("lib" + libname);
          
       return (libfile != null ? libfile.getAbsolutePath() : null);
+   }
+
+   @Override
+   public URL getResource(String path)
+   {
+      URL resourceURL = super.getResource(path);
+      
+      // Try to find the resource in the attached fragments
+      if (resourceURL == null && bundleState.isFragment() == false)
+      {
+         for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
+         {
+            ClassLoader classLoader = fragment.getDeploymentUnit().getClassLoader();
+            resourceURL = classLoader.getResource(path);
+            if (resourceURL != null)
+               break;
+         }
+      }
+      
+      return resourceURL;
    }
 }

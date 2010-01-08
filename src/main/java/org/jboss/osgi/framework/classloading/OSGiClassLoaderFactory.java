@@ -34,7 +34,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.virtual.VirtualFile;
 
 /**
@@ -70,10 +70,9 @@ public class OSGiClassLoaderFactory implements ClassLoaderFactory
          public ClassLoaderPolicy createClassLoaderPolicy()
          {
             VFSDeploymentUnit vfsUnit = (VFSDeploymentUnit)unit;
-            AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-            AbstractDeployedBundleState depBundleState = (AbstractDeployedBundleState)bundleState;
-            VirtualFile[] roots = getClassLoaderPolicyRoots(depBundleState, vfsUnit);
-            ClassLoaderPolicy policy = new OSGiClassLoaderPolicy(depBundleState, roots);
+            OSGiBundleState bundleState = (OSGiBundleState)unit.getAttachment(AbstractBundleState.class);
+            VirtualFile[] roots = getClassLoaderPolicyRoots(bundleState, vfsUnit);
+            ClassLoaderPolicy policy = new OSGiClassLoaderPolicy(bundleState, roots);
             unit.addAttachment(ClassLoaderPolicy.class, policy);
             return policy;
          }

@@ -192,21 +192,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
          return getDeploymentUnit().getResourceLoader().getResource(name);
 
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();
-      URL resourceURL = classLoader.getResource(name);
-      
-      // Try to find the resource in the attached fragments
-      if (resourceURL == null)
-      {
-         for (OSGiFragmentState fragment : getAttachedFragments())
-         {
-            classLoader = fragment.getDeploymentUnit().getClassLoader();
-            resourceURL = classLoader.getResource(name);
-            if (resourceURL != null)
-               break;
-         }
-      }
-      
-      return resourceURL;
+      return classLoader.getResource(name);
    }
 
    @SuppressWarnings("rawtypes")
@@ -219,7 +205,8 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       if (resolveBundle() == false)
          return getDeploymentUnit().getResourceLoader().getResources(name);
 
-      return getDeploymentUnit().getClassLoader().getResources(name);
+      ClassLoader classLoader = getDeploymentUnit().getClassLoader();
+      return classLoader.getResources(name);
    }
 
    // [TODO] options
