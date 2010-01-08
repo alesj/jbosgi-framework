@@ -73,19 +73,21 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
 
    public URL getResource(String name)
    {
-      throw new NotImplementedException();
+      // Null if the resource could not be found or if this bundle is a fragment bundle
+      return null;
    }
 
    @SuppressWarnings("rawtypes")
    public Enumeration getResources(String name) throws IOException
    {
-      throw new NotImplementedException();
+      // Null if the resource could not be found or if this bundle is a fragment bundle
+      return null;
    }
 
    @SuppressWarnings("rawtypes")
    public Class loadClass(String name) throws ClassNotFoundException
    {
-      throw new NotImplementedException();
+      throw new ClassNotFoundException("Cannot load class from a fragment: " + this);
    }
 
    public void start(int options) throws BundleException
