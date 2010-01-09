@@ -28,6 +28,7 @@ import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
+import org.jboss.deployers.structure.spi.ClassLoaderFactory;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
@@ -42,6 +43,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer<OSGiMetaData>
 {
    private ClassLoaderDomain domain;
+   private ClassLoaderFactory factory;
    
    public AbstractOSGiClassLoadingDeployer()
    {
@@ -55,6 +57,11 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
    public void setDomain(ClassLoaderDomain domain)
    {
       this.domain = domain;
+   }
+   
+   public void setFactory(ClassLoaderFactory factory)
+   {
+      this.factory = factory;
    }
 
    @Override
@@ -73,8 +80,12 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
       classLoadingMetaData.setDomain(domain != null ? domain.getName() : null);
 
       unit.addAttachment(ClassLoadingMetaData.class, classLoadingMetaData);
-      
+
       // AnnotationMetaDataDeployer.ANNOTATION_META_DATA_COMPLETE
       unit.addAttachment("org.jboss.deployment.annotation.metadata.complete", Boolean.TRUE);
+      
+      // Add the OSGi ClassLoaderFactory if configured
+      if (factory != null)
+         unit.addAttachment(ClassLoaderFactory.class, factory);
    }
 }

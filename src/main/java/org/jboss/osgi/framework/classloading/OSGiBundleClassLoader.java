@@ -23,15 +23,16 @@ package org.jboss.osgi.framework.classloading;
 
 // $Id: OSGiClassLoaderFactory.java 95177 2009-10-20 15:14:31Z thomas.diesler@jboss.com $
 
+import java.util.List;
+
 import org.jboss.classloader.spi.ClassLoaderPolicy;
+import org.jboss.classloader.spi.DelegateLoader;
 import org.jboss.classloader.spi.base.BaseClassLoader;
-import org.jboss.osgi.framework.deployers.OSGiBundleNativeCodeDeployer;
 
 /**
  * An OSGi bundle class loader.
  * 
  * This implementation supports the notion of OSGi Native Code Libraries.
- * The library map is initialized in {@link OSGiBundleNativeCodeDeployer}.
  * 
  * @author Thomas.Diesler@jboss.com
  * @since 19-Dec-2009
@@ -62,4 +63,30 @@ public class OSGiBundleClassLoader extends BaseClassLoader
       return libraryPath;
    }
 
+   @Override
+   public Class<?> loadClass(String className) throws ClassNotFoundException
+   {
+      try
+      {
+         Class<?> clazz = super.loadClass(className);
+         return clazz;
+      }
+      catch (ClassNotFoundException ex)
+      {
+         // Try to load the class in the attached fragments
+         List<DelegateLoader> fragmentLoaders = osgiPolicy.getFragmentLoaders();
+         if (fragmentLoaders != null)
+         {
+            for (DelegateLoader fragLoader : fragmentLoaders)
+            {
+               Class<?> clazz = fragLoader.loadClass(className);
+               if (clazz != null)
+                  return clazz;
+            }
+         }
+         
+         // Throw the ClassNotFoundException 
+         throw ex;
+      }
+   }
 }

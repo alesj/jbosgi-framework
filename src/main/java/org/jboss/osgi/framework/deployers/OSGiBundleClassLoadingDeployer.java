@@ -52,13 +52,6 @@ import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
  */
 public class OSGiBundleClassLoadingDeployer extends AbstractOSGiClassLoadingDeployer
 {
-   private ClassLoaderFactory factory;
-   
-   public void setFactory(ClassLoaderFactory factory)
-   {
-      this.factory = factory;
-   }
-
    @Override
    public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
    {
@@ -115,9 +108,5 @@ public class OSGiBundleClassLoadingDeployer extends AbstractOSGiClassLoadingDepl
             }
          }
       }
-      
-      // Add the OSGi ClassLoaderFactory if configured
-      if (factory != null)
-         unit.addAttachment(ClassLoaderFactory.class, factory);
    }
 }

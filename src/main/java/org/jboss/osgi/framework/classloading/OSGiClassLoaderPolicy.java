@@ -25,15 +25,17 @@ package org.jboss.osgi.framework.classloading;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.jboss.classloader.spi.DelegateLoader;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
-import org.jboss.osgi.framework.bundle.OSGiFragmentState;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.virtual.VirtualFile;
 
 /**
@@ -46,45 +48,52 @@ import org.jboss.virtual.VirtualFile;
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
-   // The bundle state associated with this policy
-   private OSGiBundleState bundleState;
    // Maps the lib name to native code archive
-   private Map<String, File> libraryMap = new HashMap<String, File>();
+   private Map<String, File> libraryMap;
+   // The optional list of attached fragment loaders
+   private List<DelegateLoader> fragmentLoaders;
    
-   public OSGiClassLoaderPolicy(OSGiBundleState bundleState, VirtualFile[] roots)
+   public OSGiClassLoaderPolicy(AbstractBundleState bundleState, VirtualFile[] roots)
    {
       super(roots);
       
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
 
-      this.bundleState = bundleState;
-      
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      Module module = unit.getAttachment(Module.class);
-      if (module instanceof VFSDeploymentClassLoaderPolicyModule == false)
-         throw new IllegalStateException("Module is not an instance of " + VFSDeploymentClassLoaderPolicyModule.class.getName() + " actual=" + module);
+      if (bundleState instanceof AbstractDeployedBundleState)
+      {
+         AbstractDeployedBundleState depBundleState = (AbstractDeployedBundleState)bundleState;
+         Module module = depBundleState.getDeploymentUnit().getAttachment(Module.class);
+         if (module instanceof VFSDeploymentClassLoaderPolicyModule == false)
+            throw new IllegalStateException("Not an instance of VFSDeploymentClassLoaderPolicyModule: " + module);
 
-      VFSDeploymentClassLoaderPolicyModule vfsModule = (VFSDeploymentClassLoaderPolicyModule)module;
-      String[] packageNames = vfsModule.getPackageNames();
-      setExportedPackages(packageNames);
-      setIncluded(vfsModule.getIncluded());
-      setExcluded(vfsModule.getExcluded());
-      setExcludedExport(vfsModule.getExcludedExport());
-      setExportAll(vfsModule.getExportAll());
-      setImportAll(vfsModule.isImportAll());
-      setCacheable(vfsModule.isCacheable());
-      setBlackListable(vfsModule.isBlackListable());
-      setDelegates(vfsModule.getDelegates());
+         VFSDeploymentClassLoaderPolicyModule vfsModule = (VFSDeploymentClassLoaderPolicyModule)module;
+         String[] packageNames = vfsModule.getPackageNames();
+         setExportedPackages(packageNames);
+         setIncluded(vfsModule.getIncluded());
+         setExcluded(vfsModule.getExcluded());
+         setExcludedExport(vfsModule.getExcludedExport());
+         setExportAll(vfsModule.getExportAll());
+         setImportAll(vfsModule.isImportAll());
+         setCacheable(vfsModule.isCacheable());
+         setBlackListable(vfsModule.isBlackListable());
+         setDelegates(vfsModule.getDelegates());
+      }
    }
 
    public void addLibraryMapping(String libname, File libfile)
    {
+      if (libraryMap == null)
+         libraryMap = new HashMap<String, File>();
+      
       libraryMap.put(libname, libfile);
    }
 
    public String findLibrary(String libname)
    {
+      if (libraryMap == null)
+         return null;
+      
       File libfile = libraryMap.get(libname);
       
       // [TODO] why does the TCK use 'Native' to mean 'libNative' ? 
@@ -94,18 +103,30 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
       return (libfile != null ? libfile.getAbsolutePath() : null);
    }
 
+   public List<DelegateLoader> getFragmentLoaders()
+   {
+      return fragmentLoaders;
+   }
+
+   public void addFragmentLoader(DelegateLoader delegateLoader)
+   {
+      if (fragmentLoaders == null)
+         fragmentLoaders = new ArrayList<DelegateLoader>();
+      
+      fragmentLoaders.add(delegateLoader);
+   }
+
    @Override
    public URL getResource(String path)
    {
       URL resourceURL = super.getResource(path);
       
       // Try to find the resource in the attached fragments
-      if (resourceURL == null && bundleState.isFragment() == false)
+      if (resourceURL == null && fragmentLoaders != null)
       {
-         for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
+         for (DelegateLoader fragLoader : fragmentLoaders)
          {
-            ClassLoader classLoader = fragment.getDeploymentUnit().getClassLoader();
-            resourceURL = classLoader.getResource(path);
+            resourceURL = fragLoader.getResource(path);
             if (resourceURL != null)
                break;
          }

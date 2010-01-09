@@ -28,7 +28,7 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
-import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHost;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
@@ -60,7 +60,7 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractOSGiClassLoadingDe
       
       // Initialize the Fragment-Host 
       ParameterizedAttribute hostAttr = osgiMetaData.getFragmentHost();
-      FragmentHost fragmentHost = new FragmentHost(hostAttr.getAttribute());
+      FragmentHostMetaData fragmentHost = new FragmentHostMetaData(hostAttr.getAttribute());
       classLoadingMetaData.setFragmentHost(fragmentHost);
       
       Parameter bundleVersionAttr = hostAttr.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);

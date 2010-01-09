@@ -170,6 +170,7 @@
   </bean>
   <bean name="OSGiFragmentClassLoadingDeployer" class="org.jboss.osgi.framework.deployers.OSGiFragmentClassLoadingDeployer">
     <property name="domain"><inject bean="OSGiClassLoaderDomain"/></property>
+    <property name="factory"><inject bean="OSGiClassLoaderFactory"/></property>
   </bean>
   <bean name="OSGiFragmentAttachmentDeployer" class="org.jboss.osgi.framework.deployers.OSGiFragmentAttachmentDeployer"/>
    

@@ -37,7 +37,7 @@ import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
-import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHost;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -95,7 +95,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
       DeploymentUnit fragUnit = fragState.getDeploymentUnit();
       OSGiClassLoadingMetaData fragMetaData = (OSGiClassLoadingMetaData)fragUnit.getAttachment(ClassLoadingMetaData.class);
-      FragmentHost fragHost = fragMetaData.getFragmentHost();
+      FragmentHostMetaData fragHost = fragMetaData.getFragmentHost();
       if (hostName.equals(fragHost.getSymbolicName()) == false)
          return false;
 
@@ -123,7 +123,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       fragmentState.setFragmentHost(this);
 
       // attach classloading metadata to the hosts classloading metadata
-      clMetaData.attachedFragmentMetaData(fragMetaData);
+      clMetaData.attachClassLoadingMetaData(fragMetaData);
    }
 
    public boolean isFragment()
@@ -144,42 +144,10 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       if (resolveBundle() == false)
          throw new ClassNotFoundException("Cannot load class: " + name);
 
-      Class<?> retClass = null;
-      
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();
-      ClassNotFoundException cnfEx = null;
-      try
-      {
-         retClass = classLoader.loadClass(name);
-      }
-      catch (ClassNotFoundException ex)
-      {
-         cnfEx = ex;
-      }
+      Class<?>  clazz = classLoader.loadClass(name);
       
-      // Try to load the class in the attached fragments
-      if (retClass == null)
-      {
-         for (OSGiFragmentState fragment : getAttachedFragments())
-         {
-            classLoader = fragment.getDeploymentUnit().getClassLoader();
-            try
-            {
-               retClass = classLoader.loadClass(name);
-               cnfEx = null;
-               break;
-            }
-            catch (ClassNotFoundException ex)
-            {
-               // ignore
-            }
-         }
-      }
-      
-      if (retClass == null && cnfEx != null)
-         throw cnfEx;
-      
-      return retClass;
+      return clazz;
    }
 
    public URL getResource(String name)

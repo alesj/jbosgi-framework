@@ -34,7 +34,6 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.virtual.VirtualFile;
 
 /**
@@ -58,11 +57,11 @@ public class OSGiClassLoaderFactory implements ClassLoaderFactory
    public ClassLoader createClassLoader(final DeploymentUnit unit) throws Exception
    {
       if (unit instanceof VFSDeploymentUnit == false)
-         throw new IllegalStateException("DeploymentUnit is not an instance of " + VFSDeploymentUnit.class.getName() + " actual=" + unit);
+         throw new IllegalStateException("Not an instance of VFSDeploymentUnit: " + unit);
       
       Module module = unit.getAttachment(Module.class);
       if (module instanceof VFSDeploymentClassLoaderPolicyModule == false)
-         throw new IllegalStateException("Module is not an instance of " + VFSDeploymentClassLoaderPolicyModule.class.getName() + " actual=" + module);
+         throw new IllegalStateException("Not an instance of VFSDeploymentClassLoaderPolicyModule: " + module);
 
       VFSDeploymentClassLoaderPolicyModule vfsModule = (VFSDeploymentClassLoaderPolicyModule)module;
       vfsModule.setPolicyFactory(new ClassLoaderPolicyFactory()
@@ -70,7 +69,7 @@ public class OSGiClassLoaderFactory implements ClassLoaderFactory
          public ClassLoaderPolicy createClassLoaderPolicy()
          {
             VFSDeploymentUnit vfsUnit = (VFSDeploymentUnit)unit;
-            OSGiBundleState bundleState = (OSGiBundleState)unit.getAttachment(AbstractBundleState.class);
+            AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
             VirtualFile[] roots = getClassLoaderPolicyRoots(bundleState, vfsUnit);
             ClassLoaderPolicy policy = new OSGiClassLoaderPolicy(bundleState, roots);
             unit.addAttachment(ClassLoaderPolicy.class, policy);

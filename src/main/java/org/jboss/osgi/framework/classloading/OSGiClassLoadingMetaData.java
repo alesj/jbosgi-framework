@@ -42,26 +42,26 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
    private static final long serialVersionUID = 1L;
    
    // The optional fragment host
-   private FragmentHost fragmentHost;
+   private FragmentHostMetaData fragmentHost;
    // The list of attached fragment classloading metadata
    private List<OSGiClassLoadingMetaData> attachedFragments = new ArrayList<OSGiClassLoadingMetaData>();
    
-   public FragmentHost getFragmentHost()
+   public FragmentHostMetaData getFragmentHost()
    {
       return fragmentHost;
    }
 
-   public void setFragmentHost(FragmentHost fragmentHost)
+   public void setFragmentHost(FragmentHostMetaData fragmentHost)
    {
       this.fragmentHost = fragmentHost;
    }
    
-   public List<OSGiClassLoadingMetaData> getAttachedFragmentMetaData()
+   public List<OSGiClassLoadingMetaData> getAttachedClassLoadingMetaData()
    {
       return Collections.unmodifiableList(attachedFragments);
    }
 
-   public void attachedFragmentMetaData(OSGiClassLoadingMetaData fragment)
+   public void attachClassLoadingMetaData(OSGiClassLoadingMetaData fragment)
    {
       if (fragment == null)
          throw new IllegalArgumentException("Null fragment");
@@ -76,13 +76,13 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
    /**
     *  Fragment-Host metadata.
     */
-   public static class FragmentHost
+   public static class FragmentHostMetaData
    {
       private String symbolicName;
       private Version bundleVersion;
       private String extension;
       
-      public FragmentHost(String symbolicName)
+      public FragmentHostMetaData(String symbolicName)
       {
          if (symbolicName == null)
             throw new IllegalArgumentException("Null symbolicName");

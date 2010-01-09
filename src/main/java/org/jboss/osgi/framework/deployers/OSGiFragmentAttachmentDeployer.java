@@ -23,6 +23,8 @@ package org.jboss.osgi.framework.deployers;
 
 // $Id$
 
+import org.jboss.classloader.spi.ClassLoaderPolicy;
+import org.jboss.classloader.spi.DelegateLoader;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
@@ -32,6 +34,7 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiFragmentState;
+import org.jboss.osgi.framework.classloading.OSGiClassLoaderPolicy;
 import org.osgi.framework.Bundle;
 
 /**
@@ -59,21 +62,39 @@ public class OSGiFragmentAttachmentDeployer extends AbstractSimpleRealDeployer<C
    {
       // Return if this is not a real bundle (i.e. a fragment) 
       AbstractBundleState absBundleState = unit.getAttachment(AbstractBundleState.class);
-      if (absBundleState == null || absBundleState.isFragment())
+      if (absBundleState == null)
          return;
-      
-      OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
-      
-      // Iterate over all installed fragments and attach when appropriate 
-      OSGiBundleManager bundleManager = bundleState.getBundleManager();
-      for (AbstractBundleState auxBundle : bundleManager.getBundles(Bundle.INSTALLED))
+
+      OSGiBundleManager bundleManager = absBundleState.getBundleManager();
+
+      // Iterate over all installed fragments and attach to host when appropriate 
+      if (absBundleState.isFragment() == false)
       {
-         if (auxBundle.isFragment())
+         OSGiBundleState hostState = (OSGiBundleState)absBundleState;
+         for (AbstractBundleState auxBundle : bundleManager.getBundles(Bundle.INSTALLED))
          {
-            OSGiFragmentState auxState = (OSGiFragmentState)auxBundle;
-            if (bundleState.isFragmentAttachable(auxState))
-               bundleState.attachFragment(auxState);
+            if (auxBundle.isFragment())
+            {
+               OSGiFragmentState auxState = (OSGiFragmentState)auxBundle;
+               if (hostState.isFragmentAttachable(auxState))
+               {
+                  hostState.attachFragment(auxState);
+               }
+            }
          }
+      }
+
+      // Add the fragment's DelegateLoader to the host's ClassLoaderPolicy
+      if (absBundleState.isFragment() == true)
+      {
+         OSGiFragmentState fragState = (OSGiFragmentState)absBundleState;
+         OSGiBundleState hostState = fragState.getFragmentHost();
+         DeploymentUnit hostUnit = hostState.getDeploymentUnit();
+         OSGiClassLoaderPolicy hostPolicy = (OSGiClassLoaderPolicy)hostUnit.getAttachment(ClassLoaderPolicy.class);
+         
+         OSGiClassLoaderPolicy fragPolicy = (OSGiClassLoaderPolicy)unit.getAttachment(ClassLoaderPolicy.class);
+         DelegateLoader fragLoader = new DelegateLoader(fragPolicy);
+         hostPolicy.addFragmentLoader(fragLoader);
       }
    }
 }
