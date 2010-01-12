@@ -55,8 +55,6 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractOSGiClassLoadingDe
          return;
       
       OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
-      if (classLoadingMetaData == null)
-         throw new IllegalStateException("Null ClassLoadingMetaData");
       
       // Initialize the Fragment-Host 
       ParameterizedAttribute hostAttr = osgiMetaData.getFragmentHost();
