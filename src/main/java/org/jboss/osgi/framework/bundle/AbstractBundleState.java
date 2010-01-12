@@ -805,6 +805,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     */
    protected void checkInstalled()
    {
+      // If this bundle's state is UNINSTALLED, then an IllegalStateException is thrown
       if ((getState() & Bundle.UNINSTALLED) != 0)
          throw new IllegalStateException("Bundle " + getCanonicalName() + " is not installed");
    }

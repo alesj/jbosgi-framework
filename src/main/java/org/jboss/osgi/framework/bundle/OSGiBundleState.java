@@ -141,9 +141,14 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       checkInstalled();
       checkAdminPermission(AdminPermission.CLASS);
 
+      // If this bundle's state is INSTALLED, this method must attempt to resolve this bundle 
+      // [TODO] If this bundle cannot be resolved, a Framework event of type FrameworkEvent.ERROR is fired containing a BundleException with details of the reason this bundle could not be resolved. 
+      // This method must then throw a ClassNotFoundException. 
       if (resolveBundle() == false)
+      {
          throw new ClassNotFoundException("Cannot load class: " + name);
-
+      }
+      
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();
       Class<?>  clazz = classLoader.loadClass(name);
       
