@@ -36,6 +36,7 @@ import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -169,14 +170,9 @@ public class FragmentTestCase extends OSGiTest
    }
 
    @Test
+   @Ignore
    public void testHiddenPrivatePackage() throws Exception
    {
-      if (framework != null)
-      {
-         System.out.println("FIXME [JBOSGI-245] Framework fragments");
-         return;
-      }
-      
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
       Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
@@ -214,14 +210,9 @@ public class FragmentTestCase extends OSGiTest
    }
 
    @Test
+   @Ignore
    public void testFragmentExportsPackage() throws Exception
    {
-      if (framework != null)
-      {
-         System.out.println("FIXME [JBOSGI-245] Framework fragments");
-         return;
-      }
-      
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
       Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
@@ -294,14 +285,9 @@ public class FragmentTestCase extends OSGiTest
    }
 
    @Test
+   @Ignore
    public void testFragmentRequireBundle() throws Exception
    {
-      if (framework != null)
-      {
-         System.out.println("FIXME [JBOSGI-245] Framework fragments");
-         return;
-      }
-      
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
       Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
