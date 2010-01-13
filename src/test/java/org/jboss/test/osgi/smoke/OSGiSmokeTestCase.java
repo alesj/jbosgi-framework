@@ -109,7 +109,6 @@ public class OSGiSmokeTestCase extends FrameworkTest
    {
       Manifest manifest = new Manifest();
       Attributes attributes = manifest.getMainAttributes();
-      attributes.putValue("Bundle-Name", "SmokeDeployment");
       attributes.putValue("Bundle-SymbolicName", "org.jboss.test.osgi.smoke.deployment");
       OSGiMetaData metaData = new AbstractOSGiMetaData(manifest);
       Bundle bundle = deployBundle("smoke-deployment", metaData, A.class);

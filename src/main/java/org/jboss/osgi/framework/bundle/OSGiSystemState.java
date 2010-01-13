@@ -61,6 +61,7 @@ public class OSGiSystemState extends AbstractBundleState
       Attributes attributes = manifest.getMainAttributes();
       attributes.put(new Name(Constants.BUNDLE_NAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
       attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+      attributes.put(new Name(Constants.BUNDLE_MANIFESTVERSION), "2");
       osgiMetaData = new AbstractOSGiMetaData(manifest);
    }
 

@@ -94,6 +94,7 @@ public class SystemBundleUnitTestCase extends FrameworkTest
       Dictionary expected = new Hashtable();
       expected.put(Constants.BUNDLE_NAME, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
       expected.put(Constants.BUNDLE_SYMBOLICNAME, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+      expected.put(Constants.BUNDLE_MANIFESTVERSION, "2");
       // todo expected.put(Attributes.Name.IMPLEMENTATION_TITLE.toString(), "JBoss OSGi");
       // todo expected.put(Attributes.Name.IMPLEMENTATION_VENDOR.toString(), "jboss.org");
       // todo expected.put(Attributes.Name.IMPLEMENTATION_VERSION.toString(), "r4v41");
