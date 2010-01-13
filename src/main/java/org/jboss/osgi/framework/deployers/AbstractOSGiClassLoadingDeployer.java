@@ -56,7 +56,7 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
 {
    private ClassLoaderDomain domain;
    private ClassLoaderFactory factory;
-   
+
    public AbstractOSGiClassLoadingDeployer()
    {
       super(OSGiMetaData.class);
@@ -70,7 +70,7 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
    {
       this.domain = domain;
    }
-   
+
    public void setFactory(ClassLoaderFactory factory)
    {
       this.factory = factory;
@@ -85,9 +85,9 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
       AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
       if (bundleState == null)
          throw new IllegalStateException("No bundle state");
-      
+
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
-      
+
       OSGiClassLoadingMetaData classLoadingMetaData = new OSGiClassLoadingMetaData();
       classLoadingMetaData.setName(bundleState.getSymbolicName());
       classLoadingMetaData.setVersion(bundleState.getVersion());
@@ -95,10 +95,10 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
 
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
-      
+
       OSGiBundleCapability bundleCapability = OSGiBundleCapability.create(bundleState);
       capabilities.addCapability(bundleCapability);
-      
+
       List<ParameterizedAttribute> requireBundles = osgiMetaData.getRequireBundles();
       if (requireBundles != null && requireBundles.isEmpty() == false)
       {
@@ -108,17 +108,17 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
             requirements.addRequirement(requirement);
          }
       }
-      
+
       List<PackageAttribute> exported = osgiMetaData.getExportPackages();
       if (exported != null && exported.isEmpty() == false)
       {
          for (PackageAttribute packageAttribute : exported)
          {
-            OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, packageAttribute); 
+            OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, packageAttribute);
             capabilities.addCapability(packageCapability);
          }
       }
-      
+
       List<PackageAttribute> imported = osgiMetaData.getImportPackages();
       if (imported != null && imported.isEmpty() == false)
       {
@@ -126,22 +126,22 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
          for (PackageAttribute packageAttribute : imported)
          {
             String packageName = packageAttribute.getAttribute();
-            
+
             // [TODO] Should system packages be added as capabilities?
             boolean isSystemPackage = syspackPlugin.isSystemPackage(packageName);
             if (isSystemPackage == false)
             {
-               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute); 
+               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute);
                requirements.addRequirement(requirement);
             }
          }
       }
-      
+
       unit.addAttachment(ClassLoadingMetaData.class, classLoadingMetaData);
 
       // AnnotationMetaDataDeployer.ANNOTATION_META_DATA_COMPLETE
       unit.addAttachment("org.jboss.deployment.annotation.metadata.complete", Boolean.TRUE);
-      
+
       // Add the OSGi ClassLoaderFactory if configured
       if (factory != null)
          unit.addAttachment(ClassLoaderFactory.class, factory);

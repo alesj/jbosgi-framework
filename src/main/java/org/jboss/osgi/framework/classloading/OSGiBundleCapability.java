@@ -26,6 +26,7 @@ import java.util.Map;
 import org.jboss.classloading.plugins.metadata.ModuleCapability;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.Requirement;
+import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
@@ -66,7 +67,7 @@ public class OSGiBundleCapability extends ModuleCapability
 
       return new OSGiBundleCapability(symbolicName, version, bundleState);
    }
-   
+
    /**
     * Create a new OSGiBundleCapability.
     * 
@@ -82,7 +83,7 @@ public class OSGiBundleCapability extends ModuleCapability
          throw new IllegalArgumentException("Null bundleState");
       this.bundleState = bundleState;
    }
-   
+
    /**
     * Get the metadata.
     * 
@@ -100,33 +101,34 @@ public class OSGiBundleCapability extends ModuleCapability
          return false;
       if (requirement instanceof OSGiBundleRequirement == false)
          return true;
-      
+
       // Review its not clear to me from the spec whether attribute matching 
       // beyond the version should work for require-bundle?
-      OSGiBundleRequirement bundleRequirement = (OSGiBundleRequirement) requirement;
-      OSGiMetaData osgiMetaData = getMetaData();
-      ParameterizedAttribute ourParameters = osgiMetaData.getBundleParameters();
-      ParameterizedAttribute otherParameters = bundleRequirement.getRequireBundle();
-      if (otherParameters != null)
+      Version ourVersion = Version.parseVersion(getMetaData().getBundleVersion());
+      OSGiBundleRequirement bundleRequirement = (OSGiBundleRequirement)requirement;
+      VersionRange requiredRange = bundleRequirement.getVersionRange();
+      if (requiredRange.isInRange(ourVersion) == false)
+         return false;
+
+      ParameterizedAttribute ourParameters = getMetaData().getBundleParameters();
+      if (ourParameters == null)
+         return false;
+
+      Map<String, Parameter> params = bundleRequirement.getAttributes();
+      if (params != null && params.isEmpty() == false)
       {
-         Map<String, Parameter> params = otherParameters.getAttributes();
-         if (params != null && params.isEmpty() == false)
+         for (String name : params.keySet())
          {
-            for (String name : params.keySet())
-            {
-               if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(name) == false)
-               {
-                  if (ourParameters == null)
-                     return false;
-                  String ourValue = ourParameters.getAttributeValue(name, String.class);
-                  if (ourValue == null)
-                     return false;
-                  if (ourValue.equals(otherParameters.getAttributeValue(name, String.class)) == false)
-                     return false;
-               }
-            }
+            if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(name))
+               continue;
+
+            String reqValue = (String)params.get(name).getValue();
+            String ourValue = ourParameters.getAttributeValue(name, String.class);
+            if (reqValue.equals(ourValue) == false)
+               return false;
          }
       }
+
       return true;
    }
 
@@ -137,9 +139,9 @@ public class OSGiBundleCapability extends ModuleCapability
          return true;
       if (obj == null || obj instanceof OSGiBundleCapability == false)
          return false;
-      if (super.equals(obj) ==false)
+      if (super.equals(obj) == false)
          return false;
-      OSGiBundleCapability other = (OSGiBundleCapability) obj;
+      OSGiBundleCapability other = (OSGiBundleCapability)obj;
       return getMetaData().equals(other.getMetaData());
    }
 

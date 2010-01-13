@@ -307,14 +307,14 @@ public class FragmentTestCase extends OSGiTest
 
          // Clarify error behaviour when fragments fail to attach
          // https://www.osgi.org/members/bugzilla/show_bug.cgi?id=1524
-         //
-         // Felix: Merges FragC Require-Bundle into HostA and fails to resolve
+         
          // Equinox: Resolves HostA but does not attach FragA
          if (hostA.getState() == Bundle.ACTIVE)
             assertBundleState(Bundle.INSTALLED, fragC.getState());
       }
       catch (BundleException ex)
       {
+         // Felix: Merges FragC's bundle requirement into HostA and fails to resolve
          assertBundleState(Bundle.INSTALLED, hostA.getState());
       }
 

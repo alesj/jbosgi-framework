@@ -112,7 +112,7 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
    {
       if (fragmentLoaders == null)
          fragmentLoaders = new ArrayList<DelegateLoader>();
-      
+
       fragmentLoaders.add(delegateLoader);
    }
 

@@ -317,11 +317,17 @@ public class RequireBundleUnitTestCase extends FrameworkTest
    
    public void testAttributeRequireBundleFails() throws Exception
    {
+      // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleA;test=x
+      // Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x
+      // Bundle-Version: 1.0.0
       Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
       try
       {
          bundle1.start();
          assertLoadClass(bundle1, A.class);
+         
+         // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
+         // Require-Bundle: org.jboss.test.osgi.classloader.bundleA;doesnotexist=true;test=y
          Bundle bundle2 = installBundle(assembleBundle("attributerequirebundlefails", "/bundles/classloader/attributerequirebundlefails", B.class));
          try
          {

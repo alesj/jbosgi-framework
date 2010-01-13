@@ -48,25 +48,33 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractOSGiClassLoadingDe
    public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
    {
       super.deploy(unit, osgiMetaData);
-      
+
       // Return if this is not a bundle fragment 
       AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
       if (bundleState.isFragment() == false)
          return;
-      
+
       OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
-      
+
       // Initialize the Fragment-Host 
       ParameterizedAttribute hostAttr = osgiMetaData.getFragmentHost();
       FragmentHostMetaData fragmentHost = new FragmentHostMetaData(hostAttr.getAttribute());
       classLoadingMetaData.setFragmentHost(fragmentHost);
-      
+
       Parameter bundleVersionAttr = hostAttr.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
       if (bundleVersionAttr != null)
          fragmentHost.setBundleVersion((Version)bundleVersionAttr.getValue());
-      
+
       Parameter extensionDirective = hostAttr.getDirective(Constants.EXTENSION_DIRECTIVE);
       if (extensionDirective != null)
          fragmentHost.setExtension((String)extensionDirective.getValue());
+
+      // TODO Modify the CL metadata of the host such that eventually the CL policy
+      // contains a DelegateLoader for the attached fragment
+
+      // Adding the fragment as an OSGiBundleRequirement to the host does not work because 
+      // those requirements end up as DependencyItems already during the INSTALL phase. 
+      // Remember to do equivalent code in OSGiBundleClassLoadingDeployer
+      // in case the fragment gets installed before the host.
    }
 }

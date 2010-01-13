@@ -21,6 +21,8 @@
 */
 package org.jboss.osgi.framework.classloading;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
@@ -42,9 +44,10 @@ public class OSGiBundleRequirement extends ModuleRequirement
 {
    /** The serialVersionUID */
    private static final long serialVersionUID = 4264597072894634275L;
-   
-   /** The attributes */
-   private ParameterizedAttribute requireBundle;
+
+   private String visibility;
+   private String resolution;
+   private Map<String, Parameter> attributes;
 
    /**
     * Create a new OSGiBundleRequirement.
@@ -59,49 +62,61 @@ public class OSGiBundleRequirement extends ModuleRequirement
          throw new IllegalArgumentException("Null require bundle");
 
       String name = requireBundle.getAttribute();
-      
+
       AbstractVersionRange range = null;
       String version = requireBundle.getAttributeValue(Constants.BUNDLE_VERSION_ATTRIBUTE, String.class);
       if (version != null)
-         range = (AbstractVersionRange) AbstractVersionRange.valueOf(version);
-
-      return new OSGiBundleRequirement(name, range, requireBundle);
-   }
-   
-   /**
-    * Create a new OSGiBundleRequirement.
-    * 
-    * @param name the name
-    * @param versionRange the version range - pass null for all versions
-    * @param requireBundle the require bundle metadata
-    * @throws IllegalArgumentException for a null name or requireBundle
-    */
-   public OSGiBundleRequirement(String name, VersionRange versionRange, ParameterizedAttribute requireBundle)
-   {
-      super(name, versionRange);
-      if (requireBundle == null)
-         throw new IllegalArgumentException("Null requireBundle");
-      this.requireBundle = requireBundle;
+         range = (AbstractVersionRange)AbstractVersionRange.valueOf(version);
 
       String visibility = requireBundle.getDirectiveValue(Constants.VISIBILITY_DIRECTIVE, String.class);
+      String resolution = requireBundle.getDirectiveValue(Constants.RESOLUTION_DIRECTIVE, String.class);
+      Map<String, Parameter> attributes = requireBundle.getAttributes();
+
+      return new OSGiBundleRequirement(name, range, visibility, resolution, attributes);
+   }
+
+   /**
+    * Create a new bundle requirement.
+    * 
+    * @param name the symbolic name of the required bundle
+    * @param versionRange the version range of the required bundle
+    */
+   public static OSGiBundleRequirement create(String name, VersionRange versionRange)
+   {
+      return new OSGiBundleRequirement(name, versionRange, Constants.VISIBILITY_PRIVATE, Constants.RESOLUTION_MANDATORY, null);
+   }
+
+   /**
+    * Create a new OSGiBundleRequirement.
+    */
+   private OSGiBundleRequirement(String name, VersionRange versionRange, String visDirective, String resDirective, Map<String, Parameter> attrMap)
+   {
+      super(name, versionRange);
+
+      attributes = attrMap;
+      if (attributes == null)
+         attributes = new HashMap<String, Parameter>();
+
+      visibility = visDirective;
+      if (visibility == null)
+         visibility = Constants.VISIBILITY_PRIVATE;
+
+      resolution = resDirective;
+      if (resolution == null)
+         resolution = Constants.RESOLUTION_MANDATORY;
+
       if (Constants.VISIBILITY_REEXPORT.equals(visibility))
          setReExport(true);
 
-      String resolution = requireBundle.getDirectiveValue(Constants.RESOLUTION_DIRECTIVE, String.class);
       if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
          setOptional(true);
    }
-   
-   /**
-    * Get the requireBundle metadata.
-    * 
-    * @return the requireBundle.
-    */
-   public ParameterizedAttribute getRequireBundle()
+
+   public Map<String, Parameter> getAttributes()
    {
-      return requireBundle;
+      return Collections.unmodifiableMap(attributes);
    }
-   
+
    @Override
    public boolean equals(Object obj)
    {
@@ -109,9 +124,9 @@ public class OSGiBundleRequirement extends ModuleRequirement
          return true;
       if (obj == null || obj instanceof OSGiBundleRequirement == false)
          return false;
-      if (super.equals(obj) ==false)
+      if (super.equals(obj) == false)
          return false;
-      
+
       return true;
    }
 
@@ -119,8 +134,10 @@ public class OSGiBundleRequirement extends ModuleRequirement
    protected void toString(StringBuffer buffer)
    {
       super.toString(buffer);
-      Map<String, Parameter> parameters = requireBundle.getAttributes();
-      if (parameters != null && parameters.isEmpty() == false)
-         buffer.append(" attributes=").append(parameters);
+      if (attributes.containsKey(Constants.VISIBILITY_DIRECTIVE) == false)
+         buffer.append(Constants.VISIBILITY_DIRECTIVE + ":=" + visibility);
+      if (attributes.containsKey(Constants.RESOLUTION_DIRECTIVE) == false)
+         buffer.append(Constants.RESOLUTION_DIRECTIVE + ":=" + resolution);
+      buffer.append(attributes);
    }
 }
