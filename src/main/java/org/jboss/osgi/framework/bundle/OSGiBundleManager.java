@@ -46,8 +46,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
+import java.util.jar.Manifest;
 
 import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
@@ -68,9 +68,10 @@ import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
 import org.jboss.kernel.Kernel;
 import org.jboss.kernel.spi.dependency.KernelController;
+import org.jboss.kernel.spi.qualifier.QualifierMatchers;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.plugins.loader.memory.MemoryMetaDataLoader;
-import org.jboss.metadata.spi.loader.MutableMetaDataLoader;
+import org.jboss.metadata.spi.MutableMetaData;
 import org.jboss.metadata.spi.repository.MutableMetaDataRepository;
 import org.jboss.metadata.spi.retrieval.MetaDataRetrieval;
 import org.jboss.metadata.spi.retrieval.MetaDataRetrievalFactory;
@@ -150,6 +151,8 @@ public class OSGiBundleManager
    private MainDeployerStructure deployerStructure;
    /** The deployment registry */
    private DeploymentRegistry registry;
+   /** The previous context tracker */
+   private ContextTracker previousTracker;
    /** The instance metadata factory */
    private MetaDataRetrievalFactory factory;
    /** The executor */
@@ -264,23 +267,37 @@ public class OSGiBundleManager
          retrieval = new MemoryMetaDataLoader(ScopeKey.DEFAULT_SCOPE);
          repository.addMetaDataRetrieval(retrieval);
       }
-      if (retrieval != null && retrieval instanceof MutableMetaDataLoader)
+      if (retrieval != null && retrieval instanceof MutableMetaData)
       {
-         MutableMetaDataLoader mmdl = (MutableMetaDataLoader)retrieval;
+         MutableMetaData mmd = (MutableMetaData)retrieval;
          if (register)
          {
-            mmdl.addMetaData(systemBundle, ContextTracker.class);
+            previousTracker = mmd.addMetaData(systemBundle, ContextTracker.class);
          }
          else
          {
-            mmdl.removeMetaData(ContextTracker.class);
-            if (mmdl.isEmpty())
-               repository.removeMetaDataRetrieval(mmdl.getScope());
+            if (previousTracker == null)
+            {
+               mmd.removeMetaData(ContextTracker.class);
+               if (retrieval.isEmpty())
+                  repository.removeMetaDataRetrieval(retrieval.getScope());
+            }
+            else
+            {
+               mmd.addMetaData(previousTracker, ContextTracker.class);
+            }
          }
       }
 
+      // osgi ldap filter parsing and matching
+      FilterParserAndMatcher fpm = FilterParserAndMatcher.INSTANCE;
+      QualifierMatchers matchers = QualifierMatchers.getInstance();
+
       if (register)
       {
+         matchers.addParser(fpm);
+         matchers.addMatcher(fpm);
+
          MetaDataRetrievalFactory mdrFactory = factory;
          if (mdrFactory == null)
          {
@@ -296,6 +313,9 @@ public class OSGiBundleManager
       else
       {
          repository.removeMetaDataRetrievalFactory(CommonLevels.INSTANCE);
+
+         matchers.removeParser(fpm.getHandledContent());
+         matchers.removeMatcher(fpm.getHandledType());
       }
    }
 

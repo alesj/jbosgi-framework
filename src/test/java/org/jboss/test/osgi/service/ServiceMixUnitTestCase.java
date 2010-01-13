@@ -460,6 +460,47 @@ public class ServiceMixUnitTestCase extends DeployersTest
       }
    }
 
+   public void testServiceInjection() throws Throwable
+   {
+      Bundle bundle = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle2", A.class));
+      try
+      {
+         bundle.start();
+         BundleContext bundleContext1 = bundle.getBundleContext();
+         assertNotNull(bundleContext1);
+
+         Class<?> aClass = bundle.loadClass(A.class.getName());
+         Object a = aClass.newInstance();
+         Hashtable<String, Object> table = new Hashtable<String, Object>();
+         table.put("a", "b");
+         ServiceRegistration reg1 = bundleContext1.registerService(A.class.getName(), a, table);
+         assertNotNull(reg1);
+
+         AssembledDirectory mix = createAssembledDirectory("beans1", "");
+         addPath(mix, "/bundles/service/service-beans2", "");
+         addPackage(mix, C.class);
+         Deployment deployment = assertDeploy(mix);
+         try
+         {
+            checkComplete();
+
+            Bundle beans = getBundle(getDeploymentUnit(deployment));
+            beans.start();
+
+            Object c = getBean("C");
+            assertEquals(a, getter(c, "getA", "C"));
+         }
+         finally
+         {
+            undeploy(deployment);
+         }
+      }
+      finally
+      {
+         uninstall(bundle);
+      }
+   }
+
    public void testFiltering() throws Throwable
    {
       Deployment bean = addBean("beanA", A.class);
