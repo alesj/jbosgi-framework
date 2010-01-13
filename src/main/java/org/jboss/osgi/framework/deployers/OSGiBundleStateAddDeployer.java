@@ -30,9 +30,8 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 /**
  * OSGiBundleStateDeployer.<p>
  * 
- * This deployer creates a bundle state object for all top level deployments
- * regardless of whether they are OSGi deployments or not. TODO - this is not true!
- *
+ * This deployer creates a bundle state object for all top level bundle deployments.
+ * 
  * Note: undeploy/remove part is in a separate deployer.
  *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
