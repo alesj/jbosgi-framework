@@ -400,9 +400,7 @@ public class OSGiBundleManager
                      manifest = new Manifest();
                   // [TODO] populate some bundle information
                   Attributes attributes = manifest.getMainAttributes();
-                  attributes.put(new Name(Constants.BUNDLE_NAME), unit.getName());
                   attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-                  attributes.put(new Name(Constants.BUNDLE_MANIFESTVERSION), "2");
                   osgiMetaData = new AbstractOSGiMetaData(manifest);
                   unit.addAttachment(OSGiMetaData.class, osgiMetaData);
                }
