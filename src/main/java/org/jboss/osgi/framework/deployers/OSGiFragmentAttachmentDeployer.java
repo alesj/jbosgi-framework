@@ -24,7 +24,6 @@ package org.jboss.osgi.framework.deployers;
 // $Id$
 
 import org.jboss.classloader.spi.ClassLoaderPolicy;
-import org.jboss.classloader.spi.DelegateLoader;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
@@ -91,10 +90,7 @@ public class OSGiFragmentAttachmentDeployer extends AbstractSimpleRealDeployer<C
          OSGiBundleState hostState = fragState.getFragmentHost();
          DeploymentUnit hostUnit = hostState.getDeploymentUnit();
          OSGiClassLoaderPolicy hostPolicy = (OSGiClassLoaderPolicy)hostUnit.getAttachment(ClassLoaderPolicy.class);
-         
-         OSGiClassLoaderPolicy fragPolicy = (OSGiClassLoaderPolicy)unit.getAttachment(ClassLoaderPolicy.class);
-         DelegateLoader fragLoader = new DelegateLoader(fragPolicy);
-         hostPolicy.addFragmentLoader(fragLoader);
+         hostPolicy.attachFragment(fragState.getRoot());
       }
    }
 }

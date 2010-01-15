@@ -24,13 +24,9 @@ package org.jboss.osgi.framework.classloading;
 // $Id$
 
 import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.jboss.classloader.spi.DelegateLoader;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
@@ -50,8 +46,6 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
    // Maps the lib name to native code archive
    private Map<String, File> libraryMap;
-   // The optional list of attached fragment loaders
-   private List<DelegateLoader> fragmentLoaders;
    
    public OSGiClassLoaderPolicy(AbstractBundleState bundleState, VirtualFile[] roots)
    {
@@ -101,37 +95,5 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
          libfile = libraryMap.get("lib" + libname);
          
       return (libfile != null ? libfile.getAbsolutePath() : null);
-   }
-
-   public List<DelegateLoader> getFragmentLoaders()
-   {
-      return fragmentLoaders;
-   }
-
-   public void addFragmentLoader(DelegateLoader delegateLoader)
-   {
-      if (fragmentLoaders == null)
-         fragmentLoaders = new ArrayList<DelegateLoader>();
-
-      fragmentLoaders.add(delegateLoader);
-   }
-
-   @Override
-   public URL getResource(String path)
-   {
-      URL resourceURL = super.getResource(path);
-      
-      // Try to find the resource in the attached fragments
-      if (resourceURL == null && fragmentLoaders != null)
-      {
-         for (DelegateLoader fragLoader : fragmentLoaders)
-         {
-            resourceURL = fragLoader.getResource(path);
-            if (resourceURL != null)
-               break;
-         }
-      }
-      
-      return resourceURL;
    }
 }
