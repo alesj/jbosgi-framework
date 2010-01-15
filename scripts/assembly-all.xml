@@ -13,6 +13,7 @@
       <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
       <includes>
         <include>*:args4j:jar</include>
+        <include>*:javax.inject:jar</include>
         <include>*:jaxb-api:jar</include>
         <include>*:jboss-classloader:jar</include>
         <include>*:jboss-classloading:jar</include>
