@@ -24,7 +24,6 @@ package org.jboss.osgi.framework.metadata.internal;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.aop.proxy.container.GeneratedAOPProxyFactory;
 import org.jboss.beans.metadata.spi.MetaDataVisitor;
 import org.jboss.beans.metadata.spi.MetaDataVisitorNode;
 import org.jboss.beans.metadata.spi.PropertyMetaData;
@@ -56,8 +55,8 @@ public class AbstractReferenceMetaData extends AbstractHolderMetaData implements
 
    public Object getValue(BundleContext bundleContext) throws Throwable
    {
-      // tdo - add dynamic behaviour
-      return GeneratedAOPProxyFactory.createProxy(null, null);
+      // [TODO] - add dynamic behaviour
+      return null;
    }
 
    public void visit(ServiceMetaDataVisitor visitor)
