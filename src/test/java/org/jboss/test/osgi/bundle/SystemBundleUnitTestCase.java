@@ -67,12 +67,12 @@ public class SystemBundleUnitTestCase extends FrameworkTest
    
    public void testStartStop() throws Exception
    {
-      // TODO testStartStop
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testUpdate() throws Exception
    {
-      // TODO testUpdate
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testUninstall() throws Exception
@@ -108,31 +108,31 @@ public class SystemBundleUnitTestCase extends FrameworkTest
    
    public void testGetEntry()
    {
-      // TODO [JBOSGI-138] Proper system BundleContext implementation
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testGetEntryPath()
    {
-      // TODO [JBOSGI-138] Proper system BundleContext implementation
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testFindEntries()
    {
-      // TODO [JBOSGI-138] Proper system BundleContext implementation
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testLoadClass()
    {
-      // TODO [JBOSGI-138] Proper system BundleContext implementation
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testGetResource()
    {
-      // TODO [JBOSGI-138] Proper system BundleContext implementation
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testGetResources()
    {
-      // TODO [JBOSGI-138] Proper system BundleContext implementation
+      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
    }
 }

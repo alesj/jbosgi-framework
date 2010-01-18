@@ -45,6 +45,7 @@ import org.jboss.virtual.VirtualFile;
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
    // Maps the lib name to native code archive
+   // https://jira.jboss.org/jira/browse/JBCL-136
    private Map<String, File> libraryMap;
    
    public OSGiClassLoaderPolicy(AbstractBundleState bundleState, VirtualFile[] roots)

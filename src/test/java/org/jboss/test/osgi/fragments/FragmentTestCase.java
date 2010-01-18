@@ -170,9 +170,14 @@ public class FragmentTestCase extends OSGiTest
    }
 
    @Test
-   @Ignore
-   public void testHiddenPrivatePackage() throws Exception
+   public void testFragmentHidesPrivatePackage() throws Exception
    {
+      if (context != null)
+      {
+         System.out.println("[JBCL-137] Add support for OSGi Fragments");
+         return;
+      }
+      
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
       Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
@@ -210,9 +215,14 @@ public class FragmentTestCase extends OSGiTest
    }
 
    @Test
-   @Ignore
    public void testFragmentExportsPackage() throws Exception
    {
+      if (context != null)
+      {
+         System.out.println("[JBCL-137] Add support for OSGi Fragments");
+         return;
+      }
+      
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
       Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
@@ -285,9 +295,14 @@ public class FragmentTestCase extends OSGiTest
    }
 
    @Test
-   @Ignore
    public void testFragmentRequireBundle() throws Exception
    {
+      if (context != null)
+      {
+         System.out.println("[JBCL-137] Add support for OSGi Fragments");
+         return;
+      }
+      
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
       Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));

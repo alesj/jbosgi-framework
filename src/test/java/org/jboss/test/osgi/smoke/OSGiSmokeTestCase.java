@@ -56,13 +56,13 @@ public class OSGiSmokeTestCase extends FrameworkTest
 
    public void testNoManifest() throws Exception
    {
-      // TODO [JBOSGI-203] Define non OSGi bundle handling by the Framework
+      System.out.println("[JBOSGI-203] Define non OSGi bundle handling by the Framework");
       // testBundle("smoke-no-manifest", Bundle.ACTIVE);
    }
 
    public void testNonOSGiManifest() throws Exception
    {
-      // TODO [JBOSGI-203] Define non OSGi bundle handling by the Framework
+      System.out.println("[JBOSGI-203] Define non OSGi bundle handling by the Framework");
       // testBundle("smoke-non-osgi-manifest", Bundle.ACTIVE);
    }
 
@@ -90,13 +90,13 @@ public class OSGiSmokeTestCase extends FrameworkTest
 
    public void testDeployedNoManifest() throws Exception
    {
-      // TODO [JBOSGI-203] Define non OSGi bundle handling by the Framework
+      System.out.println("[JBOSGI-203] Define non OSGi bundle handling by the Framework");
       // testDeployedBundle("smoke-no-manifest", Bundle.ACTIVE);
    }
 
    public void testDeployedNonOSGiManifest() throws Exception
    {
-      // TODO [JBOSGI-203] Define non OSGi bundle handling by the Framework
+      System.out.println("[JBOSGI-203] Define non OSGi bundle handling by the Framework");
       // testDeployedBundle("smoke-non-osgi-manifest", Bundle.ACTIVE);
    }
 
@@ -128,7 +128,8 @@ public class OSGiSmokeTestCase extends FrameworkTest
 
    public void testAssembledNonOSGiDeployment() throws Exception
    {
-      /* TODO [JBOSGI-203] Define non OSGi bundle handling by the Framework
+      System.out.println("[JBOSGI-203] Define non OSGi bundle handling by the Framework");
+      /*
       Bundle bundle = deployBundle("smoke-non-osgi-deployment", A.class);
       try
       {
