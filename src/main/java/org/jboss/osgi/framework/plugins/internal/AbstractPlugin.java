@@ -34,7 +34,7 @@ import org.jboss.osgi.framework.plugins.Plugin;
  */
 public abstract class AbstractPlugin implements Plugin
 {
-   protected OSGiBundleManager bundleManager;
+   private OSGiBundleManager bundleManager;
 
    public AbstractPlugin(OSGiBundleManager bundleManager)
    {

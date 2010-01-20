@@ -66,7 +66,7 @@ public class LifecycleInterceptorServiceImpl extends AbstractServicePlugin imple
          protected InvocationContext getInvocationContext(Bundle bundle)
          {
             long bundleId = bundle.getBundleId();
-            AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)bundleManager.getBundleById(bundleId);
+            AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)getBundleManager().getBundleById(bundleId);
             if (bundle == null)
                throw new IllegalStateException("Cannot obtain bundle for: " + bundle);
 

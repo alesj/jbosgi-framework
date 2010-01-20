@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +49,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.framework.plugins.LifecycleInterceptorServicePlugin;
+import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.util.CaseInsensitiveDictionary;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.osgi.spi.util.ConstantsHelper;
@@ -433,21 +433,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    {
       checkInstalled();
 
-      Set<ControllerContext> contexts = getRegisteredContexts();
-      if (contexts.isEmpty())
-         return null;
-
-      OSGiBundleManager manager = getBundleManager();
-      Set<ServiceReference> result = new HashSet<ServiceReference>();
-      for (ControllerContext context : contexts)
-      {
-         ServiceReference ref = manager.getServiceReferenceForContext(context);
-         if (ref != null)
-            result.add(ref);
-      }
-      if (result.isEmpty())
-         return null;
-      return result.toArray(new ServiceReference[result.size()]);
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      return plugin.getRegisteredServices(this);
    }
 
    /**
@@ -484,52 +471,37 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    public ServiceReference[] getServicesInUse()
    {
-      Set<ControllerContext> contexts = getUsedContexts(this);
-      if (contexts == null || contexts.isEmpty())
-         return null;
-
-      OSGiBundleManager manager = getBundleManager();
-      List<ServiceReference> references = new ArrayList<ServiceReference>();
-      for (ControllerContext context : contexts)
-      {
-         ServiceReference ref = manager.getServiceReferenceForContext(context);
-         if (ref != null)
-            references.add(ref);
-      }
-
-      if (references.isEmpty())
-         return null;
-      return references.toArray(new ServiceReference[references.size()]);
+      checkInstalled();
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      return plugin.getServicesInUse(this);
    }
 
    public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException
    {
       checkValidBundleContext();
-      return getBundleManager().getServiceReferences(this, clazz, filter, false);
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      return plugin.getAllServiceReferences(this, clazz, filter);
    }
 
    public Object getService(ServiceReference reference)
    {
       checkValidBundleContext();
-
-      if (reference == null)
-         throw new IllegalArgumentException("Null reference");
-
-      return getBundleManager().getService(this, reference);
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      return plugin.getService(this, reference);
    }
 
    public ServiceReference getServiceReference(String clazz)
    {
       checkValidBundleContext();
-      if (clazz == null)
-         throw new IllegalArgumentException("Null clazz");
-      return getBundleManager().getServiceReference(this, clazz);
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      return plugin.getServiceReference(this, clazz);
    }
 
    public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException
    {
       checkValidBundleContext();
-      return getBundleManager().getServiceReferences(this, clazz, filter, true);
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      return plugin.getServiceReferences(this, clazz, filter);
    }
 
    @SuppressWarnings({ "rawtypes" })
@@ -544,16 +516,28 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties)
    {
       checkValidBundleContext();
-
-      OSGiServiceState serviceState = getBundleManager().registerService(this, clazzes, service, properties);
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      OSGiServiceState serviceState = (OSGiServiceState)plugin.registerService(this, clazzes, service, properties);
       afterServiceRegistration(serviceState);
       return serviceState.getRegistration();
    }
 
+   void unregisterService(OSGiServiceState serviceState)
+   {
+      beforeServiceUnregistration(serviceState);
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      plugin.unregisterService(serviceState);
+   }
+
+   public boolean ungetService(ServiceReference reference)
+   {
+      checkValidBundleContext();
+      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
+      return plugin.ungetService(this, reference);
+   }
+
    /**
     * After service registration callback.
-    *
-    * @param service the service
     */
    protected void afterServiceRegistration(OSGiServiceState service)
    {
@@ -561,40 +545,11 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    /**
     * Before service unregistration callback.
-    *
-    * @param service the service
     */
    protected void beforeServiceUnregistration(OSGiServiceState service)
    {
    }
-
-   /**
-    * Unregister a service
-    * 
-    * @param serviceState the service state
-    */
-   void unregisterService(OSGiServiceState serviceState)
-   {
-      beforeServiceUnregistration(serviceState);
-      getBundleManager().unregisterService(serviceState);
-   }
-
-   public boolean ungetService(ServiceReference reference)
-   {
-      if (reference == null)
-         throw new IllegalArgumentException("Null reference");
-
-      // Check if the service is still in use by this bundle
-      ControllerContextHandle handle = (ControllerContextHandle)reference;
-      ControllerContext context = handle.getContext();
-      if (OSGiBundleManager.isUnregistered(context))
-         return false;
-
-      checkValidBundleContext();
-
-      return ungetContext(context);
-   }
-
+   
    boolean ungetContext(ControllerContext context)
    {
       return getBundleManager().ungetContext(this, context);
@@ -710,7 +665,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     * @param className the class name
     * @return the source or null if no source
     */
-   Object getSource(String className)
+   public Object getSource(String className)
    {
       // [TODO] some more efficient way than using the class?
       try

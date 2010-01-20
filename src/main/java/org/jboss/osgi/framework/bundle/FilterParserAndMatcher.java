@@ -57,6 +57,7 @@ class FilterParserAndMatcher implements QualifierParser, QualifierMatcher<Filter
       return QualifierContent.getContent("filter");
    }
 
+   @SuppressWarnings("rawtypes")
    public boolean matches(ControllerContext context, Set<Object> suppliedQualifiers, Filter filter)
    {
       MetaData metaData = context.getScopeInfo().getMetaData();

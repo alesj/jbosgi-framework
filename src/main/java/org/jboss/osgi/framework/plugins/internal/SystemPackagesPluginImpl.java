@@ -55,7 +55,7 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
    
    public void start()
    {
-      String systemPackages = bundleManager.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
+      String systemPackages = getBundleManager().getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
       if (systemPackages != null)
       {
          allPackages.addAll(packagesAsList(systemPackages));
@@ -110,10 +110,10 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          allPackages.add("org.osgi.service.packageadmin");
          
          String asString = packagesAsString(allPackages);
-         bundleManager.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES, asString);
+         getBundleManager().setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES, asString);
       }
       
-      String extraPackages = bundleManager.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+      String extraPackages = getBundleManager().getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
       if (extraPackages != null)
       {
          allPackages.addAll(packagesAsList(extraPackages));

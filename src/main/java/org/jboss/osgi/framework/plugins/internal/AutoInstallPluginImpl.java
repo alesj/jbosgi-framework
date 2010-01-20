@@ -78,7 +78,7 @@ public class AutoInstallPluginImpl extends AbstractPlugin implements AutoInstall
       for (URL bundleURL : autoInstall)
       {
          
-         Bundle bundle = bundleManager.installBundle(bundleURL);
+         Bundle bundle = getBundleManager().installBundle(bundleURL);
          autoBundles.put(bundleURL, bundle);
       }
    }

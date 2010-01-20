@@ -34,7 +34,6 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +51,6 @@ import java.util.jar.Attributes.Name;
 import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
-import org.jboss.dependency.spi.tracker.ContextTracker;
 import org.jboss.deployers.client.spi.DeployerClient;
 import org.jboss.deployers.client.spi.IncompleteDeploymentException;
 import org.jboss.deployers.client.spi.IncompleteDeployments;
@@ -67,16 +65,7 @@ import org.jboss.deployers.structure.spi.main.MainDeployerStructure;
 import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
 import org.jboss.kernel.Kernel;
-import org.jboss.kernel.spi.dependency.KernelController;
-import org.jboss.kernel.spi.qualifier.QualifierMatchers;
 import org.jboss.logging.Logger;
-import org.jboss.metadata.plugins.loader.memory.MemoryMetaDataLoader;
-import org.jboss.metadata.spi.MutableMetaData;
-import org.jboss.metadata.spi.repository.MutableMetaDataRepository;
-import org.jboss.metadata.spi.retrieval.MetaDataRetrieval;
-import org.jboss.metadata.spi.retrieval.MetaDataRetrievalFactory;
-import org.jboss.metadata.spi.scope.CommonLevels;
-import org.jboss.metadata.spi.scope.ScopeKey;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.deployment.deployer.DeploymentFactory;
 import org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer;
@@ -90,7 +79,6 @@ import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.Plugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.ServicePlugin;
-import org.jboss.osgi.framework.util.NoFilter;
 import org.jboss.osgi.framework.util.URLHelper;
 import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.util.platform.Java;
@@ -102,12 +90,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -149,12 +132,8 @@ public class OSGiBundleManager
    private DeployerClient deployerClient;
    /** The deployment structure */
    private MainDeployerStructure deployerStructure;
-   /** The deployment registry */
+      /** The deployment registry */
    private DeploymentRegistry registry;
-   /** The previous context tracker */
-   private ContextTracker previousTracker;
-   /** The instance metadata factory */
-   private MetaDataRetrievalFactory factory;
    /** The executor */
    private Executor executor;
    /** The system bundle */
@@ -242,202 +221,11 @@ public class OSGiBundleManager
       // Create the system Bundle
       systemBundle = new OSGiSystemState();
       addBundle(systemBundle);
-
-      applyMDRUsage(true);
    }
 
    public void stop()
    {
-      applyMDRUsage(false);
-   }
-
-   /**
-    * Apply OSGi's MDR usage:
-    * - add/remove system bundle as default context tracker
-    * - add/remove instance metadata retrieval factory 
-    *
-    * @param register do we register or unregister
-    */
-   protected void applyMDRUsage(boolean register)
-   {
-      MutableMetaDataRepository repository = kernel.getMetaDataRepository().getMetaDataRepository();
-      MetaDataRetrieval retrieval = repository.getMetaDataRetrieval(ScopeKey.DEFAULT_SCOPE);
-      if (register && retrieval == null)
-      {
-         retrieval = new MemoryMetaDataLoader(ScopeKey.DEFAULT_SCOPE);
-         repository.addMetaDataRetrieval(retrieval);
-      }
-      if (retrieval != null && retrieval instanceof MutableMetaData)
-      {
-         MutableMetaData mmd = (MutableMetaData)retrieval;
-         if (register)
-         {
-            previousTracker = mmd.addMetaData(systemBundle, ContextTracker.class);
-         }
-         else
-         {
-            if (previousTracker == null)
-            {
-               mmd.removeMetaData(ContextTracker.class);
-               if (retrieval.isEmpty())
-                  repository.removeMetaDataRetrieval(retrieval.getScope());
-            }
-            else
-            {
-               mmd.addMetaData(previousTracker, ContextTracker.class);
-            }
-         }
-      }
-
-      // osgi ldap filter parsing and matching
-      FilterParserAndMatcher fpm = FilterParserAndMatcher.INSTANCE;
-      QualifierMatchers matchers = QualifierMatchers.getInstance();
-
-      if (register)
-      {
-         matchers.addParser(fpm);
-         matchers.addMatcher(fpm);
-
-         MetaDataRetrievalFactory mdrFactory = factory;
-         if (mdrFactory == null)
-         {
-            Controller controller = kernel.getController();
-            InstanceMetaDataRetrievalFactory imdrf = new InstanceMetaDataRetrievalFactory(controller);
-            imdrf.addFactory(new OSGiServiceStateDictionaryFactory());
-            imdrf.addFactory(new KernelDictionaryFactory(kernel.getConfigurator()));
-            // TODO - JMX?
-            mdrFactory = imdrf;
-         }
-         repository.addMetaDataRetrievalFactory(CommonLevels.INSTANCE, mdrFactory);
-      }
-      else
-      {
-         repository.removeMetaDataRetrievalFactory(CommonLevels.INSTANCE);
-
-         matchers.removeParser(fpm.getHandledContent());
-         matchers.removeMatcher(fpm.getHandledType());
-      }
-   }
-
-   /**
-    * Set instance metadata factory.
-    *
-    * @param factory the instance metadata factory
-    */
-   public void setInstanceMetaDataFactory(MetaDataRetrievalFactory factory)
-   {
-      this.factory = factory;
-   }
-
-   /**
-    * Put context to deployment mapping.
-    *
-    * @param context the context
-    * @param unit the deployment
-    * @return previous mapping value
-    */
-   DeploymentUnit putContext(ControllerContext context, DeploymentUnit unit)
-   {
-      return registry.putContext(context, unit);
-   }
-
-   /**
-    * Remove context to deployment mapping.
-    *
-    * @param context the context
-    * @param unit the deployment
-    * @return is previous mapping value same as unit param
-    */
-   DeploymentUnit removeContext(ControllerContext context, DeploymentUnit unit)
-   {
-      return registry.removeContext(context, unit);
-   }
-
-   /**
-    * Get bundle for user tracker.
-    *
-    * @param user the user tracker object
-    * @return bundle state
-    */
-   AbstractBundleState getBundleForUser(Object user)
-   {
-      if (user instanceof AbstractBundleState)
-         return (AbstractBundleState)user;
-      else if (user instanceof ControllerContext)
-         return getBundleForContext((ControllerContext)user);
-      else
-         throw new IllegalArgumentException("Unknown tracker type: " + user);
-   }
-
-   /**
-    * Get bundle for context.
-    *
-    * @param context the context
-    * @return bundle state
-    */
-   AbstractBundleState getBundleForContext(ControllerContext context)
-   {
-      if (context instanceof OSGiServiceState)
-      {
-         OSGiServiceState service = (OSGiServiceState)context;
-         return service.getBundleState();
-      }
-
-      DeploymentUnit unit = registry.getDeployment(context);
-      if (unit != null)
-      {
-         synchronized (unit)
-         {
-            OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
-            if (bundleState == null)
-            {
-               OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
-               if (osgiMetaData == null)
-               {
-                  Manifest manifest = unit.getAttachment(Manifest.class);
-                  // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
-                  if (manifest == null)
-                     manifest = new Manifest();
-                  // [TODO] populate some bundle information
-                  Attributes attributes = manifest.getMainAttributes();
-                  attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-                  osgiMetaData = new AbstractOSGiMetaData(manifest);
-                  unit.addAttachment(OSGiMetaData.class, osgiMetaData);
-               }
-
-               try
-               {
-                  bundleState = (OSGiBundleState)addDeployment(unit);
-                  bundleState.startInternal();
-               }
-               catch (Throwable t)
-               {
-                  throw new RuntimeException("Cannot dynamically add generic bundle: " + unit, t);
-               }
-            }
-            return bundleState;
-         }
-      }
-
-      return systemBundle;
-   }
-
-   /**
-    * Get service reference for context.
-    *
-    * @param context the context
-    * @return service reference
-    */
-   ServiceReference getServiceReferenceForContext(ControllerContext context)
-   {
-      if (context instanceof OSGiServiceState)
-      {
-         OSGiServiceState service = (OSGiServiceState)context;
-         return service.hasPermission() ? service.getReferenceInternal() : null;
-      }
-
-      AbstractBundleState bundleState = getBundleForContext(context);
-      return new GenericServiceReferenceWrapper(context, bundleState);
+      // nothing to do
    }
 
    /**
@@ -1519,7 +1307,7 @@ public class OSGiBundleManager
     * @param clazz the class
     * @return class or null
     */
-   Class<?> loadClass(Bundle bundle, String clazz)
+   Class<?> loadClassFailsafe(Bundle bundle, String clazz)
    {
       try
       {
@@ -1529,284 +1317,6 @@ public class OSGiBundleManager
       {
          return null;
       }
-   }
-
-   /**
-    * Do we have a permission to use context.
-    *
-    * @param context the context
-    * @return true if allowed to use context, false otherwise
-    */
-   private boolean hasPermission(ControllerContext context)
-   {
-      // TODO - make thisa generic, w/o casting
-      if (context instanceof OSGiServiceState)
-      {
-         OSGiServiceState serviceState = (OSGiServiceState)context;
-         return serviceState.hasPermission();
-      }
-      return true;
-   }
-
-   /**
-    * Get services
-    * 
-    * @param bundle the referencing bundle
-    * @param clazz any class
-    * @param filter any filter
-    * @param checkAssignable whether to check isAssignable
-    * @return the services
-    */
-   Collection<ServiceReference> getServices(AbstractBundleState bundle, String clazz, Filter filter, boolean checkAssignable)
-   {
-      Set<ControllerContext> contexts;
-      KernelController controller = kernel.getController();
-
-      // Don't check assignabilty for the system bundle
-      boolean isSystemBundle = (bundle.getBundleId() == 0);
-      if (isSystemBundle)
-         checkAssignable = false;
-
-      // TODO - a bit slow for system bundle
-      if (clazz != null && isSystemBundle == false)
-      {
-         Class<?> type = loadClass(bundle, clazz);
-         if (type == null)
-            return null; // or check all?
-
-         contexts = controller.getContexts(type, ControllerState.INSTALLED);
-      }
-      else
-      {
-         contexts = controller.getContextsByState(ControllerState.INSTALLED);
-      }
-
-      if (contexts == null || contexts.isEmpty())
-         return null;
-
-      if (filter == null)
-         filter = NoFilter.INSTANCE;
-
-      List<ControllerContext> sorted = new ArrayList<ControllerContext>(contexts);
-      Collections.sort(sorted, ContextComparator.INSTANCE); // Sort by the spec, should bubble up
-      Collection<ServiceReference> result = new ArrayList<ServiceReference>();
-      for (ControllerContext context : sorted)
-      {
-         // re-check?? -- we already only get INSTALLED 
-         if (isUnregistered(context) == false)
-         {
-            ServiceReference ref = getServiceReferenceForContext(context);
-            if (filter.match(ref) && hasPermission(context))
-            {
-               if (clazz == null || isSystemBundle == false || MDRUtils.matchClass(context, clazz))
-               {
-                  // Check the assignability
-                  if (checkAssignable == false || MDRUtils.isAssignableTo(context, bundle))
-                     result.add(ref);
-               }
-            }
-         }
-      }
-      return result;
-   }
-
-   /**
-    * Get service reference
-    * 
-    * @param bundle the referencing bundle
-    * @param clazz any class
-    * @return the reference
-    */
-   ServiceReference getServiceReference(AbstractBundleState bundle, String clazz)
-   {
-      Collection<ServiceReference> services = getServices(bundle, clazz, null, true);
-      if (services == null || services.isEmpty())
-         return null;
-
-      return services.iterator().next();
-   }
-
-   /**
-    * Get service references
-    * 
-    * @param bundle the referencing bundle
-    * @param clazz any class
-    * @param filter any filter
-    * @param checkAssignable whether to check isAssignable
-    * @return the services
-    */
-   ServiceReference[] getServiceReferences(AbstractBundleState bundle, String clazz, Filter filter, boolean checkAssignable)
-   {
-      Collection<ServiceReference> services = getServices(bundle, clazz, filter, checkAssignable);
-      if (services == null || services.isEmpty())
-         return null;
-
-      return services.toArray(new ServiceReference[services.size()]);
-   }
-
-   /**
-    * Get service references
-    * 
-    * @param bundle the referencing bundle
-    * @param clazz any class
-    * @param filterStr any filter
-    * @param checkAssignable whether to check isAssignable
-    * @return the services
-    * @throws InvalidSyntaxException when the filter is invalid
-    */
-   ServiceReference[] getServiceReferences(AbstractBundleState bundle, String clazz, String filterStr, boolean checkAssignable) throws InvalidSyntaxException
-   {
-      Filter filter = NoFilter.INSTANCE;
-      if (filterStr != null)
-         filter = FrameworkUtil.createFilter(filterStr);
-
-      return getServiceReferences(bundle, clazz, filter, checkAssignable);
-   }
-
-   /**
-    * Register a service
-    * 
-    * @param bundleState the bundle
-    * @param clazzes the classes to implement
-    * @param service the service
-    * @param properties the properties
-    * @return the service state
-    */
-   @SuppressWarnings("rawtypes")
-   OSGiServiceState registerService(AbstractBundleState bundleState, String[] clazzes, Object service, Dictionary properties)
-   {
-      OSGiServiceState result = new OSGiServiceState(bundleState, clazzes, service, properties);
-      result.internalRegister();
-      try
-      {
-         Controller controller = kernel.getController();
-         controller.install(result);
-      }
-      catch (Throwable t)
-      {
-         fireError(bundleState, "installing service to MC in", t);
-         throw new RuntimeException(t);
-      }
-
-      FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
-      plugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
-
-      return result;
-   }
-
-   /**
-    * Get registered contexts for bundle.
-    *
-    * @param bundleState the owning bundle
-    * @return registered contexts
-    */
-   Set<ControllerContext> getRegisteredContext(AbstractDeployedBundleState bundleState)
-   {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      return registry.getContexts(unit);
-   }
-
-   /**
-    * Unregister a service
-    * 
-    * @param serviceState the service state
-    */
-   void unregisterService(OSGiServiceState serviceState)
-   {
-      Controller controller = kernel.getController();
-      controller.uninstall(serviceState.getName());
-
-      serviceState.internalUnregister();
-
-      FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
-      plugin.fireServiceEvent(serviceState.getBundleState(), ServiceEvent.UNREGISTERING, serviceState);
-   }
-
-   /**
-    * Unregister contexts.
-    *
-    * @param bundleState the stopping bundle
-    */
-   void unregisterContexts(AbstractDeployedBundleState bundleState)
-   {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      Set<ControllerContext> contexts = registry.getContexts(unit);
-      for (ControllerContext context : contexts)
-      {
-         unregisterContext(context);
-      }
-   }
-
-   /**
-    * Unregister context.
-    *
-    * @param context the context
-    */
-   private static void unregisterContext(ControllerContext context)
-   {
-      if (context instanceof ServiceRegistration)
-      {
-         ServiceRegistration service = (ServiceRegistration)context;
-         service.unregister();
-      }
-   }
-
-   /**
-    * Get a service
-    * 
-    * @param bundleState the bundle that requests the service
-    * @param reference the service reference
-    * @return the service
-    */
-   Object getService(AbstractBundleState bundleState, ServiceReference reference)
-   {
-      ControllerContextHandle handle = (ControllerContextHandle)reference;
-      ControllerContext context = handle.getContext();
-      if (isUnregistered(context)) // we're probably not installed anymore
-         return null;
-
-      return bundleState.addContextInUse(context);
-   }
-
-   /**
-    * Is the context undergisted.
-    *
-    * @param context the context
-    * @return true if the context is unregisted, false otherwise
-    */
-   static boolean isUnregistered(ControllerContext context)
-   {
-      Controller controller = context.getController();
-      return controller == null || controller.getStates().isBeforeState(context.getState(), ControllerState.INSTALLED);
-   }
-
-   /**
-    * Unget a service
-    * 
-    * @param bundleState the bundle state
-    * @param reference the service reference
-    * @return true when the service is still in use by the bundle
-    */
-   boolean ungetService(AbstractBundleState bundleState, ServiceReference reference)
-   {
-      if (reference == null)
-         throw new IllegalArgumentException("Null reference");
-
-      ControllerContextHandle serviceReference = (ControllerContextHandle)reference;
-      ControllerContext context = serviceReference.getContext();
-      return ungetContext(bundleState, context);
-   }
-
-   /**
-    * Unget a context
-    * 
-    * @param bundleState the bundle state
-    * @param context the context
-    * @return true when the context is still in use by the bundle
-    */
-   boolean ungetContext(AbstractBundleState bundleState, ControllerContext context)
-   {
-      return bundleState.removeContextInUse(context);
    }
 
    /**
@@ -2069,6 +1579,164 @@ public class OSGiBundleManager
             }
          }
       }
+   }
+
+   /**
+    * Put context to deployment mapping.
+    *
+    * @param context the context
+    * @param unit the deployment
+    * @return previous mapping value
+    */
+   DeploymentUnit putContext(ControllerContext context, DeploymentUnit unit)
+   {
+      return registry.putContext(context, unit);
+   }
+
+   /**
+    * Remove context to deployment mapping.
+    *
+    * @param context the context
+    * @param unit the deployment
+    * @return is previous mapping value same as unit param
+    */
+   DeploymentUnit removeContext(ControllerContext context, DeploymentUnit unit)
+   {
+      return registry.removeContext(context, unit);
+   }
+
+   /**
+    * Get registered contexts for bundle.
+    *
+    * @param bundleState the owning bundle
+    * @return registered contexts
+    */
+   Set<ControllerContext> getRegisteredContext(AbstractDeployedBundleState bundleState)
+   {
+      DeploymentUnit unit = bundleState.getDeploymentUnit();
+      return registry.getContexts(unit);
+   }
+
+   /**
+    * Is the context undergisted.
+    *
+    * @param context the context
+    * @return true if the context is unregisted, false otherwise
+    */
+   public static boolean isUnregistered(ControllerContext context)
+   {
+      Controller controller = context.getController();
+      return controller == null || controller.getStates().isBeforeState(context.getState(), ControllerState.INSTALLED);
+   }
+
+   /**
+    * Unregister contexts.
+    *
+    * @param bundleState the stopping bundle
+    */
+   void unregisterContexts(AbstractDeployedBundleState bundleState)
+   {
+      DeploymentUnit unit = bundleState.getDeploymentUnit();
+      Set<ControllerContext> contexts = registry.getContexts(unit);
+      for (ControllerContext context : contexts)
+      {
+         unregisterContext(context);
+      }
+   }
+
+   /**
+    * Get bundle for user tracker.
+    *
+    * @param user the user tracker object
+    * @return bundle state
+    */
+   AbstractBundleState getBundleForUser(Object user)
+   {
+      if (user instanceof AbstractBundleState)
+         return (AbstractBundleState)user;
+      else if (user instanceof ControllerContext)
+         return getBundleForContext((ControllerContext)user);
+      else
+         throw new IllegalArgumentException("Unknown tracker type: " + user);
+   }
+
+   /**
+    * Unget a context
+    * 
+    * @param bundleState the bundle state
+    * @param context the context
+    * @return true when the context is still in use by the bundle
+    */
+   boolean ungetContext(AbstractBundleState bundleState, ControllerContext context)
+   {
+      return bundleState.removeContextInUse(context);
+   }
+
+   /**
+    * Unregister context.
+    *
+    * @param context the context
+    */
+   private static void unregisterContext(ControllerContext context)
+   {
+      if (context instanceof ServiceRegistration)
+      {
+         ServiceRegistration service = (ServiceRegistration)context;
+         service.unregister();
+      }
+   }
+
+   /**
+    * Get bundle for context.
+    *
+    * @param context the context
+    * @return bundle state
+    */
+   public AbstractBundleState getBundleForContext(ControllerContext context)
+   {
+      if (context instanceof OSGiServiceState)
+      {
+         OSGiServiceState service = (OSGiServiceState)context;
+         return service.getBundleState();
+      }
+
+      DeploymentUnit unit = registry.getDeployment(context);
+      if (unit != null)
+      {
+         synchronized (unit)
+         {
+            OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+            if (bundleState == null)
+            {
+               OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
+               if (osgiMetaData == null)
+               {
+                  Manifest manifest = unit.getAttachment(Manifest.class);
+                  // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
+                  if (manifest == null)
+                     manifest = new Manifest();
+                  // [TODO] populate some bundle information
+                  Attributes attributes = manifest.getMainAttributes();
+                  attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
+                  osgiMetaData = new AbstractOSGiMetaData(manifest);
+                  unit.addAttachment(OSGiMetaData.class, osgiMetaData);
+               }
+
+               try
+               {
+                  bundleState = (OSGiBundleState)addDeployment(unit);
+                  bundleState.startInternal();
+               }
+               catch (Throwable t)
+               {
+                  throw new RuntimeException("Cannot dynamically add generic bundle: " + unit, t);
+               }
+            }
+            return bundleState;
+         }
+      }
+
+      return systemBundle;
    }
 
    private URL getLocationURL(String location) throws BundleException

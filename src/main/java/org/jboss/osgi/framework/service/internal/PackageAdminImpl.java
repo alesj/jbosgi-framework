@@ -133,7 +133,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
    public ExportedPackage[] getExportedPackages(Bundle bundle)
    {
-      AbstractBundleState abstractBundleState = bundleManager.getBundleState(bundle);
+      AbstractBundleState abstractBundleState = getBundleManager().getBundleState(bundle);
 
       // [TODO] exported packages for the system bundle 
       if (abstractBundleState instanceof OSGiBundleState == false)
@@ -195,7 +195,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       List<Bundle> unresolvedBundles = new ArrayList<Bundle>();
       if (bundleArr == null)
       {
-         for (Bundle bundle : bundleManager.getBundles(Bundle.INSTALLED))
+         for (Bundle bundle : getBundleManager().getBundles(Bundle.INSTALLED))
          {
             AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
             if (bundleState.isFragment() == false)
@@ -217,7 +217,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       List<OSGiBundleState> resolvableBundles = new ArrayList<OSGiBundleState>();
 
       // Check if the external resolver plugin is available
-      Resolver bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      Resolver bundleResolver = getBundleManager().getOptionalPlugin(ResolverPlugin.class);
       if (bundleResolver != null)
       {
          // Resolve the bundles through the resolver
@@ -245,7 +245,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
             OSGiBundleState bundleState = it.next();
             try
             {
-               boolean bundleResolved = bundleManager.resolveBundle(bundleState, false);
+               boolean bundleResolved = getBundleManager().resolveBundle(bundleState, false);
                if (bundleResolved)
                {
                   it.remove();
@@ -267,7 +267,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          {
             try
             {
-               bundleManager.resolveBundle(bundleState, true);
+               getBundleManager().resolveBundle(bundleState, true);
             }
             catch (Exception ex)
             {

@@ -234,7 +234,7 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
       {
          className = clazzes[0];
          OSGiBundleManager manager = bundleState.getBundleManager();
-         clazz = manager.loadClass(bundleState, className);
+         clazz = manager.loadClassFailsafe(bundleState, className);
       }
 
       ScopeInfo info = OSGiScopeInfo.createScopeInfo(getName(), className, clazz, this);

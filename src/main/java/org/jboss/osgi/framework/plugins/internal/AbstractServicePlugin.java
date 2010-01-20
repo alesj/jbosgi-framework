@@ -42,6 +42,6 @@ public abstract class AbstractServicePlugin extends AbstractPlugin implements Se
 
    public BundleContext getSystemContext()
    {
-      return bundleManager.getSystemContext();
+      return getBundleManager().getSystemContext();
    }
 }
