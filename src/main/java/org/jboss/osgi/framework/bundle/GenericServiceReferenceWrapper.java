@@ -29,6 +29,8 @@ import java.util.Set;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.tracker.ContextTracker;
 import org.jboss.dependency.spi.tracker.ContextTracking;
+import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
+import org.jboss.osgi.framework.util.KernelUtils;
 import org.osgi.framework.Bundle;
 
 /**
@@ -75,7 +77,7 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
 
    public Bundle getBundle()
    {
-      if (OSGiBundleManager.isUnregistered(context))
+      if (KernelUtils.isUnregistered(context))
          return null;
       
       return bundleState.getBundleInternal();
@@ -91,11 +93,13 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
             return null;
 
          OSGiBundleManager manager = bundleState.getBundleManager();
+         ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+         
          Set<Object> users = ct.getUsers(context);
          Set<Bundle> bundles = new HashSet<Bundle>();
          for (Object user : users)
          {
-            AbstractBundleState abs = manager.getBundleForUser(user);
+            AbstractBundleState abs = plugin.getBundleForUser(user);
             bundles.add(abs.getBundleInternal());
          }
          if (bundles.isEmpty() == false)

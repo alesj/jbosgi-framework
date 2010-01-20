@@ -39,6 +39,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -133,7 +134,9 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
    protected Set<ControllerContext> getRegisteredContexts()
    {
-      return getBundleManager().getRegisteredContext(this);
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      return plugin.getRegisteredContext(this);
    }
 
    public Class<?> loadClass(String name) throws ClassNotFoundException
@@ -308,7 +311,9 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       }
 
       // Any services registered by this bundle must be unregistered
-      getBundleManager().unregisterContexts(this);
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      plugin.unregisterContexts(this);
 
       // Any services used by this bundle must be released
       for (ControllerContext context : getUsedContexts(this))
@@ -318,7 +323,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
          {
             try
             {
-               getBundleManager().ungetContext(this, context);
+               removeContextInUse(context);
             }
             catch (Throwable t)
             {
@@ -387,12 +392,16 @@ public class OSGiBundleState extends AbstractDeployedBundleState
    @Override
    protected void afterServiceRegistration(OSGiServiceState service)
    {
-      getBundleManager().putContext(service, getDeploymentUnit());
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      plugin.putContext(service, getDeploymentUnit());
    }
 
    @Override
    protected void beforeServiceUnregistration(OSGiServiceState service)
    {
-      getBundleManager().removeContext(service, getDeploymentUnit());
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      plugin.removeContext(service, getDeploymentUnit());
    }
 }

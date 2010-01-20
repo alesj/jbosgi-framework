@@ -46,9 +46,11 @@ import org.jboss.metadata.spi.retrieval.MetaDataRetrieval;
 import org.jboss.metadata.spi.retrieval.MetaDataRetrievalFactory;
 import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.ScopeKey;
+import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
+import org.jboss.osgi.framework.util.KernelUtils;
 import org.jboss.osgi.framework.util.NoFilter;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
@@ -154,7 +156,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       
       ControllerContextHandle handle = (ControllerContextHandle)reference;
       ControllerContext context = handle.getContext();
-      if (OSGiBundleManager.isUnregistered(context)) // we're probably not installed anymore
+      if (KernelUtils.isUnregistered(context)) // we're probably not installed anymore
          return null;
 
       return bundleState.addContextInUse(context);
@@ -227,10 +229,10 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
       ControllerContextHandle serviceReference = (ControllerContextHandle)reference;
       ControllerContext context = serviceReference.getContext();
-      if (OSGiBundleManager.isUnregistered(context))
+      if (KernelUtils.isUnregistered(context))
          return false;
       
-      return getBundleManager().ungetContext(bundleState, context);
+      return bundleState.removeContextInUse(context);
    }
 
    /**
@@ -341,7 +343,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       for (ControllerContext context : sorted)
       {
          // re-check?? -- we already only get INSTALLED 
-         if (OSGiBundleManager.isUnregistered(context) == false)
+         if (KernelUtils.isUnregistered(context) == false)
          {
             ServiceReference ref = getServiceReferenceForContext(context);
             if (filter.match(ref) && hasPermission(context))
@@ -372,7 +374,9 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          return service.hasPermission() ? service.getReferenceInternal() : null;
       }
 
-      AbstractBundleState bundleState = getBundleManager().getBundleForContext(context);
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      AbstractBundleState bundleState = plugin.getBundleForContext(context);
       return new GenericServiceReferenceWrapper(context, bundleState);
    }
 

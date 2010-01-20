@@ -12,7 +12,6 @@
     <constructor>
       <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
       <parameter><inject bean="MainDeployer" /></parameter>
-      <parameter><inject bean="DeploymentRegistry" /></parameter>
     </constructor>
     <property name="properties">
       <map keyClass="java.lang.String" valueClass="java.lang.String">
@@ -47,10 +46,16 @@
   ********************************
   -->
   
+  <bean name="OSGiControllerContextPlugin" class="org.jboss.osgi.framework.bundle.ControllerContextPluginImpl">
+    <constructor>
+      <parameter><inject bean="OSGiBundleManager" /></parameter>
+      <parameter><inject bean="DeploymentRegistry" /></parameter>
+    </constructor>
+  </bean>
   <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
-  <bean name="OSGiServiceManager" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
+  <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">

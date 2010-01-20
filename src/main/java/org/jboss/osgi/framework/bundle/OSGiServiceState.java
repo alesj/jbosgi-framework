@@ -45,6 +45,7 @@ import org.jboss.kernel.spi.config.KernelConfigurator;
 import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.Scope;
 import org.jboss.metadata.spi.scope.ScopeKey;
+import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.framework.util.CaseInsensitiveDictionary;
 import org.jboss.osgi.spi.util.BundleClassLoader;
@@ -289,7 +290,8 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
    protected Object getActualUser(ControllerContext context)
    {
       OSGiBundleManager manager = bundleState.getBundleManager();
-      return manager.getBundleForContext(context);
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      return plugin.getBundleForContext(context);
    }
 
    protected Object getTargetForActualUser(Object user)
@@ -537,11 +539,13 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
          return null;
 
       OSGiBundleManager manager = bundleState.getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      
       Set<Object> users = ct.getUsers(this);
       Set<Bundle> bundles = new HashSet<Bundle>();
       for (Object user : users)
       {
-         AbstractBundleState abs = manager.getBundleForUser(user);
+         AbstractBundleState abs = plugin.getBundleForUser(user);
          bundles.add(abs.getBundleInternal());
       }
       return bundles.toArray(new Bundle[bundles.size()]);
@@ -667,9 +671,11 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
          {
             Set<AbstractBundleState> used = new HashSet<AbstractBundleState>();
             OSGiBundleManager manager = bundleState.getBundleManager();
+            ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+            
             for (Object user : users)
             {
-               AbstractBundleState using = manager.getBundleForUser(user);
+               AbstractBundleState using = plugin.getBundleForUser(user);
                if (used.add(using)) // add so we don't do duplicate work
                {
                   int count = ct.getUsedByCount(this, using);

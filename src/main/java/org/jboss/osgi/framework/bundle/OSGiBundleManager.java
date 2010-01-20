@@ -44,11 +44,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-import java.util.jar.Attributes.Name;
 
-import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.DeployerClient;
@@ -59,7 +55,6 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.deployers.spi.deployer.DeploymentStage;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
-import org.jboss.deployers.structure.spi.DeploymentRegistry;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.structure.spi.main.MainDeployerStructure;
 import org.jboss.deployers.vfs.spi.client.VFSDeployment;
@@ -71,7 +66,6 @@ import org.jboss.osgi.deployment.deployer.DeploymentFactory;
 import org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
-import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.jboss.osgi.framework.plugins.AutoInstallPlugin;
 import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
@@ -91,7 +85,6 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -130,10 +123,6 @@ public class OSGiBundleManager
    private Kernel kernel;
    /** The main deployer */
    private DeployerClient deployerClient;
-   /** The deployment structure */
-   private MainDeployerStructure deployerStructure;
-      /** The deployment registry */
-   private DeploymentRegistry registry;
    /** The executor */
    private Executor executor;
    /** The system bundle */
@@ -179,9 +168,9 @@ public class OSGiBundleManager
     * @param registry the deployment registry
     * @throws IllegalArgumentException for a null parameter
     */
-   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, DeploymentRegistry registry)
+   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient)
    {
-      this(kernel, deployerClient, registry, null);
+      this(kernel, deployerClient, null);
    }
 
    /**
@@ -193,7 +182,7 @@ public class OSGiBundleManager
     * @param executor the executor
     * @throws IllegalArgumentException for a null parameter
     */
-   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, DeploymentRegistry registry, Executor executor)
+   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, Executor executor)
    {
       if (kernel == null)
          throw new IllegalArgumentException("Null kernel");
@@ -201,13 +190,9 @@ public class OSGiBundleManager
          throw new IllegalArgumentException("Null deployerClient");
       if (deployerClient instanceof MainDeployerStructure == false)
          throw new IllegalArgumentException("Deployer client does not implement " + MainDeployerStructure.class.getName());
-      if (registry == null)
-         throw new IllegalArgumentException("Null deployment registry");
-
+      
       this.kernel = kernel;
       this.deployerClient = deployerClient;
-      this.deployerStructure = (MainDeployerStructure)deployerClient;
-      this.registry = registry;
 
       // TODO thread factory
       if (executor == null)
@@ -561,6 +546,7 @@ public class OSGiBundleManager
          deployerClient.deploy(deployment);
          try
          {
+            MainDeployerStructure deployerStructure = (MainDeployerStructure)deployerClient;
             DeploymentUnit unit = deployerStructure.getDeploymentUnit(deployment.getName());
             bundleState = unit.getAttachment(AbstractBundleState.class);
             if (bundleState == null)
@@ -1579,164 +1565,6 @@ public class OSGiBundleManager
             }
          }
       }
-   }
-
-   /**
-    * Put context to deployment mapping.
-    *
-    * @param context the context
-    * @param unit the deployment
-    * @return previous mapping value
-    */
-   DeploymentUnit putContext(ControllerContext context, DeploymentUnit unit)
-   {
-      return registry.putContext(context, unit);
-   }
-
-   /**
-    * Remove context to deployment mapping.
-    *
-    * @param context the context
-    * @param unit the deployment
-    * @return is previous mapping value same as unit param
-    */
-   DeploymentUnit removeContext(ControllerContext context, DeploymentUnit unit)
-   {
-      return registry.removeContext(context, unit);
-   }
-
-   /**
-    * Get registered contexts for bundle.
-    *
-    * @param bundleState the owning bundle
-    * @return registered contexts
-    */
-   Set<ControllerContext> getRegisteredContext(AbstractDeployedBundleState bundleState)
-   {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      return registry.getContexts(unit);
-   }
-
-   /**
-    * Is the context undergisted.
-    *
-    * @param context the context
-    * @return true if the context is unregisted, false otherwise
-    */
-   public static boolean isUnregistered(ControllerContext context)
-   {
-      Controller controller = context.getController();
-      return controller == null || controller.getStates().isBeforeState(context.getState(), ControllerState.INSTALLED);
-   }
-
-   /**
-    * Unregister contexts.
-    *
-    * @param bundleState the stopping bundle
-    */
-   void unregisterContexts(AbstractDeployedBundleState bundleState)
-   {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      Set<ControllerContext> contexts = registry.getContexts(unit);
-      for (ControllerContext context : contexts)
-      {
-         unregisterContext(context);
-      }
-   }
-
-   /**
-    * Get bundle for user tracker.
-    *
-    * @param user the user tracker object
-    * @return bundle state
-    */
-   AbstractBundleState getBundleForUser(Object user)
-   {
-      if (user instanceof AbstractBundleState)
-         return (AbstractBundleState)user;
-      else if (user instanceof ControllerContext)
-         return getBundleForContext((ControllerContext)user);
-      else
-         throw new IllegalArgumentException("Unknown tracker type: " + user);
-   }
-
-   /**
-    * Unget a context
-    * 
-    * @param bundleState the bundle state
-    * @param context the context
-    * @return true when the context is still in use by the bundle
-    */
-   boolean ungetContext(AbstractBundleState bundleState, ControllerContext context)
-   {
-      return bundleState.removeContextInUse(context);
-   }
-
-   /**
-    * Unregister context.
-    *
-    * @param context the context
-    */
-   private static void unregisterContext(ControllerContext context)
-   {
-      if (context instanceof ServiceRegistration)
-      {
-         ServiceRegistration service = (ServiceRegistration)context;
-         service.unregister();
-      }
-   }
-
-   /**
-    * Get bundle for context.
-    *
-    * @param context the context
-    * @return bundle state
-    */
-   public AbstractBundleState getBundleForContext(ControllerContext context)
-   {
-      if (context instanceof OSGiServiceState)
-      {
-         OSGiServiceState service = (OSGiServiceState)context;
-         return service.getBundleState();
-      }
-
-      DeploymentUnit unit = registry.getDeployment(context);
-      if (unit != null)
-      {
-         synchronized (unit)
-         {
-            OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
-            if (bundleState == null)
-            {
-               OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
-               if (osgiMetaData == null)
-               {
-                  Manifest manifest = unit.getAttachment(Manifest.class);
-                  // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
-                  if (manifest == null)
-                     manifest = new Manifest();
-                  // [TODO] populate some bundle information
-                  Attributes attributes = manifest.getMainAttributes();
-                  attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-                  osgiMetaData = new AbstractOSGiMetaData(manifest);
-                  unit.addAttachment(OSGiMetaData.class, osgiMetaData);
-               }
-
-               try
-               {
-                  bundleState = (OSGiBundleState)addDeployment(unit);
-                  bundleState.startInternal();
-               }
-               catch (Throwable t)
-               {
-                  throw new RuntimeException("Cannot dynamically add generic bundle: " + unit, t);
-               }
-            }
-            return bundleState;
-         }
-      }
-
-      return systemBundle;
    }
 
    private URL getLocationURL(String location) throws BundleException

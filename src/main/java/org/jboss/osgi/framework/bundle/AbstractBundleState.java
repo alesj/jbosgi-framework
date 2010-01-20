@@ -552,7 +552,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    
    boolean ungetContext(ControllerContext context)
    {
-      return getBundleManager().ungetContext(this, context);
+      return removeContextInUse(context);
    }
 
    public void addBundleListener(BundleListener listener)

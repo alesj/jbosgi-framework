@@ -31,6 +31,8 @@ import org.jboss.logging.Logger;
 import org.jboss.metadata.spi.MetaData;
 import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.ScopeLevel;
+import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
+import org.jboss.osgi.framework.util.KernelUtils;
 import org.jboss.util.collection.Iterators;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -144,7 +146,7 @@ public class MDRUtils
       if (bundleState == otherBundle)
          return true;
 
-      if (OSGiBundleManager.isUnregistered(context))
+      if (KernelUtils.isUnregistered(context))
          return false;
 
       return isAssignableTo(bundleState, otherBundle, className);
@@ -256,11 +258,13 @@ public class MDRUtils
          throw new IllegalArgumentException("Null bundle state");
 
       OSGiBundleManager manager = bundleState.getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      
       // context's bundle
-      AbstractBundleState other = manager.getBundleForContext(context);
+      AbstractBundleState other = plugin.getBundleForContext(context);
       if (bundleState == other)
          return true;
-      if (OSGiBundleManager.isUnregistered(context))
+      if (KernelUtils.isUnregistered(context))
          return false;
 
       String[] classes = getProperty(context, Constants.OBJECTCLASS, String[].class);
@@ -293,8 +297,8 @@ public class MDRUtils
          throw new IllegalArgumentException("Null class name");
 
       OSGiBundleManager manager = bundleState.getBundleManager();
-      // context's bundle
-      AbstractBundleState other = manager.getBundleForContext(context);
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      AbstractBundleState other = plugin.getBundleForContext(context);
       return isAssignableTo(context, bundleState, other, className);
    }
 
