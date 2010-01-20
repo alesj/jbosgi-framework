@@ -136,7 +136,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
    {
       OSGiBundleManager manager = getBundleManager();
       ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-      return plugin.getRegisteredContext(this);
+      return plugin.getRegisteredContexts(this);
    }
 
    public Class<?> loadClass(String name) throws ClassNotFoundException

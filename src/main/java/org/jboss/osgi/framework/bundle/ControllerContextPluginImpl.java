@@ -23,6 +23,7 @@ package org.jboss.osgi.framework.bundle;
 
 //$Id$
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -49,10 +50,10 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
 {
    // Provide logging
    final Logger log = Logger.getLogger(ControllerContextPluginImpl.class);
-   
+
    /** The deployment registry */
    private DeploymentRegistry registry;
-   
+
    public ControllerContextPluginImpl(OSGiBundleManager bundleManager, DeploymentRegistry registry)
    {
       super(bundleManager);
@@ -73,9 +74,12 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
       return registry.removeContext(context, unit);
    }
 
-   public Set<ControllerContext> getRegisteredContext(AbstractDeployedBundleState bundleState)
+   public Set<ControllerContext> getRegisteredContexts(AbstractBundleState bundleState)
    {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
+      if (bundleState instanceof OSGiBundleState == false)
+         return Collections.emptySet();
+
+      DeploymentUnit unit = ((OSGiBundleState)bundleState).getDeploymentUnit();
       return registry.getContexts(unit);
    }
 
@@ -154,22 +158,20 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
     *
     * @param bundleState the stopping bundle
     */
-   public void unregisterContexts(AbstractDeployedBundleState bundleState)
+   public void unregisterContexts(AbstractBundleState bundleState)
    {
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      Set<ControllerContext> contexts = registry.getContexts(unit);
-      for (ControllerContext context : contexts)
+      if (bundleState instanceof OSGiBundleState)
       {
-         unregisterContext(context);
-      }
-   }
-
-   private void unregisterContext(ControllerContext context)
-   {
-      if (context instanceof ServiceRegistration)
-      {
-         ServiceRegistration service = (ServiceRegistration)context;
-         service.unregister();
+         DeploymentUnit unit = ((OSGiBundleState)bundleState).getDeploymentUnit();
+         Set<ControllerContext> contexts = registry.getContexts(unit);
+         for (ControllerContext context : contexts)
+         {
+            if (context instanceof ServiceRegistration)
+            {
+               ServiceRegistration service = (ServiceRegistration)context;
+               service.unregister();
+            }
+         }
       }
    }
 }

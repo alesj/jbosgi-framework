@@ -29,7 +29,6 @@ import java.security.Permission;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -39,7 +38,6 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.dependency.plugins.tracker.AbstractContextTracker;
@@ -417,16 +415,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
       FrameworkEventsPlugin plugin = getBundleManager().getPlugin(FrameworkEventsPlugin.class);
       plugin.removeServiceListener(this, listener);
-   }
-
-   /**
-    * Get registered contexts.
-    *
-    * @return the registered contexts
-    */
-   protected Set<ControllerContext> getRegisteredContexts()
-   {
-      return Collections.emptySet();
    }
 
    public ServiceReference[] getRegisteredServices()

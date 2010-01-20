@@ -26,7 +26,6 @@ import java.util.Set;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 
 
 /**
@@ -61,14 +60,14 @@ public interface ControllerContextPlugin extends Plugin
     * @param bundleState the owning bundle
     * @return registered contexts
     */
-   Set<ControllerContext> getRegisteredContext(AbstractDeployedBundleState bundleState);
+   Set<ControllerContext> getRegisteredContexts(AbstractBundleState bundleState);
 
    /**
     * Unregister contexts.
     *
     * @param bundleState the stopping bundle
     */
-   void unregisterContexts(AbstractDeployedBundleState bundleState);
+   void unregisterContexts(AbstractBundleState bundleState);
    
    /**
     * Get bundle for user tracker.

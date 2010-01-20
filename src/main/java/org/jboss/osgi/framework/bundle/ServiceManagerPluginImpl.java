@@ -92,7 +92,8 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    public ServiceReference[] getRegisteredServices(AbstractBundleState bundleState)
    {
-      Set<ControllerContext> contexts = bundleState.getRegisteredContexts();
+      ControllerContextPlugin plugin = getBundleManager().getPlugin(ControllerContextPlugin.class);
+      Set<ControllerContext> contexts = plugin.getRegisteredContexts(bundleState);
       if (contexts.isEmpty())
          return null;
 

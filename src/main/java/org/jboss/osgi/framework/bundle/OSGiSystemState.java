@@ -25,15 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
 
-import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
-import org.jboss.util.collection.ConcurrentSet;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -47,8 +44,6 @@ import org.osgi.framework.Constants;
  */
 public class OSGiSystemState extends AbstractBundleState
 {
-   /** The registred contexts */
-   private Set<ControllerContext> registered = new ConcurrentSet<ControllerContext>();
    /** The osgi metadata */
    private OSGiMetaData osgiMetaData;
 
@@ -74,23 +69,6 @@ public class OSGiSystemState extends AbstractBundleState
       return false;
    }
    
-   protected Set<ControllerContext> getRegisteredContexts()
-   {
-      return registered;
-   }
-
-   @Override
-   protected void afterServiceRegistration(OSGiServiceState service)
-   {
-      registered.add(service);
-   }
-
-   @Override
-   protected void beforeServiceUnregistration(OSGiServiceState service)
-   {
-      registered.remove(service);
-   }
-
    public long getBundleId()
    {
       return 0;
