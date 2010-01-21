@@ -153,7 +153,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    }
 
    public abstract boolean isFragment();
-   
+
    public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType)
    {
       throw new NotImplementedException();
@@ -268,7 +268,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
       // Get the resource bundle URL for the given base and locale
       URL entryURL = getLocalizationEntryPath(baseName, locale);
-      
+
       // If the specified locale entry could not be found fall back to the default locale entry
       if (entryURL == null)
       {
@@ -289,7 +289,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
             throw new IllegalStateException("Cannot read resouce bundle: " + entryURL, ex);
          }
       }
-      
+
       Dictionary<String, String> locHeaders = new Hashtable<String, String>();
       Enumeration<String> e = rawHeaders.keys();
       while (e.hasMoreElements())
@@ -298,7 +298,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
          String value = rawHeaders.get(key);
          if (value.startsWith("%"))
             value = value.substring(1);
-         
+
          if (resBundle != null)
          {
             try
@@ -310,7 +310,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
                // ignore
             }
          }
-         
+
          locHeaders.put(key, value);
       }
 
@@ -324,14 +324,14 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       // appending the .properties suffix. If a translation is not found, the locale
       // must be made more generic by first removing the variant, then the country
       // and finally the language until an entry is found that contains a valid translation.
-      
+
       String entryPath = baseName + "_" + locale + ".properties";
       URL entryURL = getEntryInternal(entryPath);
       while (entryURL == null)
       {
          if (entryPath.equals(baseName + ".properties"))
             break;
-         
+
          int lastIndex = locale.lastIndexOf('_');
          if (lastIndex > 0)
          {
@@ -342,7 +342,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
          {
             entryPath = baseName + ".properties";
          }
-         
+
          // The bundle's class loader is not used to search for localization entries. Only
          // the contents of the bundle and its attached fragments are searched.
          entryURL = getEntryInternal(entryPath);
@@ -537,7 +537,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    protected void beforeServiceUnregistration(OSGiServiceState service)
    {
    }
-   
+
    boolean ungetContext(ControllerContext context)
    {
       return removeContextInUse(context);
@@ -656,14 +656,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    public Object getSource(String className)
    {
       // [TODO] some more efficient way than using the class?
-      try
-      {
-         return loadClass(className);
-      }
-      catch (ClassNotFoundException e)
-      {
-         return null;
-      }
+      return getBundleManager().loadClassFailsafe(this, className);
    }
 
    /**
