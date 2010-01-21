@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.jboss.classloader.spi.ClassLoaderPolicy;
-import org.jboss.classloader.spi.ClassLoaderPolicy.NativeLibraryProvider;
+import org.jboss.classloader.spi.NativeLibraryProvider;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.classloading.spi.metadata.NativeLibrary;
 import org.jboss.classloading.spi.metadata.NativeLibraryMetaData;
@@ -78,7 +78,7 @@ public class OSGiNativeCodePolicyDeployer extends AbstractRealDeployer
       final OSGiBundleManager bundleManager = bundleState.getBundleManager();
 
       // Add the native library mappings to the OSGiClassLoaderPolicy
-      ClassLoaderPolicy policy = (ClassLoaderPolicy)unit.getAttachment(ClassLoaderPolicy.class);
+      ClassLoaderPolicy policy = unit.getAttachment(ClassLoaderPolicy.class);
       for (NativeLibrary library : libMetaData.getNativeLibraries())
       {
          final String libpath = library.getLibraryPath();
