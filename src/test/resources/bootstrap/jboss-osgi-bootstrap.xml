@@ -143,16 +143,17 @@
   </bean>
 
   <!-- OSGI Deployment -->
-  <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
+  <bean name="OSGiBundleActivatorDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer" />
   <bean name="OSGiBundleStateAddDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleStateAddDeployer">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="OSGiBundleStateRemoveDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleStateRemoveDeployer">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
-  <bean name="OSGiBundleNativeCodeDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleNativeCodeDeployer" />
-  <bean name="OSGiBundleActivatorDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer" />
   <bean name="OSGiContextTrackerDeployer" class="org.jboss.osgi.framework.deployers.OSGiContextTrackerDeployer" />
+  <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
+  <bean name="OSGiNativeCodeMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiNativeCodeMetaDataDeployer" />
+  <bean name="OSGiNativeCodePolicyDeployer" class="org.jboss.osgi.framework.deployers.OSGiNativeCodePolicyDeployer" />
 
   <!--
   ********************************

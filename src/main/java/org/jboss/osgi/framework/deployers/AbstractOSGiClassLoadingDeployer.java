@@ -99,6 +99,7 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
       OSGiBundleCapability bundleCapability = OSGiBundleCapability.create(bundleState);
       capabilities.addCapability(bundleCapability);
 
+      // Required Bundles
       List<ParameterizedAttribute> requireBundles = osgiMetaData.getRequireBundles();
       if (requireBundles != null && requireBundles.isEmpty() == false)
       {
@@ -109,6 +110,7 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
          }
       }
 
+      // Export Packages
       List<PackageAttribute> exported = osgiMetaData.getExportPackages();
       if (exported != null && exported.isEmpty() == false)
       {
@@ -119,6 +121,7 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
          }
       }
 
+      // Import Packages
       List<PackageAttribute> imported = osgiMetaData.getImportPackages();
       if (imported != null && imported.isEmpty() == false)
       {

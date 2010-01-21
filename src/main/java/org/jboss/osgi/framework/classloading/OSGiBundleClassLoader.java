@@ -29,13 +29,12 @@ import org.jboss.classloader.spi.base.BaseClassLoader;
 /**
  * An OSGi bundle class loader.
  * 
- * This implementation supports the notion of OSGi Native Code Libraries.
- * 
  * @author Thomas.Diesler@jboss.com
  * @since 19-Dec-2009
  */
 public class OSGiBundleClassLoader extends BaseClassLoader
 {
+   @SuppressWarnings("unused")
    private OSGiClassLoaderPolicy osgiPolicy;
 
    public OSGiBundleClassLoader(ClassLoaderPolicy policy)
@@ -44,19 +43,5 @@ public class OSGiBundleClassLoader extends BaseClassLoader
 
       if (policy instanceof OSGiClassLoaderPolicy)
          osgiPolicy = (OSGiClassLoaderPolicy)policy;
-   }
-
-   @Override
-   protected String findLibrary(String libname)
-   {
-      String libraryPath = null;
-
-      if (osgiPolicy != null)
-         libraryPath = osgiPolicy.findLibrary(libname);
-
-      if (libraryPath == null)
-         libraryPath = super.findLibrary(libname);
-
-      return libraryPath;
    }
 }

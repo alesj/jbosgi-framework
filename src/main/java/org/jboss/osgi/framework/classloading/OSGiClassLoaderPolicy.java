@@ -23,10 +23,6 @@ package org.jboss.osgi.framework.classloading;
 
 // $Id$
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
@@ -37,17 +33,11 @@ import org.jboss.virtual.VirtualFile;
 /**
  * The ClassLoaderPolicy for OSGi bundles.
  * 
- * This implementation supports the notion of OSGi Native Code Libraries.
- * 
  * @author Thomas.Diesler@jboss.com
  * @since 11-Sep-2209
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
-   // Maps the lib name to native code archive
-   // https://jira.jboss.org/jira/browse/JBCL-136
-   private Map<String, File> libraryMap;
-   
    public OSGiClassLoaderPolicy(AbstractBundleState bundleState, VirtualFile[] roots)
    {
       super(roots);
@@ -74,27 +64,5 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
          setBlackListable(vfsModule.isBlackListable());
          setDelegates(vfsModule.getDelegates());
       }
-   }
-
-   public void addLibraryMapping(String libname, File libfile)
-   {
-      if (libraryMap == null)
-         libraryMap = new HashMap<String, File>();
-      
-      libraryMap.put(libname, libfile);
-   }
-
-   public String findLibrary(String libname)
-   {
-      if (libraryMap == null)
-         return null;
-      
-      File libfile = libraryMap.get(libname);
-      
-      // [TODO] why does the TCK use 'Native' to mean 'libNative' ? 
-      if (libfile == null)
-         libfile = libraryMap.get("lib" + libname);
-         
-      return (libfile != null ? libfile.getAbsolutePath() : null);
    }
 }

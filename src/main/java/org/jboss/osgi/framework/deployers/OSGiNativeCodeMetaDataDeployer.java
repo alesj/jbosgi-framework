@@ -21,35 +21,27 @@
 */
 package org.jboss.osgi.framework.deployers;
 
-// $Id: $
+// $Id$
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.classloader.spi.ClassLoaderPolicy;
+import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
+import org.jboss.classloading.spi.metadata.NativeLibrary;
+import org.jboss.classloading.spi.metadata.NativeLibraryMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
-import org.jboss.deployers.structure.spi.ClassLoaderFactory;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
-import org.jboss.osgi.framework.classloading.OSGiClassLoaderPolicy;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
-import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.Constants;
 
 /**
@@ -58,11 +50,8 @@ import org.osgi.framework.Constants;
  * @author Thomas.Diesler@jboss.com
  * @since 19-Dec-2009
  */
-public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
+public class OSGiNativeCodeMetaDataDeployer extends AbstractRealDeployer
 {
-   // Provide logging
-   private static final Logger log = Logger.getLogger(OSGiBundleNativeCodeDeployer.class);
-
    /** Maps an alias to an OSGi processor name */
    private static Map<String, String> processorAlias = new HashMap<String, String>();
    static
@@ -76,7 +65,7 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
       processorAlias.put("em64t", "x86-64");
       processorAlias.put("x86_64", "x86-64");
    }
-   
+
    /** Maps an alias to an OSGi osname */
    private static Map<String, String> osAlias = new HashMap<String, String>();
    static
@@ -112,76 +101,44 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
       osAlias.put("Windows Vista", "WindowsVista");
       osAlias.put("Win32", "WindowsVista");
    }
-   
-   public OSGiBundleNativeCodeDeployer()
+
+   public OSGiNativeCodeMetaDataDeployer()
    {
-      setInput(ClassLoaderFactory.class);
-      addInput(ClassLoaderPolicy.class);
-      addInput(OSGiBundleState.class);
-      setStage(DeploymentStages.CLASSLOADER);
+      setInput(ClassLoadingMetaData.class);
+      setStage(DeploymentStages.POST_PARSE);
       setTopLevelOnly(true);
    }
 
+   @SuppressWarnings("unchecked")
    @Override
    protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
+      ClassLoadingMetaData classLoadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
+      if (classLoadingMetaData == null)
+         throw new IllegalStateException("No ClassLoadingMetaData");
+
       AbstractBundleState absBundleState = unit.getAttachment(AbstractBundleState.class);
       if (absBundleState == null)
-         throw new IllegalStateException("No bundle state");
-      
+         throw new IllegalStateException("No AbstractBundleState");
+
       if ((absBundleState instanceof OSGiBundleState) == false)
          return;
-      
-      AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)absBundleState;
+
+      OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
+      OSGiBundleManager bundleManager = bundleState.getBundleManager();
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       List<ParameterizedAttribute> nativeCodeParams = osgiMetaData.getBundleNativeCode();
       if (nativeCodeParams == null)
          return;
-      
-      OSGiBundleManager bundleManager = bundleState.getBundleManager();
-      String fwOSName = bundleManager.getProperty(Constants.FRAMEWORK_OS_NAME);
-      String fwProcessor = bundleManager.getProperty(Constants.FRAMEWORK_PROCESSOR);
-      //String fwOSVersion = bundleManager.getProperty(Constants.FRAMEWORK_OS_VERSION);
-      
+
+      // Find the matching parameters
       List<ParameterizedAttribute> matchedParams = new ArrayList<ParameterizedAttribute>();
       for (ParameterizedAttribute param : nativeCodeParams)
       {
-         // Only select the native code clauses for which the following expressions all evaluate to true
-         //  * osname ~= [org.osgi.framework.os.name]
-         //  * processor ~= [org.osgi.framework.processor]
-         //  * osversion range includes [org.osgi.framework.os.version] or osversion is not specified
-         //  * language ~= [org.osgi.framework.language] or language is not specified
-         //  * selection-filter evaluates to true when using the values of the system properties or selection-filter is not specified
-
-         Parameter osnameParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_OSNAME);
-         Parameter procParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_PROCESSOR);
-         //Parameter osversionParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_OSVERSION);
-         
-         boolean match = (osnameParam != null);
-         
-         // osname ~= [org.osgi.framework.os.name]
-         if (match && osnameParam != null)
-         {
-            String osname = (String)osnameParam.getValue();
-            match = (osname.equals(fwOSName) || osname.equals(osAlias.get(fwOSName)));
-         }
-         
-         // processor ~= [org.osgi.framework.processor]
-         match &= (procParam != null);
-         if (match && procParam != null)
-         {
-            String processor = (String)procParam.getValue();
-            match = (processor.equals(fwProcessor) || processor.equals(processorAlias.get(fwProcessor)));
-         }
-         
-         // [TODO] osversion range includes [org.osgi.framework.os.version] or osversion is not specified
-         // [TODO] language ~= [org.osgi.framework.language] or language is not specified
-         // [TODO] selection-filter evaluates to true when using the values of the system properties or selection-filter is not specified
-         
-         if (match == true)
+         if (matchParameter(bundleManager, param))
             matchedParams.add(param);
       }
-      
+
       // If no native clauses were selected in step 1, this algorithm is terminated
       // and a BundleException is thrown if the optional clause is not present
       if (matchedParams.size() == 0)
@@ -189,7 +146,7 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
          // [TODO] optional
          throw new DeploymentException("No native clauses selected from: " + nativeCodeParams);
       }
-      
+
       // The selected clauses are now sorted in the following priority order:
       //  * osversion: floor of the osversion range in descending order, osversion not specified
       //  * language: language specified, language not specified
@@ -199,40 +156,110 @@ public class OSGiBundleNativeCodeDeployer extends AbstractRealDeployer
          // [TODO] selected clauses are now sorted
       }
 
-      // The first clause of the sorted clauses from step 3 must be used as the selected native code clause
-      ParameterizedAttribute selectedParams = matchedParams.get(0);
-      log.debug("Selected native code clause: " + selectedParams);
-      
-      String nativeLib = selectedParams.getAttribute();
-      URL entryURL = bundleState.getEntry(nativeLib);
-      
-      // If a native code library in a selected native code clause cannot be found
-      // within the bundle then the bundle must fail to resolve
-      if (entryURL == null)
-         throw new DeploymentException("Cannot find native library: " + nativeLib);
+      NativeLibraryMetaData nativeLibraries = classLoadingMetaData.getNativeLibraries();
+      for (ParameterizedAttribute param : matchedParams)
+      {
+         Parameter osnameParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_OSNAME);
+         Parameter procParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_PROCESSOR);
+         //Parameter osversionParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_OSVERSION);
 
-      // Copy the native library to the bundle storage area
-      File nativeFileCopy;
-      try
-      {
-         VirtualFile nativeVirtualFile = bundleState.getRoot().getChild(nativeLib);
-         BundleStoragePlugin plugin = bundleManager.getPlugin(BundleStoragePlugin.class);
-         nativeFileCopy = plugin.getDataFile(bundleState, nativeLib);
-         FileOutputStream fos = new FileOutputStream(nativeFileCopy);
-         VFSUtils.copyStream(nativeVirtualFile.openStream(), fos);
-         fos.close();
+         List<String> osNames;
+         if (osnameParam.isCollection())
+            osNames = (List<String>)osnameParam.getValue();
+         else
+            osNames = Collections.singletonList((String)osnameParam.getValue());
+
+         String libpath = param.getAttribute();
+         String libsource = bundleState.getCanonicalName();
+
+         NativeLibrary library = new NativeLibrary(osNames, libpath, libsource);
+         
+         // Processors
+         if (procParam != null)
+         {
+            List<String> processors;
+            if (procParam.isCollection())
+               processors = (List<String>)procParam.getValue();
+            else
+               processors = Collections.singletonList((String)procParam.getValue());
+            
+            library.setProcessors(processors);
+         }
+         
+         // [TODO] osVersions, languages, selectionFilter, optional
+         // library.setOsVersions(osVersions);
+         // library.setLanguages(languages);
+         // library.setSelectionFilter(selectionFilter);
+         // library.setOptional(optional);
+         
+         nativeLibraries.addNativeLibrary(library);
       }
-      catch (IOException ex)
+   }
+
+   @SuppressWarnings("unchecked")
+   private boolean matchParameter(OSGiBundleManager bundleManager, ParameterizedAttribute param)
+   {
+      String fwOSName = bundleManager.getProperty(Constants.FRAMEWORK_OS_NAME);
+      String fwProcessor = bundleManager.getProperty(Constants.FRAMEWORK_PROCESSOR);
+      //String fwOSVersion = bundleManager.getProperty(Constants.FRAMEWORK_OS_VERSION);
+
+      // Only select the native code clauses for which the following expressions all evaluate to true
+      //  * osname ~= [org.osgi.framework.os.name]
+      //  * processor ~= [org.osgi.framework.processor]
+      //  * osversion range includes [org.osgi.framework.os.version] or osversion is not specified
+      //  * language ~= [org.osgi.framework.language] or language is not specified
+      //  * selection-filter evaluates to true when using the values of the system properties or selection-filter is not specified
+
+      Parameter osnameParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_OSNAME);
+      Parameter procParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_PROCESSOR);
+      //Parameter osversionParam = param.getAttribute(Constants.BUNDLE_NATIVECODE_OSVERSION);
+
+      boolean match = (osnameParam != null);
+
+      // osname ~= [org.osgi.framework.os.name]
+      if (match == true && osnameParam != null)
       {
-         throw new DeploymentException("Cannot copy native library: " + nativeLib, ex);
+         List<String> osNames;
+         if (osnameParam.isCollection())
+            osNames = (List<String>)osnameParam.getValue();
+         else
+            osNames = Collections.singletonList((String)osnameParam.getValue());
+
+         boolean osmatch = false;
+         for (String osname : osNames)
+         {
+            osmatch = (osname.equals(fwOSName) || osname.equals(osAlias.get(fwOSName)));
+            if (osmatch == true)
+               break;
+         }
+
+         match &= osmatch;
       }
-      
-      // Generate the key for the library mapping
-      String libfile = new File(nativeLib).getName();
-      String libname = libfile.substring(0, libfile.lastIndexOf('.'));
-      
-      // Add the native library mapping to the OSGiClassLoaderPolicy
-      OSGiClassLoaderPolicy policy = (OSGiClassLoaderPolicy)unit.getAttachment(ClassLoaderPolicy.class);
-      policy.addLibraryMapping(libname, nativeFileCopy);
+
+      // processor ~= [org.osgi.framework.processor]
+      match &= (procParam != null);
+      if (match && procParam != null)
+      {
+         List<String> processors;
+         if (procParam.isCollection())
+            processors = (List<String>)procParam.getValue();
+         else
+            processors = Collections.singletonList((String)procParam.getValue());
+
+         boolean procmatch = false;
+         for (String proc : processors)
+         {
+            procmatch = (proc.equals(fwProcessor) || proc.equals(processorAlias.get(fwProcessor)));
+            if (procmatch == true)
+               break;
+         }
+
+         match &= procmatch;
+      }
+
+      // [TODO] osversion range includes [org.osgi.framework.os.version] or osversion is not specified
+      // [TODO] language ~= [org.osgi.framework.language] or language is not specified
+      // [TODO] selection-filter evaluates to true when using the values of the system properties or selection-filter is not specified
+      return match;
    }
 }

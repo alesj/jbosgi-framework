@@ -25,6 +25,7 @@ package org.jboss.osgi.framework.deployers;
 
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
+import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
@@ -33,7 +34,6 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiFragmentState;
-import org.jboss.osgi.framework.classloading.OSGiClassLoaderPolicy;
 import org.osgi.framework.Bundle;
 
 /**
@@ -89,7 +89,7 @@ public class OSGiFragmentAttachmentDeployer extends AbstractSimpleRealDeployer<C
          OSGiFragmentState fragState = (OSGiFragmentState)absBundleState;
          OSGiBundleState hostState = fragState.getFragmentHost();
          DeploymentUnit hostUnit = hostState.getDeploymentUnit();
-         OSGiClassLoaderPolicy hostPolicy = (OSGiClassLoaderPolicy)hostUnit.getAttachment(ClassLoaderPolicy.class);
+         VFSClassLoaderPolicy hostPolicy = (VFSClassLoaderPolicy)hostUnit.getAttachment(ClassLoaderPolicy.class);
          hostPolicy.attachFragment(fragState.getRoot());
       }
    }
