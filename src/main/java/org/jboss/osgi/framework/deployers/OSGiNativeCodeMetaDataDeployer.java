@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
-import org.jboss.classloading.spi.metadata.NativeLibrary;
-import org.jboss.classloading.spi.metadata.NativeLibraryMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
@@ -39,6 +37,9 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
+import org.jboss.osgi.framework.metadata.NativeLibrary;
+import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
@@ -113,7 +114,7 @@ public class OSGiNativeCodeMetaDataDeployer extends AbstractRealDeployer
    @Override
    protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
-      ClassLoadingMetaData classLoadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
+      OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
       if (classLoadingMetaData == null)
          throw new IllegalStateException("No ClassLoadingMetaData");
 

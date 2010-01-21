@@ -33,8 +33,6 @@ import java.util.Date;
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.NativeLibraryProvider;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
-import org.jboss.classloading.spi.metadata.NativeLibrary;
-import org.jboss.classloading.spi.metadata.NativeLibraryMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
@@ -43,6 +41,9 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
+import org.jboss.osgi.framework.metadata.NativeLibrary;
+import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
 import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -71,7 +72,7 @@ public class OSGiNativeCodePolicyDeployer extends AbstractRealDeployer
       if (absBundleState == null)
          throw new IllegalStateException("No bundle state");
 
-      ClassLoadingMetaData classLoadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
+      OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
       NativeLibraryMetaData libMetaData = classLoadingMetaData.getNativeLibraries();
       if (libMetaData == null || libMetaData.getNativeLibraries() == null)
          return;

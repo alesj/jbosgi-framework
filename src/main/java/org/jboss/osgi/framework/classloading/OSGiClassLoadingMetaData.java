@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
+import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
 import org.osgi.framework.Version;
 
 /**
@@ -43,8 +44,12 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
    
    // The optional fragment host
    private FragmentHostMetaData fragmentHost;
+   
    // The list of attached fragment classloading metadata
    private List<OSGiClassLoadingMetaData> attachedFragments = new ArrayList<OSGiClassLoadingMetaData>();
+   
+   // The native code libraries 
+   private NativeLibraryMetaData libraries = new NativeLibraryMetaData();
    
    public FragmentHostMetaData getFragmentHost()
    {
@@ -71,6 +76,29 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
          throw new IllegalArgumentException("Cannot attach a fragment to a fragment: " + fragment);
       
       attachedFragments.add(fragment);
+   }
+
+   /**
+    * Get the native libraries.
+    * 
+    * @return the native libraries.
+    */
+   public NativeLibraryMetaData getNativeLibraries()
+   {
+      return libraries;
+   }
+
+   /**
+    * Set the native libraries.
+    * 
+    * @param nativeLibraries libraries the native libraries.
+    * @throws IllegalArgumentException for null native libraries
+    */
+   public void setNativeLibraries(NativeLibraryMetaData nativeLibraries)
+   {
+      if (nativeLibraries == null)
+         throw new IllegalArgumentException("Null libraries");
+      this.libraries = nativeLibraries;
    }
 
    /**
