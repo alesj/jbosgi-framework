@@ -62,6 +62,9 @@
     <bnd classpath="${tests.classes.dir}" output="${tests.output.dir}/test-libs/fragments-simple-fragB.jar" files="${tests.resources.dir}/fragments/simple-fragB.bnd" />
     <bnd classpath="${tests.classes.dir}" output="${tests.output.dir}/test-libs/fragments-simple-fragC.jar" files="${tests.resources.dir}/fragments/simple-fragC.bnd" />
 
+    <!-- nativecode -->
+    <bnd classpath="${tests.classes.dir}" output="${tests.output.dir}/test-libs/simple-nativecode.jar" files="${tests.resources.dir}/nativecode/simple-nativecode.bnd" />
+    
     <!-- simple -->
     <bnd classpath="${tests.classes.dir}" output="${tests.output.dir}/test-libs/simple-bundle.jar" files="${tests.resources.dir}/integration/simple/simple.bnd" />
     <bnd classpath="${tests.classes.dir}" output="${tests.output.dir}/test-libs/simple-logservice-bundle.jar" files="${tests.resources.dir}/integration/simple/simple-logservice.bnd" />

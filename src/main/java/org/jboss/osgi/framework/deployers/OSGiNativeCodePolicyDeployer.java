@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.NativeLibraryProvider;
@@ -73,52 +75,87 @@ public class OSGiNativeCodePolicyDeployer extends AbstractRealDeployer
       NativeLibraryMetaData libMetaData = classLoadingMetaData.getNativeLibraries();
       if (libMetaData == null || libMetaData.getNativeLibraries() == null)
          return;
-         
-      final OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
-      final OSGiBundleManager bundleManager = bundleState.getBundleManager();
 
       // Add the native library mappings to the OSGiClassLoaderPolicy
-      ClassLoaderPolicy policy = unit.getAttachment(ClassLoaderPolicy.class);
+      OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
+      ClassLoaderPolicy policy = (ClassLoaderPolicy)unit.getAttachment(ClassLoaderPolicy.class);
       for (NativeLibrary library : libMetaData.getNativeLibraries())
       {
-         final String libpath = library.getLibraryPath();
-
-         NativeLibraryProvider provider = new NativeLibraryProvider()
-         {
-            private File libraryFile;
-            
-            public String getLibraryPath()
-            {
-               return libpath;
-            }
-            
-            public File getLibraryLocation() throws IOException
-            {
-               if (libraryFile == null)
-               {
-                  URL entryURL = bundleState.getEntry(libpath);
-
-                  // If a native code library in a selected native code clause cannot be found
-                  // within the bundle then the bundle must fail to resolve
-                  if (entryURL == null)
-                     throw new IOException("Cannot find native library: " + libpath);
-
-                  // Copy the native library to the bundle storage area
-                  VirtualFile nativeVirtualFile = bundleState.getRoot().getChild(libpath);
-                  BundleStoragePlugin plugin = bundleManager.getPlugin(BundleStoragePlugin.class);
-                  libraryFile = plugin.getDataFile(bundleState, libpath);
-                  FileOutputStream fos = new FileOutputStream(libraryFile);
-                  VFSUtils.copyStream(nativeVirtualFile.openStream(), fos);
-                  fos.close();
-               }
-               return libraryFile;
-            }
-         };
-         
-         // Add the library provider to the policy
+         String libpath = library.getLibraryPath();
          String libfile = new File(libpath).getName();
          String libname = libfile.substring(0, libfile.lastIndexOf('.'));
-         policy.addNativeLibrary(libname, provider);
+         
+         // Add the library provider to the policy
+         NativeLibraryProvider libProvider = new OSGiNativeLibraryProvider(bundleState, libname, libpath);
+         policy.addNativeLibrary(libProvider);
+         
+         // [TODO] why does the TCK use 'Native' to mean 'libNative' ? 
+         if (libname.startsWith("lib"))
+         {
+            libname = libname.substring(3);
+            libProvider = new OSGiNativeLibraryProvider(bundleState, libname, libpath);
+            policy.addNativeLibrary(libProvider);
+         }
+      }
+   }
+   
+   static class OSGiNativeLibraryProvider implements NativeLibraryProvider
+   {
+      private OSGiBundleState bundleState;
+      private String libpath;
+      private String libname;
+      private File libraryFile;
+      
+      OSGiNativeLibraryProvider(OSGiBundleState bundleState, String libname, String libpath)
+      {
+         this.bundleState = bundleState;
+         this.libpath = libpath;
+         this.libname = libname;
+         
+         // If a native code library in a selected native code clause cannot be found
+         // within the bundle then the bundle must fail to resolve
+         URL entryURL = bundleState.getEntry(libpath);
+         if (entryURL == null)
+            throw new IllegalStateException("Cannot find native library: " + libpath);
+      }
+      
+      public String getLibraryName()
+      {
+         return libname;
+      }
+
+      public String getLibraryPath()
+      {
+         return libpath;
+      }
+      
+      public File getLibraryLocation() throws IOException
+      {
+         if (libraryFile == null)
+         {
+            // Get the virtual file for entry for the library
+            VirtualFile fileSource = bundleState.getRoot().getChild(libpath);
+            
+            // Create a unique local file location
+            libraryFile = getUniqueLibraryFile(bundleState, libpath);
+            libraryFile.deleteOnExit();
+            
+            // Copy the native library to the bundle storage area
+            FileOutputStream fos = new FileOutputStream(libraryFile);
+            VFSUtils.copyStream(fileSource.openStream(), fos);
+            fos.close();
+         }
+         return libraryFile;
+      }
+
+      private File getUniqueLibraryFile(final OSGiBundleState bundleState, final String libpath)
+      {
+         OSGiBundleManager bundleManager = bundleState.getBundleManager();
+         BundleStoragePlugin plugin = bundleManager.getPlugin(BundleStoragePlugin.class);
+         Date lmdate = new Date(bundleState.getLastModified());
+         String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(lmdate);
+         String uniquePath = new StringBuffer(libpath).insert(libpath.lastIndexOf("."), timestamp).toString();
+         return plugin.getDataFile(bundleState, uniquePath);
       }
    }
 }
