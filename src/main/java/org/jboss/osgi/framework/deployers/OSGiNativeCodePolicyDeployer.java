@@ -152,10 +152,9 @@ public class OSGiNativeCodePolicyDeployer extends AbstractRealDeployer
       private File getUniqueLibraryFile(final OSGiBundleState bundleState, final String libpath)
       {
          OSGiBundleManager bundleManager = bundleState.getBundleManager();
-         BundleStoragePlugin plugin = bundleManager.getPlugin(BundleStoragePlugin.class);
-         Date lmdate = new Date(bundleState.getLastModified());
-         String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmssSSS").format(lmdate);
+         String timestamp = new SimpleDateFormat("-yyyyMMdd-HHmmssSSS").format(new Date(bundleState.getLastModified()));
          String uniquePath = new StringBuffer(libpath).insert(libpath.lastIndexOf("."), timestamp).toString();
+         BundleStoragePlugin plugin = bundleManager.getPlugin(BundleStoragePlugin.class);
          return plugin.getDataFile(bundleState, uniquePath);
       }
    }
