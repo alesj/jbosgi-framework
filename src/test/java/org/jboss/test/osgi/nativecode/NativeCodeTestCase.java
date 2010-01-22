@@ -26,8 +26,8 @@ package org.jboss.test.osgi.nativecode;
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
 import org.jboss.osgi.testing.OSGiTest;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -41,32 +41,31 @@ import org.osgi.framework.launch.Framework;
  */
 public class NativeCodeTestCase extends OSGiTest
 {
-   private Framework framework;
-   private BundleContext context;
+   private static Framework framework;
 
-   @Before
-   public void setUp() throws Exception
+   @BeforeClass
+   public static void beforeClass() throws Exception
    {
       OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
       framework = bootProvider.getFramework();
       framework.start();
-      
-      context = framework.getBundleContext();
    }
 
-   @After
-   public void tearDown() throws Exception
+   @AfterClass
+   public static void afterClass() throws Exception
    {
       if (framework != null)
       {
          framework.stop();
-         framework.waitForStop(5000);
+         framework = null;
       }
    }
 
    @Test
    public void testNativeCode() throws Exception
    {
+      BundleContext context = framework.getBundleContext();
+      
       Bundle bundleA = context.installBundle(getTestArchivePath("simple-nativecode.jar"));
       assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
