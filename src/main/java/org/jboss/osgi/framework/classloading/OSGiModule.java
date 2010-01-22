@@ -37,20 +37,8 @@ public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
    /** The serialVersionUID */
    private static final long serialVersionUID = 1L;
 
-   private OSGiClassLoadingMetaData metaData;
-   
    public OSGiModule(DeploymentUnit unit, ClassLoadingMetaData metaData)
    {
       super(unit);
-      
-      if (metaData instanceof OSGiClassLoadingMetaData == false)
-         throw new IllegalStateException("Not an instance of OSGiClassLoadingMetaData: " + metaData);
-      
-      this.metaData = (OSGiClassLoadingMetaData)metaData;
-   }
-
-   public OSGiClassLoadingMetaData getClassLoadingMetaData()
-   {
-      return metaData;
    }
 }

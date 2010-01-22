@@ -32,7 +32,9 @@ import java.util.Date;
 
 import org.jboss.classloader.spi.NativeLibraryProvider;
 import org.jboss.classloading.spi.dependency.Module;
+import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
@@ -61,7 +63,8 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
       if (absBundleState instanceof AbstractDeployedBundleState)
       {
          AbstractDeployedBundleState depBundleState = (AbstractDeployedBundleState)absBundleState;
-         Module module = depBundleState.getDeploymentUnit().getAttachment(Module.class);
+         DeploymentUnit unit = depBundleState.getDeploymentUnit();
+         Module module = unit.getAttachment(Module.class);
          if (module instanceof OSGiModule == false)
             throw new IllegalStateException("Not an instance of OSGiModule: " + module);
 
@@ -77,36 +80,56 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
          setBlackListable(osgiModule.isBlackListable());
          setDelegates(osgiModule.getDelegates());
 
-         // NativeCode-Library handling
-         OSGiClassLoadingMetaData classLoadingMetaData = osgiModule.getClassLoadingMetaData();
-         NativeLibraryMetaData libMetaData = classLoadingMetaData.getNativeLibraries();
-         if (libMetaData != null && libMetaData.getNativeLibraries() != null)
+         // Bundle-NativeCode handling
+         processNativeLibraryMetaData(depBundleState);
+      }
+   }
+
+   /**
+    * Processes the NativeLibraryMetaData that is part of the OSGiClassLoadingMetaData 
+    * and adds the NativeLibraryProviders to the ClassLoaderPolicy
+    */
+   private void processNativeLibraryMetaData(AbstractBundleState absBundleState)
+   {
+      if (absBundleState instanceof OSGiBundleState == false)
+         return;
+      
+      OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
+      DeploymentUnit unit = bundleState.getDeploymentUnit();
+      ClassLoadingMetaData clMetaData = unit.getAttachment(ClassLoadingMetaData.class);
+      if (clMetaData instanceof OSGiClassLoadingMetaData == false)
+         return;
+      
+      OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)clMetaData;
+      NativeLibraryMetaData libMetaData = classLoadingMetaData.getNativeLibraries();
+      if (libMetaData == null || libMetaData.getNativeLibraries() == null)
+         return;
+      
+      // Add the native library mappings to the OSGiClassLoaderPolicy
+      for (NativeLibrary library : libMetaData.getNativeLibraries())
+      {
+         String libpath = library.getLibraryPath();
+         String libfile = new File(libpath).getName();
+         String libname = libfile.substring(0, libfile.lastIndexOf('.'));
+         
+         // Add the library provider to the policy
+         NativeLibraryProvider libProvider = new OSGiNativeLibraryProvider(bundleState, libname, libpath);
+         addNativeLibrary(libProvider);
+         
+         // [TODO] why does the TCK use 'Native' to mean 'libNative' ? 
+         if (libname.startsWith("lib"))
          {
-            OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
-            
-            // Add the native library mappings to the OSGiClassLoaderPolicy
-            for (NativeLibrary library : libMetaData.getNativeLibraries())
-            {
-               String libpath = library.getLibraryPath();
-               String libfile = new File(libpath).getName();
-               String libname = libfile.substring(0, libfile.lastIndexOf('.'));
-               
-               // Add the library provider to the policy
-               NativeLibraryProvider libProvider = new OSGiNativeLibraryProvider(bundleState, libname, libpath);
-               addNativeLibrary(libProvider);
-               
-               // [TODO] why does the TCK use 'Native' to mean 'libNative' ? 
-               if (libname.startsWith("lib"))
-               {
-                  libname = libname.substring(3);
-                  libProvider = new OSGiNativeLibraryProvider(bundleState, libname, libpath);
-                  addNativeLibrary(libProvider);
-               }
-            }
+            libname = libname.substring(3);
+            libProvider = new OSGiNativeLibraryProvider(bundleState, libname, libpath);
+            addNativeLibrary(libProvider);
          }
       }
    }
 
+   /**
+    * An implementation of NativeLibraryProvider that provides the native library file
+    * location from the bundle that contains the library.
+    */
    static class OSGiNativeLibraryProvider implements NativeLibraryProvider
    {
       private OSGiBundleState bundleState;
