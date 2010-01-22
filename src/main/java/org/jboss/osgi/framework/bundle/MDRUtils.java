@@ -162,11 +162,11 @@ public class MDRUtils
     */
    private static boolean isAssignableTo(AbstractBundleState bundleState, AbstractBundleState other, String className)
    {
-      Object source = bundleState.getSource(className);
+      Object source = getSource(bundleState, className);
       if (source == null)
          throw new IllegalStateException("Cannot load '" + className + "' from: " + bundleState);
 
-      Object otherSource = other.getSource(className);
+      Object otherSource = getSource(other, className);
       if (otherSource == null)
       {
          log.debug("Cannot load '" + className + "' from: " + other);
@@ -184,6 +184,22 @@ public class MDRUtils
          log.warn(buffer.toString());
       }
       return equals;
+   }
+
+   /**
+    * Get the source of a class for ServiceReference.isAssignable()
+    * 
+    * @param className the class name
+    * @return the source or null if no source
+    */
+   private static Object getSource(AbstractBundleState bundleState, String className)
+   {
+      if (bundleState.getState() == Bundle.UNINSTALLED)
+         return null;
+      
+      // [TODO] some more efficient way than using the class?
+      OSGiBundleManager bundleManager = bundleState.getBundleManager();
+      return bundleManager.loadClassFailsafe(bundleState, className);
    }
 
    /**

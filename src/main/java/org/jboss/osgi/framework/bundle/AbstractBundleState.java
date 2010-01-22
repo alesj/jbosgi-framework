@@ -648,18 +648,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    }
 
    /**
-    * Get the source of a class for ServiceReference.isAssignable()
-    * 
-    * @param className the class name
-    * @return the source or null if no source
-    */
-   public Object getSource(String className)
-   {
-      // [TODO] some more efficient way than using the class?
-      return getBundleManager().loadClassFailsafe(this, className);
-   }
-
-   /**
     * Change the state of the bundle
     * 
     * @param state the new state
