@@ -267,13 +267,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
          baseName = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
 
       // Get the resource bundle URL for the given base and locale
-      URL entryURL = getLocalizationEntryPath(baseName, locale);
+      URL entryURL = getLocalizationEntry(baseName, locale);
 
       // If the specified locale entry could not be found fall back to the default locale entry
       if (entryURL == null)
       {
          String defaultLocale = Locale.getDefault().toString();
-         entryURL = getLocalizationEntryPath(baseName, defaultLocale);
+         entryURL = getLocalizationEntry(baseName, defaultLocale);
       }
 
       // Read the resource bundle
@@ -317,16 +317,17 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return new CaseInsensitiveDictionary(locHeaders);
    }
 
-   private URL getLocalizationEntryPath(String baseName, String locale)
+   URL getLocalizationEntry(String baseName, String locale)
    {
       // The Framework searches for localization entries by appending suffixes to
       // the localization base name according to a specified locale and finally
       // appending the .properties suffix. If a translation is not found, the locale
       // must be made more generic by first removing the variant, then the country
       // and finally the language until an entry is found that contains a valid translation.
-
+      
       String entryPath = baseName + "_" + locale + ".properties";
-      URL entryURL = getEntryInternal(entryPath);
+      
+      URL entryURL = getLocalizationEntry(entryPath);
       while (entryURL == null)
       {
          if (entryPath.equals(baseName + ".properties"))
@@ -345,9 +346,27 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
          // The bundle's class loader is not used to search for localization entries. Only
          // the contents of the bundle and its attached fragments are searched.
-         entryURL = getEntryInternal(entryPath);
+         entryURL = getLocalizationEntry(entryPath);
       }
       return entryURL;
+   }
+
+   /**
+   * The framework must search for localization entries using the follow-
+   * ing search rules based on the bundle type:
+   *
+   * fragment bundle - If the bundle is a resolved fragment, then the search
+   *   for localization data must delegate to the attached host bundle with the
+   *   highest version. If the fragment is not resolved, then the framework
+   *   must search the fragment's JAR for the localization entry.
+   *
+   * other bundle - The framework must first search in the bundle’s JAR for
+   *   the localization entry. If the entry is not found and the bundle has fragments, 
+   *   then the attached fragment JARs must be searched for the localization entry.
+   */
+   URL getLocalizationEntry(String entryPath)
+   {
+      return null;
    }
 
    // Get the entry without checking permissions and bundle state. 

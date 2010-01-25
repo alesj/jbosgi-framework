@@ -75,6 +75,25 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
       return null;
    }
 
+   @Override
+   URL getLocalizationEntry(String entryPath)
+   {
+      // If the bundle is a resolved fragment, then the search
+      // for localization data must delegate to the attached host bundle with the
+      // highest version. If the fragment is not resolved, then the framework
+      // must search the fragment's JAR for the localization entry.
+      if (getState() == Bundle.RESOLVED)
+      {
+         OSGiBundleState host = getFragmentHost();
+         return host.getLocalizationEntry(entryPath);
+      }
+      else
+      {
+         URL entryURL = getEntryInternal(entryPath);
+         return entryURL;
+      }
+   }
+   
    @SuppressWarnings("rawtypes")
    public Class loadClass(String name) throws ClassNotFoundException
    {

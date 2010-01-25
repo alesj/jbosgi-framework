@@ -185,6 +185,25 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return classLoader.getResources(name);
    }
 
+   @Override
+   URL getLocalizationEntry(String entryPath)
+   {
+      // The framework must first search in the bundle’s JAR for
+      // the localization entry. If the entry is not found and the bundle has fragments, 
+      // then the attached fragment JARs must be searched for the localization entry.
+      URL entryURL = getEntryInternal(entryPath);
+      if (entryURL == null)
+      {
+         for (OSGiFragmentState frag : getAttachedFragments())
+         {
+            entryURL = frag.getEntryInternal(entryPath);
+            if (entryURL != null)
+               break;
+         }
+      }
+      return entryURL;
+   }
+
    // [TODO] options
    public void start(int options) throws BundleException
    {
