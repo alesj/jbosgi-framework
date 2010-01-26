@@ -29,11 +29,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.classloader.spi.NativeLibraryProvider;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
+import org.jboss.classloading.spi.vfs.policy.VirtualFileInfo;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
@@ -53,6 +56,9 @@ import org.jboss.virtual.VirtualFile;
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
+   /** The fragment roots */
+   private List<VirtualFile> fragments;
+
    public OSGiClassLoaderPolicy(AbstractBundleState absBundleState, VirtualFile[] roots)
    {
       super(roots);
@@ -124,6 +130,76 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
             addNativeLibrary(libProvider);
          }
       }
+   }
+
+   /**
+    * Attach a new fragment root to the policy.
+    * @param fragRoot The fragment root file
+    */
+   public void attachFragment(VirtualFile fragRoot)
+   {
+      if (fragRoot == null)
+         throw new IllegalArgumentException("Null fragment file");
+      
+      if (fragments == null)
+         fragments = new CopyOnWriteArrayList<VirtualFile>();
+      
+      fragments.add(fragRoot);
+   }
+
+   /**
+    * Detach a fragment root from the policy.
+    * @param fragRoot The fragment root file
+    * @return true if the fragment could be detached
+    */
+   public boolean detachFragment(VirtualFile fragRoot)
+   {
+      if (fragRoot == null)
+         throw new IllegalArgumentException("Null fragment file");
+      
+      if (fragments == null)
+         return false;
+      
+      return fragments.remove(fragRoot);
+   }
+
+   /**
+    * Get the array of attached fragment root files.
+    * @return The array of attached fragment root files or null.
+    */
+   public VirtualFile[] getFragmentRoots()
+   {
+      if (fragments == null)
+         return null;
+      
+      VirtualFile[] retarr = new VirtualFile[fragments.size()];
+      fragments.toArray(retarr);
+      return retarr;
+   }
+
+   @Override
+   protected VirtualFileInfo findVirtualFileInfo(String path)
+   {
+      VirtualFileInfo result = super.findVirtualFileInfo(path);
+      if (result == null && fragments != null)
+      {
+         for (VirtualFile root : fragments)
+         {
+            try
+            {
+               VirtualFile file = root.getChild(path);
+               if (file != null)
+               {
+                  result = new VirtualFileInfo(file, root);
+                  return result;
+               }
+            }
+            catch (Exception ignored)
+            {
+            }
+         }
+      }
+      return result;
    }
 
    /**
