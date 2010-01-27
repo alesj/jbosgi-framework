@@ -115,8 +115,8 @@ public class OSGiBundleManager
    private static String OSGi_FRAMEWORK_PROCESSOR;
    /** The framework vendor */
    private static String OSGi_FRAMEWORK_VENDOR = "jboss.org";
-   /** The framework version */
-   private static String OSGi_FRAMEWORK_VERSION = "r4v42";
+   /** The framework version. This is the version of the org.osgi.framework package in r4v42 */
+   private static String OSGi_FRAMEWORK_VERSION = "1.5";
    /** The bundles by id */
    private List<AbstractBundleState> allBundles = new CopyOnWriteArrayList<AbstractBundleState>();
    /** The kernel */

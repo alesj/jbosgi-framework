@@ -184,7 +184,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
          bundle.start();
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
-         assertEquals("r4v42", bundleContext.getProperty(Constants.FRAMEWORK_VERSION)); 
+         assertEquals("1.5", bundleContext.getProperty(Constants.FRAMEWORK_VERSION)); 
          assertEquals("jboss.org", bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
          assertEquals(Locale.getDefault().getISO3Language(), bundleContext.getProperty(Constants.FRAMEWORK_LANGUAGE));
          assertSystemProperty(bundleContext, "os.name", Constants.FRAMEWORK_OS_NAME);
