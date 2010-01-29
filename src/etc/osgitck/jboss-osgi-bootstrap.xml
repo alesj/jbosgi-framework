@@ -62,7 +62,7 @@
   <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
-  <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
+  <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ControllerContextServiceManager">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">

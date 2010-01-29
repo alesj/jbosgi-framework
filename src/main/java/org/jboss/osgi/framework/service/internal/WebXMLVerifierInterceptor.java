@@ -48,10 +48,7 @@ public class WebXMLVerifierInterceptor extends AbstractServicePlugin implements 
    public WebXMLVerifierInterceptor(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
-   }
-
-   public void startService()
-   {
+      
       delegate = new AbstractLifecycleInterceptor()
       {
          public void invoke(int state, InvocationContext context) throws LifecycleInterceptorException
@@ -78,7 +75,10 @@ public class WebXMLVerifierInterceptor extends AbstractServicePlugin implements 
             }
          }
       };
+   }
 
+   public void startService()
+   {
       getSystemContext().registerService(LifecycleInterceptor.class.getName(), delegate, null);
    }
 

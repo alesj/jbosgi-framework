@@ -59,22 +59,25 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 
 /**
- * A plugin that manages OSGi services
+ * A plugin that manages OSGi services.
+ * 
+ * This implementation handles service integration with the MC.
+ * 
  * 
  * @author thomas.diesler@jboss.com
  * @since 20-Jan-2010
  */
-public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceManagerPlugin
+public class ControllerContextServiceManager extends AbstractPlugin implements ServiceManagerPlugin
 {
    // Provide logging
-   final Logger log = Logger.getLogger(ServiceManagerPluginImpl.class);
+   final Logger log = Logger.getLogger(ControllerContextServiceManager.class);
 
    /** The kernel */
    private Kernel kernel;
    /** The previous context tracker */
    private ContextTracker previousTracker;
    
-   public ServiceManagerPluginImpl(OSGiBundleManager bundleManager)
+   public ControllerContextServiceManager(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
    }

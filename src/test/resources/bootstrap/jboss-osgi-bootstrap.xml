@@ -49,13 +49,13 @@
   <bean name="OSGiControllerContextPlugin" class="org.jboss.osgi.framework.bundle.ControllerContextPluginImpl">
     <constructor>
       <parameter><inject bean="OSGiBundleManager" /></parameter>
-      <parameter><inject bean="DeploymentRegistry" /></parameter>
+      <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
     </constructor>
   </bean>
   <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
-  <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
+  <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ControllerContextServiceManager">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
@@ -103,9 +103,6 @@
     <property name="deployers"><inject bean="Deployers" /></property>
   </bean>
 
-  <!-- The deployment registry -->
-  <bean name="DeploymentRegistry" class="org.jboss.deployers.structure.spi.helpers.AbstractDeploymentRegistry"/>
-
   <!-- The holder for deployers that determine structure -->
   <bean name="StructuralDeployers" class="org.jboss.deployers.vfs.plugins.structure.VFSStructuralDeployersImpl">
     <property name="structureBuilder">
@@ -139,8 +136,11 @@
     <constructor>
       <parameter class="org.jboss.dependency.spi.Controller"><inject bean="jboss.kernel:service=KernelController" /></parameter>
     </constructor>
-    <property name="deploymentRegistry"><inject bean="DeploymentRegistry"/></property>
+    <property name="deploymentRegistry"><inject bean="OSGiDeploymentRegistry"/></property>
   </bean>
+
+  <!-- The deployment registry -->
+  <bean name="OSGiDeploymentRegistry" class="org.jboss.deployers.structure.spi.helpers.AbstractDeploymentRegistry"/>
 
   <!-- OSGI Deployment -->
   <bean name="OSGiBundleActivatorDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer" />

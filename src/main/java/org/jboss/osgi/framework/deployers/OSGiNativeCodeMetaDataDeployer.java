@@ -114,16 +114,13 @@ public class OSGiNativeCodeMetaDataDeployer extends AbstractRealDeployer
    @Override
    protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
+      AbstractBundleState absBundleState = unit.getAttachment(AbstractBundleState.class);
+      if ((absBundleState instanceof OSGiBundleState) == false)
+         return;
+
       OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
       if (classLoadingMetaData == null)
          throw new IllegalStateException("No ClassLoadingMetaData");
-
-      AbstractBundleState absBundleState = unit.getAttachment(AbstractBundleState.class);
-      if (absBundleState == null)
-         throw new IllegalStateException("No AbstractBundleState");
-
-      if ((absBundleState instanceof OSGiBundleState) == false)
-         return;
 
       OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
       OSGiBundleManager bundleManager = bundleState.getBundleManager();

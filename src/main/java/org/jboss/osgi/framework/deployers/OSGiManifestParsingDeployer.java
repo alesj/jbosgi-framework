@@ -29,6 +29,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.jboss.osgi.spi.OSGiConstants;
 import org.jboss.virtual.VirtualFile;
+import org.osgi.framework.Version;
 
 /**
  * OSGiManifestParsingDeployer.<p>
@@ -55,10 +56,12 @@ public class OSGiManifestParsingDeployer extends ManifestDeployer<OSGiMetaData>
       // At least one of these manifest headers must be there
       // Note, in R3 and R4 there is no common mandatory header
       String bundleName = osgiMetaData.getBundleName();
-      String bundleVersion = osgiMetaData.getBundleVersion();
       String bundleSymbolicName = osgiMetaData.getBundleSymbolicName();
-      if (bundleName == null && bundleVersion == null && bundleSymbolicName == null)
-         osgiMetaData = null;
+      Version bundleVersion = Version.parseVersion(osgiMetaData.getBundleVersion());
+      
+      boolean isEmptyVersion = Version.emptyVersion.equals(bundleVersion);
+      if (bundleName == null && bundleSymbolicName == null && isEmptyVersion == true)
+         return null;
       
       return osgiMetaData;
    }
