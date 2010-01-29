@@ -63,21 +63,23 @@ import org.osgi.framework.ServiceReference;
  * 
  * This implementation handles service integration with the MC.
  * 
+ * [JBOSGI-141] Service integration with MC
  * 
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @author thomas.diesler@jboss.com
  * @since 20-Jan-2010
  */
-public class ControllerContextServiceManager extends AbstractPlugin implements ServiceManagerPlugin
+public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceManagerPlugin
 {
    // Provide logging
-   final Logger log = Logger.getLogger(ControllerContextServiceManager.class);
+   final Logger log = Logger.getLogger(ServiceManagerPluginImpl.class);
 
    /** The kernel */
    private Kernel kernel;
    /** The previous context tracker */
    private ContextTracker previousTracker;
    
-   public ControllerContextServiceManager(OSGiBundleManager bundleManager)
+   public ServiceManagerPluginImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
    }
