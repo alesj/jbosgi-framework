@@ -78,21 +78,30 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    private Kernel kernel;
    /** The previous context tracker */
    private ContextTracker previousTracker;
+   /** Enable MDR usage */
+   private boolean enableMDRUsage = true;
    
    public ServiceManagerPluginImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
    }
 
+   public void setEnableMDRUsage(boolean mdrUsage)
+   {
+      this.enableMDRUsage = mdrUsage;
+   }
+
    public void start()
    {
       kernel = getBundleManager().getKernel();
-      applyMDRUsage(true);
+      if (enableMDRUsage == true)
+         applyMDRUsage(true);
    }
 
    public void stop()
    {
-      applyMDRUsage(false);
+      if (enableMDRUsage == true)
+         applyMDRUsage(false);
    }
 
    public ServiceReference[] getRegisteredServices(AbstractBundleState bundleState)
