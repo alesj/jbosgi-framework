@@ -23,7 +23,6 @@ package org.jboss.osgi.framework.deployers;
 
 import org.jboss.classloading.spi.dependency.policy.ClassLoaderPolicyModule;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
-import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSClassLoaderDescribeDeployer;
 import org.jboss.osgi.framework.classloading.OSGiModule;
@@ -36,8 +35,31 @@ import org.jboss.osgi.framework.classloading.OSGiModule;
  */
 public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
 {
+   /* [TODO] We don't need to overwrite deploy if the base class can handle an already attached Module
+   public void deploy(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
+   {
+      // If there is no module attached proceed as normal 
+      Module module = unit.getAttachment(Module.class);
+      if (module == null)
+      {
+         super.deploy(unit, metaData);
+         return;
+      }
+
+      // If there is already a module attached and this is an OSGi deployment
+      // remove the old module and create a new OSGiModule
+      if (metaData instanceof OSGiClassLoadingMetaData)
+      {
+         ClassLoading classLoading = getClassLoading();
+         classLoading.removeModule(module);
+         unit.removeAttachment(Module.class);
+         super.deploy(unit, metaData);
+      }
+   }
+   */
+
    @Override
-   protected ClassLoaderPolicyModule createModule(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
+   protected ClassLoaderPolicyModule createModule(DeploymentUnit unit, ClassLoadingMetaData metaData) 
    {
       return new OSGiModule(unit, metaData);
    }
