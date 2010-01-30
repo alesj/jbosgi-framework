@@ -36,6 +36,7 @@ import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
@@ -70,8 +71,9 @@ public class BasicResolverImpl extends AbstractResolver
    @Override
    public ResolverBundle addBundle(Bundle bundle)
    {
-      // Ignore the system bundle
-      if (bundle.getBundleId() == 0)
+      // Ignore the system bundle and fragments
+      AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
+      if (bundleState instanceof OSGiBundleState == false)
          return null;
       
       return super.addBundle(bundle);
