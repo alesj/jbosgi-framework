@@ -92,6 +92,16 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
 
          allPackages.add("org.jboss.virtual");
          
+         allPackages.add("org.osgi.framework");
+         allPackages.add("org.osgi.framework.hooks");
+         allPackages.add("org.osgi.framework.hooks.service");
+         allPackages.add("org.osgi.framework.launch");
+         allPackages.add("org.osgi.service.condpermadmin");
+         allPackages.add("org.osgi.service.packageadmin");
+         allPackages.add("org.osgi.service.permissionadmin");
+         allPackages.add("org.osgi.service.startlevel");
+         allPackages.add("org.osgi.service.url");
+         
          allPackages.add("org.w3c.dom");
          allPackages.add("org.w3c.dom.bootstrap");
          allPackages.add("org.w3c.dom.ls");
@@ -103,11 +113,6 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          allPackages.add("org.xml.sax");
          allPackages.add("org.xml.sax.ext");
          allPackages.add("org.xml.sax.helpers");
-
-         allPackages.add("org.osgi.framework");
-         allPackages.add("org.osgi.framework.launch");
-         allPackages.add("org.osgi.service.startlevel");
-         allPackages.add("org.osgi.service.packageadmin");
          
          String asString = packagesAsString(allPackages);
          getBundleManager().setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES, asString);

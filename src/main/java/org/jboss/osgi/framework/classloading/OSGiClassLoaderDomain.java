@@ -28,6 +28,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.classloader.plugins.filter.CombiningClassFilter;
+import org.jboss.classloader.plugins.filter.PatternClassFilter;
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
@@ -35,6 +37,7 @@ import org.jboss.classloader.spi.ParentPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
 import org.jboss.classloader.spi.filter.ClassFilterUtils;
 import org.jboss.classloader.spi.filter.PackageClassFilter;
+import org.jboss.classloader.spi.filter.RecursivePackageClassFilter;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
@@ -98,11 +101,12 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
 
       // Initialize the configured system packages
       String filteredPackages = getSystemPackagesAsString();
-      PackageClassFilter classFilter = PackageClassFilter.createPackageClassFilterFromString(filteredPackages);
-      classFilter.setIncludeJava(true);
+      PackageClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(filteredPackages);
+      PatternClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
+      CombiningClassFilter filter = CombiningClassFilter.create(javaFilter, systemFilter);
 
       // Setup the domain's parent policy
-      setParentPolicy(new ParentPolicy(classFilter, ClassFilterUtils.NOTHING));
+      setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));
 
       // Initialize the configured policy roots
       VirtualFile[] roots = new VirtualFile[classPath.size()];

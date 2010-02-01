@@ -49,9 +49,8 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
    {
       ClassLoaderDomain domain = getDefaultDomain();
 
-      PatternClassFilter filter = RecursivePackageClassFilter.createRecursivePackageClassFilterFromString("org.osgi");
-      filter.setIncludeJava(true);
-      domain.setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));
+      PatternClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
+      domain.setParentPolicy(new ParentPolicy(javaFilter, ClassFilterUtils.NOTHING));
 
       AbstractJDKChecker.getExcluded().add(AbstractBundleState.class);
       AbstractJDKChecker.getExcluded().add(OSGiBundleState.class);
@@ -60,7 +59,7 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
    @Override
    protected ClassLoaderDomain createDomain(String name)
    {
-      return new ClassLoaderDomain(name);
+      return new OSGiClassLoaderDomain(name);
    }
 
    @Override
