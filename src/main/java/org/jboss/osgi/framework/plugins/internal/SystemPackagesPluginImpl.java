@@ -24,11 +24,13 @@ package org.jboss.osgi.framework.plugins.internal;
 //$Id$
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.classloading.OSGiCoreClassFilter;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.osgi.framework.Constants;
 
@@ -91,6 +93,9 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          allPackages.add("org.jboss.osgi.microcontainer");
 
          allPackages.add("org.jboss.virtual");
+         
+         String[] corePackages = OSGiCoreClassFilter.getCorePackages();
+         allPackageNames.addAll(Arrays.asList(corePackages));
          
          allPackages.add("org.w3c.dom");
          allPackages.add("org.w3c.dom.bootstrap");

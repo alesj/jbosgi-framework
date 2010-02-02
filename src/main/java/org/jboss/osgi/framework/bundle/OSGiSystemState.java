@@ -87,7 +87,7 @@ public class OSGiSystemState extends AbstractBundleState
    
    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse)
    {
-      log.warn("[JBOSGI-138] findEntries(" + path + "," + filePattern + "," + recurse + ")");
+      System.out.println("FIXME [JBOSGI-138] findEntries(" + path + "," + filePattern + "," + recurse + ")");
       return null;
 
       // [Bug-1472] Clarify the semantic of resource API when called on the system bundle
@@ -115,27 +115,27 @@ public class OSGiSystemState extends AbstractBundleState
 
    public URL getEntry(String path)
    {
-      log.warn("[JBOSGI-138] getEntry(" + path + ")");
+      System.out.println("FIXME [JBOSGI-138] getEntry(" + path + ")");
       return null;
    }
 
    @SuppressWarnings("rawtypes")
    public Enumeration getEntryPaths(String path)
    {
-      log.warn("[JBOSGI-138] getEntryPaths(" + path + ")");
+      System.out.println("FIXME [JBOSGI-138] getEntryPaths(" + path + ")");
       return null;
    }
 
    public URL getResource(String name)
    {
-      log.warn("[JBOSGI-138] getResource(" + name + ")");
+      System.out.println("FIXME [JBOSGI-138] getResource(" + name + ")");
       return null;
    }
 
    @SuppressWarnings("rawtypes")
    public Enumeration getResources(String name) throws IOException
    {
-      log.warn("[JBOSGI-138] getResources(" + name + ")");
+      System.out.println("FIXME [JBOSGI-138] getResources(" + name + ")");
       return null;
    }
 

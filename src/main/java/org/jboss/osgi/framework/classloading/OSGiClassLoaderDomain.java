@@ -57,29 +57,6 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    private List<URL> classPath = new ArrayList<URL>();
 
    /**
-    * Return a filter for all packages defined in the org.osgi.core.jar
-    * and java.* but not javax.* 
-    */
-   static ClassFilter getClassLoaderDomainFilter()
-   {
-      // Filter the list of org.osgi.core packages
-      ArrayList<String> corePackages = new ArrayList<String>();
-      corePackages.add("org.osgi.framework");
-      corePackages.add("org.osgi.framework.hooks");
-      corePackages.add("org.osgi.framework.hooks.service");
-      corePackages.add("org.osgi.framework.launch");
-      corePackages.add("org.osgi.service.condpermadmin");
-      corePackages.add("org.osgi.service.packageadmin");
-      corePackages.add("org.osgi.service.permissionadmin");
-      corePackages.add("org.osgi.service.startlevel");
-      corePackages.add("org.osgi.service.url");
-      ClassFilter osgiFilter = PackageClassFilter.createPackageClassFilter(corePackages);
-      // Filter java.* but not javax.*
-      ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
-      return CombiningClassFilter.create(javaFilter, osgiFilter);
-   }
-   
-   /**
     * Create a new OSGiClassLoaderDomain.
     * @param domainName the domain name
     * @throws IllegalArgumentException for a null bundle manager
@@ -124,7 +101,8 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
 
       // Initialize the configured system packages
       ClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(getSystemPackagesAsString());
-      ClassFilter filter = CombiningClassFilter.create(getClassLoaderDomainFilter(), systemFilter);
+      ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
+      ClassFilter filter = CombiningClassFilter.create(javaFilter, OSGiCoreClassFilter.INSTANCE, systemFilter);
 
       // Setup the domain's parent policy
       setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));

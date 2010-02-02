@@ -67,12 +67,12 @@ public class SystemBundleUnitTestCase extends FrameworkTest
    
    public void testStartStop() throws Exception
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testUpdate() throws Exception
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testUninstall() throws Exception
@@ -108,31 +108,31 @@ public class SystemBundleUnitTestCase extends FrameworkTest
    
    public void testGetEntry()
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testGetEntryPath()
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testFindEntries()
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testLoadClass()
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testGetResource()
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
    public void testGetResources()
    {
-      System.out.println("[JBOSGI-138] Proper system BundleContext implementation");
+      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
 }
