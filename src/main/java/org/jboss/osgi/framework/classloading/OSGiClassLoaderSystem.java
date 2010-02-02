@@ -21,15 +21,15 @@
 */
 package org.jboss.osgi.framework.classloading;
 
-import org.jboss.classloader.plugins.filter.PatternClassFilter;
+
 import org.jboss.classloader.plugins.jdk.AbstractJDKChecker;
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.classloader.spi.ParentPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
+import org.jboss.classloader.spi.filter.ClassFilter;
 import org.jboss.classloader.spi.filter.ClassFilterUtils;
-import org.jboss.classloader.spi.filter.RecursivePackageClassFilter;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 
@@ -49,8 +49,8 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
    {
       ClassLoaderDomain domain = getDefaultDomain();
 
-      PatternClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
-      domain.setParentPolicy(new ParentPolicy(javaFilter, ClassFilterUtils.NOTHING));
+      ClassFilter domainFilter = OSGiClassLoaderDomain.getClassLoaderDomainFilter();
+      domain.setParentPolicy(new ParentPolicy(domainFilter, ClassFilterUtils.NOTHING));
 
       AbstractJDKChecker.getExcluded().add(AbstractBundleState.class);
       AbstractJDKChecker.getExcluded().add(OSGiBundleState.class);

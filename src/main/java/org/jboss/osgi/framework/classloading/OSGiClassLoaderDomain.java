@@ -29,12 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.classloader.plugins.filter.CombiningClassFilter;
-import org.jboss.classloader.plugins.filter.PatternClassFilter;
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.classloader.spi.ParentPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
+import org.jboss.classloader.spi.filter.ClassFilter;
 import org.jboss.classloader.spi.filter.ClassFilterUtils;
 import org.jboss.classloader.spi.filter.PackageClassFilter;
 import org.jboss.classloader.spi.filter.RecursivePackageClassFilter;
@@ -56,6 +56,29 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    private OSGiBundleManager bundleManager;
    private List<URL> classPath = new ArrayList<URL>();
 
+   /**
+    * Return a filter for all packages defined in the org.osgi.core.jar
+    * and java.* but not javax.* 
+    */
+   static ClassFilter getClassLoaderDomainFilter()
+   {
+      // Filter the list of org.osgi.core packages
+      ArrayList<String> corePackages = new ArrayList<String>();
+      corePackages.add("org.osgi.framework");
+      corePackages.add("org.osgi.framework.hooks");
+      corePackages.add("org.osgi.framework.hooks.service");
+      corePackages.add("org.osgi.framework.launch");
+      corePackages.add("org.osgi.service.condpermadmin");
+      corePackages.add("org.osgi.service.packageadmin");
+      corePackages.add("org.osgi.service.permissionadmin");
+      corePackages.add("org.osgi.service.startlevel");
+      corePackages.add("org.osgi.service.url");
+      ClassFilter osgiFilter = PackageClassFilter.createPackageClassFilter(corePackages);
+      // Filter java.* but not javax.*
+      ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
+      return CombiningClassFilter.create(javaFilter, osgiFilter);
+   }
+   
    /**
     * Create a new OSGiClassLoaderDomain.
     * @param domainName the domain name
@@ -100,10 +123,8 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
       classLoaderSystem.registerDomain(this);
 
       // Initialize the configured system packages
-      String filteredPackages = getSystemPackagesAsString();
-      PackageClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(filteredPackages);
-      PatternClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
-      CombiningClassFilter filter = CombiningClassFilter.create(javaFilter, systemFilter);
+      ClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(getSystemPackagesAsString());
+      ClassFilter filter = CombiningClassFilter.create(getClassLoaderDomainFilter(), systemFilter);
 
       // Setup the domain's parent policy
       setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));
