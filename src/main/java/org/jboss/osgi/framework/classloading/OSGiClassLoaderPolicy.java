@@ -56,19 +56,22 @@ import org.jboss.virtual.VirtualFile;
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
 {
+   /** The associated bundle state */
+   private AbstractBundleState bundleState;
    /** The fragment roots */
    private List<VirtualFile> fragments;
 
-   public OSGiClassLoaderPolicy(AbstractBundleState absBundleState, VirtualFile[] roots)
+   public OSGiClassLoaderPolicy(AbstractBundleState bundleState, VirtualFile[] roots)
    {
       super(roots);
       
-      if (absBundleState == null)
+      if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
-
-      if (absBundleState instanceof AbstractDeployedBundleState)
+      this.bundleState = bundleState;
+      
+      if (bundleState instanceof AbstractDeployedBundleState)
       {
-         AbstractDeployedBundleState depBundleState = (AbstractDeployedBundleState)absBundleState;
+         AbstractDeployedBundleState depBundleState = (AbstractDeployedBundleState)bundleState;
          DeploymentUnit unit = depBundleState.getDeploymentUnit();
          Module module = unit.getAttachment(Module.class);
          if (module instanceof OSGiModule == false)
@@ -89,6 +92,13 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
          // Bundle-NativeCode handling
          processNativeLibraryMetaData(depBundleState);
       }
+   }
+
+   
+   @Override
+   public String getName()
+   {
+      return bundleState.getCanonicalName();
    }
 
    /**
