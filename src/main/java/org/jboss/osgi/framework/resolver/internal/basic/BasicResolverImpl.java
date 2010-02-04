@@ -37,7 +37,6 @@ import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
@@ -55,7 +54,7 @@ import org.osgi.framework.Constants;
  * @author thomas.diesler@jboss.com
  * @since 10-Sep-2009
  */
-public class BasicResolverImpl extends AbstractResolver 
+public class BasicResolverImpl extends AbstractResolver
 {
    /** The log */
    private static final Logger log = Logger.getLogger(BasicResolverImpl.class);
@@ -75,7 +74,7 @@ public class BasicResolverImpl extends AbstractResolver
       AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
       if (bundleState instanceof OSGiBundleState == false)
          return null;
-      
+
       return super.addBundle(bundle);
    }
 
@@ -85,7 +84,7 @@ public class BasicResolverImpl extends AbstractResolver
       AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
       if (bundleState instanceof OSGiBundleState == false)
          return null;
-      
+
       ResolverBundle removedBundle = super.removeBundle(bundle);
       bundleCapabilitiesMap.remove(bundleState);
 
@@ -103,7 +102,7 @@ public class BasicResolverImpl extends AbstractResolver
    public List<ResolverBundle> resolve(List<Bundle> bundles)
    {
       List<ResolverBundle> resolvedBundles = new ArrayList<ResolverBundle>();
-      for (AbstractDeployedBundleState aux : resolveBundles(bundles))
+      for (OSGiBundleState aux : resolveBundles(bundles))
       {
          ResolverBundle resBundle = getBundle(aux);
          if (resBundle == null)
@@ -134,43 +133,53 @@ public class BasicResolverImpl extends AbstractResolver
             unresolvedBundles.add(OSGiBundleState.assertBundleState(aux));
       }
 
-      int resolved = 1;
-      int resolveRounds = 0;
+      // Add the capabilities and requirements of the unresolved bundles
+      for (OSGiBundleState bundleState : unresolvedBundles)
+      {
+         getBundleCapabilities(bundleState);
+         getBundleRequirements(bundleState);
+      }
 
-      // Get the list of all capabilities
+      // Get the list of all capabilities for all resolved and unresolved bundles
       List<BundleCapability> allCapabilities = new ArrayList<BundleCapability>();
       for (List<BundleCapability> list : bundleCapabilitiesMap.values())
       {
          allCapabilities.addAll(list);
       }
 
-      List<OSGiBundleState> resolvedBundles = new ArrayList<OSGiBundleState>();
-      while (resolved > 0 && unresolvedBundles.isEmpty() == false)
+      // Reduce the capabilities for bundles that cannot be resolved
+      for (OSGiBundleState bundleState : unresolvedBundles)
       {
-         resolveRounds++;
-
-         log.debug("#" + resolveRounds + " *****************************************************************");
-         log.debug("Unresolved bundles: " + unresolvedBundles);
-
-         resolved = 0;
-         Iterator<OSGiBundleState> it = unresolvedBundles.iterator();
-         while (it.hasNext())
+         if (reduceCapabilities(allCapabilities, bundleState) == false)
          {
-            OSGiBundleState bundleState = it.next();
-            log.debug("Resolving: " + bundleState);
-            if (resolveBundle(allCapabilities, bundleState))
-            {
-               resolvedBundles.add(bundleState);
-               it.remove();
-               resolved++;
-            }
+            bundleCapabilitiesMap.remove(bundleState);
+            bundleRequirementsMap.remove(bundleState);
+         }
+      }
+
+      log.debug("START****************************************************************");
+      log.debug("Unresolved bundles: " + unresolvedBundles);
+
+      List<OSGiBundleState> resolvedBundles = new ArrayList<OSGiBundleState>();
+      Iterator<OSGiBundleState> itUnresolved = unresolvedBundles.iterator();
+      while (itUnresolved.hasNext())
+      {
+         OSGiBundleState bundleState = itUnresolved.next();
+
+         log.debug("Resolving: " + bundleState);
+         if (resolveBundle(allCapabilities, bundleState))
+         {
+            logResolvedBundleInfo(bundleState);
+
+            resolvedBundles.add(bundleState);
+            itUnresolved.remove();
          }
       }
 
       log.debug("END *****************************************************************");
 
       // Log the unresolved bundles
-      for (AbstractDeployedBundleState bundle : unresolvedBundles)
+      for (OSGiBundleState bundle : unresolvedBundles)
       {
          StringBuffer message = new StringBuffer("Unresolved bundle: " + bundle);
          message.append("\n  Cannot find exporter for");
@@ -192,17 +201,17 @@ public class BasicResolverImpl extends AbstractResolver
 
    public ExportPackage getExporter(Bundle bundle, String importPackage)
    {
-      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
       BundleCapability match = getMatchingCapability(bundleState, importPackage);
       if (match == null)
          return null;
 
-      AbstractDeployedBundleState exportingBundle = match.getExportingBundle();
+      OSGiBundleState exportingBundle = match.getExportingBundle();
       ResolverBundle resolverBundle = getBundle(exportingBundle);
       return resolverBundle.getExportPackage(importPackage);
    }
 
-   private BundleCapability getMatchingCapability(AbstractDeployedBundleState bundle, String importPackage)
+   private BundleCapability getMatchingCapability(OSGiBundleState bundle, String importPackage)
    {
       List<BundleRequirement> requirements = bundleRequirementsMap.get(bundle);
       if (requirements == null)
@@ -222,19 +231,46 @@ public class BasicResolverImpl extends AbstractResolver
       return result;
    }
 
-   private boolean resolveBundle(List<BundleCapability> allCapabilities, OSGiBundleState bundle)
+   private boolean reduceCapabilities(List<BundleCapability> allCapabilities, OSGiBundleState bundleState)
    {
-      List<BundleCapability> bundleCapabilities = getBundleCapabilities(bundle);
-      List<BundleRequirement> bundleRequirements = getBundleRequirements(bundle);
+      boolean canResolve = true;
 
-      List<BundleCapability> futureCapabilities = new ArrayList<BundleCapability>(allCapabilities);
-      futureCapabilities.addAll(bundleCapabilities);
-
+      List<BundleRequirement> bundleRequirements = getBundleRequirements(bundleState);
       for (BundleRequirement requirement : bundleRequirements)
       {
          PackageRequirement packreq = requirement.getPackageRequirement();
+         BundleCapability bestMatch = findBestMatch(allCapabilities, requirement);
+         if (bestMatch == null && packreq.isOptional() == false && packreq.isDynamic() == false)
+         {
+            log.debug("Cannot resolve: " + packreq);
+            canResolve = false;
+            break;
+         }
+      }
 
-         BundleCapability bestMatch = findBestMatch(futureCapabilities, requirement);
+      canResolve &= processRequiredBundle(bundleState, bundleRequirements);
+      if (canResolve == false)
+      {
+         Iterator<BundleCapability> iterator = allCapabilities.iterator();
+         while (iterator.hasNext())
+         {
+            BundleCapability next = iterator.next();
+            OSGiBundleState exportingBundle = next.getExportingBundle();
+            if (exportingBundle == bundleState)
+               iterator.remove();
+         }
+      }
+
+      return canResolve;
+   }
+
+   private boolean resolveBundle(List<BundleCapability> allCapabilities, OSGiBundleState bundleState)
+   {
+      List<BundleRequirement> bundleRequirements = getBundleRequirements(bundleState);
+      for (BundleRequirement requirement : bundleRequirements)
+      {
+         PackageRequirement packreq = requirement.getPackageRequirement();
+         BundleCapability bestMatch = findBestMatch(allCapabilities, requirement);
          if (bestMatch == null && packreq.isOptional() == false && packreq.isDynamic() == false)
             return false;
 
@@ -245,18 +281,14 @@ public class BasicResolverImpl extends AbstractResolver
       Iterator<BundleRequirement> it = bundleRequirements.iterator();
       while (it.hasNext())
       {
-         if (it.next().getWiredCapability() == null)
+         BundleRequirement requirement = it.next();
+         PackageRequirement packreq = requirement.getPackageRequirement();
+         if ((packreq.isOptional() || packreq.isDynamic()) && requirement.getWiredCapability() == null)
             it.remove();
       }
 
-      if (processRequiredBundle(bundle, bundleCapabilities, bundleRequirements) == false)
+      if (processRequiredBundle(bundleState, bundleRequirements) == false)
          return false;
-
-      allCapabilities.addAll(bundleCapabilities);
-      bundleCapabilitiesMap.put(bundle, bundleCapabilities);
-      bundleRequirementsMap.put(bundle, bundleRequirements);
-
-      logResolvedBundleInfo(bundle, bundleCapabilities, bundleRequirements);
 
       return true;
    }
@@ -264,10 +296,13 @@ public class BasicResolverImpl extends AbstractResolver
    /**
     * Logs information about a resolved bundle
     */
-   private void logResolvedBundleInfo(AbstractDeployedBundleState bundle, List<BundleCapability> bundleCapabilities, List<BundleRequirement> bundleRequirements)
+   private void logResolvedBundleInfo(OSGiBundleState bundleState)
    {
+      List<BundleCapability> bundleCapabilities = getBundleCapabilities(bundleState);
+      List<BundleRequirement> bundleRequirements = getBundleRequirements(bundleState);
+
       // Log the package wiring information
-      StringBuffer message = new StringBuffer("Resolved: " + bundle);
+      StringBuffer message = new StringBuffer("Resolved: " + bundleState);
 
       // Log the exports
       int nameLengthMax = 0;
@@ -335,44 +370,70 @@ public class BasicResolverImpl extends AbstractResolver
 
    private BundleCapability findBestMatch(List<BundleCapability> capabilities, BundleRequirement requirement)
    {
-      BundleCapability result = null;
+      BundleCapability bestCapability = null;
+      OSGiBundleState bestExporter = null;
+      int bestState = 0;
+
       for (BundleCapability capability : capabilities)
       {
          if (capability.matches(requirement))
          {
-            if (result == null)
+            OSGiBundleState capExporter = capability.getExportingBundle();
+            int capState = capExporter.getState();
+            boolean updateMatch = false;
+
+            if (bestCapability == null)
             {
-               result = capability;
+               updateMatch = true;
             }
-            else
+            
+            // Update if we can wire to an already resolved bundle
+            else if (bestState == Bundle.INSTALLED && (capState == Bundle.RESOLVED || capState == Bundle.ACTIVE))
             {
-               // [TODO] handle multiple matches
+               updateMatch = true;
+            }
+            
+            // Update if we can wire to a bundle with lower id
+            else if (bestExporter.getBundleId() > capExporter.getBundleId())
+            {
+               updateMatch = true;
+            }
+
+            if (updateMatch == true)
+            {
+               bestCapability = capability;
+               bestExporter = bestCapability.getExportingBundle();
+               bestState = bestExporter.getState();
             }
          }
       }
-      return result;
+      return bestCapability;
    }
 
    /**
     * Get the set of bundle capabilities
     */
-   private List<BundleCapability> getBundleCapabilities(AbstractDeployedBundleState bundle)
+   private List<BundleCapability> getBundleCapabilities(OSGiBundleState bundle)
    {
-      List<BundleCapability> result = new ArrayList<BundleCapability>();
-
-      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      ClassLoadingMetaData metadata = unit.getAttachment(ClassLoadingMetaData.class);
-
-      List<Capability> capabilities = metadata.getCapabilities().getCapabilities();
-      if (capabilities != null)
+      List<BundleCapability> result = bundleCapabilitiesMap.get(bundle);
+      if (result == null)
       {
-         for (Capability capability : capabilities)
+         bundleCapabilitiesMap.put(bundle, result = new ArrayList<BundleCapability>());
+
+         OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+         DeploymentUnit unit = bundleState.getDeploymentUnit();
+         ClassLoadingMetaData metadata = unit.getAttachment(ClassLoadingMetaData.class);
+
+         List<Capability> capabilities = metadata.getCapabilities().getCapabilities();
+         if (capabilities != null)
          {
-            if (capability instanceof PackageCapability)
+            for (Capability capability : capabilities)
             {
-               PackageCapability packageCapability = (PackageCapability)capability;
-               result.add(new BundleCapability(bundle, packageCapability));
+               if (capability instanceof PackageCapability)
+               {
+                  PackageCapability packageCapability = (PackageCapability)capability;
+                  result.add(new BundleCapability(bundle, packageCapability));
+               }
             }
          }
       }
@@ -382,31 +443,34 @@ public class BasicResolverImpl extends AbstractResolver
    /**
     * Get the set of bundle requirements
     */
-   private List<BundleRequirement> getBundleRequirements(AbstractDeployedBundleState bundle)
+   private List<BundleRequirement> getBundleRequirements(OSGiBundleState bundle)
    {
-      List<BundleRequirement> result = new ArrayList<BundleRequirement>();
-
-      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      ClassLoadingMetaData classloadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
-
-      List<Requirement> requirements = classloadingMetaData.getRequirements().getRequirements();
-      if (requirements != null)
+      List<BundleRequirement> result = bundleRequirementsMap.get(bundle);
+      if (result == null)
       {
-         for (Requirement requirement : requirements)
+         bundleRequirementsMap.put(bundle, result = new ArrayList<BundleRequirement>());
+
+         OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+         DeploymentUnit unit = bundleState.getDeploymentUnit();
+         ClassLoadingMetaData classloadingMetaData = unit.getAttachment(ClassLoadingMetaData.class);
+
+         List<Requirement> requirements = classloadingMetaData.getRequirements().getRequirements();
+         if (requirements != null)
          {
-            if (requirement instanceof PackageRequirement)
+            for (Requirement requirement : requirements)
             {
-               PackageRequirement packageRequirement = (PackageRequirement)requirement;
-               result.add(new BundleRequirement(bundle, packageRequirement));
+               if (requirement instanceof PackageRequirement)
+               {
+                  PackageRequirement packageRequirement = (PackageRequirement)requirement;
+                  result.add(new BundleRequirement(bundle, packageRequirement));
+               }
             }
          }
       }
-
       return result;
    }
 
-   private boolean processRequiredBundle(AbstractDeployedBundleState bundle, List<BundleCapability> bundleCapabilities, List<BundleRequirement> bundleRequirements)
+   private boolean processRequiredBundle(OSGiBundleState bundle, List<BundleRequirement> bundleRequirements)
    {
       // The Require-Bundle header specifies that all exported packages from
       // another bundle must be imported, effectively requiring the public interface
@@ -452,8 +516,7 @@ public class BasicResolverImpl extends AbstractResolver
 
                   if (Constants.VISIBILITY_REEXPORT.equals(visibility))
                   {
-                     BundleCapability newBundleCapability = new BundleCapability(bundle, otherPackage);
-                     bundleCapabilities.add(newBundleCapability);
+                     // [TODO] vivibility=reexport
                   }
                }
             }

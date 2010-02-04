@@ -21,6 +21,7 @@
  */
 package org.jboss.osgi.framework.resolver.internal.basic;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -41,11 +42,11 @@ import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
  */
 class BundleCapability
 {
-   private AbstractDeployedBundleState bundle;
+   private OSGiBundleState bundle;
    private PackageCapability packageCapability;
    private List<BundleRequirement> wires;
    
-   BundleCapability(AbstractDeployedBundleState bundle, PackageCapability packageCapability)
+   BundleCapability(OSGiBundleState bundle, PackageCapability packageCapability)
    {
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
@@ -56,7 +57,7 @@ class BundleCapability
       this.packageCapability = packageCapability;
    }
 
-   AbstractDeployedBundleState getExportingBundle()
+   OSGiBundleState getExportingBundle()
    {
       return bundle;
    }
@@ -100,6 +101,19 @@ class BundleCapability
    {
       if (wires != null)
          wires.remove(bundleRequirement);
+   }
+   
+   void unwireRequirements()
+   {
+      if (wires != null)
+      {
+         ArrayList<BundleRequirement> wiresCopy = new ArrayList<BundleRequirement>(wires);
+         for (BundleRequirement aux : wiresCopy)
+         {
+            aux.unwireCapability();
+         }
+         wires = null;
+      }
    }
    
    @Override

@@ -68,6 +68,7 @@ public class ResolverSmokeTest extends OSGiTest
          bundlePaths.add("bundles/jboss-osgi-jaxb.jar");
          bundlePaths.add("bundles/jboss-osgi-jmx.jar");
          bundlePaths.add("bundles/jboss-osgi-jndi.jar");
+         bundlePaths.add("bundles/jboss-osgi-reflect.jar");
          bundlePaths.add("bundles/jboss-osgi-xml-binding.jar");
          bundlePaths.add("bundles/org.apache.felix.configadmin.jar");
          bundlePaths.add("bundles/org.apache.felix.log.jar");
@@ -100,7 +101,7 @@ public class ResolverSmokeTest extends OSGiTest
          packageAdmin.resolveBundles(null);
          
          System.out.println("FIXME [JBOSGI-151] Cannot resolve circular dependencies");
-         //assertTrue("All bundles resolved", allResoved);
+         // assertTrue("All bundles resolved", allResolved);
       }
       finally
       {
