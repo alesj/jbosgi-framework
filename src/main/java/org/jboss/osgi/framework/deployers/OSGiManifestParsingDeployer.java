@@ -28,8 +28,8 @@ import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.jboss.osgi.spi.OSGiConstants;
+import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.virtual.VirtualFile;
-import org.osgi.framework.Version;
 
 /**
  * OSGiManifestParsingDeployer.<p>
@@ -51,18 +51,11 @@ public class OSGiManifestParsingDeployer extends ManifestDeployer<OSGiMetaData>
    @Override
    protected OSGiMetaData createMetaData(Manifest manifest) throws Exception
    {
-      AbstractOSGiMetaData osgiMetaData = new AbstractOSGiMetaData(manifest);
-      
-      // At least one of these manifest headers must be there
-      // Note, in R3 and R4 there is no common mandatory header
-      String bundleName = osgiMetaData.getBundleName();
-      String bundleSymbolicName = osgiMetaData.getBundleSymbolicName();
-      Version bundleVersion = Version.parseVersion(osgiMetaData.getBundleVersion());
-      
-      boolean isEmptyVersion = Version.emptyVersion.equals(bundleVersion);
-      if (bundleName == null && bundleSymbolicName == null && isEmptyVersion == true)
+      int manifestVersion = BundleInfo.getBundleManifestVersion(manifest);
+      if (manifestVersion < 0 || manifestVersion > 2)
          return null;
       
+      AbstractOSGiMetaData osgiMetaData = new AbstractOSGiMetaData(manifest);
       return osgiMetaData;
    }
 
