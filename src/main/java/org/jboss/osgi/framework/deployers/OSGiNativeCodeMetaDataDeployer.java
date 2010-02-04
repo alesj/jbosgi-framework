@@ -101,6 +101,7 @@ public class OSGiNativeCodeMetaDataDeployer extends AbstractRealDeployer
       osAlias.put("WinVista", "WindowsVista");
       osAlias.put("Windows Vista", "WindowsVista");
       osAlias.put("Win32", "WindowsVista");
+      osAlias.put("Windows 7", "Windows7");
    }
 
    public OSGiNativeCodeMetaDataDeployer()
@@ -226,7 +227,7 @@ public class OSGiNativeCodeMetaDataDeployer extends AbstractRealDeployer
          boolean osmatch = false;
          for (String osname : osNames)
          {
-            osmatch = (osname.equals(fwOSName) || osname.equals(osAlias.get(fwOSName)));
+            osmatch = (osname.equalsIgnoreCase(fwOSName) || osname.equalsIgnoreCase(osAlias.get(fwOSName)));
             if (osmatch == true)
                break;
          }

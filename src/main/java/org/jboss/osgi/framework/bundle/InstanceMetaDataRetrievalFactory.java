@@ -27,7 +27,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
+import org.jboss.kernel.Kernel;
 import org.jboss.metadata.plugins.loader.memory.MemoryMetaDataLoader;
+import org.jboss.metadata.spi.repository.MutableMetaDataRepository;
 import org.jboss.metadata.spi.retrieval.MetaDataRetrieval;
 import org.jboss.metadata.spi.retrieval.MetaDataRetrievalFactory;
 import org.jboss.metadata.spi.scope.CommonLevels;
@@ -42,15 +44,18 @@ import org.jboss.metadata.spi.scope.ScopeKey;
 public class InstanceMetaDataRetrievalFactory implements MetaDataRetrievalFactory
 {
    private Controller controller;
+   private MutableMetaDataRepository repository;
    
    @SuppressWarnings("rawtypes")
    private Set<DictionaryFactory> factories = new CopyOnWriteArraySet<DictionaryFactory>();
 
-   public InstanceMetaDataRetrievalFactory(Controller controller)
+   public InstanceMetaDataRetrievalFactory(Kernel kernel)
    {
-      if (controller == null)
-         throw new IllegalArgumentException("Null controller");
-      this.controller = controller;
+      if (kernel == null)
+         throw new IllegalArgumentException("Null kernel");
+
+      this.controller = kernel.getController();
+      this.repository = kernel.getMetaDataRepository().getMetaDataRepository();
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
@@ -62,6 +67,8 @@ public class InstanceMetaDataRetrievalFactory implements MetaDataRetrievalFactor
          throw new IllegalArgumentException("Not an instance scope: " + scope);
 
       MemoryMetaDataLoader loader = new MemoryMetaDataLoader(new ScopeKey(scope));
+      repository.addMetaDataRetrieval(loader); // remember loader
+
       Object qualifier = scope.getQualifier();
       ControllerContext context = controller.getContext(qualifier, null);
       if (context != null)

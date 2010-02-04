@@ -49,7 +49,7 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class ServiceMixUnitTestCase extends DeployersTest
+public class ServiceMixUnitTestCase extends ServicesTest
 {
    public ServiceMixUnitTestCase(String name)
    {
@@ -105,23 +105,6 @@ public class ServiceMixUnitTestCase extends DeployersTest
       {
          undeploy(bean);
       }
-   }
-
-   private static Object getter(Object target, String getter, String name) throws Throwable
-   {
-      assertNotNull("Target " + name + " is not null", target);
-      Class<?> clazz = target.getClass();
-      Method m = clazz.getDeclaredMethod(getter);
-      return m.invoke(target);
-   }
-
-   private static Object setter(Object target, String setter, Object value, String name) throws Throwable
-   {
-      assertNotNull("Target " + name + " is not null", target);
-      assertNotNull("Value is not null", value);
-      Class<?> clazz = target.getClass();
-      Method m = clazz.getDeclaredMethod(setter, value.getClass());
-      return m.invoke(target, value);
    }
 
    public void testInjectionToMC() throws Throwable

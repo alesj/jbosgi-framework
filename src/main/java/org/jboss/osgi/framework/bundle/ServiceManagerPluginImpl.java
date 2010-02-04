@@ -313,8 +313,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    private MetaDataRetrievalFactory getMetaDataRetrievalFactory()
    {
       MetaDataRetrievalFactory mdrFactory;
-      Controller controller = kernel.getController();
-      InstanceMetaDataRetrievalFactory imdrf = new InstanceMetaDataRetrievalFactory(controller);
+      InstanceMetaDataRetrievalFactory imdrf = new InstanceMetaDataRetrievalFactory(kernel);
       imdrf.addFactory(new OSGiServiceStateDictionaryFactory());
       imdrf.addFactory(new KernelDictionaryFactory(kernel.getConfigurator()));
       // TODO - JMX?

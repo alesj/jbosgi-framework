@@ -1,0 +1,7 @@
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+    <bean name="Invoker" class="org.jboss.test.osgi.service.support.MockInvoker">
+        <annotation>@org.jboss.aop.microcontainer.aspects.jmx.JMX(name="jboss:service=invoker,type=unified",exposedInterface=org.jboss.test.osgi.service.support.MockInvokerMBean.class,registerDirectly=true)</annotation>
+    </bean>
+
+</deployment>
