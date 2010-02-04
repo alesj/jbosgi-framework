@@ -21,7 +21,7 @@
  */
 package org.jboss.test.osgi.nativecode.bundleA;
 
-//$Id: HostAActivator.java 99304 2010-01-12 17:29:06Z thomas.diesler@jboss.com $
+//$Id: NativeCodeActivatorA.java 99304 2010-01-12 17:29:06Z thomas.diesler@jboss.com $
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
