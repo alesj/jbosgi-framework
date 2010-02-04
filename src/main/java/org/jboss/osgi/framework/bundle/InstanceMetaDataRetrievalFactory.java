@@ -66,7 +66,8 @@ public class InstanceMetaDataRetrievalFactory implements MetaDataRetrievalFactor
       if (CommonLevels.INSTANCE.equals(scope.getScopeLevel()) == false)
          throw new IllegalArgumentException("Not an instance scope: " + scope);
 
-      MemoryMetaDataLoader loader = new MemoryMetaDataLoader(new ScopeKey(scope));
+      ScopeKey key = new ScopeKey(scope);
+      MemoryMetaDataLoader loader = new MemoryMetaDataLoader(key.getOptimizedKey());
       repository.addMetaDataRetrieval(loader); // remember loader
 
       Object qualifier = scope.getQualifier();

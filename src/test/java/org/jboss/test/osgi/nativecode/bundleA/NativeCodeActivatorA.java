@@ -23,13 +23,14 @@ package org.jboss.test.osgi.nativecode.bundleA;
 
 //$Id: NativeCodeActivatorA.java 99304 2010-01-12 17:29:06Z thomas.diesler@jboss.com $
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class NativeCodeActivatorA implements BundleActivator
 {
@@ -90,7 +91,7 @@ public class NativeCodeActivatorA implements BundleActivator
          if ("".equals(suffix))
             System.err.println("No such OS mapped to alias: " + os);
 
-         String substr = "osgi-store/bundle-" + bundleid + "/" + suffix;
+         String substr = "osgi-store" + File.separator + "bundle-" + bundleid + File.separator + suffix;
          if (exmsg.indexOf(substr) < 0)
             throw new UnsatisfiedLinkError("Cannot find '" + substr + "' in '" + exmsg + "'");
       }
