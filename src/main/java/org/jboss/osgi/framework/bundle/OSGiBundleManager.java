@@ -1038,7 +1038,7 @@ public class OSGiBundleManager
          }
 
          // Fallback to the deployment name
-         else if (aux instanceof OSGiBundleState)
+         else if (aux instanceof AbstractDeployedBundleState)
          {
             DeploymentUnit unit = ((AbstractDeployedBundleState)aux).getDeploymentUnit();
             if (location.equals(unit.getName()))

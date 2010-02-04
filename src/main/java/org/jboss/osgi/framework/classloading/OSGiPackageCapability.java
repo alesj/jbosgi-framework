@@ -32,6 +32,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
@@ -144,24 +145,22 @@ public class OSGiPackageCapability extends PackageCapability
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       Resolver bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
       if (bundleResolver != null)
-         return resolverMatch(bundleResolver, reqModule, osgiPackageRequirement);
+      {
+         // Get the bundle associated with the requirement
+         String reqLocation = reqModule.getContextName();
+         AbstractBundleState reqBundle = bundleManager.getBundleByLocation(reqLocation);
+         if (reqBundle == null)
+            throw new IllegalStateException("Cannot get bundle for: " + reqLocation);
+         
+         // Get the exporter for this requirement
+         if (reqBundle instanceof OSGiBundleState)
+         {
+            String packageName = osgiPackageRequirement.getName();
+            return bundleResolver.match(reqBundle, bundleState, packageName);
+         }
+      }
 
       return true;
-   }
-
-   // Return true if the given requirement matches in the external resolver
-   private boolean resolverMatch(Resolver bundleResolver, Module reqModule, OSGiPackageRequirement packageRequirement)
-   {
-      // Get the bundle associated with the requirement
-      String reqLocation = reqModule.getContextName();
-      OSGiBundleManager bundleManager = bundleState.getBundleManager();
-      AbstractBundleState reqBundle = bundleManager.getBundleByLocation(reqLocation);
-      if (reqBundle == null)
-         throw new IllegalStateException("Cannot get bundle for: " + reqLocation);
-
-      // Get the exporter for this requirement
-      String packageName = packageRequirement.getName();
-      return bundleResolver.match(reqBundle, bundleState, packageName);
    }
 
    /**
