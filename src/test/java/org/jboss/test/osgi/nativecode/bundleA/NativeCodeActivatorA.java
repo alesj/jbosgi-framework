@@ -44,31 +44,32 @@ public class NativeCodeActivatorA implements BundleActivator
       osAliases.put("Mac OS X", "MacOSX");
       osAliases.put("OS/2", "OS2");
       osAliases.put("procnto", "QNX");
-      osAliases.put("Win95", "Windows95");
-      osAliases.put("Windows 95", "Windows95");
-      osAliases.put("Win32", "Windows95");
-      osAliases.put("Win98", "Windows98");
-      osAliases.put("Windows 98", "Windows98");
-      osAliases.put("Win32", "Windows98");
-      osAliases.put("WinNT", "WindowsNT");
-      osAliases.put("Windows NT", "WindowsNT");
-      osAliases.put("Win32", "WindowsNT");
-      osAliases.put("WinCE", "WindowsCE");
-      osAliases.put("Windows CE", "WindowsCE");
-      osAliases.put("Win2000", "Windows2000");
-      osAliases.put("Windows 2000", "Windows2000");
-      osAliases.put("Win32", "Windows2000");
-      osAliases.put("Win2003", "Windows2003");
-      osAliases.put("Windows 2003", "Windows2003");
-      osAliases.put("Win32", "Windows2003");
-      osAliases.put("Windows Server 2003", "Windows2003");
-      osAliases.put("WinXP", "WindowsXP");
-      osAliases.put("Windows XP", "WindowsXP");
-      osAliases.put("Win32", "WindowsXP");
-      osAliases.put("WinVista", "WindowsVista");
-      osAliases.put("Windows Vista", "WindowsVista");
-      osAliases.put("Win32", "WindowsVista");
-      osAliases.put("Windows 7", "Windows7");
+      // map any winz stuff to plain windows
+      osAliases.put("Win95", "Windows");
+      osAliases.put("Windows 95", "Windows");
+      osAliases.put("Win32", "Windows");
+      osAliases.put("Win98", "Windows");
+      osAliases.put("Windows 98", "Windows");
+      osAliases.put("Win32", "Windows");
+      osAliases.put("WinNT", "Windows");
+      osAliases.put("Windows NT", "Windows");
+      osAliases.put("Win32", "Windows");
+      osAliases.put("WinCE", "Windows");
+      osAliases.put("Windows CE", "Windows");
+      osAliases.put("Win2000", "Windows");
+      osAliases.put("Windows 2000", "Windows");
+      osAliases.put("Win32", "Windows");
+      osAliases.put("Win2003", "Windows");
+      osAliases.put("Windows 2003", "Windows");
+      osAliases.put("Win32", "Windows");
+      osAliases.put("Windows Server 2003", "Windows");
+      osAliases.put("WinXP", "Windows");
+      osAliases.put("Windows XP", "Windows");
+      osAliases.put("Win32", "Windows");
+      osAliases.put("WinVista", "Windows");
+      osAliases.put("Windows Vista", "Windows");
+      osAliases.put("Win32", "Windows");
+      osAliases.put("Windows 7", "Windows");
    }
 
    public void start(BundleContext context) throws BundleException
