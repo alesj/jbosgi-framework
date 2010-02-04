@@ -51,6 +51,7 @@
     <version.jboss.deployers>2.2.0.Alpha1</version.jboss.deployers>
     <version.jboss.kernel>2.2.0.Alpha2</version.jboss.kernel>
     <version.jboss.logging>2.1.0.GA</version.jboss.logging>
+    <version.jboss.mdr>2.2.0.Alpha1</version.jboss.mdr>
     <version.jboss.osgi.apache.xerces>2.9.1.SP3</version.jboss.osgi.apache.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
     <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
@@ -93,7 +94,32 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-client</artifactId>
+      <version>${version.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-client-spi</artifactId>
+      <version>${version.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-core</artifactId>
+      <version>${version.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-core-spi</artifactId>
+      <version>${version.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
       <artifactId>jboss-deployers-impl</artifactId>
+      <version>${version.jboss.deployers}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-structure-spi</artifactId>
       <version>${version.jboss.deployers}</version>
     </dependency>
     <dependency>
@@ -120,6 +146,11 @@
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging-spi</artifactId>
       <version>${version.jboss.logging}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-mdr</artifactId>
+      <version>${version.jboss.mdr}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.osgi</groupId>

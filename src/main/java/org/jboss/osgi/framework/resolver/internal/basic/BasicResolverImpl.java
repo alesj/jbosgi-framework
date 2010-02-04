@@ -81,9 +81,12 @@ public class BasicResolverImpl extends AbstractResolver
 
    public ResolverBundle removeBundle(Bundle bundle)
    {
-      ResolverBundle removedBundle = super.removeBundle(bundle);
+      // Ignore the system bundle and fragments
+      AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
+      if (bundleState instanceof OSGiBundleState == false)
+         return null;
       
-      AbstractDeployedBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+      ResolverBundle removedBundle = super.removeBundle(bundle);
       bundleCapabilitiesMap.remove(bundleState);
 
       List<BundleRequirement> bundleRequirements = bundleRequirementsMap.remove(bundleState);
