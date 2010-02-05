@@ -21,61 +21,45 @@
 */
 package org.jboss.osgi.framework.bundle;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.jboss.beans.info.spi.BeanInfo;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.kernel.spi.config.KernelConfigurator;
-import org.jboss.kernel.spi.dependency.KernelControllerContext;
-import org.jboss.reflect.spi.ClassInfo;
-import org.jboss.util.collection.Iterators;
-import org.osgi.framework.Constants;
+import org.jboss.system.microcontainer.ServiceControllerContext;
+
+import java.util.Dictionary;
 
 /**
- * Kernel dictionary factory.
+ * JMX dictionary factory.
+ * TODO - expose all classes, or just explicit target class and its mbean interface?
  *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
-public class KernelDictionaryFactory extends AbstractDictionaryFactory<KernelControllerContext>
+public class JMXDictionaryFactory extends AbstractDictionaryFactory<ServiceControllerContext>
 {
-   public KernelDictionaryFactory(KernelConfigurator configurator)
+   public JMXDictionaryFactory(KernelConfigurator configurator)
    {
       super(configurator);
    }
 
-   public Class<KernelControllerContext> getContextType()
+   public Class<ServiceControllerContext> getContextType()
    {
-      return KernelControllerContext.class;
+      return ServiceControllerContext.class;
    }
 
-   public Dictionary<String, Object> getDictionary(KernelControllerContext context)
+   public Dictionary<String, Object> getDictionary(ServiceControllerContext context)
    {
-      return new KernelDictionary(context);
+      return null;
    }
 
-   private class KernelDictionary extends AbstractDictionary
+   private class JMXDictionary extends AbstractDictionary
    {
-      private KernelDictionary(KernelControllerContext context)
+      private JMXDictionary(ServiceControllerContext context)
       {
          super(context);
       }
 
       protected Object getName(ControllerContext context)
       {
-         return KernelControllerContext.class.cast(context).getName();
-      }
-
-      @Override
-      protected ClassInfo getFromNullTarget(ControllerContext context)
-      {
-         KernelControllerContext kcc = KernelControllerContext.class.cast(context);
-         BeanInfo beanInfo = kcc.getBeanInfo();
-         return beanInfo != null ? beanInfo.getClassInfo() : null;
+         return ServiceControllerContext.class.cast(context).getObjectName().getCanonicalName();
       }
    }
 }

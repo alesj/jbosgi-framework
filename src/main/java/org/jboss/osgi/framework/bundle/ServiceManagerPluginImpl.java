@@ -72,36 +72,35 @@ import org.osgi.framework.ServiceReference;
 public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceManagerPlugin
 {
    // Provide logging
-   final Logger log = Logger.getLogger(ServiceManagerPluginImpl.class);
+   private final Logger log = Logger.getLogger(ServiceManagerPluginImpl.class);
 
    /** The kernel */
    private Kernel kernel;
+   /** The mdr factory */
+   private MetaDataRetrievalFactory factory;
    /** The previous context tracker */
    private ContextTracker previousTracker;
-   /** Enable MDR usage */
-   private boolean enableMDRUsage = true;
-   
+
    public ServiceManagerPluginImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
    }
 
+   @Deprecated
    public void setEnableMDRUsage(boolean mdrUsage)
    {
-      this.enableMDRUsage = mdrUsage;
+      log.warn("This flag is no longer supported.");
    }
 
    public void start()
    {
       kernel = getBundleManager().getKernel();
-      if (enableMDRUsage == true)
-         applyMDRUsage(true);
+      applyMDRUsage(true);
    }
 
    public void stop()
    {
-      if (enableMDRUsage == true)
-         applyMDRUsage(false);
+      applyMDRUsage(false);
    }
 
    public ServiceReference[] getRegisteredServices(AbstractBundleState bundleState)
@@ -312,12 +311,15 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    private MetaDataRetrievalFactory getMetaDataRetrievalFactory()
    {
-      MetaDataRetrievalFactory mdrFactory;
-      InstanceMetaDataRetrievalFactory imdrf = new InstanceMetaDataRetrievalFactory(kernel);
-      imdrf.addFactory(new OSGiServiceStateDictionaryFactory());
-      imdrf.addFactory(new KernelDictionaryFactory(kernel.getConfigurator()));
-      // TODO - JMX?
-      mdrFactory = imdrf;
+      MetaDataRetrievalFactory mdrFactory = factory;
+      if (mdrFactory == null)
+      {
+         InstanceMetaDataRetrievalFactory imdrf = new InstanceMetaDataRetrievalFactory(kernel);
+         imdrf.addFactory(new OSGiServiceStateDictionaryFactory());
+         imdrf.addFactory(new KernelDictionaryFactory(kernel.getConfigurator()));
+         // add JMX via configuration, as we don't wanna depend on JMX code
+         mdrFactory = imdrf;
+      }
       return mdrFactory;
    }
 
@@ -402,12 +404,22 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
     */
    private boolean hasPermission(ControllerContext context)
    {
-      // TODO - make thisa generic, w/o casting
+      // TODO - make this generic, w/o casting
       if (context instanceof OSGiServiceState)
       {
          OSGiServiceState serviceState = (OSGiServiceState)context;
          return serviceState.hasPermission();
       }
       return true;
+   }
+
+   /**
+    * Set mdr factory.
+    *
+    * @param factory the factory
+    */
+   public void setFactory(MetaDataRetrievalFactory factory)
+   {
+      this.factory = factory;
    }
 }
