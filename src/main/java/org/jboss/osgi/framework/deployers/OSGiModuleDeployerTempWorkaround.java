@@ -64,6 +64,7 @@ public class OSGiModuleDeployerTempWorkaround extends VFSClassLoaderDescribeDepl
    @Override
    protected ClassLoaderPolicyModule createModule(DeploymentUnit unit, ClassLoadingMetaData metaData) 
    {
-      return new OSGiModule(unit, metaData);
+      OSGiModule module = new OSGiModule(unit, metaData);
+      return module;
    }
 }
