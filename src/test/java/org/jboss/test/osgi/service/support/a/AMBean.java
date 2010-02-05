@@ -22,33 +22,17 @@
 package org.jboss.test.osgi.service.support.a;
 
 /**
- * A.
- * 
- * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @version $Revision: 1.1 $
+ * A mbean.
+ *
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
-public class A implements AMBean
+public interface AMBean
 {
-   public String msg;
-   private int x;
+   String getMsg();
 
-   public String getMsg()
-   {
-      return msg;
-   }
+   void setMsg(String msg);
 
-   public void setMsg(String msg)
-   {
-      this.msg = msg;
-   }
+   void calc(int x);
 
-   public void calc(int x)
-   {
-      this.x = x;
-   }
-
-   public int getX()
-   {
-      return x;
-   }
+   int getX();
 }

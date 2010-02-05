@@ -49,7 +49,7 @@
     <version.drools>5.0.1</version.drools>
     <version.jboss.classloading>2.2.0.Alpha1</version.jboss.classloading>
     <version.jboss.deployers>2.2.0.Alpha1</version.jboss.deployers>
-    <version.jboss.kernel>2.2.0.Alpha5</version.jboss.kernel>
+    <version.jboss.kernel>2.2.0-SNAPSHOT</version.jboss.kernel>
     <version.jboss.logging>2.1.0.GA</version.jboss.logging>
     <version.jboss.mdr>2.2.0.Alpha1</version.jboss.mdr>
     <version.jboss.osgi.apache.xerces>2.9.1.SP3</version.jboss.osgi.apache.xerces>

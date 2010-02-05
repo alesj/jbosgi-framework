@@ -26,37 +26,13 @@ import org.jboss.test.osgi.service.support.a.A;
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class C implements CMBean
+public interface CMBean
 {
-   private A a;
-   private String msg;
+   A getA();
 
-   public C()
-   {
-   }
+   void setA(A a);
 
-   public C(A a)
-   {
-      this.a = a;
-   }
+   String getMsg();
 
-   public A getA()
-   {
-      return a;
-   }
-
-   public void setA(A a)
-   {
-      this.a = a;
-   }
-
-   public String getMsg()
-   {
-      return msg;
-   }
-
-   public void setMsg(String msg)
-   {
-      this.msg = msg;
-   }
+   void setMsg(String msg);
 }
