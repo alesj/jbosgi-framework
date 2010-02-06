@@ -64,12 +64,12 @@ public abstract class AbstractDictionaryFactory<T extends ControllerContext> imp
       }
    }
 
-   protected abstract class AbstractDictionary extends Dictionary<String, Object>
+   protected class ControllerContextDictionary extends Dictionary<String, Object>
    {
       private Map<Object, Object> map;
       private ControllerContext context;
 
-      protected AbstractDictionary(ControllerContext context)
+      protected ControllerContextDictionary(ControllerContext context)
       {
          this.context = context;
          this.map = new ConcurrentHashMap<Object, Object>(2);
@@ -77,7 +77,10 @@ public abstract class AbstractDictionaryFactory<T extends ControllerContext> imp
          map.put(Constants.OBJECTCLASS, EMPTY);
       }
 
-      protected abstract Object getName(ControllerContext context);
+      protected Object getName(ControllerContext context)
+      {
+         return context.getName();
+      }
 
       public int size()
       {

@@ -47,19 +47,6 @@ public class JMXDictionaryFactory extends AbstractDictionaryFactory<ServiceContr
 
    public Dictionary<String, Object> getDictionary(ServiceControllerContext context)
    {
-      return null;
-   }
-
-   private class JMXDictionary extends AbstractDictionary
-   {
-      private JMXDictionary(ServiceControllerContext context)
-      {
-         super(context);
-      }
-
-      protected Object getName(ControllerContext context)
-      {
-         return ServiceControllerContext.class.cast(context).getObjectName().getCanonicalName();
-      }
+      return new ControllerContextDictionary(context);
    }
 }

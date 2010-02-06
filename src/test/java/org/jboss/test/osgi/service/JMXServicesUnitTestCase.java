@@ -89,7 +89,7 @@ public class JMXServicesUnitTestCase extends ServicesTest
          assertEquals(1, refs.length);
          ServiceReference ref = refs[0];
          assertEquals(bundle, ref.getBundle());
-         // assertEquals("test:service=A", ref.getProperty("bean.name")); // TODO - add JMX MDR describe action
+         assertEquals("test:service=A", ref.getProperty("bean.name"));
          Class<?> aClass = bundle.loadClass(A.class.getName());
          BundleContext bc = bundle.getBundleContext();
          assertNotNull(bc);

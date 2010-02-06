@@ -22,19 +22,12 @@
 package org.jboss.osgi.framework.bundle;
 
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.beans.info.spi.BeanInfo;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.kernel.spi.config.KernelConfigurator;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.reflect.spi.ClassInfo;
-import org.jboss.util.collection.Iterators;
-import org.osgi.framework.Constants;
 
 /**
  * Kernel dictionary factory.
@@ -58,16 +51,11 @@ public class KernelDictionaryFactory extends AbstractDictionaryFactory<KernelCon
       return new KernelDictionary(context);
    }
 
-   private class KernelDictionary extends AbstractDictionary
+   private class KernelDictionary extends ControllerContextDictionary
    {
       private KernelDictionary(KernelControllerContext context)
       {
          super(context);
-      }
-
-      protected Object getName(ControllerContext context)
-      {
-         return KernelControllerContext.class.cast(context).getName();
       }
 
       @Override
