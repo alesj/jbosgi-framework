@@ -45,7 +45,7 @@ class DescribeAction extends OSGiServiceAction
       KernelMetaDataRepository repository = getRepository(context);
       ScopeKey contextScopeKey = context.getScopeInfo().getMutableScope();
       Scope scope = contextScopeKey.getScope(CommonLevels.INSTANCE);
-      ScopeKey key = new ScopeKey(scope);
+      ScopeKey key = new ScopeKey(scope).getOptimizedKey();
       MutableMetaDataRepository mutable = repository.getMetaDataRepository();
       MetaDataRetrieval retrieval = mutable.getMetaDataRetrieval(key);
       if (retrieval == null)

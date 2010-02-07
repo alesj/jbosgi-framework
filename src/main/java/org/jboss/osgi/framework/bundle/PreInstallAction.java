@@ -36,7 +36,6 @@ class PreInstallAction extends SimpleOSGiServiceAction
       if (install)
       {
          repository.addMetaData(context);
-         repository.getMetaData(context); // TODO - remove this once we fix it in MC core
       }
       else
       {
