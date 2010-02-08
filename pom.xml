@@ -55,14 +55,14 @@
     <version.jboss.osgi.apache.xerces>2.9.1.SP3</version.jboss.osgi.apache.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
     <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
-    <version.jboss.osgi.deployment>1.0.1-SNAPSHOT</version.jboss.osgi.deployment>
-    <version.jboss.osgi.husky>1.0.3-SNAPSHOT</version.jboss.osgi.husky>
+    <version.jboss.osgi.deployment>1.0.1</version.jboss.osgi.deployment>
+    <version.jboss.osgi.husky>1.0.4-SNAPSHOT</version.jboss.osgi.husky>
     <version.jboss.osgi.jaxb>2.1.10.SP3</version.jboss.osgi.jaxb>
-    <version.jboss.osgi.jmx>1.0.3-SNAPSHOT</version.jboss.osgi.jmx>
-    <version.jboss.osgi.reflect>2.2.0-SNAPSHOT</version.jboss.osgi.reflect>
-    <version.jboss.osgi.runtime.deployers>1.0.4-SNAPSHOT</version.jboss.osgi.runtime.deployers>
-    <version.jboss.osgi.spi>1.0.4-SNAPSHOT</version.jboss.osgi.spi>
-    <version.jboss.osgi.xml.binding>2.0.2.Beta4-SNAPSHOT</version.jboss.osgi.xml.binding>
+    <version.jboss.osgi.jmx>1.0.4-SNAPSHOT</version.jboss.osgi.jmx>
+    <version.jboss.osgi.reflect>2.2.0</version.jboss.osgi.reflect>
+    <version.jboss.osgi.runtime.deployers>1.0.4</version.jboss.osgi.runtime.deployers>
+    <version.jboss.osgi.spi>1.0.5-SNAPSHOT</version.jboss.osgi.spi>
+    <version.jboss.osgi.xml.binding>2.0.2.Beta4</version.jboss.osgi.xml.binding>
     <version.jboss.test>1.1.4.GA</version.jboss.test>
     <version.ops4j.pax.web>0.7.2</version.ops4j.pax.web>
     <version.osgi>4.2.0</version.osgi>
@@ -385,19 +385,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>javacc-maven-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>javacc</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-idea-plugin</artifactId>
         <configuration>
           <downloadSources>true</downloadSources>
@@ -438,7 +425,7 @@
             </property>
             <property>
               <name>org.jboss.osgi.husky.Invoker</name>
-              <value>org.jboss.osgi.husky.internal.OSGiInvoker</value>
+              <value>org.jboss.osgi.husky.internal.AbstractInvoker</value>
             </property>
             <property>
               <name>test.archive.directory</name>
