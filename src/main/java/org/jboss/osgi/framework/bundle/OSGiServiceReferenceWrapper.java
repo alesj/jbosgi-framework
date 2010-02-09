@@ -49,11 +49,6 @@ public class OSGiServiceReferenceWrapper extends ControllerContextHandle
       this.serviceState = serviceState;
    }
 
-   ControllerContext getContext()
-   {
-      return getServiceState();
-   }
-
    public Bundle getBundle()
    {
       return serviceState.getBundle();
@@ -102,13 +97,13 @@ public class OSGiServiceReferenceWrapper extends ControllerContextHandle
       return serviceState.toString();
    }
 
-   /**
-    * Get the serviceState.
-    * 
-    * @return the serviceState.
-    */
    OSGiServiceState getServiceState()
    {
       return serviceState;
+   }
+
+   ControllerContext getContext()
+   {
+      return getServiceState();
    }
 }

@@ -86,12 +86,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       super(bundleManager);
    }
 
-   @Deprecated
-   public void setEnableMDRUsage(boolean mdrUsage)
-   {
-      log.warn("This flag is no longer supported.");
-   }
-
    public void start()
    {
       kernel = getBundleManager().getKernel();
@@ -217,19 +211,29 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          throw new RuntimeException(t);
       }
 
-      FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
-      plugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
+      if (bundleState instanceof OSGiBundleState)
+      {
+         ControllerContextPlugin plugin = getPlugin(ControllerContextPlugin.class);
+         plugin.putContext(result, ((OSGiBundleState)bundleState).getDeploymentUnit());
+      }
 
+      FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
+      eventsPlugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
+      
       return result;
    }
 
    public void unregisterService(OSGiServiceState serviceState)
    {
       AbstractBundleState bundleState = serviceState.getBundleState();
-      
+      if (bundleState instanceof OSGiBundleState)
+      {
+         ControllerContextPlugin plugin = getPlugin(ControllerContextPlugin.class);
+         plugin.removeContext(serviceState, ((OSGiBundleState)bundleState).getDeploymentUnit());
+      }
+
       Controller controller = kernel.getController();
       controller.uninstall(serviceState.getName());
-
       serviceState.internalUnregister();
 
       FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
@@ -247,6 +251,12 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          return false;
       
       return bundleState.removeContextInUse(context);
+   }
+
+   public void unregisterServices(AbstractBundleState bundleState)
+   {
+      ControllerContextPlugin plugin = getPlugin(ControllerContextPlugin.class);
+      plugin.unregisterContexts(bundleState);
    }
 
    /**
