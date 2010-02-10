@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
@@ -38,7 +39,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
+import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -129,6 +130,13 @@ public class OSGiBundleState extends AbstractDeployedBundleState
    public boolean isFragment()
    {
       return false;
+   }
+
+   protected Set<ControllerContext> getRegisteredContexts()
+   {
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      return plugin.getRegisteredContexts(this);
    }
 
    public Class<?> loadClass(String name) throws ClassNotFoundException
@@ -306,8 +314,8 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       Throwable rethrow = null;
       if (priorState == Bundle.ACTIVE)
       {
-         BundleContext bundleContext = getBundleContext();
          BundleActivator bundleActivator = getDeploymentUnit().getAttachment(BundleActivator.class);
+         BundleContext bundleContext = getBundleContext();
          if (bundleActivator != null && bundleContext != null)
          {
             try
@@ -322,8 +330,9 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       }
 
       // Any services registered by this bundle must be unregistered
-      ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
-      plugin.unregisterServices(this);
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      plugin.unregisterContexts(this);
 
       // Any services used by this bundle must be released
       for (ControllerContext context : getUsedContexts(this))
@@ -397,5 +406,21 @@ public class OSGiBundleState extends AbstractDeployedBundleState
          return headersOnUninstall;
 
       return super.getHeaders(locale);
+   }
+
+   @Override
+   protected void afterServiceRegistration(OSGiServiceState service)
+   {
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      plugin.putContext(service, getDeploymentUnit());
+   }
+
+   @Override
+   protected void beforeServiceUnregistration(OSGiServiceState service)
+   {
+      OSGiBundleManager manager = getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      plugin.removeContext(service, getDeploymentUnit());
    }
 }

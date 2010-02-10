@@ -25,15 +25,11 @@ import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.system.metadata.ServiceConstructorMetaData;
-import org.jboss.system.metadata.ServiceMetaData;
 import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.osgi.framework.Bundle;
-
-import javax.management.ObjectName;
 
 /**
  * Deployers test - generic deployment test.
@@ -95,29 +91,6 @@ public abstract class DeployersTest extends FrameworkTest
    protected Deployment addBean(String name, Class<?> beanClass, Class<?> ... references) throws Exception
    {
       return addBean(name, beanClass, null, references);
-   }
-
-   protected Deployment addJMX(String name, Class<?> serviceClass, String serviceName, ServiceMetaData smd, Class<?> ... references) throws Exception
-   {
-      AssembledDirectory dir = createAssembledDirectory(name, "");
-      if (serviceClass != null)
-         addPackage(dir, serviceClass);
-      if (references != null)
-      {
-         for (Class<?> reference : references)
-            addPackage(dir, reference);
-      }
-      if (smd == null)
-      {
-         if (serviceClass == null)
-            throw new IllegalArgumentException("Null service class");
-         
-         smd = new ServiceMetaData();
-         smd.setConstructor(new ServiceConstructorMetaData());
-         smd.setCode(serviceClass.getName());
-         smd.setObjectName(ObjectName.getInstance(serviceName));
-      }
-      return addDeployment(dir, smd, ServiceMetaData.class);
    }
 
    protected Deployment addBean(String name, Class<?> beanClass, BeanMetaData bmd, Class<?> ... references) throws Exception

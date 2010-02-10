@@ -525,11 +525,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       checkValidBundleContext();
       ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
       OSGiServiceState serviceState = (OSGiServiceState)plugin.registerService(this, clazzes, service, properties);
+      afterServiceRegistration(serviceState);
       return serviceState.getRegistration();
    }
 
    void unregisterService(OSGiServiceState serviceState)
    {
+      beforeServiceUnregistration(serviceState);
       ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
       plugin.unregisterService(serviceState);
    }
@@ -539,6 +541,20 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       checkValidBundleContext();
       ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
       return plugin.ungetService(this, reference);
+   }
+
+   /**
+    * After service registration callback.
+    */
+   protected void afterServiceRegistration(OSGiServiceState service)
+   {
+   }
+
+   /**
+    * Before service unregistration callback.
+    */
+   protected void beforeServiceUnregistration(OSGiServiceState service)
+   {
    }
 
    boolean ungetContext(ControllerContext context)

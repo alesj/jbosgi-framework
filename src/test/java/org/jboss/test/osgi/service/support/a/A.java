@@ -27,7 +27,7 @@ package org.jboss.test.osgi.service.support.a;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class A implements AMBean
+public class A
 {
    public String msg;
    private int x;

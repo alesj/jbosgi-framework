@@ -62,7 +62,6 @@
   </bean>
   <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-    <property name="factory"><inject bean="InstanceMDRFactory"/></property>
   </bean>
   <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
@@ -70,19 +69,7 @@
   <bean name="OSGiSystemPackages" class="org.jboss.osgi.framework.plugins.internal.SystemPackagesPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
-
-  <bean name="InstanceMDRFactory" class="org.jboss.osgi.framework.bundle.InstanceMetaDataRetrievalFactory">
-    <constructor><parameter><inject bean="jboss.kernel:service=Kernel"/></parameter></constructor>
-    <incallback method="addFactory"/>
-    <uncallback method="removeFactory"/>
-  </bean>
-  <bean name="OSGiDictionaryFactory" class="org.jboss.osgi.framework.bundle.OSGiServiceStateDictionaryFactory"/>
-  <bean name="KernelDictionaryFactory" class="org.jboss.osgi.framework.bundle.KernelDictionaryFactory">
-      <constructor>
-          <parameter><inject bean="jboss.kernel:service=KernelConfigurator"/></parameter>
-      </constructor>
-  </bean>
-
+  
   <!-- 
   ********************************
   *                              *  

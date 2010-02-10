@@ -24,8 +24,6 @@ package org.jboss.test.osgi.service;
 import junit.framework.Test;
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
-import org.jboss.dependency.spi.Controller;
-import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
@@ -52,8 +50,6 @@ import java.util.List;
  */
 public abstract class ServicesTest extends DeployersTest
 {
-   private static final String ANCHOR = "OSGiBundleManager";
-
    public ServicesTest(String name)
    {
       super(name);
@@ -74,31 +70,5 @@ public abstract class ServicesTest extends DeployersTest
       Class<?> clazz = target.getClass();
       Method m = clazz.getDeclaredMethod(setter, value.getClass());
       return m.invoke(target, value);
-   }
-
-   private Controller getController() throws Throwable
-   {
-      KernelControllerContext kcc = getControllerContext(ANCHOR);
-      assertNotNull(kcc);
-      return kcc.getController();
-   }
-
-   protected ControllerContext getServiceContext(Object name, ControllerState state) throws Throwable
-   {
-      Controller controller = getController();
-      return controller.getContext(name, state);
-   }
-
-   protected Object getService(Object name) throws Throwable
-   {
-      ControllerContext context = getServiceContext(name, ControllerState.INSTALLED);
-      assertNotNull(context);
-      return context.getTarget(); 
-   }
-
-   protected void changeContext(ControllerContext context, ControllerState state) throws Throwable
-   {
-      Controller controller = getController();
-      controller.change(context, state);      
    }
 }

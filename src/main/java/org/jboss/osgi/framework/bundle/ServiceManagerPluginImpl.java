@@ -72,29 +72,36 @@ import org.osgi.framework.ServiceReference;
 public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceManagerPlugin
 {
    // Provide logging
-   private final Logger log = Logger.getLogger(ServiceManagerPluginImpl.class);
+   final Logger log = Logger.getLogger(ServiceManagerPluginImpl.class);
 
    /** The kernel */
    private Kernel kernel;
-   /** The mdr factory */
-   private MetaDataRetrievalFactory factory;
    /** The previous context tracker */
    private ContextTracker previousTracker;
-
+   /** Enable MDR usage */
+   private boolean enableMDRUsage = true;
+   
    public ServiceManagerPluginImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
    }
 
+   public void setEnableMDRUsage(boolean mdrUsage)
+   {
+      this.enableMDRUsage = mdrUsage;
+   }
+
    public void start()
    {
       kernel = getBundleManager().getKernel();
-      applyMDRUsage(true);
+      if (enableMDRUsage == true)
+         applyMDRUsage(true);
    }
 
    public void stop()
    {
-      applyMDRUsage(false);
+      if (enableMDRUsage == true)
+         applyMDRUsage(false);
    }
 
    public ServiceReference[] getRegisteredServices(AbstractBundleState bundleState)
@@ -211,29 +218,19 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          throw new RuntimeException(t);
       }
 
-      if (bundleState instanceof OSGiBundleState)
-      {
-         ControllerContextPlugin plugin = getPlugin(ControllerContextPlugin.class);
-         plugin.putContext(result, ((OSGiBundleState)bundleState).getDeploymentUnit());
-      }
+      FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
+      plugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
 
-      FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
-      eventsPlugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
-      
       return result;
    }
 
    public void unregisterService(OSGiServiceState serviceState)
    {
       AbstractBundleState bundleState = serviceState.getBundleState();
-      if (bundleState instanceof OSGiBundleState)
-      {
-         ControllerContextPlugin plugin = getPlugin(ControllerContextPlugin.class);
-         plugin.removeContext(serviceState, ((OSGiBundleState)bundleState).getDeploymentUnit());
-      }
-
+      
       Controller controller = kernel.getController();
       controller.uninstall(serviceState.getName());
+
       serviceState.internalUnregister();
 
       FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
@@ -251,12 +248,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          return false;
       
       return bundleState.removeContextInUse(context);
-   }
-
-   public void unregisterServices(AbstractBundleState bundleState)
-   {
-      ControllerContextPlugin plugin = getPlugin(ControllerContextPlugin.class);
-      plugin.unregisterContexts(bundleState);
    }
 
    /**
@@ -321,15 +312,12 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    private MetaDataRetrievalFactory getMetaDataRetrievalFactory()
    {
-      MetaDataRetrievalFactory mdrFactory = factory;
-      if (mdrFactory == null)
-      {
-         InstanceMetaDataRetrievalFactory imdrf = new InstanceMetaDataRetrievalFactory(kernel);
-         imdrf.addFactory(new OSGiServiceStateDictionaryFactory());
-         imdrf.addFactory(new KernelDictionaryFactory(kernel.getConfigurator()));
-         // add JMX via configuration, as we don't wanna depend on JMX code
-         mdrFactory = imdrf;
-      }
+      MetaDataRetrievalFactory mdrFactory;
+      InstanceMetaDataRetrievalFactory imdrf = new InstanceMetaDataRetrievalFactory(kernel);
+      imdrf.addFactory(new OSGiServiceStateDictionaryFactory());
+      imdrf.addFactory(new KernelDictionaryFactory(kernel.getConfigurator()));
+      // TODO - JMX?
+      mdrFactory = imdrf;
       return mdrFactory;
    }
 
@@ -414,22 +402,12 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
     */
    private boolean hasPermission(ControllerContext context)
    {
-      // TODO - make this generic, w/o casting
+      // TODO - make thisa generic, w/o casting
       if (context instanceof OSGiServiceState)
       {
          OSGiServiceState serviceState = (OSGiServiceState)context;
          return serviceState.hasPermission();
       }
       return true;
-   }
-
-   /**
-    * Set mdr factory.
-    *
-    * @param factory the factory
-    */
-   public void setFactory(MetaDataRetrievalFactory factory)
-   {
-      this.factory = factory;
    }
 }

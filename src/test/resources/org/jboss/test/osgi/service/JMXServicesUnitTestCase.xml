@@ -12,13 +12,6 @@
     <bean name="ServiceDeploymentDeployer" class="org.jboss.system.deployers.ServiceDeploymentDeployer"/>
     <bean name="ServiceDeployer" class="org.jboss.system.deployers.ServiceDeployer">
         <constructor><parameter><inject bean="JMXKernel" property="serviceController"/></parameter></constructor>
-        <property name="deploymentRegistry"><inject bean="OSGiDeploymentRegistry"/></property>
-    </bean>
-
-    <bean name="JMXDictionaryFactory" class="org.jboss.osgi.framework.bundle.JMXDictionaryFactory">
-        <constructor>
-            <parameter><inject bean="jboss.kernel:service=KernelConfigurator"/></parameter>
-        </constructor>
     </bean>
 
     <!-- Intercept all annotation plugings -->

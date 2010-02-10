@@ -22,23 +22,50 @@
 package org.jboss.osgi.framework.bundle;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.beans.info.spi.BeanInfo;
-import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.kernel.spi.config.KernelConfigurator;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.reflect.spi.ClassInfo;
+import org.jboss.util.collection.Iterators;
+import org.osgi.framework.Constants;
 
 /**
  * Kernel dictionary factory.
  *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
-public class KernelDictionaryFactory extends AbstractDictionaryFactory<KernelControllerContext>
+public class KernelDictionaryFactory implements DictionaryFactory<KernelControllerContext>
 {
+   private static final String NAME = "bean.name";
+   private static final String[] EMPTY = new String[0];
+   private KernelConfigurator configurator;
+   private final ClassInfo OBJECT;
+
    public KernelDictionaryFactory(KernelConfigurator configurator)
    {
-      super(configurator);
+      if (configurator == null)
+         throw new IllegalArgumentException("Null configurator");
+
+      this.configurator = configurator;
+      OBJECT = getClassInfo(Object.class);
+   }
+
+   private ClassInfo getClassInfo(Class<?> clazz)
+   {
+      try
+      {
+         return configurator.getClassInfo(clazz);
+      }
+      catch (Throwable t)
+      {
+         throw new RuntimeException(t);
+      }
    }
 
    public Class<KernelControllerContext> getContextType()
@@ -51,19 +78,100 @@ public class KernelDictionaryFactory extends AbstractDictionaryFactory<KernelCon
       return new KernelDictionary(context);
    }
 
-   private class KernelDictionary extends ControllerContextDictionary
+   private class KernelDictionary extends Dictionary<String, Object>
    {
+      private Map<Object, Object> map;
+      private KernelControllerContext context;
+
       private KernelDictionary(KernelControllerContext context)
       {
-         super(context);
+         this.context = context;
+         this.map = new ConcurrentHashMap<Object, Object>(2);
+         map.put(NAME, context.getName());
+         map.put(Constants.OBJECTCLASS, EMPTY);
       }
 
-      @Override
-      protected ClassInfo getFromNullTarget(ControllerContext context)
+      public int size()
       {
-         KernelControllerContext kcc = KernelControllerContext.class.cast(context);
-         BeanInfo beanInfo = kcc.getBeanInfo();
-         return beanInfo != null ? beanInfo.getClassInfo() : null;
+         return map.size();
+      }
+
+      public boolean isEmpty()
+      {
+         return size() == 0;
+      }
+
+      @SuppressWarnings({"unchecked"})
+      public Enumeration<String> keys()
+      {
+         return Iterators.toEnumeration(map.keySet().iterator());
+      }
+
+      @SuppressWarnings({"unchecked"})
+      public Enumeration<Object> elements()
+      {
+         return Iterators.toEnumeration(map.values().iterator());
+      }
+
+      public Object get(Object key)
+      {
+         Object value = map.get(key);
+         if (value != EMPTY)
+            return value;
+
+         ClassInfo clazz = null;
+         Object target = context.getTarget();
+         BeanInfo info = context.getBeanInfo();
+         if (target != null)
+         {
+            clazz = getClassInfo(target.getClass());
+         }
+         else if (info != null)
+         {
+            clazz = info.getClassInfo();
+         }
+
+         String[] classes = EMPTY;
+         if (clazz != null)
+         {
+            Set<String> clazzes = new HashSet<String>();
+            traverseClass(clazz, clazzes);
+            classes = clazzes.toArray(new String[clazzes.size()]);
+            map.put(Constants.OBJECTCLASS, classes);
+         }
+         return classes;
+      }
+
+      public Object put(String key, Object value)
+      {
+         return map.put(key, value);
+      }
+
+      public Object remove(Object key)
+      {
+         return map.remove(key);
+      }
+
+      protected void traverseClass(ClassInfo clazz, Set<String> classes)
+      {
+         if (clazz == null || clazz == OBJECT)
+         {
+            return;
+         }
+
+         classes.add(clazz.getName());
+
+         // traverse superclass
+         traverseClass(clazz.getSuperclass(), classes);
+         ClassInfo[] interfaces = clazz.getInterfaces();
+         if (interfaces != null)
+         {
+            // traverse interfaces
+            for(ClassInfo intface : interfaces)
+            {
+               traverseClass(intface, classes);
+            }
+         }
       }
    }
 }

@@ -26,7 +26,7 @@ import org.jboss.test.osgi.service.support.a.A;
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class C implements CMBean
+public class C
 {
    private A a;
    private String msg;
