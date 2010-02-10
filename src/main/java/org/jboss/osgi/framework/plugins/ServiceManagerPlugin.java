@@ -140,4 +140,10 @@ public interface ServiceManagerPlugin extends Plugin
     * 
     */
    void unregisterService(OSGiServiceState serviceState);
+
+   /**
+    * Unregister all services that were registered on behalf of the given bundle. 
+    * @param bundleState The bundle that registered the services.
+    */
+   void unregisterServices(AbstractBundleState bundleState);
 }

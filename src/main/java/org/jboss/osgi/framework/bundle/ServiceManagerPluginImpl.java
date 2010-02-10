@@ -35,6 +35,8 @@ import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.dependency.spi.tracker.ContextTracker;
+import org.jboss.deployers.structure.spi.DeploymentRegistry;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.kernel.Kernel;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.qualifier.QualifierMatchers;
@@ -57,6 +59,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * A plugin that manages OSGi services.
@@ -78,12 +81,20 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    private Kernel kernel;
    /** The previous context tracker */
    private ContextTracker previousTracker;
+   /** The deployment registry */
+   private DeploymentRegistry registry;
+
    /** Enable MDR usage */
    private boolean enableMDRUsage = true;
    
-   public ServiceManagerPluginImpl(OSGiBundleManager bundleManager)
+   public ServiceManagerPluginImpl(OSGiBundleManager bundleManager, DeploymentRegistry registry)
    {
       super(bundleManager);
+      
+      if (registry == null)
+         throw new IllegalArgumentException("Null deployment registry");
+
+      this.registry = registry;
    }
 
    public void setEnableMDRUsage(boolean mdrUsage)
@@ -106,8 +117,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    public ServiceReference[] getRegisteredServices(AbstractBundleState bundleState)
    {
-      ControllerContextPlugin plugin = getBundleManager().getPlugin(ControllerContextPlugin.class);
-      Set<ControllerContext> contexts = plugin.getRegisteredContexts(bundleState);
+      Set<ControllerContext> contexts = getRegisteredContexts(bundleState);
       if (contexts.isEmpty())
          return null;
 
@@ -218,19 +228,27 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          throw new RuntimeException(t);
       }
 
-      FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
-      plugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
+      if (bundleState instanceof OSGiBundleState)
+      {
+         putContext(result, ((OSGiBundleState)bundleState).getDeploymentUnit());
+      }
 
+      FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
+      eventsPlugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
+      
       return result;
    }
 
    public void unregisterService(OSGiServiceState serviceState)
    {
       AbstractBundleState bundleState = serviceState.getBundleState();
-      
+      if (bundleState instanceof OSGiBundleState)
+      {
+         removeContext(serviceState, ((OSGiBundleState)bundleState).getDeploymentUnit());
+      }
+
       Controller controller = kernel.getController();
       controller.uninstall(serviceState.getName());
-
       serviceState.internalUnregister();
 
       FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
@@ -248,6 +266,11 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          return false;
       
       return bundleState.removeContextInUse(context);
+   }
+
+   public void unregisterServices(AbstractBundleState bundleState)
+   {
+      unregisterContexts(bundleState);
    }
 
    /**
@@ -409,5 +432,41 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          return serviceState.hasPermission();
       }
       return true;
+   }
+
+   private DeploymentUnit putContext(ControllerContext context, DeploymentUnit unit)
+   {
+      return registry.putContext(context, unit);
+   }
+
+   private DeploymentUnit removeContext(ControllerContext context, DeploymentUnit unit)
+   {
+      return registry.removeContext(context, unit);
+   }
+
+   private Set<ControllerContext> getRegisteredContexts(AbstractBundleState bundleState)
+   {
+      if (bundleState instanceof OSGiBundleState == false)
+         return Collections.emptySet();
+
+      DeploymentUnit unit = ((OSGiBundleState)bundleState).getDeploymentUnit();
+      return registry.getContexts(unit);
+   }
+
+   private void unregisterContexts(AbstractBundleState bundleState)
+   {
+      if (bundleState instanceof OSGiBundleState)
+      {
+         DeploymentUnit unit = ((OSGiBundleState)bundleState).getDeploymentUnit();
+         Set<ControllerContext> contexts = registry.getContexts(unit);
+         for (ControllerContext context : contexts)
+         {
+            if (context instanceof ServiceRegistration)
+            {
+               ServiceRegistration service = (ServiceRegistration)context;
+               service.unregister();
+            }
+         }
+      }
    }
 }

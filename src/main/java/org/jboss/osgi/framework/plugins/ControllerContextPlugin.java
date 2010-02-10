@@ -21,10 +21,7 @@
  */
 package org.jboss.osgi.framework.plugins;
 
-import java.util.Set;
-
 import org.jboss.dependency.spi.ControllerContext;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 
 
@@ -36,39 +33,6 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
  */
 public interface ControllerContextPlugin extends Plugin
 {
-   /**
-    * Put context to deployment mapping.
-    *
-    * @param context the context
-    * @param unit the deployment
-    * @return previous mapping value
-    */
-   DeploymentUnit putContext(ControllerContext context, DeploymentUnit unit);
-
-   /**
-    * Remove context to deployment mapping.
-    *
-    * @param context the context
-    * @param unit the deployment
-    * @return is previous mapping value same as unit param
-    */
-   DeploymentUnit removeContext(ControllerContext context, DeploymentUnit unit);
-
-   /**
-    * Get registered contexts for bundle.
-    *
-    * @param bundleState the owning bundle
-    * @return registered contexts
-    */
-   Set<ControllerContext> getRegisteredContexts(AbstractBundleState bundleState);
-
-   /**
-    * Unregister contexts.
-    *
-    * @param bundleState the stopping bundle
-    */
-   void unregisterContexts(AbstractBundleState bundleState);
-   
    /**
     * Get bundle for user tracker.
     *

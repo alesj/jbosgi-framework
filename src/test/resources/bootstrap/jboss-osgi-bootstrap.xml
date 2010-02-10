@@ -61,7 +61,10 @@
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+    <constructor>
+      <parameter><inject bean="OSGiBundleManager" /></parameter>
+      <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
+    </constructor>
   </bean>
   <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
