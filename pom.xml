@@ -178,13 +178,6 @@
       <version>${version.jboss.osgi.deployment}</version>
     </dependency>
 
-    <!-- Provided Dependencies -->
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging-log4j</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- OSGi Dependencies -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -195,24 +188,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <version>${version.osgi}</version>
-    </dependency>
-
-    <!-- Test dependencies -->
-    <dependency>
-      <groupId>org.jboss.test</groupId>
-      <artifactId>jboss-test</artifactId>
-      <version>${version.jboss.test}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jboss</groupId>
-          <artifactId>jboss-common-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.jboss.logging</groupId>
-          <artifactId>jboss-logging-spi</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- Test bundles dependencies -->
@@ -318,6 +293,30 @@
       <version>${version.ops4j.pax.web}</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>org.jboss.test</groupId>
+      <artifactId>jboss-test</artifactId>
+      <version>${version.jboss.test}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-common-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.logging</groupId>
+          <artifactId>jboss-logging-spi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging-log4j</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
