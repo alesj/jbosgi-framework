@@ -19,18 +19,26 @@
         <entry><key>org.osgi.framework.storage.clean</key><value>onFirstInit</value></entry>
         <entry><key>org.osgi.framework.system.packages.extra</key><value>
         
-          org.jboss.logging;version=2.0,
+          <!-- logging -->
+          org.apache.log4j;version=1.2,
+          org.jboss.logging;version=2.1,
           
+          <!-- jboss -->
+          org.jboss.beans.metadata.plugins;version=2.2,
+          org.jboss.beans.metadata.plugins.builder;version=2.2,
+          org.jboss.beans.metadata.spi;version=2.2,
+          org.jboss.beans.metadata.spi.builder;version=2.2,
+          org.jboss.dependency.spi;version=2.2,
+          org.jboss.kernel.spi.dependency;version=2.2,
+          
+          <!-- jboss-osgi -->
           org.jboss.osgi.spi;version=1.0,
           org.jboss.osgi.spi.capability;version=1.0,
+          org.jboss.osgi.spi.framework;version=1.0,
           org.jboss.osgi.spi.management;version=1.0,
           org.jboss.osgi.spi.service;version=1.0,
           org.jboss.osgi.spi.util;version=1.0,
-          
-          org.osgi.framework,
-          org.osgi.framework.launch,
-          org.osgi.service.startlevel,
-          org.osgi.service.packageadmin
+          org.jboss.osgi.testing;version=1.0
         </value></entry>
       </map>
     </property>
