@@ -190,6 +190,13 @@
       <version>${version.osgi}</version>
     </dependency>
 
+    <!-- Provided Dependencies -->
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging-log4j</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    
     <!-- Test bundles dependencies -->
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -310,11 +317,6 @@
           <artifactId>jboss-logging-spi</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging-log4j</artifactId>
-      <scope>test</scope>
     </dependency>
 
   </dependencies>
