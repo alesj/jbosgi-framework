@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.service.internal;
+package org.jboss.osgi.framework.packageadmin;
 
 //$Id: StartLevelImpl.java 93118 2009-09-02 08:24:44Z thomas.diesler@jboss.com $
 
@@ -41,8 +41,10 @@ import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiFragmentState;
+import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
+import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
 import org.jboss.osgi.framework.resolver.ResolverBundle;
@@ -50,8 +52,6 @@ import org.jboss.osgi.spi.NotImplementedException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.RequiredBundle;
@@ -69,8 +69,6 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
    /** The log */
    private static final Logger log = Logger.getLogger(PackageAdminImpl.class);
 
-   private ServiceRegistration registration;
-
    public PackageAdminImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
@@ -79,16 +77,11 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
    public void startService()
    {
       BundleContext sysContext = getSystemContext();
-      registration = sysContext.registerService(PackageAdmin.class.getName(), this, null);
+      sysContext.registerService(PackageAdmin.class.getName(), this, null);
    }
 
    public void stopService()
    {
-      if (registration != null)
-      {
-         registration.unregister();
-         registration = null;
-      }
    }
 
    @SuppressWarnings("rawtypes")
@@ -109,7 +102,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
             // Return the fragment's host bundle
             if (bundleState.isFragment())
                bundleState = ((OSGiFragmentState)bundleState).getFragmentHost();
-            
+
             return bundleState.getBundleInternal();
          }
       }
@@ -118,7 +111,8 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
    public int getBundleType(Bundle bundle)
    {
-      throw new NotImplementedException();
+      AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
+      return bundleState.isFragment() ? BUNDLE_TYPE_FRAGMENT : 0;
    }
 
    public Bundle[] getBundles(String symbolicName, String versionRange)
@@ -133,27 +127,37 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
    public ExportedPackage[] getExportedPackages(Bundle bundle)
    {
-      AbstractBundleState abstractBundleState = getBundleManager().getBundleState(bundle);
-
-      // [TODO] exported packages for the system bundle 
-      if (abstractBundleState instanceof OSGiBundleState == false)
-         throw new UnsupportedOperationException("FIXME: getExportedPackages for System bundle");
-
-      AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)abstractBundleState;
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      ClassLoadingMetaData metaData = unit.getAttachment(ClassLoadingMetaData.class);
-      if (metaData == null)
-         throw new IllegalStateException("Cannot obtain ClassLoadingMetaData");
-
       List<ExportedPackage> exported = new ArrayList<ExportedPackage>();
-      CapabilitiesMetaData capabilities = metaData.getCapabilities();
-      for (Capability capability : capabilities.getCapabilities())
+
+      AbstractBundleState absBundleState = AbstractBundleState.assertBundleState(bundle);
+      if (absBundleState instanceof OSGiSystemState)
       {
-         if (capability instanceof PackageCapability)
+         OSGiSystemState bundleState = (OSGiSystemState)absBundleState;
+         SystemPackagesPlugin plugin = bundleState.getBundleManager().getPlugin(SystemPackagesPlugin.class);
+
+         // [TODO] include package versions
+         for (String packageName : plugin.getSystemPackages(false))
          {
-            exported.add(new ExportedPackageImpl(bundleState, (PackageCapability)capability));
+            exported.add(new SystemExportedPackage(bundleState, packageName));
          }
       }
+      else
+      {
+         AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)absBundleState;
+         ClassLoadingMetaData metaData = bundleState.getDeploymentUnit().getAttachment(ClassLoadingMetaData.class);
+         if (metaData == null)
+            throw new IllegalStateException("Cannot obtain ClassLoadingMetaData");
+
+         CapabilitiesMetaData capabilities = metaData.getCapabilities();
+         for (Capability capability : capabilities.getCapabilities())
+         {
+            if (capability instanceof PackageCapability)
+            {
+               exported.add(new CapabilityExportedPackage(bundleState, (PackageCapability)capability));
+            }
+         }
+      }
+
       if (exported.size() == 0)
          return null;
 
@@ -165,22 +169,72 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
    public ExportedPackage[] getExportedPackages(String name)
    {
-      throw new NotImplementedException();
+      List<ExportedPackage> exported = new ArrayList<ExportedPackage>();
+      
+      for (AbstractBundleState auxBundle : getBundleManager().getBundles())
+      {
+         for (ExportedPackage auxPackage : getExportedPackages(auxBundle))
+         {
+            if (auxPackage.getName().equals(name))
+               exported.add(auxPackage);
+         }
+      }
+      
+      if (exported.size() == 0)
+         return null;
+
+      ExportedPackage[] result = new ExportedPackage[exported.size()];
+      exported.toArray(result);
+
+      return result;
    }
 
    public Bundle[] getFragments(Bundle bundle)
    {
-      throw new NotImplementedException();
+      AbstractBundleState absBundleState = AbstractBundleState.assertBundleState(bundle);
+      if (absBundleState instanceof OSGiBundleState == false)
+         return null;
+      
+      List<Bundle> bundles = new ArrayList<Bundle>();
+      
+      OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
+      List<OSGiFragmentState> fragments = bundleState.getAttachedFragments();
+      for (OSGiFragmentState aux : fragments)
+         bundles.add(aux.getBundle());
+      
+      if (bundles.isEmpty())
+         return null;
+      
+      return bundles.toArray(new Bundle[bundles.size()]);
    }
 
    public Bundle[] getHosts(Bundle bundle)
    {
-      throw new NotImplementedException();
+      AbstractBundleState absBundleState = AbstractBundleState.assertBundleState(bundle);
+      if (absBundleState instanceof OSGiFragmentState == false)
+         return null;
+      
+      List<Bundle> bundles = new ArrayList<Bundle>();
+      
+      // [TODO] Add support for multiple hosts
+      OSGiFragmentState bundleState = (OSGiFragmentState)absBundleState;
+      OSGiBundleState fragmentHost = bundleState.getFragmentHost();
+      if (fragmentHost != null)
+      {
+         bundles.add(fragmentHost.getBundle());
+      }
+      
+      if (bundles.isEmpty())
+         return null;
+      
+      return bundles.toArray(new Bundle[bundles.size()]);
    }
 
    public RequiredBundle[] getRequiredBundles(String symbolicName)
    {
-      throw new NotImplementedException();
+      // [TODO] getRequiredBundles(String symbolicName)
+      log.info("Not implemented getRequiredBundles");
+      return null;
    }
 
    public void refreshPackages(Bundle[] bundles)
@@ -278,47 +332,5 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
       allResolved = allResolved && resolvableBundles.isEmpty();
       return allResolved;
-   }
-
-   private static class ExportedPackageImpl implements ExportedPackage
-   {
-      private Bundle bundle;
-      private PackageCapability capability;
-
-      public ExportedPackageImpl(AbstractBundleState bundle, PackageCapability capability)
-      {
-         this.bundle = bundle.getBundle();
-         this.capability = capability;
-      }
-
-      public Bundle getExportingBundle()
-      {
-         return bundle;
-      }
-
-      public Bundle[] getImportingBundles()
-      {
-         throw new NotImplementedException();
-      }
-
-      public String getName()
-      {
-         return capability.getName();
-      }
-
-      public String getSpecificationVersion()
-      {
-         throw new NotImplementedException();
-      }
-
-      public Version getVersion()
-      {
-         return Version.parseVersion(capability.getVersion().toString());
-      }
-
-      public boolean isRemovalPending()
-      {
-         throw new NotImplementedException();
-      }
    }
 }

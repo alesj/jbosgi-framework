@@ -23,7 +23,7 @@ package org.jboss.test.osgi.compendium;
 
 import junit.framework.Test;
 
-import org.jboss.osgi.framework.service.internal.PackageAdminImpl;
+import org.jboss.osgi.framework.packageadmin.PackageAdminImpl;
 import org.jboss.test.osgi.FrameworkTest;
 import org.jboss.test.osgi.compendium.support.b.Other;
 import org.jboss.test.osgi.compendium.support.a.PA;
