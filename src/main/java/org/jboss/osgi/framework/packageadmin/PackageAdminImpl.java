@@ -204,7 +204,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
       List<OSGiFragmentState> fragments = bundleState.getAttachedFragments();
       for (OSGiFragmentState aux : fragments)
-         bundles.add(aux.getBundle());
+         bundles.add(aux.getBundleInternal());
       
       if (bundles.isEmpty())
          return null;
