@@ -173,10 +173,14 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       
       for (AbstractBundleState auxBundle : getBundleManager().getBundles())
       {
-         for (ExportedPackage auxPackage : getExportedPackages(auxBundle))
+         ExportedPackage[] exportedPackages = getExportedPackages(auxBundle);
+         if (exportedPackages != null)
          {
-            if (auxPackage.getName().equals(name))
-               exported.add(auxPackage);
+            for (ExportedPackage auxPackage : exportedPackages)
+            {
+               if (auxPackage.getName().equals(name))
+                  exported.add(auxPackage);
+            }
          }
       }
       
