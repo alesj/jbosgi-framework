@@ -21,7 +21,6 @@
  */
 package org.jboss.test.osgi.service.support;
 
-import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 

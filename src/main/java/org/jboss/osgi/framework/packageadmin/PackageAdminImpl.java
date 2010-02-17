@@ -233,14 +233,12 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
    public RequiredBundle[] getRequiredBundles(String symbolicName)
    {
       // [TODO] getRequiredBundles(String symbolicName)
-      log.info("Not implemented getRequiredBundles");
       return null;
    }
 
    public void refreshPackages(Bundle[] bundles)
    {
       // [TODO] refreshPackages(Bundle[] bundles)
-      log.debug("Ignore refreshPackages");
    }
 
    public boolean resolveBundles(Bundle[] bundleArr)

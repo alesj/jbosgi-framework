@@ -116,7 +116,7 @@ public class MicrocontainerServiceImpl extends AbstractServicePlugin implements 
       return (T)target;
    }
 
-   public List<String> getRegisteredBeans()
+   public List<String> listRegisteredBeans()
    {
       List<String> names = new ArrayList<String>();
 

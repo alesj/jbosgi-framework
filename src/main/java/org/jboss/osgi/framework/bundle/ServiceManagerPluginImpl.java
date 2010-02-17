@@ -233,6 +233,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          putContext(result, ((OSGiBundleState)bundleState).getDeploymentUnit());
       }
 
+      // This event is synchronously delivered after the service has been registered with the Framework. 
       FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
       eventsPlugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
       
@@ -242,6 +243,11 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    public void unregisterService(OSGiServiceState serviceState)
    {
       AbstractBundleState bundleState = serviceState.getBundleState();
+      
+      // This event is synchronously delivered before the service has completed unregistering. 
+      FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
+      plugin.fireServiceEvent(bundleState, ServiceEvent.UNREGISTERING, serviceState);
+      
       if (bundleState instanceof OSGiBundleState)
       {
          removeContext(serviceState, ((OSGiBundleState)bundleState).getDeploymentUnit());
@@ -250,9 +256,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       Controller controller = kernel.getController();
       controller.uninstall(serviceState.getName());
       serviceState.internalUnregister();
-
-      FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
-      plugin.fireServiceEvent(bundleState, ServiceEvent.UNREGISTERING, serviceState);
    }
 
    public boolean ungetService(AbstractBundleState bundleState, ServiceReference reference)

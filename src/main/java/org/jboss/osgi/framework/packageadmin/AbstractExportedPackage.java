@@ -23,7 +23,6 @@ package org.jboss.osgi.framework.packageadmin;
 
 //$Id: StartLevelImpl.java 93118 2009-09-02 08:24:44Z thomas.diesler@jboss.com $
 
-import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
@@ -37,9 +36,6 @@ import org.osgi.service.packageadmin.ExportedPackage;
  */
 abstract class AbstractExportedPackage implements ExportedPackage
 {
-   /** The log */
-   private static final Logger log = Logger.getLogger(AbstractExportedPackage.class);
-   
    private AbstractBundleState bundle;
    private String packageName;
    private Version version;
@@ -64,7 +60,6 @@ abstract class AbstractExportedPackage implements ExportedPackage
    public Bundle[] getImportingBundles()
    {
       // [TODO] Not implemented getImportingBundles
-      log.info("Not implemented getImportingBundles");
       return null;
    }
 
@@ -76,7 +71,6 @@ abstract class AbstractExportedPackage implements ExportedPackage
    public String getSpecificationVersion()
    {
       // [TODO] Not implemented getSpecificationVersion
-      log.info("Not implemented getSpecificationVersion");
       return null;
    }
 
@@ -88,7 +82,6 @@ abstract class AbstractExportedPackage implements ExportedPackage
    public boolean isRemovalPending()
    {
       // [TODO] Not implemented isRemovalPending
-      log.info("Not implemented isRemovalPending");
       return false;
    }
 }

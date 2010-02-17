@@ -528,6 +528,7 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
       else
          this.properties = new CaseInsensitiveDictionary(properties);
 
+      // This event is synchronously delivered after the service properties have been modified. 
       FrameworkEventsPlugin plugin = bundleState.getBundleManager().getPlugin(FrameworkEventsPlugin.class);
       plugin.fireServiceEvent(bundleState, ServiceEvent.MODIFIED, this);
    }

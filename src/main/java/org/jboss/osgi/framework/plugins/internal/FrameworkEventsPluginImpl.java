@@ -429,32 +429,29 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       if (getBundleManager().isFrameworkActive() == false)
          return;
 
-      Runnable runnable = new Runnable()
+      // Call the listeners. All service events are synchronously delivered
+      for (ServiceListenerRegistration registration : listeners)
       {
-         public void run()
+         try
          {
-            // Call the listeners
-            for (ServiceListenerRegistration registration : listeners)
+            // [TODO] MODIFIED_ENDMATCH
+            // This event is synchronously delivered after the service properties have been modified. 
+            // This event is only delivered to listeners which were added with a non-null filter where 
+            // the filter matched the service properties prior to the modification but the filter does 
+            // not match the modified service properties. 
+            
+            if (registration.filter.match(service))
             {
-               try
-               {
-                  if (registration.filter.match(service))
-                  {
-                     AccessControlContext accessControlContext = registration.accessControlContext;
-                     if (accessControlContext == null || service.hasPermission(accessControlContext))
-                        registration.listener.serviceChanged(event);
-                  }
-               }
-               catch (Throwable t)
-               {
-                  log.warn("Error while firing " + typeName + " for service " + service, t);
-               }
+               AccessControlContext accessControlContext = registration.accessControlContext;
+               if (accessControlContext == null || service.hasPermission(accessControlContext))
+                  registration.listener.serviceChanged(event);
             }
          }
-      };
-
-      // Fire the event in a runnable
-      fireEvent(runnable, synchronous);
+         catch (Throwable t)
+         {
+            log.warn("Error while firing " + typeName + " for service " + service, t);
+         }
+      }
    }
 
    private Bundle assertBundle(Bundle bundle)

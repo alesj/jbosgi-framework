@@ -21,7 +21,6 @@
  */
 package org.jboss.test.osgi.service;
 
-import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -33,7 +32,6 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
-import org.jboss.test.osgi.DeployersTest;
 import org.jboss.test.osgi.service.support.LazyBundle;
 import org.jboss.test.osgi.service.support.a.A;
 import org.jboss.test.osgi.service.support.c.C;
