@@ -69,12 +69,12 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
 
    /**
     * Create a new BundleState.
-    * 
-    * @param unit the deployment unit
     * @throws IllegalArgumentException for a null parameter
     */
-   public AbstractDeployedBundleState(DeploymentUnit unit)
+   public AbstractDeployedBundleState(OSGiBundleManager bundleManager, DeploymentUnit unit)
    {
+      super(bundleManager);
+      
       if (unit == null)
          throw new IllegalArgumentException("Null deployment unit");
 

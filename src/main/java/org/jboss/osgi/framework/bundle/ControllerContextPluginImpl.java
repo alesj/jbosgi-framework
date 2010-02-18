@@ -139,6 +139,7 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
                try
                {
                   bundleState = (OSGiBundleState)bundleManager.addDeployment(unit);
+                  bundleManager.addBundle(bundleState);
                   bundleState.startInternal();
                }
                catch (Throwable t)

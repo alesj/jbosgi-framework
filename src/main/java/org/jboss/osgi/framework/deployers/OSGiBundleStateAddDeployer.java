@@ -24,6 +24,7 @@ package org.jboss.osgi.framework.deployers;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
@@ -58,6 +59,8 @@ public class OSGiBundleStateAddDeployer extends AbstractOSGiBundleStateDeployer
       // [TODO] look at manifest headers and persistent state for this
       unit.setRequiredStage(DeploymentStages.DESCRIBE);
       
-      bundleManager.addDeployment(unit);
+      // Attach the abstract bundle state
+      AbstractBundleState bundleState = bundleManager.addDeployment(unit);
+      unit.addAttachment(AbstractBundleState.class, bundleState);
    }
 }

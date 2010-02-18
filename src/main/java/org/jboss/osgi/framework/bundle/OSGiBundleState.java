@@ -61,13 +61,10 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
    /**
     * Create a new BundleState.
-    * 
-    * @param unit the deployment unit
-    * @throws IllegalArgumentException for a null parameter
     */
-   public OSGiBundleState(DeploymentUnit unit)
+   public OSGiBundleState(OSGiBundleManager bundleManager, DeploymentUnit unit)
    {
-      super(unit);
+      super(bundleManager, unit);
    }
 
    /**

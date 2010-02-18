@@ -50,8 +50,10 @@ public class OSGiSystemState extends AbstractBundleState
    /**
     * Create a new OSGiSystemBundle.
     */
-   public OSGiSystemState()
+   public OSGiSystemState(OSGiBundleManager bundleManager)
    {
+      super(bundleManager);
+      
       Manifest manifest = new Manifest();
       Attributes attributes = manifest.getMainAttributes();
       attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);

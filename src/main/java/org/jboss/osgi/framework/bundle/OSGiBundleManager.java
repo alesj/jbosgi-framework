@@ -190,7 +190,7 @@ public class OSGiBundleManager
          throw new IllegalArgumentException("Null deployerClient");
       if (deployerClient instanceof MainDeployerStructure == false)
          throw new IllegalArgumentException("Deployer client does not implement " + MainDeployerStructure.class.getName());
-      
+
       this.kernel = kernel;
       this.deployerClient = deployerClient;
 
@@ -204,7 +204,7 @@ public class OSGiBundleManager
    public void start()
    {
       // Create the system Bundle
-      systemBundle = new OSGiSystemState();
+      systemBundle = new OSGiSystemState(this);
       addBundle(systemBundle);
    }
 
@@ -813,20 +813,15 @@ public class OSGiBundleManager
          if (fragmentHost != null)
          {
             // Create a new OSGiFragmentState
-            OSGiFragmentState fragmentState = new OSGiFragmentState(unit);
+            OSGiFragmentState fragmentState = new OSGiFragmentState(this, unit);
             absBundle = fragmentState;
-            addBundle(fragmentState);
          }
          else
          {
             // Create a new OSGiBundleState
-            AbstractDeployedBundleState bundleState = new OSGiBundleState(unit);
+            AbstractDeployedBundleState bundleState = new OSGiBundleState(this, unit);
             absBundle = bundleState;
-            addBundle(bundleState);
          }
-         
-         // Attach the abstract bundle state
-         unit.addAttachment(AbstractBundleState.class, absBundle);
       }
 
       // Attach the abstract bundle state
@@ -839,7 +834,11 @@ public class OSGiBundleManager
    }
 
    /**
-    * Add a bundle
+    * Add a bundle to the manager.
+    * 
+    * Note, the bundle must be metadata complete when it is added to the manager.
+    * An extender might pickup the INSTALLED event and use PackageAdmin to examine the 
+    * exported packages for example.
     * 
     * @param bundleState the bundle state
     * @throws IllegalArgumentException for a null bundle state
@@ -849,21 +848,20 @@ public class OSGiBundleManager
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle state");
 
-      validateBundle(bundleState);
-
-      bundleState.setBundleManager(this);
-      allBundles.add(bundleState);
-
-      // Only fire the INSTALLED event if this is not an update
-      boolean fireEvent = true;
+      // Do nothing if this is a bundle update
       if (bundleState instanceof OSGiBundleState)
       {
          DeploymentUnit unit = ((AbstractDeployedBundleState)bundleState).getDeploymentUnit();
          Deployment dep = unit.getAttachment(Deployment.class);
-         fireEvent = (dep == null || dep.isBundleUpdate() == false);
+         if (dep != null && dep.isBundleUpdate())
+            return;
       }
 
-      bundleState.changeState(Bundle.INSTALLED, fireEvent);
+      validateBundle(bundleState);
+      
+      allBundles.add(bundleState);
+      
+      bundleState.changeState(Bundle.INSTALLED, true);
 
       // Add the bundle to the resolver
       // Note, plugins are not registered when the system bundle is added 
@@ -885,10 +883,13 @@ public class OSGiBundleManager
       if (osgiMetaData == null)
          return;
 
+      OSGiBundleValidator validator;
+      
       // Delegate to the validator for the appropriate revision
-      OSGiBundleValidator validator = new OSGiBundleValidatorR3(this);
       if (osgiMetaData.getBundleManifestVersion() > 1)
          validator = new OSGiBundleValidatorR4(this);
+      else
+         validator = new OSGiBundleValidatorR3(this);
 
       validator.validateBundle(bundleState);
    }
@@ -905,7 +906,6 @@ public class OSGiBundleManager
          throw new IllegalArgumentException("Null bundle state");
 
       bundleState.uninstallInternal();
-      bundleState.setBundleManager(null);
 
       // Remove the bundle from the resolver
       ResolverPlugin bundleResolver = getOptionalPlugin(ResolverPlugin.class);
@@ -1135,7 +1135,7 @@ public class OSGiBundleManager
       {
          deployerClient.change(unitName, DeploymentStages.CLASSLOADER);
          deployerClient.checkComplete(unitName);
-         
+
          // Advance the attached fragments to CLASSLOADER 
          for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
          {
@@ -1143,11 +1143,11 @@ public class OSGiBundleManager
             deployerClient.change(fragUnitName, DeploymentStages.CLASSLOADER);
             deployerClient.checkComplete(fragUnitName);
          }
-            
+
          bundleState.changeState(Bundle.RESOLVED);
          for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
             fragment.changeState(Bundle.RESOLVED);
-         
+
          return true;
       }
       catch (DeploymentException ex)

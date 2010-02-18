@@ -44,6 +44,7 @@ import org.osgi.framework.Constants;
  *
  * TODO test security
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
 public class BundleUnitTestCase extends FrameworkTest

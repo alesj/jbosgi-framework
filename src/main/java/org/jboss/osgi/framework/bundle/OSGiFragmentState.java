@@ -42,9 +42,9 @@ public class OSGiFragmentState extends AbstractDeployedBundleState
    // The host that this fragment is attached to
    private OSGiBundleState fragmentHost;
    
-   public OSGiFragmentState(DeploymentUnit unit)
+   public OSGiFragmentState(OSGiBundleManager bundleManager, DeploymentUnit unit)
    {
-      super(unit);
+      super(bundleManager, unit);
    }
 
    public OSGiBundleState getFragmentHost()

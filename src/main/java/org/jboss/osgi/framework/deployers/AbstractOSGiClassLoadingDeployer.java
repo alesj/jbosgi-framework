@@ -141,6 +141,9 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
       }
 
       unit.addAttachment(ClassLoadingMetaData.class, classLoadingMetaData);
+      
+      // Add the bundle to the manager when the class loading metadata is available
+      bundleManager.addBundle(bundleState);
 
       // AnnotationMetaDataDeployer.ANNOTATION_META_DATA_COMPLETE
       unit.addAttachment("org.jboss.deployment.annotation.metadata.complete", Boolean.TRUE);
@@ -148,5 +151,16 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
       // Add the OSGi ClassLoaderFactory if configured
       if (factory != null)
          unit.addAttachment(ClassLoaderFactory.class, factory);
+   }
+
+   @Override
+   public void undeploy(DeploymentUnit unit, OSGiMetaData deployment)
+   {
+      AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
+      if (bundleState != null)
+      {
+         OSGiBundleManager bundleManager = bundleState.getBundleManager();
+         bundleManager.removeBundle(bundleState);
+      }
    }
 }

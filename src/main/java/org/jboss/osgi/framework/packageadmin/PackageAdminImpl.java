@@ -146,7 +146,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)absBundleState;
          ClassLoadingMetaData metaData = bundleState.getDeploymentUnit().getAttachment(ClassLoadingMetaData.class);
          if (metaData == null)
-            throw new IllegalStateException("Cannot obtain ClassLoadingMetaData");
+            throw new IllegalStateException("Cannot obtain ClassLoadingMetaData for: " + bundle);
 
          CapabilitiesMetaData capabilities = metaData.getCapabilities();
          for (Capability capability : capabilities.getCapabilities())

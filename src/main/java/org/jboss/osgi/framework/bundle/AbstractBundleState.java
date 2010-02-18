@@ -113,15 +113,25 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    }
 
    /**
+    * Create a new abstract bundle state.
+    * 
+    * @throws IllegalArgumentException for a null parameter
+    */
+   public AbstractBundleState(OSGiBundleManager bundleManager)
+   {
+      this.bundleManager = bundleManager;
+      
+      if (bundleManager == null)
+         throw new IllegalArgumentException("Null bundle manager");
+   }
+
+   /**
     * Get the bundleManager.
     * 
     * @return the bundleManager.
     */
    public OSGiBundleManager getBundleManager()
    {
-      if (bundleManager == null)
-         throw new IllegalStateException("Bundle not installed: " + getCanonicalName());
-
       return bundleManager;
    }
 
@@ -635,19 +645,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    public String getCanonicalName()
    {
       return getSymbolicName() + "-" + getVersion();
-   }
-
-   /**
-    * Set the bundle manager
-    * 
-    * @param bundleManager the bundle manager or null to uninstall the bundle
-    */
-   void setBundleManager(OSGiBundleManager bundleManager)
-   {
-      if (bundleManager != null && this.bundleManager != null)
-         throw new IllegalStateException("Bundle " + this + " is already installed");
-
-      this.bundleManager = bundleManager;
    }
 
    /**
