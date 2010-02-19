@@ -21,36 +21,45 @@
 */
 package org.jboss.osgi.framework.deployers;
 
+import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
+import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.spi.deployer.DeploymentStages;
+import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
 /**
- * This deployer removes any osgi state bundle from manager.
+ * A deployer that adds the bundle state to the bundle manager.
+ * 
+ * This causes the bundle to get INSTALLED.
  *
- * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
+ * @since 19-Feb-2010
  */
-public class OSGiBundleStateRemoveDeployer extends AbstractOSGiBundleStateDeployer
+public class OSGiBundleStateInstallDeployer extends AbstractSimpleRealDeployer<AbstractBundleState>
 {
-   /**
-    * Create a new BundleStateDeployer.
-    *
-    * @param bundleManager the bundleManager
-    * @throws IllegalArgumentException for a null bundle manager
-    */
-   public OSGiBundleStateRemoveDeployer(OSGiBundleManager bundleManager)
+   public OSGiBundleStateInstallDeployer()
    {
-      super(bundleManager);
-      addInput(OSGiMetaData.class);
+      super(AbstractBundleState.class);
+      addInput(ClassLoadingMetaData.class);
+      setStage(DeploymentStages.POST_PARSE);
+      setTopLevelOnly(true);
    }
 
    @Override
-   protected void internalUndeploy(DeploymentUnit unit)
+   public void deploy(DeploymentUnit unit, AbstractBundleState bundleState) throws DeploymentException
    {
-      AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-      if (bundleState != null)
-         bundleManager.removeBundle(bundleState);
+      // Add the bundle to the manager when it is metadata complete
+      OSGiBundleManager bundleManager = bundleState.getBundleManager();
+      bundleManager.addBundle(bundleState);
+   }
+
+   @Override
+   public void undeploy(DeploymentUnit unit, AbstractBundleState bundleState)
+   {
+      // Remove the bundle from the manager
+      OSGiBundleManager bundleManager = bundleState.getBundleManager();
+      bundleManager.removeBundle(bundleState);
    }
 }

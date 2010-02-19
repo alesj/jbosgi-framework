@@ -27,32 +27,40 @@ import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
 /**
- * AbstractOSGiBundleStateDeployer.<p>
+ * A deployer that creates the bundle state through the bundle manager.
+ * 
+ * The bundle is not yet INSTALLED.
  *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
  */
-public abstract class AbstractOSGiBundleStateDeployer extends AbstractRealDeployer
+public class OSGiBundleStateCreateDeployer extends AbstractRealDeployer
 {
    /** The bundle manager */
    protected OSGiBundleManager bundleManager;
 
-   protected AbstractOSGiBundleStateDeployer(OSGiBundleManager bundleManager)
+   public OSGiBundleStateCreateDeployer(OSGiBundleManager bundleManager)
    {
       if (bundleManager == null)
          throw new IllegalArgumentException("Null bundle manager");
+      this.bundleManager = bundleManager;
 
+      setInput(OSGiMetaData.class);
       setOutput(AbstractBundleState.class);
       setStage(DeploymentStages.POST_PARSE);
       setTopLevelOnly(true);
-
-      this.bundleManager = bundleManager;
    }
 
-   protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
+   @Override
+   public void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
-      // do nothing
+      unit.setRequiredStage(DeploymentStages.DESCRIBE);
+      
+      // Create the bundle state
+      bundleManager.addDeployment(unit);
    }
 }

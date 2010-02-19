@@ -286,7 +286,7 @@ public class FrameworkTestDelegate extends MicrocontainerTestDelegate
       try
       {
          DeploymentUnit unit = deployerStructure.getDeploymentUnit(deployment.getName());
-         AbstractDeployedBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
          if (bundleState == null)
             throw new IllegalStateException("Unable to determine bundle state for " + deployment.getName());
 

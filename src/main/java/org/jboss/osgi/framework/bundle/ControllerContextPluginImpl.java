@@ -119,7 +119,7 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
       {
          synchronized (unit)
          {
-            OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+            OSGiBundleState bundleState = (OSGiBundleState)unit.getAttachment(AbstractBundleState.class);
             if (bundleState == null)
             {
                OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);

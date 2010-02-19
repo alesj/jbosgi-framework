@@ -26,8 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.osgi.framework.Bundle;
 
 /**
@@ -61,7 +60,7 @@ public class LazyBundle
       {
          if (bundle == null)
          {
-            AbstractDeployedBundleState bundle = unit.getAttachment(OSGiBundleState.class);
+            AbstractBundleState bundle = unit.getAttachment(AbstractBundleState.class);
             if (bundle == null)
                throw new IllegalArgumentException("No such OSGiBundleState attachment: " + unit);
             this.bundle = bundle.getBundleInternal();                        

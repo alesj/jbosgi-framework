@@ -45,6 +45,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.DeployerClient;
@@ -787,11 +788,9 @@ public class OSGiBundleManager
    }
 
    /**
-    * Add a deployment
+    * Add a deployment to the manager, which creates the bundle state.
     * 
-    * @param unit the deployment unit
-    * @return the bundle state
-    * @throws IllegalArgumentException for a null parameter
+    * Note, the bundle state is not yet added to the manager.
     */
    public AbstractBundleState addDeployment(DeploymentUnit unit)
    {
@@ -803,7 +802,7 @@ public class OSGiBundleManager
       if (absBundle != null)
       {
          // Add the DeploymentUnit to the OSGiBundleState
-         AbstractDeployedBundleState depBundle = (AbstractDeployedBundleState)absBundle;
+         OSGiBundleState depBundle = (OSGiBundleState)absBundle;
          depBundle.addDeploymentUnit(unit);
       }
       else
@@ -825,11 +824,13 @@ public class OSGiBundleManager
       }
 
       // Attach the abstract bundle state
+      unit.addAttachment(AbstractBundleState.class, absBundle);
+      
       if (absBundle.isFragment())
          unit.addAttachment(OSGiFragmentState.class, (OSGiFragmentState)absBundle);
       else
          unit.addAttachment(OSGiBundleState.class, (OSGiBundleState)absBundle);
-
+      
       return absBundle;
    }
 
@@ -852,6 +853,9 @@ public class OSGiBundleManager
       if (bundleState instanceof OSGiBundleState)
       {
          DeploymentUnit unit = ((AbstractDeployedBundleState)bundleState).getDeploymentUnit();
+         if (unit.getAttachment(ClassLoadingMetaData.class) == null)
+            throw new IllegalStateException("Cannot obtain ClassLoadingMetaData");
+            
          Deployment dep = unit.getAttachment(Deployment.class);
          if (dep != null && dep.isBundleUpdate())
             return;
