@@ -320,9 +320,8 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       // We can only return true if all bundles are resolvable.
       boolean allResolved = resolvableBundles.containsAll(unresolvedBundles);
 
-      // TODO [JBDEPLOY-226] Allow multiple deployments to change state at once
-      resolveBundles(resolvableBundles);
-
+      // Advance the bundles to stage CLASSLOADER and check at the end
+      advanceBundlesToClassloader(resolvableBundles);
       try
       {
          DeployerClient deployerClient = getBundleManager().getDeployerClient();
@@ -337,7 +336,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       return allResolved;
    }
 
-   private void resolveBundles(List<OSGiBundleState> resolvableBundles) 
+   private void advanceBundlesToClassloader(List<OSGiBundleState> resolvableBundles) 
    {
       for (OSGiBundleState bundleState: resolvableBundles)
       {
@@ -363,10 +362,6 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
                String fragUnitName = fragment.getDeploymentUnit().getName();
                deployerClient.change(fragUnitName, DeploymentStages.CLASSLOADER);
             }
-
-            //         bundleState.changeState(Bundle.RESOLVED);
-            //         for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
-            //            fragment.changeState(Bundle.RESOLVED);
          }
          catch (DeploymentException ex)
          {
