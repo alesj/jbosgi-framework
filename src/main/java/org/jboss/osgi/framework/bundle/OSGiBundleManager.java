@@ -46,15 +46,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
-import org.jboss.dependency.spi.ControllerContext;
-import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.DeployerClient;
 import org.jboss.deployers.client.spi.IncompleteDeploymentException;
 import org.jboss.deployers.client.spi.IncompleteDeployments;
 import org.jboss.deployers.client.spi.MissingDependency;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
-import org.jboss.deployers.spi.deployer.DeploymentStage;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.structure.spi.main.MainDeployerStructure;
@@ -1085,85 +1082,6 @@ public class OSGiBundleManager
             bundles.add(aux);
       }
       return Collections.unmodifiableList(bundles);
-   }
-
-   /**
-    * Resolve a bundle
-    * 
-    * @param bundleState the bundle state
-    * @param errorOnFail whether to throw an error if it cannot be resolved
-    * @return true when resolved
-    */
-   public boolean resolveBundle(OSGiBundleState bundleState, boolean errorOnFail) throws BundleException
-   {
-      int state = bundleState.getState();
-      if (state != Bundle.INSTALLED)
-         return true;
-
-      // A bundle can only resolve if the framework is running on a VM which
-      // implements one of the listed required execution environments. 
-      List<String> reqExecEnvironments = bundleState.getOSGiMetaData().getRequiredExecutionEnvironment();
-      if (reqExecEnvironments != null)
-      {
-         boolean foundExecEnv = false;
-         String fwExecEnvs = getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
-         for (String aux : reqExecEnvironments)
-         {
-            if (fwExecEnvs.contains(aux))
-            {
-               foundExecEnv = true;
-               break;
-            }
-         }
-
-         if (foundExecEnv == false)
-         {
-            String msg = "Cannot find any of the required execution environments " + reqExecEnvironments + ", we have: " + fwExecEnvs;
-            if (errorOnFail == true)
-               throw new BundleException(msg);
-
-            log.error(msg);
-            return false;
-         }
-      }
-
-      DeploymentUnit unit = bundleState.getDeploymentUnit();
-      String unitName = unit.getName();
-
-      ControllerContext context = unit.getAttachment(ControllerContext.class);
-      ControllerState requiredState = context.getRequiredState();
-      DeploymentStage requiredStage = unit.getRequiredStage();
-
-      // TODO [JBDEPLOY-226] Allow multiple deployments to change state at once
-      try
-      {
-         deployerClient.change(unitName, DeploymentStages.CLASSLOADER);
-         deployerClient.checkComplete(unitName);
-
-         // Advance the attached fragments to CLASSLOADER 
-         for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
-         {
-            String fragUnitName = fragment.getDeploymentUnit().getName();
-            deployerClient.change(fragUnitName, DeploymentStages.CLASSLOADER);
-            deployerClient.checkComplete(fragUnitName);
-         }
-
-         bundleState.changeState(Bundle.RESOLVED);
-         for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
-            fragment.changeState(Bundle.RESOLVED);
-
-         return true;
-      }
-      catch (DeploymentException ex)
-      {
-         unit.setRequiredStage(requiredStage);
-         context.setRequiredState(requiredState);
-
-         if (errorOnFail)
-            throw new BundleException("Error resolving bundle: " + bundleState, ex);
-
-         return false;
-      }
    }
 
    /**

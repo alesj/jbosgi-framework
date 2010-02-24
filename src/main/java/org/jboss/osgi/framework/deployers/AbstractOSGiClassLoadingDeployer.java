@@ -47,7 +47,7 @@ import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 
 /**
- * An abstract OSGi classloading deployer, that maps osgi metadata into classloading metadata.
+ * An abstract OSGi classloading deployer, that maps {@link OSGiMetaData} into {@link ClassLoadingMetaData}.
  * 
  * @author Thomas.Diesler@jboss.com
  * @since 07-Jan-2010

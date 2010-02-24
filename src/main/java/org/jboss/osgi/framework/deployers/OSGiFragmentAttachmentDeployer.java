@@ -49,10 +49,14 @@ import org.osgi.framework.Bundle;
  */
 public class OSGiFragmentAttachmentDeployer extends AbstractSimpleRealDeployer<ClassLoadingMetaData>
 {
+   // The relative order at which the fragments get attached
+   static final int RELATIVE_ORDER = 100;
+   
    public OSGiFragmentAttachmentDeployer()
    {
       super(ClassLoadingMetaData.class);
       setStage(DeploymentStages.CLASSLOADER);
+      setRelativeOrder(RELATIVE_ORDER);
       setTopLevelOnly(true);
    }
 
