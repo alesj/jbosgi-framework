@@ -393,7 +393,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       
       if (foundExecEnv == false)
       {
-         String msg = "Cannot find any of the required execution environments " + reqExecEnvs + ", we have: " + fwExecEnvs;
+         String msg = "Cannot find required execution environment " + reqExecEnvs + ", we have: " + fwExecEnvs;
          if (errorOnFail == true)
             throw new BundleException(msg);
 
