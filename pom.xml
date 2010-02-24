@@ -58,6 +58,7 @@
     <version.jboss.osgi.husky>1.0.4-SNAPSHOT</version.jboss.osgi.husky>
     <version.jboss.osgi.jaxb>2.1.10.SP3</version.jboss.osgi.jaxb>
     <version.jboss.osgi.jmx>1.0.4-SNAPSHOT</version.jboss.osgi.jmx>
+    <version.jboss.osgi.jndi>1.0.3-SNAPSHOT</version.jboss.osgi.jndi>
     <version.jboss.osgi.reflect>2.2.0</version.jboss.osgi.reflect>
     <version.jboss.osgi.runtime.deployers>1.0.4</version.jboss.osgi.runtime.deployers>
     <version.jboss.osgi.spi>1.0.5-SNAPSHOT</version.jboss.osgi.spi>
@@ -191,13 +192,6 @@
       <version>${version.osgi}</version>
     </dependency>
 
-    <!-- Provided Dependencies -->
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging-log4j</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    
     <!-- Test bundles dependencies -->
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -278,9 +272,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.bundles</groupId>
+      <groupId>org.jboss.osgi.jmx</groupId>
       <artifactId>jboss-osgi-jmx</artifactId>
       <version>${version.jboss.osgi.jmx}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.osgi.jndi</groupId>
+      <artifactId>jboss-osgi-jndi</artifactId>
+      <version>${version.jboss.osgi.jndi}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -323,6 +323,11 @@
       <groupId>org.jboss.osgi</groupId>
       <artifactId>jboss-osgi-testing</artifactId>
       <version>${version.jboss.osgi.testing}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging-log4j</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

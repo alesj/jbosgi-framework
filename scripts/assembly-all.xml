@@ -55,7 +55,7 @@
         <include>*:jboss-logging-log4j:jar</include>
       </includes>
       <useStrictFiltering>true</useStrictFiltering>
-      <scope>provided</scope>
+      <scope>test</scope>
       <unpack>true</unpack>
     </dependencySet>
   </dependencySets>
