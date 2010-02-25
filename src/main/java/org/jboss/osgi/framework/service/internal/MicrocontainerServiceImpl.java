@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.management.MBeanServer;
-import javax.management.StandardMBean;
 
 import org.jboss.dependency.plugins.AbstractController;
 import org.jboss.dependency.plugins.AbstractControllerContext;
@@ -40,11 +39,9 @@ import org.jboss.dependency.spi.ControllerState;
 import org.jboss.kernel.Kernel;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
-import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.plugins.MicrocontainerServicePlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
-import org.jboss.osgi.spi.management.MicrocontainerServiceMBean;
 import org.jboss.osgi.spi.service.MicrocontainerService;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -59,11 +56,8 @@ import org.osgi.framework.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @since 31-Aug-2009
  */
-public class MicrocontainerServiceImpl extends AbstractServicePlugin implements MicrocontainerServicePlugin, MicrocontainerServiceMBean
+public class MicrocontainerServiceImpl extends AbstractServicePlugin implements MicrocontainerServicePlugin
 {
-   /** The log */
-   private static final Logger log = Logger.getLogger(MicrocontainerServiceImpl.class);
-
    private Kernel kernel;
    private ServiceRegistration registration;
 
@@ -83,7 +77,7 @@ public class MicrocontainerServiceImpl extends AbstractServicePlugin implements 
       try
       {
          String filter = "(" + Constants.OBJECTCLASS + "=" + MBeanServer.class.getName() + ")";
-         getSystemContext().addServiceListener(new JMXServiceListener(this), filter);
+         getSystemContext().addServiceListener(new JMXServiceListener(), filter);
       }
       catch (InvalidSyntaxException ex)
       {
@@ -144,45 +138,21 @@ public class MicrocontainerServiceImpl extends AbstractServicePlugin implements 
       }
    }
 
-   private void registerMBeans(MBeanServer server, MicrocontainerServiceMBean mbeanImpl)
+   private void uninstallKernelBean(String beanName)
    {
+      KernelController controller = kernel.getController();
       try
       {
-         if (server != null)
-         {
-            installKernelBean(BEAN_MBEAN_SERVER, server);
-            StandardMBean mbean = new StandardMBean(mbeanImpl, MicrocontainerServiceMBean.class);
-            server.registerMBean(mbean, MBEAN_MICROCONTAINER_SERVICE);
-         }
+         controller.uninstall(beanName);
       }
-      catch (Exception ex)
+      catch (Throwable th)
       {
-         throw new IllegalStateException("Cannot register MicrocontainerServiceMBean", ex);
-      }
-   }
-
-   private void unregisterMBeans(MBeanServer server)
-   {
-      try
-      {
-         if (server != null && server.isRegistered(MBEAN_MICROCONTAINER_SERVICE))
-            server.unregisterMBean(MBEAN_MICROCONTAINER_SERVICE);
-      }
-      catch (Exception ex)
-      {
-         log.warn("Cannot unregister MicrocontainerServiceMBean", ex);
+         throw new IllegalStateException("Cannot uninstall kernel bean: " + beanName, th);
       }
    }
 
    class JMXServiceListener implements ServiceListener
    {
-      private MicrocontainerServiceMBean mbean;
-
-      public JMXServiceListener(MicrocontainerServiceMBean mbean)
-      {
-         this.mbean = mbean;
-      }
-
       public void serviceChanged(ServiceEvent event)
       {
          ServiceReference sref = event.getServiceReference();
@@ -191,12 +161,23 @@ public class MicrocontainerServiceImpl extends AbstractServicePlugin implements 
          switch (type)
          {
             case ServiceEvent.REGISTERED:
-               registerMBeans(server, mbean);
+               registerMBeanServer(server);
                break;
             case ServiceEvent.UNREGISTERING:
-               unregisterMBeans(server);
+               unregisterMBeanServer(server);
                break;
          }
+      }
+
+      private void registerMBeanServer(MBeanServer server)
+      {
+         if (server != null)
+            installKernelBean(BEAN_MBEAN_SERVER, server);
+      }
+
+      private void unregisterMBeanServer(MBeanServer server)
+      {
+         uninstallKernelBean(BEAN_MBEAN_SERVER);
       }
    }
 }
