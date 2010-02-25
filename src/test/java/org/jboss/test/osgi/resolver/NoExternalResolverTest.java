@@ -42,6 +42,6 @@ public class NoExternalResolverTest extends AbstractImportExportTest
    @Override
    public void testPreferredExporterHigherVersion() throws Exception
    {
-      System.out.println("[JBCL-133] Implement resolver preferences");
+      System.out.println("FIXME [JBCL-133] Implement resolver preferences");
    }
 }
