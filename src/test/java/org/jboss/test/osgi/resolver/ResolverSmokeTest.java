@@ -96,7 +96,7 @@ public class ResolverSmokeTest extends OSGiTest
             assertEquals("All bundles resolved", unresolved.size(), resolved.size());
          }
          
-         System.out.println("FIXME [JBOSGI-151] Cannot resolve circular dependencies");
+         System.out.println("FIXME [JBKERNEL-54] Cannot resolve circular dependencies");
          //PackageAdminPlugin packageAdmin = bundleManager.getPlugin(PackageAdminPlugin.class);
          //boolean allResolved = packageAdmin.resolveBundles(null);
          //assertTrue("All bundles resolved", allResolved);
