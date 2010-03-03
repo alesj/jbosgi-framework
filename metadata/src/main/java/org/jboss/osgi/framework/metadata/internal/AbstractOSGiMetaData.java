@@ -64,13 +64,13 @@ import java.util.jar.Attributes.Name;
 import org.jboss.classloading.spi.version.VersionComparatorRegistry;
 import org.jboss.deployers.vfs.spi.deployer.helpers.AbstractManifestMetaData;
 import org.jboss.osgi.framework.metadata.ActivationPolicyMetaData;
+import org.jboss.osgi.framework.metadata.CaseInsensitiveDictionary;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange.OSGiVersionToOSGiVersionComparator;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange.OSGiVersionToStringComparator;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange.OSGiVersionToVersionComparator;
-import org.jboss.osgi.framework.util.CaseInsensitiveDictionary;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 

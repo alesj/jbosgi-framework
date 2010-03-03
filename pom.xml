@@ -17,7 +17,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <name>JBossOSGi Framework</name>
-  <groupId>org.jboss.osgi.runtime</groupId>
+  <groupId>org.jboss.osgi.framework</groupId>
   <artifactId>jboss-osgi-framework-parent</artifactId>
   <packaging>pom</packaging>
 
@@ -67,6 +67,7 @@
   <!-- Modules -->
   <modules>
     <module>core</module>
+    <module>metadata</module>
   </modules>
   
   <!-- Dependency Management -->
