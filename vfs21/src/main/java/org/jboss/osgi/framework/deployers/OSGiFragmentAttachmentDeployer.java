@@ -34,6 +34,8 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiFragmentState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoaderPolicy;
+import org.jboss.osgi.vfs.AbstractVFS;
+import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.Bundle;
 
 /**
@@ -94,7 +96,7 @@ public class OSGiFragmentAttachmentDeployer extends AbstractSimpleRealDeployer<C
          OSGiBundleState hostState = fragState.getFragmentHost();
          DeploymentUnit hostUnit = hostState.getDeploymentUnit();
          OSGiClassLoaderPolicy hostPolicy = (OSGiClassLoaderPolicy)hostUnit.getAttachment(ClassLoaderPolicy.class);
-         hostPolicy.attachFragment(fragState.getRoot());
+         hostPolicy.attachFragment((VirtualFile)AbstractVFS.adapt(fragState.getRoot()));
       }
    }
 }

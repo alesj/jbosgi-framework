@@ -45,6 +45,7 @@ import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.NativeLibrary;
 import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
 import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
+import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 
@@ -251,7 +252,8 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
          if (libraryFile == null)
          {
             // Get the virtual file for entry for the library
-            VirtualFile fileSource = bundleState.getRoot().getChild(libpath);
+            VirtualFile root = (VirtualFile)AbstractVFS.adapt(bundleState.getRoot());
+            VirtualFile fileSource = root.getChild(libpath);
             
             // Create a unique local file location
             libraryFile = getUniqueLibraryFile(bundleState, libpath);
