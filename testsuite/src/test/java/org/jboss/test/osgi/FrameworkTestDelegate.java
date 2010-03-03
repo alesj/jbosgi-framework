@@ -107,7 +107,6 @@ public class FrameworkTestDelegate extends MicrocontainerTestDelegate
       super.undeploy();
    }
 
-   @SuppressWarnings("unchecked")
    protected void deployBundles() throws Exception
    {
       try

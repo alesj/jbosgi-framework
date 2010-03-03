@@ -69,6 +69,8 @@
   <modules>
     <module>core</module>
     <module>metadata</module>
+    <module>vfs21</module>
+    <module>testsuite</module>
   </modules>
   
   <!-- Dependency Management -->

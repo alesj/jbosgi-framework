@@ -23,7 +23,7 @@ package org.jboss.osgi.framework.service.internal;
 
 //$Id$
 
-import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.deployment.interceptor.AbstractLifecycleInterceptorService;
 import org.jboss.osgi.deployment.interceptor.InvocationContext;
@@ -34,7 +34,6 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.plugins.LifecycleInterceptorServicePlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
 import org.jboss.osgi.framework.util.DeploymentUnitAttachments;
-import org.jboss.osgi.vfs.AbstractVFS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -71,13 +70,13 @@ public class LifecycleInterceptorServiceImpl extends AbstractServicePlugin imple
             if (bundleState == null)
                throw new IllegalStateException("Cannot obtain bundleState for: " + bundle);
 
-            VFSDeploymentUnit unit = (VFSDeploymentUnit)bundleState.getDeploymentUnit();
+            DeploymentUnit unit = bundleState.getDeploymentUnit();
             InvocationContext inv = unit.getAttachment(InvocationContext.class);
             if (inv == null)
             {
                BundleContext context = bundleState.getBundleManager().getSystemContext();
                DeploymentUnitAttachments att = new DeploymentUnitAttachments(unit);
-               inv = new InvocationContextImpl(context, bundle, AbstractVFS.adapt(unit.getRoot()), att);
+               inv = new InvocationContextImpl(context, bundle, bundleState.getRoot(), att);
                unit.addAttachment(InvocationContext.class, inv);
             }
             return inv;

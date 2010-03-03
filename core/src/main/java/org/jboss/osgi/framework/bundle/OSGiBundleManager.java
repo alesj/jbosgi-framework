@@ -55,12 +55,11 @@ import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.structure.spi.main.MainDeployerStructure;
-import org.jboss.deployers.vfs.spi.client.VFSDeployment;
-import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
 import org.jboss.kernel.Kernel;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.deployment.deployer.DeploymentFactory;
+import org.jboss.osgi.framework.deployers.AbstractDeployment;
 import org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
@@ -532,8 +531,7 @@ public class OSGiBundleManager
       // Create the deployment and deploy it
       try
       {
-         org.jboss.virtual.VirtualFile root = (org.jboss.virtual.VirtualFile)AbstractVFS.adapt(dep.getRoot());
-         VFSDeployment deployment = VFSDeploymentFactory.getInstance().createVFSDeployment(root);
+         org.jboss.deployers.client.spi.Deployment deployment = AbstractDeployment.createDeployment(dep.getRoot());
          MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
          att.addAttachment(Deployment.class, dep);
 
