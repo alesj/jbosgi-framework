@@ -29,20 +29,19 @@
 
   <!-- Properties -->
   <properties>
-    <version.jboss.vfs>2.1.3.SP1</version.jboss.vfs>
   </properties>
   
   <!-- Dependencies -->
   <dependencies>
     <dependency>
       <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework</artifactId>
+      <artifactId>jboss-osgi-framework-core</artifactId>
       <version>${version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-vfs</artifactId>
-      <version>${version.jboss.vfs}</version>
+      <groupId>org.jboss.osgi.vfs</groupId>
+      <artifactId>jboss-osgi-vfs21</artifactId>
+      <version>${version.jboss.osgi.vfs}</version>
     </dependency>
   </dependencies>
 

@@ -16,10 +16,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <name>JBossOSGi Framework - Testsuite</name>
+  <name>JBossOSGi Framework - Bundle</name>
   <groupId>org.jboss.osgi.framework</groupId>
-  <artifactId>jboss-osgi-framework-testsuite</artifactId>
-  <packaging>jar</packaging>
+  <artifactId>jboss-osgi-framework</artifactId>
+  <packaging>bundle</packaging>
 
   <parent>
     <groupId>org.jboss.osgi.framework</groupId>
@@ -196,6 +196,21 @@
               <descriptors>
                 <descriptor>scripts/assembly-bundles.xml</descriptor>
               </descriptors>
+            </configuration>
+          </execution>
+          <execution>
+            <id>all</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>scripts/assembly-all.xml</descriptor>
+              </descriptors>
+              <archive>
+                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+              </archive>
             </configuration>
           </execution>
         </executions>
