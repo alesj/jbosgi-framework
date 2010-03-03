@@ -36,7 +36,7 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.plugins.DeployerServicePlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
 import org.jboss.osgi.spi.util.BundleInfo;
-import org.jboss.virtual.VirtualFile;
+import org.jboss.osgi.vfs.VirtualFile;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
@@ -96,18 +96,8 @@ public class DeployerServiceImpl extends AbstractServicePlugin implements Deploy
       delegate.deploy(bundleDeps);
    }
 
-   public void deploy(URL url) throws BundleException
-   {
-      delegate.deploy(url);
-   }
-
    public void undeploy(Deployment[] bundleDeps) throws BundleException
    {
       delegate.undeploy(bundleDeps);
-   }
-
-   public void undeploy(URL url) throws BundleException
-   {
-      delegate.undeploy(url);
    }
 }

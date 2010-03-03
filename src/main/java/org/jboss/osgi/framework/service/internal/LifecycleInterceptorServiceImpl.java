@@ -34,6 +34,7 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.plugins.LifecycleInterceptorServicePlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
 import org.jboss.osgi.framework.util.DeploymentUnitAttachments;
+import org.jboss.osgi.vfs.AbstractVFS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -76,7 +77,7 @@ public class LifecycleInterceptorServiceImpl extends AbstractServicePlugin imple
             {
                BundleContext context = bundleState.getBundleManager().getSystemContext();
                DeploymentUnitAttachments att = new DeploymentUnitAttachments(unit);
-               inv = new InvocationContextImpl(context, bundle, unit.getRoot(), att);
+               inv = new InvocationContextImpl(context, bundle, AbstractVFS.adapt(unit.getRoot()), att);
                unit.addAttachment(InvocationContext.class, inv);
             }
             return inv;

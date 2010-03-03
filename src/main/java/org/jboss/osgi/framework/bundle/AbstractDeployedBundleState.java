@@ -36,6 +36,7 @@ import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
+import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -82,7 +83,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       // The framework is expected to preserve the location passed into installBundle(String)
       Deployment dep = unit.getAttachment(Deployment.class);
       location = (dep != null ? dep.getLocation() : unit.getName());
-      rootFile = (dep != null ? dep.getRoot() : ((VFSDeploymentUnit)unit).getRoot());
+      rootFile = (dep != null ? (VirtualFile)AbstractVFS.adapt(dep.getRoot()) : ((VFSDeploymentUnit)unit).getRoot());
 
       bundleId = bundleIDGenerator.incrementAndGet();
 

@@ -73,6 +73,7 @@ import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.ServicePlugin;
 import org.jboss.osgi.framework.util.URLHelper;
 import org.jboss.osgi.spi.util.BundleInfo;
+import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.util.platform.Java;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
@@ -507,7 +508,7 @@ public class OSGiBundleManager
       Deployment dep;
       try
       {
-         BundleInfo info = BundleInfo.createBundleInfo(root, location);
+         BundleInfo info = BundleInfo.createBundleInfo(AbstractVFS.adapt(root), location);
          dep = DeploymentFactory.createDeployment(info);
          dep.setAutoStart(autoStart);
       }
@@ -532,7 +533,8 @@ public class OSGiBundleManager
       // Create the deployment and deploy it
       try
       {
-         VFSDeployment deployment = VFSDeploymentFactory.getInstance().createVFSDeployment(dep.getRoot());
+         VirtualFile root = (VirtualFile)AbstractVFS.adapt(dep.getRoot());
+         VFSDeployment deployment = VFSDeploymentFactory.getInstance().createVFSDeployment(root);
          MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
          att.addAttachment(Deployment.class, dep);
 
@@ -685,7 +687,7 @@ public class OSGiBundleManager
          URL storageLocation = getBundleStorageLocation(in);
          VirtualFile root = VFS.getRoot(storageLocation);
 
-         BundleInfo info = BundleInfo.createBundleInfo(root, location);
+         BundleInfo info = BundleInfo.createBundleInfo(AbstractVFS.adapt(root), location);
          Deployment dep = DeploymentFactory.createDeployment(info);
          dep.addAttachment(AbstractBundleState.class, bundleState);
          dep.setBundleUpdate(true);
