@@ -27,8 +27,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.test.osgi.classloader.support.a.A;
-import org.jboss.virtual.VirtualFile;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;

@@ -27,7 +27,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Dictionary;
 
-import org.jboss.virtual.VirtualFile;
+import org.jboss.osgi.vfs.VirtualFile;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;

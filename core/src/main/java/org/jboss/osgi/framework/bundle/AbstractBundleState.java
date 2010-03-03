@@ -51,7 +51,7 @@ import org.jboss.osgi.framework.plugins.LifecycleInterceptorServicePlugin;
 import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.jboss.osgi.spi.util.ConstantsHelper;
-import org.jboss.virtual.VirtualFile;
+import org.jboss.osgi.vfs.VirtualFile;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

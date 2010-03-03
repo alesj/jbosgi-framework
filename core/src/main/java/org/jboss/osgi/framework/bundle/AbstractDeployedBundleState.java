@@ -37,7 +37,7 @@ import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.vfs.AbstractVFS;
-import org.jboss.virtual.VirtualFile;
+import org.jboss.osgi.vfs.VirtualFile;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -83,7 +83,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       // The framework is expected to preserve the location passed into installBundle(String)
       Deployment dep = unit.getAttachment(Deployment.class);
       location = (dep != null ? dep.getLocation() : unit.getName());
-      rootFile = (dep != null ? (VirtualFile)AbstractVFS.adapt(dep.getRoot()) : ((VFSDeploymentUnit)unit).getRoot());
+      rootFile = (dep != null ? dep.getRoot() : AbstractVFS.adapt(((VFSDeploymentUnit)unit).getRoot()));
 
       bundleId = bundleIDGenerator.incrementAndGet();
 
@@ -179,26 +179,14 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
    
-      DeploymentUnit unit = getDeploymentUnit();
-      if (unit instanceof VFSDeploymentUnit)
+      try
       {
-         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
-         VirtualFile root = vfsDeploymentUnit.getRoot();
-         if (path.startsWith("/"))
-            path = path.substring(1);
-         try
-         {
-            VirtualFile child = root.getChild(path);
-            if (child != null)
-               return new VFSEntryPathsEnumeration(root, child);
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException("Error determining entry paths for " + root + " path=" + path);
-         }
-   
+         return rootFile.getEntryPaths(path);
       }
-      return null;
+      catch (IOException e)
+      {
+         throw new RuntimeException("Error determining entry paths for " + rootFile + " path=" + path);
+      }
    }
    
    @Override
@@ -232,7 +220,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
    }
 
    @SuppressWarnings("rawtypes")
-   public Enumeration findEntries(String path, String filePattern, boolean recurse)
+   public Enumeration findEntries(String path, String pattern, boolean recurse)
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
@@ -241,32 +229,16 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
    
-      // [TODO] fragments
       resolveBundle();
-   
-      if (filePattern == null)
-         filePattern = "*";
-   
-      DeploymentUnit unit = getDeploymentUnit();
-      if (unit instanceof VFSDeploymentUnit)
+      
+      try
       {
-         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
-         VirtualFile root = vfsDeploymentUnit.getRoot();
-         if (path.startsWith("/"))
-            path = path.substring(1);
-         try
-         {
-            VirtualFile child = root.getChild(path);
-            if (child != null)
-               return new VFSFindEntriesEnumeration(root, child, filePattern, recurse);
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException("Error finding entries for " + root + " path=" + path + " pattern=" + filePattern + " recurse=" + recurse);
-         }
-   
+         return rootFile.findEntries(path, pattern, recurse);
       }
-      return null;
+      catch (IOException e)
+      {
+         throw new RuntimeException("Error finding entries for " + rootFile + " path=" + path + " pattern=" + pattern + " recurse=" + recurse);
+      }
    }
 
    /**

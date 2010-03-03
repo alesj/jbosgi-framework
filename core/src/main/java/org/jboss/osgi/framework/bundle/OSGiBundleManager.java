@@ -74,10 +74,9 @@ import org.jboss.osgi.framework.plugins.ServicePlugin;
 import org.jboss.osgi.framework.util.URLHelper;
 import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.osgi.vfs.AbstractVFS;
+import org.jboss.osgi.vfs.VFSUtils;
+import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.util.platform.Java;
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -452,7 +451,7 @@ public class OSGiBundleManager
       VirtualFile root;
       try
       {
-         root = VFS.getRoot(locationURL);
+         root = AbstractVFS.getChild(locationURL);
       }
       catch (IOException e)
       {
@@ -508,7 +507,7 @@ public class OSGiBundleManager
       Deployment dep;
       try
       {
-         BundleInfo info = BundleInfo.createBundleInfo(AbstractVFS.adapt(root), location);
+         BundleInfo info = BundleInfo.createBundleInfo(root, location);
          dep = DeploymentFactory.createDeployment(info);
          dep.setAutoStart(autoStart);
       }
@@ -533,7 +532,7 @@ public class OSGiBundleManager
       // Create the deployment and deploy it
       try
       {
-         VirtualFile root = (VirtualFile)AbstractVFS.adapt(dep.getRoot());
+         org.jboss.virtual.VirtualFile root = (org.jboss.virtual.VirtualFile)AbstractVFS.adapt(dep.getRoot());
          VFSDeployment deployment = VFSDeploymentFactory.getInstance().createVFSDeployment(root);
          MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
          att.addAttachment(Deployment.class, dep);
@@ -685,9 +684,9 @@ public class OSGiBundleManager
       try
       {
          URL storageLocation = getBundleStorageLocation(in);
-         VirtualFile root = VFS.getRoot(storageLocation);
+         VirtualFile root = AbstractVFS.getChild(storageLocation);
 
-         BundleInfo info = BundleInfo.createBundleInfo(AbstractVFS.adapt(root), location);
+         BundleInfo info = BundleInfo.createBundleInfo(root, location);
          Deployment dep = DeploymentFactory.createDeployment(info);
          dep.addAttachment(AbstractBundleState.class, bundleState);
          dep.setBundleUpdate(true);

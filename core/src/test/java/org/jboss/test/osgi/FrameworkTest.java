@@ -37,6 +37,7 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.spi.util.ConstantsHelper;
+import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.test.kernel.junit.MicrocontainerTest;
 import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.VirtualFile;
@@ -179,7 +180,7 @@ public abstract class FrameworkTest extends MicrocontainerTest implements Framew
    
    protected Bundle installBundle(VirtualFile bundleFile) throws BundleException
    {
-      return getBundleManager().installBundle(bundleFile).getBundleInternal();
+      return getBundleManager().installBundle(AbstractVFS.adapt(bundleFile)).getBundleInternal();
    }
    
    /**

@@ -24,7 +24,7 @@ package org.jboss.osgi.framework.util;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.jboss.virtual.VirtualFile;
+import org.jboss.osgi.vfs.VirtualFile;
 
 /**
  * A helper for URL convertions that does not throw checked exceptions.

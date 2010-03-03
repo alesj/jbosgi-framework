@@ -45,6 +45,7 @@ import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.test.kernel.junit.MicrocontainerTestDelegate;
 import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.VFS;
@@ -192,7 +193,7 @@ public class FrameworkTestDelegate extends MicrocontainerTestDelegate
     */
    public Bundle addBundle(VirtualFile file) throws Exception
    {
-      AbstractBundleState bundleState = getBundleManager().installBundle(file);
+      AbstractBundleState bundleState = getBundleManager().installBundle(AbstractVFS.adapt(file));
       return bundleState.getBundleInternal();
    }
 
