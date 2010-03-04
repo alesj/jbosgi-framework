@@ -70,6 +70,7 @@
     <module>core</module>
     <module>metadata</module>
     <module>vfs21</module>
+    <module>vfs30</module>
     <module>bundle</module>
   </modules>
   
