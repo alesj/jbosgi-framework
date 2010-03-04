@@ -61,8 +61,26 @@ public abstract class AbstractDeployment
          }
          catch (Exception e)
          {
-            throw new IllegalStateException("Cannot load DeploymentAdaptor");
+            // ignore
          }
+
+         if (adaptor == null)
+         {
+            try
+            {
+               String classname = "org.jboss.osgi.framework.deployers.DeploymentAdaptor30";
+               ClassLoader classLoader = AbstractDeployment.class.getClassLoader();
+               Class<DeploymentAdaptor> clazz = (Class<DeploymentAdaptor>)classLoader.loadClass(classname);
+               adaptor = clazz.newInstance();
+            }
+            catch (Exception e)
+            {
+               // ignore
+            }
+         }
+         
+         if (adaptor == null)
+            throw new IllegalStateException("Cannot load DeploymentAdaptor");
       }
       return adaptor;
    }

@@ -31,12 +31,12 @@ import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.osgi.vfs.VirtualFile;
 
 /**
- * An abstraction of the VFSDeploymentFactory for jboss-vfs-2.1.x 
+ * An abstraction of the VFSDeploymentFactory for jboss-vfs-3.0.x 
  * 
  * @author Thomas.Diesler@jboss.com
  * @since 03-Mar-2010
  */
-public class DeploymentAdaptor21 implements DeploymentAdaptor 
+public class DeploymentAdaptor30 implements DeploymentAdaptor 
 {
    public Deployment createDeployment(VirtualFile root)
    {
