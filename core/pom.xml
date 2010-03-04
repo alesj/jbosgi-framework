@@ -133,13 +133,15 @@
       <groupId>org.jboss</groupId>
       <artifactId>jboss-mdr</artifactId>
     </dependency>
+    
+    <!-- JBoss OSGi Dependencies -->
     <dependency>
       <groupId>org.jboss.osgi</groupId>
       <artifactId>jboss-osgi-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.runtime</groupId>
-      <artifactId>jboss-osgi-deployers</artifactId>
+      <groupId>org.jboss.osgi.deployers</groupId>
+      <artifactId>jboss-osgi-deployers-vfs21</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.osgi.runtime</groupId>

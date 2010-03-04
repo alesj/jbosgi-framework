@@ -167,14 +167,21 @@
         <artifactId>jboss-mdr</artifactId>
         <version>${version.jboss.mdr}</version>
       </dependency>
+      
+      <!-- JBoss OSGi Dependencies -->
       <dependency>
         <groupId>org.jboss.osgi</groupId>
         <artifactId>jboss-osgi-spi</artifactId>
         <version>${version.jboss.osgi.spi}</version>
       </dependency>
       <dependency>
-        <groupId>org.jboss.osgi.runtime</groupId>
-        <artifactId>jboss-osgi-deployers</artifactId>
+        <groupId>org.jboss.osgi.deployers</groupId>
+        <artifactId>jboss-osgi-deployers-vfs21</artifactId>
+        <version>${version.jboss.osgi.deployers}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.osgi.deployers</groupId>
+        <artifactId>jboss-osgi-deployers-vfs30</artifactId>
         <version>${version.jboss.osgi.deployers}</version>
       </dependency>
       <dependency>

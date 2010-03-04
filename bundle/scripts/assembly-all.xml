@@ -36,7 +36,7 @@
         <include>*:jboss-mdr:jar</include>
         <include>*:jboss-metatype:jar</include>
         <include>*:jboss-osgi-deployment:jar</include>
-        <include>*:jboss-osgi-deployers:jar</include>
+        <include>*:jboss-osgi-deployers-vfs21:jar</include>
         <include>*:jboss-osgi-spi:jar</include>
         <include>*:jboss-reflect:jar</include>
         <include>*:jboss-vfs:jar</include>
