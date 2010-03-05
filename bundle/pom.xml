@@ -39,11 +39,6 @@
       <version>${version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework-vfs21</artifactId>
-      <version>${version}</version>
-    </dependency>
-    <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
     </dependency>
@@ -164,6 +159,12 @@
     <dependency>
       <groupId>org.jboss.osgi</groupId>
       <artifactId>jboss-osgi-testing</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.osgi.framework</groupId>
+      <artifactId>jboss-osgi-framework-vfs21</artifactId>
+      <version>${version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

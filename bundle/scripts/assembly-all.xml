@@ -39,7 +39,7 @@
         <include>*:jboss-osgi-deployers-vfs21:jar</include>
         <include>*:jboss-osgi-spi:jar</include>
         <include>*:jboss-reflect:jar</include>
-        <include>*:jboss-vfs:jar</include>
+        <!-- include>*:jboss-vfs:jar</include -->
         <include>*:jbossxb:jar</include>
         <include>*:mcann-core:jar</include>
         <include>*:org.osgi.core:jar</include>

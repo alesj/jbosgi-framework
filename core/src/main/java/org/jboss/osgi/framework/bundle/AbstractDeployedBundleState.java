@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.deployers.vfs.spi.structure.VFSDeploymentResourceLoader;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.deployers.AbstractDeployment;
@@ -75,7 +76,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
    public AbstractDeployedBundleState(OSGiBundleManager bundleManager, DeploymentUnit unit)
    {
       super(bundleManager);
-      
+
       if (unit == null)
          throw new IllegalArgumentException("Null deployment unit");
 
@@ -168,7 +169,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       checkInstalled();
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
-   
+
       return getEntryInternal(path);
    }
 
@@ -178,7 +179,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       checkInstalled();
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
-   
+
       try
       {
          return rootFile.getEntryPaths(path);
@@ -188,34 +189,30 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
          throw new RuntimeException("Error determining entry paths for " + rootFile + " path=" + path);
       }
    }
-   
+
    @Override
    protected URL getEntryInternal(String path)
    {
-      DeploymentUnit unit = getDeploymentUnit();
-      if (unit instanceof VFSDeploymentUnit)
-      {
-         VFSDeploymentUnit vfsDeploymentUnit = (VFSDeploymentUnit)unit;
+      VFSDeploymentUnit unit = (VFSDeploymentUnit)getDeploymentUnit();
+      if (path.startsWith("/"))
+         path = path.substring(1);
 
-         if (path.startsWith("/"))
-            path = path.substring(1);
-
-         return vfsDeploymentUnit.getResourceLoader().getResource(path);
-      }
-      return null;
+      VFSDeploymentResourceLoader loader = unit.getResourceLoader();
+      URL resource = loader.getResource(path);
+      return resource;
    }
-   
+
    public void uninstall() throws BundleException
    {
-      checkAdminPermission(AdminPermission.LIFECYCLE); 
+      checkAdminPermission(AdminPermission.LIFECYCLE);
 
       // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown
       if (getState() == Bundle.UNINSTALLED)
          throw new IllegalStateException("Bundle already uninstalled: " + this);
-      
+
       // Cache the headers in the default locale 
       headersOnUninstall = getHeaders(null);
-      
+
       getBundleManager().uninstallBundle(this);
    }
 
@@ -224,13 +221,13 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
-   
+
       checkInstalled();
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
-   
+
       resolveBundle();
-      
+
       try
       {
          return rootFile.findEntries(path, pattern, recurse);
