@@ -104,7 +104,6 @@ public class BundleEntriesUnitTestCase extends FrameworkTest
          assertNoEntries(bundle, "", "", false);
          assertNoEntries(bundle, "", "", true);
          assertEntryPaths("", bundle, 
-               "/",
                "root.xml",
                "root-no-suffix",
                "entry1.xml",
