@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- ====================================================================== -->
-<!-- -->
-<!-- JBoss, the OpenSource J2EE webOS -->
-<!-- -->
-<!-- Distributable under LGPL license. -->
-<!-- See terms of license at http://www.gnu.org. -->
-<!-- -->
+<!--                                                                        -->
+<!-- JBoss, the OpenSource J2EE webOS                                       -->
+<!--                                                                        -->
+<!-- Distributable under LGPL license.                                      -->
+<!-- See terms of license at http://www.gnu.org.                            -->
+<!--                                                                        -->
 <!-- ====================================================================== -->
 
 <!-- $Id$ -->
 
-<!-- Set these VM properties in your IDE debugger -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework/target} -Dlog4j.configuration=log4j-console.xml -->
+<!-- 
+    Set these VM properties in your IDE debugger 
+    -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework/target} 
+    -Dlog4j.configuration=log4j-console.xml 
+-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -284,10 +288,139 @@
             </property>
           </systemProperties>
           <excludes>
-            <!-- excludes listed here need to have a jira issue associated <exclude>org/jboss/test/osgi/service/ServiceMixUnitTestCase.class</exclude> -->
+            <!-- excludes listed here need to have a jira issue associated 
+            <exclude>org/jboss/test/osgi/service/ServiceMixUnitTestCase.class</exclude> 
+            -->
           </excludes>
         </configuration>
       </plugin>
     </plugins>
   </build>
+  
+  <profiles>
+    <!--
+      Name: embedded-testing 
+      Descr: Setup for embedded integration testing
+    -->
+    <profile>
+      <id>embedded-testing</id>
+      <activation>
+        <property>
+          <name>!target.container</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-vfs21</artifactId>
+          <version>${version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Name: runtime-testing 
+      Descr: Setup for runtime integration testing
+    -->
+    <profile>
+      <id>runtime-testing</id>
+      <activation>
+        <property>
+          <name>target.container</name>
+          <value>runtime</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-vfs21</artifactId>
+          <version>${version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Name: jboss501
+      Descr: Setup for jboss501 integration testing
+    -->
+    <profile>
+      <id>jboss501</id>
+      <activation>
+        <property>
+          <name>target.container</name>
+          <value>jboss501</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-vfs21</artifactId>
+          <version>${version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Name: jboss510
+      Descr: Setup for jboss510 integration testing
+    -->
+    <profile>
+      <id>jboss510</id>
+      <activation>
+        <property>
+          <name>target.container</name>
+          <value>jboss510</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-vfs21</artifactId>
+          <version>${version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Name: jboss600
+      Descr: Setup for jboss600 integration testing
+    -->
+    <profile>
+      <id>jboss600</id>
+      <activation>
+        <property>
+          <name>target.container</name>
+          <value>jboss600</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-vfs21</artifactId>
+          <version>${version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <!--
+      Name: jboss601
+      Descr: Setup for jboss601 integration testing
+    -->
+    <profile>
+      <id>jboss601</id>
+      <activation>
+        <property>
+          <name>target.container</name>
+          <value>jboss601</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-vfs30</artifactId>
+          <version>${version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 </project>
