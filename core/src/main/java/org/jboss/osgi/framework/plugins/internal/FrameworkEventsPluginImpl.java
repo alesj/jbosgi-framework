@@ -78,17 +78,20 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
    private ExecutorService executorService;
    /** True for synchronous event delivery */
    private boolean synchronous;
-   /** The set of bundle events taht cause an info log */
-   private Set<Integer> infoEvents = new HashSet<Integer>();
+   /** The set of bundle events that are delivered to an (asynchronous) BundleListener */
+   private Set<Integer> asyncBundleEvents = new HashSet<Integer>();
    
    public FrameworkEventsPluginImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
       executorService = Executors.newCachedThreadPool();
-      infoEvents.add(new Integer(BundleEvent.INSTALLED));
-      infoEvents.add(new Integer(BundleEvent.STARTED));
-      infoEvents.add(new Integer(BundleEvent.STOPPED));
-      infoEvents.add(new Integer(BundleEvent.UNINSTALLED));
+      asyncBundleEvents.add(new Integer(BundleEvent.INSTALLED));
+      asyncBundleEvents.add(new Integer(BundleEvent.RESOLVED));
+      asyncBundleEvents.add(new Integer(BundleEvent.STARTED));
+      asyncBundleEvents.add(new Integer(BundleEvent.STOPPED));
+      asyncBundleEvents.add(new Integer(BundleEvent.UPDATED));
+      asyncBundleEvents.add(new Integer(BundleEvent.UNRESOLVED));
+      asyncBundleEvents.add(new Integer(BundleEvent.UNINSTALLED));
    }
 
    public void setSynchronous(boolean synchronous)
@@ -274,7 +277,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       final BundleEvent event = new OSGiBundleEvent(type, assertBundle(bundle));
       final String typeName = ConstantsHelper.bundleEvent(event.getType());
 
-      if (infoEvents.contains(event.getType()))
+      if (asyncBundleEvents.contains(event.getType()))
          log.info("Bundle " + typeName + ": " + bundle);
       else
          log.debug("Bundle " + typeName + ": " + bundle);
@@ -305,8 +308,9 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
                }
             }
 
-            // Normal listeners after, if required
-            if (type != BundleEvent.STARTING && type != BundleEvent.STOPPING && type != BundleEvent.LAZY_ACTIVATION)
+            // BundleListeners are called with a BundleEvent object when a bundle has been 
+            // installed, resolved, started, stopped, updated, unresolved, or uninstalled
+            if (asyncBundleEvents.contains(type))
             {
                for (BundleListener listener : listeners)
                {

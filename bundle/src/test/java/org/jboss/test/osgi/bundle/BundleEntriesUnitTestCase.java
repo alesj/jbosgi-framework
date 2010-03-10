@@ -21,6 +21,10 @@
 */
 package org.jboss.test.osgi.bundle;
 
+// $Id: $
+
+import static org.junit.Assert.*;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,9 +32,9 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.Test;
-
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 /**
@@ -39,65 +43,62 @@ import org.osgi.framework.Bundle;
  * TODO test security
  * TODO test fragments
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleEntriesUnitTestCase extends FrameworkTest
+public class BundleEntriesUnitTestCase extends NativeFrameworkTest
 {
-   public static Test suite()
-   {
-      return suite(BundleEntriesUnitTestCase.class);
-   }
-
-   public BundleEntriesUnitTestCase(String name)
-   {
-      super(name);
-   }
-
+   @Test
    public void testEntriesNotInstalled() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/entries/", "entries-simple");
-      uninstall(bundle);
+      VirtualFile assembly = assembleBundle("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      bundle.uninstall();
       try
       {
          bundle.getEntry("root.xml");
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (IllegalStateException t)
       {
-         checkThrowable(IllegalStateException.class, t);
+         // expected
       }
       try
       {
          bundle.findEntries("", "root.xml", false);
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (IllegalStateException t)
       {
-         checkThrowable(IllegalStateException.class, t);
+         // expected
       }
    }
    
+   @Test
    public void testFindEntriesNoPath() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/entries/", "entries-simple");
+      VirtualFile assembly = assembleBundle("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.findEntries(null, "root.xml", false);
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (IllegalArgumentException t)
       {
-         checkThrowable(IllegalArgumentException.class, t);
+         // expected
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testEntries() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/entries/", "entries-simple");
+      VirtualFile assembly = assembleBundle("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          assertEntry(bundle, "");
@@ -367,24 +368,14 @@ public class BundleEntriesUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
 
-   protected void assertEntry(Bundle bundle, String path) throws Exception
-   {
-      URL expected = getBundleResource(bundle, path);
-      if (expected == null)
-         fail("Expected resource not found: " + path);
-
-      assertEntry(bundle, path, expected);
-      assertEntry(bundle, "/" + path, expected);
-   }
-
-   protected void assertEntry(Bundle bundle, String path, URL expected) throws Exception
+   private void assertEntry(Bundle bundle, String path) throws Exception
    {
       URL actual = bundle.getEntry(path);
-      assertEquals(expected, actual);
+      assertNotNull("Entry expected for: " + path, actual);
    }
 
    protected void assertNoEntry(Bundle bundle, String path) throws Exception
@@ -393,30 +384,19 @@ public class BundleEntriesUnitTestCase extends FrameworkTest
       assertNull("Did not expect entry: " + actual + " for path: " + path, actual);
    }
    
-   protected void assertEntries(Bundle bundle, String path, String filePattern, boolean recurse, String... entries) throws Exception
-   {
-      Set<URL> expected = new HashSet<URL>();
-      for (String entry : entries)
-      {
-         Enumeration<URL> urls = getBundleResources(bundle, entry);
-         if (urls == null || urls.hasMoreElements() == false)
-            fail("Expected resource not found: " + entry);
-         while (urls.hasMoreElements())
-            expected.add(urls.nextElement());
-      }
-
-      assertEntries(bundle, path, filePattern, recurse, expected);
-      assertEntries(bundle, "/" + path, filePattern, recurse, expected);
-   }
-   
    @SuppressWarnings("unchecked")
-   protected void assertEntries(Bundle bundle, String path, String filePattern, boolean recurse, Set<URL> expected) throws Exception
+   protected void assertEntries(Bundle bundle, String path, String filePattern, boolean recurse, String... entries) throws Exception
    {
       Set<URL> actual = new HashSet<URL>();
       Enumeration<URL> enumeration = bundle.findEntries(path, filePattern, recurse);
       while (enumeration != null && enumeration.hasMoreElements())
          actual.add(enumeration.nextElement());
       
+      URL baseurl = bundle.getEntry("/");
+      Set<URL> expected = new HashSet<URL>();
+      for (String entry : entries)
+         expected.add(new URL(baseurl + entry));
+
       assertEquals(expected, actual);
    }
 

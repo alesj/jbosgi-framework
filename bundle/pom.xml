@@ -13,6 +13,7 @@
 
 <!-- 
     Set these VM properties in your IDE debugger 
+    
     -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework/target} 
     -Dlog4j.configuration=log4j-console.xml 
 -->

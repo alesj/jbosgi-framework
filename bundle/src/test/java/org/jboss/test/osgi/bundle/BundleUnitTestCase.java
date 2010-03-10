@@ -21,6 +21,12 @@
 */
 package org.jboss.test.osgi.bundle;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Dictionary;
@@ -29,11 +35,10 @@ import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import junit.framework.Test;
-
-import org.jboss.test.osgi.FrameworkTest;
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
+import org.jboss.osgi.vfs.VFSUtils;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -47,63 +52,59 @@ import org.osgi.framework.Constants;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleUnitTestCase extends FrameworkTest
+public class BundleUnitTestCase extends NativeFrameworkTest
 {
-   public static Test suite()
-   {
-      return suite(BundleUnitTestCase.class);
-   }
-
-   public BundleUnitTestCase(String name)
-   {
-      super(name);
-   }
-
+   @Test
    public void testBundleId() throws Exception
    {
       long id1 = -1;
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          id1 = bundle.getBundleId();
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
       assertEquals(id1, bundle.getBundleId());
 
       long id2 = -1;
-      bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          id2 = bundle.getBundleId();
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
       assertEquals(id2, bundle.getBundleId());
       assertTrue("Ids should be different" + id1 + "," + id2, id1 != id2);
    }
    
+   @Test
    public void testSymbolicName() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          assertEquals("org.jboss.test.osgi.simple1", bundle.getSymbolicName());
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
       assertEquals("org.jboss.test.osgi.simple1", bundle.getSymbolicName());
    }
    
+   @Test
    public void testState() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          assertEquals(Bundle.INSTALLED, bundle.getState());
@@ -116,14 +117,16 @@ public class BundleUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
       assertEquals(Bundle.UNINSTALLED, bundle.getState());
    }
    
+   @Test
    public void testGetBundleContext() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          BundleContext bundleContext = bundle.getBundleContext();
@@ -139,20 +142,23 @@ public class BundleUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testLastModified() throws Exception
    {
       // TODO testLastModified
    }
    
+   @Test
    public void testStartStop() throws Exception
    {
       // TODO testStartStop
    }
    
+   @Test
    public void testUpdate() throws Exception
    {
       VirtualFile assemble1 = assembleBundle("bundle1", "/bundles/update/update-bundle1");
@@ -163,13 +169,10 @@ public class BundleUnitTestCase extends FrameworkTest
       new JarOutputStream(baos, manifest).close();
       ByteArrayInputStream updateStream = new ByteArrayInputStream(baos.toByteArray());
       
-      // [JBVFS-130] VFSUtils.temp(assembledDirectory) cannot create tmp dir
-      // assemble2 = VFSUtils.temp(assemble2);
-      
-      Bundle bundle = installBundle(assemble1);
+      Bundle bundle = context.installBundle(assemble1.toURL().toExternalForm());
       try
       {
-         int beforeCount = getBundleManager().getBundles().size();
+         int beforeCount = context.getBundles().length;
          
          bundle.start();
          assertBundleState(Bundle.ACTIVE, bundle.getState());
@@ -179,7 +182,7 @@ public class BundleUnitTestCase extends FrameworkTest
          assertBundleState(Bundle.ACTIVE, bundle.getState());
          assertEquals("Bundle-Version", "1.0.1", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
          
-         int afterCount = getBundleManager().getBundles().size();
+         int afterCount = context.getBundles().length;
          assertEquals("Bundle count", beforeCount, afterCount);
       }
       finally
@@ -188,56 +191,64 @@ public class BundleUnitTestCase extends FrameworkTest
       }
    }
    
+   @Test
    public void testUninstall() throws Exception
    {
       // TODO testUninstall
    }
    
+   @Test
    public void testSingleton() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundle10", "/bundles/singleton/singleton1"));
+      VirtualFile assemblyA = assembleBundle("bundle10", "/bundles/singleton/singleton1");
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         Bundle bundle2 = installBundle(assembleBundle("bundle20", "/bundles/singleton/singleton2"));
-         uninstall(bundle2);
+         VirtualFile assemblyB = assembleBundle("bundle20", "/bundles/singleton/singleton2");
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         bundleB.uninstall();
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (BundleException t)
       {
-         checkThrowable(BundleException.class, t);
+         // expected
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testNotSingleton() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundle1", "/bundles/singleton/singleton1"));
+      VirtualFile assemblyA = assembleBundle("bundle1", "/bundles/singleton/singleton1");
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         Bundle bundle2 = installBundle(assembleBundle("not-singleton", "/bundles/singleton/not-singleton"));
+         VirtualFile assemblyB = assembleBundle("not-singleton", "/bundles/singleton/not-singleton");
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            assertEquals(bundle1.getSymbolicName(), bundle2.getSymbolicName());
+            assertEquals(bundleA.getSymbolicName(), bundleB.getSymbolicName());
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    @SuppressWarnings({ "rawtypes", "unchecked" })
    public void testGetHeaders() throws Exception
    {
-      // TODO case insensistive
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          Dictionary expected = new Hashtable();
@@ -254,35 +265,41 @@ public class BundleUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testLocation() throws Exception
    {
       // TODO testGetLocation
    }
    
+   @Test
    public void testGetRegisteredServices() throws Exception
    {
       // TODO testGetRegisteredServices
    }
    
+   @Test
    public void testServicesInUse() throws Exception
    {
       // TODO testServicesInUse
    }
    
+   @Test
    public void testHasPermission() throws Exception
    {
       // TODO testHasPermission
    }
    
+   @Test
    public void testGetResources() throws Exception
    {
       // TODO testGetResource(s)
    }
    
+   @Test
    public void testLoadClass() throws Exception
    {
       // TODO testLoadClass

@@ -21,6 +21,14 @@
 */
 package org.jboss.test.osgi.bundle;
 
+// $Id: $
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
@@ -30,10 +38,9 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
-import junit.framework.Test;
-
-import org.jboss.osgi.testing.OSGiTestHelper;
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -50,21 +57,13 @@ import org.osgi.framework.ServiceRegistration;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleContextUnitTestCase extends FrameworkTest
+public class BundleContextUnitTestCase extends NativeFrameworkTest
 {
-   public static Test suite()
-   {
-      return suite(BundleContextUnitTestCase.class);
-   }
-
-   public BundleContextUnitTestCase(String name)
-   {
-      super(name);
-   }
-
+   @Test
    public void testGetBundle() throws Exception
    {
-      Bundle bundle1 = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly1 = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       BundleContext context1 = null;
       try
       {
@@ -75,11 +74,11 @@ public class BundleContextUnitTestCase extends FrameworkTest
          
          Bundle[] bundles = context1.getBundles();
          Set<Bundle> actual = new HashSet<Bundle>(Arrays.asList(bundles));
-         Set<Bundle> expected = new HashSet<Bundle>(Arrays.asList(bundle1));
-         addBaseBundles(expected);
+         Set<Bundle> expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
          assertEquals(expected, actual);
          
-         Bundle bundle2 = addBundle("/bundles/simple/", "simple-bundle2");
+         VirtualFile assembly2 = assembleBundle("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
+         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          BundleContext context2 = null;
          try
          {
@@ -89,8 +88,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
             
             bundles = context1.getBundles();
             actual = new HashSet<Bundle>(Arrays.asList(bundles));
-            expected = new HashSet<Bundle>(Arrays.asList(bundle1, bundle2));
-            addBaseBundles(expected);
+            expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1, bundle2));
             assertEquals(expected, actual);
             
             assertEquals(bundle1, context2.getBundle(bundle1.getBundleId()));
@@ -98,7 +96,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundle2.uninstall();
          }
 
          assertEquals(bundle1, context1.getBundle(bundle1.getBundleId()));
@@ -106,8 +104,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
          
          bundles = context1.getBundles();
          actual = new HashSet<Bundle>(Arrays.asList(bundles));
-         expected = new HashSet<Bundle>(Arrays.asList(bundle1));
-         addBaseBundles(expected);
+         expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
          assertEquals(expected, actual);
          
          try
@@ -115,9 +112,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
             context2.getBundle();
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
          
          try
@@ -125,9 +122,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
             context2.getBundle(bundle1.getBundleId());
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
          
          try
@@ -135,14 +132,14 @@ public class BundleContextUnitTestCase extends FrameworkTest
             context2.getBundles();
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundle1.uninstall();
       }
       
       try
@@ -150,9 +147,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
          context1.getBundle();
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (IllegalStateException t)
       {
-         checkThrowable(IllegalStateException.class, t);
+         // expected
       }
       
       try
@@ -160,9 +157,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
          context1.getBundle(bundle1.getBundleId());
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (IllegalStateException t)
       {
-         checkThrowable(IllegalStateException.class, t);
+         // expected
       }
       
       try
@@ -170,15 +167,17 @@ public class BundleContextUnitTestCase extends FrameworkTest
          context1.getBundles();
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (IllegalStateException t)
       {
-         checkThrowable(IllegalStateException.class, t);
+         // expected
       }
    }
-         
+   
+   @Test
    public void testProperties() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -201,24 +200,22 @@ public class BundleContextUnitTestCase extends FrameworkTest
             bundleContext.getProperty(getClass().getName());
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testInstallBundle() throws Exception
    {
-      OSGiTestHelper helper = new OSGiTestHelper();
-      
-      // Test URL location
-      URL url = helper.getTestArchiveURL("bundles/jboss-osgi-common.jar");
-      Bundle bundle = installBundle(url.toExternalForm());
+      URL url = getTestArchiveURL("bundles/jboss-osgi-common.jar");
+      Bundle bundle = context.installBundle(url.toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -231,8 +228,8 @@ public class BundleContextUnitTestCase extends FrameworkTest
       }
       
       // Test file location
-      String location = helper.getTestArchivePath("bundles/jboss-osgi-common.jar");
-      bundle = installBundle(location);
+      String location = getTestArchivePath("bundles/jboss-osgi-common.jar");
+      bundle = context.installBundle(location);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -245,7 +242,7 @@ public class BundleContextUnitTestCase extends FrameworkTest
       }
       
       // Test symbolic location
-      bundle = installBundle("/symbolic/location", url.openStream());
+      bundle = context.installBundle("/symbolic/location", url.openStream());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -258,9 +255,11 @@ public class BundleContextUnitTestCase extends FrameworkTest
       }
    }
 
+   @Test
    public void testServiceListener() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -272,9 +271,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
             bundleContext.addServiceListener(null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -282,9 +281,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
             bundleContext.addServiceListener(null, "(a=b)");
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -292,9 +291,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
             bundleContext.removeServiceListener(null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          bundleContext.addServiceListener(this);
@@ -345,16 +344,211 @@ public class BundleContextUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
-   protected BundleContext assertServiceLifecycle(Bundle bundle, boolean events) throws Exception
+   @Test
+   public void testBundleListener() throws Exception
+   {
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      try
+      {
+         bundle.start();
+         BundleContext bundleContext = bundle.getBundleContext();
+         assertNotNull(bundleContext);
+         
+         try
+         {
+            bundleContext.addBundleListener(null);
+            fail("Should not be here!");
+         }
+         catch (IllegalArgumentException t)
+         {
+            // expected
+         }
+         
+         try
+         {
+            bundleContext.removeBundleListener(null);
+            fail("Should not be here!");
+         }
+         catch (IllegalArgumentException t)
+         {
+            // expected
+         }
+         
+         bundleContext.addBundleListener(this);
+         bundleContext = assertBundleLifecycle(bundle, true);
+         bundleContext.removeBundleListener(this);
+         
+         bundleContext.addBundleListener(this);
+         bundleContext.removeBundleListener(this);
+         bundleContext = assertBundleLifecycle(bundle, false);
+         
+         bundleContext.addBundleListener(this);
+         bundleContext.addBundleListener(this);
+         bundleContext = assertBundleLifecycle(bundle, true);
+         bundleContext.removeBundleListener(this);
+
+         bundleContext.addBundleListener(this);
+         
+         // todo test asynch BundleListener
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
+      assertBundleEvent(BundleEvent.STOPPING, bundle);
+      assertBundleEvent(BundleEvent.STOPPED, bundle);
+      // todo assertBundleEvent(BundleEvent.UNRESOLVED, bundle);
+      assertBundleEvent(BundleEvent.UNINSTALLED, bundle);
+   }
+   
+   @Test
+   public void testFrameworkListener() throws Exception
+   {
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      try
+      {
+         bundle.start();
+         BundleContext bundleContext = bundle.getBundleContext();
+         assertNotNull(bundleContext);
+         
+         try
+         {
+            bundleContext.addFrameworkListener(null);
+            fail("Should not be here!");
+         }
+         catch (IllegalArgumentException t)
+         {
+            // expected
+         }
+         
+         try
+         {
+            bundleContext.removeFrameworkListener(null);
+            fail("Should not be here!");
+         }
+         catch (IllegalArgumentException t)
+         {
+            // expected
+         }
+         
+         // todo test events
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
+   }
+   
+   @Test
+   public void testGetDataFile() throws Exception
+   {
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      try
+      {
+         bundle.start();
+         BundleContext bundleContext = bundle.getBundleContext();
+         assertNotNull(bundleContext);
+         
+         File dataFile = bundleContext.getDataFile("blah");
+         assertNotNull(dataFile);
+         assertTrue(dataFile.toString().endsWith(File.separator + "blah"));
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
+   }
+   
+   @Test
+   public void testStopedBundleContext() throws Exception
+   {
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      try
+      {
+         bundle.start();
+         BundleContext bundleContext = bundle.getBundleContext();
+         assertNotNull(bundleContext);
+
+         // The context should be illegal to use.
+         bundle.stop();
+         try
+         {
+            bundleContext.getProperty(getClass().getName());
+            fail("Should not be here!");
+         }
+         catch (IllegalStateException t)
+         {
+            // expected
+         }
+         
+         // The context should not become reusable after we restart the bundle
+         bundle.start();
+         try
+         {
+            bundleContext.getProperty(getClass().getName());
+            fail("Should not be here!");
+         }
+         catch (IllegalStateException t)
+         {
+            // expected
+         }
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
+   }
+   
+   private BundleContext assertBundleLifecycle(Bundle bundle, boolean events) throws Exception
+   {
+      assertNoBundleEvent();
+      
+      bundle.stop();
+      if (events)
+      {
+         assertBundleEvent(BundleEvent.STOPPING, bundle);
+         assertBundleEvent(BundleEvent.STOPPED, bundle);
+      }
+      else
+      {
+         assertNoBundleEvent();
+      }
+      
+      bundle.start();
+      if (events)
+      {
+         assertBundleEvent(BundleEvent.STARTING, bundle);
+         assertBundleEvent(BundleEvent.STARTED, bundle);
+      }
+      else
+      {
+         assertNoBundleEvent();
+      }
+      
+      return bundle.getBundleContext();
+   }
+   
+   private void assertSystemProperty(BundleContext bundleContext, String property, String osgiProperty)
+   {
+      String expected = System.getProperty(property);
+      assertNotNull(expected);
+      assertEquals(expected, bundleContext.getProperty(osgiProperty));
+   }
+
+   private BundleContext assertServiceLifecycle(Bundle bundle, boolean events) throws Exception
    {
       return assertServiceLifecycle(bundle, null, events);
    }
    
-   protected BundleContext assertServiceLifecycle(Bundle bundle, Dictionary<String, Object> properties, boolean events) throws Exception
+   private BundleContext assertServiceLifecycle(Bundle bundle, Dictionary<String, Object> properties, boolean events) throws Exception
    {
       assertNoServiceEvent();
       
@@ -397,9 +591,9 @@ public class BundleContextUnitTestCase extends FrameworkTest
          bundleContext.addServiceListener(this);
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (IllegalStateException t)
       {
-         checkThrowable(IllegalStateException.class, t);
+         // expected
       }
       
       bundle.start();
@@ -407,193 +601,5 @@ public class BundleContextUnitTestCase extends FrameworkTest
       assertNotNull(bundleContext);
       
       return bundleContext;
-   }
-   
-   public void testBundleListener() throws Exception
-   {
-      // todo how to test INSTALLED/RESOLVED?
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
-      try
-      {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
-         
-         try
-         {
-            bundleContext.addBundleListener(null);
-            fail("Should not be here!");
-         }
-         catch (Throwable t)
-         {
-            checkThrowable(IllegalArgumentException.class, t);
-         }
-         
-         try
-         {
-            bundleContext.removeBundleListener(null);
-            fail("Should not be here!");
-         }
-         catch (Throwable t)
-         {
-            checkThrowable(IllegalArgumentException.class, t);
-         }
-         
-         bundleContext.addBundleListener(this);
-         bundleContext = assertBundleLifecycle(bundle, true);
-         bundleContext.removeBundleListener(this);
-         
-         bundleContext.addBundleListener(this);
-         bundleContext.removeBundleListener(this);
-         bundleContext = assertBundleLifecycle(bundle, false);
-         
-         bundleContext.addBundleListener(this);
-         bundleContext.addBundleListener(this);
-         bundleContext = assertBundleLifecycle(bundle, true);
-         bundleContext.removeBundleListener(this);
-
-         bundleContext.addBundleListener(this);
-         
-         // todo test asynch BundleListener
-      }
-      finally
-      {
-         uninstall(bundle);
-      }
-      assertBundleEvent(BundleEvent.STOPPING, bundle);
-      assertBundleEvent(BundleEvent.STOPPED, bundle);
-      // todo assertBundleEvent(BundleEvent.UNRESOLVED, bundle);
-      assertBundleEvent(BundleEvent.UNINSTALLED, bundle);
-   }
-   
-   protected BundleContext assertBundleLifecycle(Bundle bundle, boolean events) throws Exception
-   {
-      assertNoBundleEvent();
-      
-      bundle.stop();
-      if (events)
-      {
-         assertBundleEvent(BundleEvent.STOPPING, bundle);
-         assertBundleEvent(BundleEvent.STOPPED, bundle);
-      }
-      else
-      {
-         assertNoBundleEvent();
-      }
-      
-      bundle.start();
-      if (events)
-      {
-         assertBundleEvent(BundleEvent.STARTING, bundle);
-         assertBundleEvent(BundleEvent.STARTED, bundle);
-      }
-      else
-      {
-         assertNoBundleEvent();
-      }
-      
-      return bundle.getBundleContext();
-   }
-   
-   public void testFrameworkListener() throws Exception
-   {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
-      try
-      {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
-         
-         try
-         {
-            bundleContext.addFrameworkListener(null);
-            fail("Should not be here!");
-         }
-         catch (Throwable t)
-         {
-            checkThrowable(IllegalArgumentException.class, t);
-         }
-         
-         try
-         {
-            bundleContext.removeFrameworkListener(null);
-            fail("Should not be here!");
-         }
-         catch (Throwable t)
-         {
-            checkThrowable(IllegalArgumentException.class, t);
-         }
-         
-         // todo test events
-      }
-      finally
-      {
-         uninstall(bundle);
-      }
-   }
-   
-   public void testGetDataFile() throws Exception
-   {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
-      try
-      {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
-         
-         File dataFile = bundleContext.getDataFile("blah");
-         assertNotNull(dataFile);
-         assertTrue(dataFile.toString().endsWith(File.separator + "blah"));
-      }
-      finally
-      {
-         uninstall(bundle);
-      }
-   }
-   
-   public void testStopedBundleContext() throws Exception
-   {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
-      try
-      {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
-
-         // The context should be illegal to use.
-         bundle.stop();
-         try
-         {
-            bundleContext.getProperty(getClass().getName());
-            fail("Should not be here!");
-         }
-         catch (Throwable t)
-         {
-            checkThrowable(IllegalStateException.class, t);
-         }
-         
-         // The context should not become reusable after we restart the bundle
-         bundle.start();
-         try
-         {
-            bundleContext.getProperty(getClass().getName());
-            fail("Should not be here!");
-         }
-         catch (Throwable t)
-         {
-            checkThrowable(IllegalStateException.class, t);
-         }
-      }
-      finally
-      {
-         uninstall(bundle);
-      }
-   }
-   
-   protected void assertSystemProperty(BundleContext bundleContext, String property, String osgiProperty)
-   {
-      String expected = System.getProperty(property);
-      assertNotNull(expected);
-      assertEquals(expected, bundleContext.getProperty(osgiProperty));
    }
 }

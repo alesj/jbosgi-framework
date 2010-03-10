@@ -21,12 +21,15 @@
 */
 package org.jboss.test.osgi.bundle;
 
+// $Id: $
+
+import static org.junit.Assert.*;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.test.osgi.NativeFrameworkTest;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -36,58 +39,56 @@ import org.osgi.framework.Constants;
  *
  * TODO test security
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class SystemBundleUnitTestCase extends FrameworkTest
+public class SystemBundleUnitTestCase extends NativeFrameworkTest
 {
-   public SystemBundleUnitTestCase(String name)
-   {
-      super(name);
-   }
-
-   public static Test suite()
-   {
-      return suite(SystemBundleUnitTestCase.class);
-   }
-
+   @Test
    public void testBundleId() throws Exception
    {
-      assertEquals(0, getSystemBundle().getBundleId());
+      assertEquals(0, framework.getBundleId());
    }
    
+   @Test
    public void testSymbolicName() throws Exception
    {
-      assertEquals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, getSystemBundle().getSymbolicName());
+      assertEquals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, framework.getSymbolicName());
    }
    
+   @Test
    public void testState() throws Exception
    {
-      assertEquals(Bundle.ACTIVE, getSystemBundle().getState());
+      assertEquals(Bundle.ACTIVE, framework.getState());
    }
    
+   @Test
    public void testStartStop() throws Exception
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
+   @Test
    public void testUpdate() throws Exception
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
+   @Test
    public void testUninstall() throws Exception
    {
       try
       {
-         getSystemBundle().uninstall();
+         framework.uninstall();
          fail("Should not be here!");
       }
-      catch (Throwable t)
+      catch (BundleException t)
       {
-         checkThrowable(BundleException.class, t);
+         // expected
       }
    }
    
+   @Test
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public void testGetHeaders() throws Exception
    {
@@ -97,40 +98,47 @@ public class SystemBundleUnitTestCase extends FrameworkTest
       // todo expected.put(Attributes.Name.IMPLEMENTATION_VENDOR.toString(), "jboss.org");
       // todo expected.put(Attributes.Name.IMPLEMENTATION_VERSION.toString(), "r4v41");
       
-      Dictionary dictionary = getSystemBundle().getHeaders();
+      Dictionary dictionary = framework.getHeaders();
       assertEquals(expected, dictionary);
    }
    
+   @Test
    public void testLocation() throws Exception
    {
-      assertEquals(Constants.SYSTEM_BUNDLE_LOCATION, getSystemBundle().getLocation());
+      assertEquals(Constants.SYSTEM_BUNDLE_LOCATION, framework.getLocation());
    }
    
+   @Test
    public void testGetEntry()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
+   @Test
    public void testGetEntryPath()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
+   @Test
    public void testFindEntries()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
+   @Test
    public void testLoadClass()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
+   @Test
    public void testGetResource()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
+   @Test
    public void testGetResources()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");

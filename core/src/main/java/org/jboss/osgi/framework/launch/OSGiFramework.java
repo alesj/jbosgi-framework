@@ -41,7 +41,7 @@ import org.osgi.framework.launch.Framework;
  * @author thomas.diesler@jboss.com
  * @since 21-Aug-2009
  */
-public class OSGiFramework extends OSGiBundleWrapper implements Framework
+public final class OSGiFramework extends OSGiBundleWrapper implements Framework
 {
    // Provide logging
    final Logger log = Logger.getLogger(OSGiFramework.class);

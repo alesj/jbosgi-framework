@@ -59,6 +59,7 @@ import org.osgi.framework.SynchronousBundleListener;
  * @author <a href="baileyje@gmail.com">John Bailey</a>
  * @version $Revision: 87848 $
  */
+@Deprecated // This has a dependency on VFS21 - use OSGiTest.
 public abstract class FrameworkTest extends MicrocontainerTest implements FrameworkListener, SynchronousBundleListener, ServiceListener
 {
    private final List<FrameworkEvent> frameworkEvents = new CopyOnWriteArrayList<FrameworkEvent>();

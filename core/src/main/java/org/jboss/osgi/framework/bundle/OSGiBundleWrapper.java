@@ -191,12 +191,6 @@ public class OSGiBundleWrapper implements Bundle
       bundleState.stop(options);
    }
 
-   @Override
-   public String toString()
-   {
-      return bundleState.toString();
-   }
-
    public void uninstall() throws BundleException
    {
       bundleState.uninstall();
@@ -210,5 +204,27 @@ public class OSGiBundleWrapper implements Bundle
    public void update(InputStream in) throws BundleException
    {
       bundleState.update(in);
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return bundleState.hashCode();
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (!(obj instanceof OSGiBundleWrapper))
+         return false;
+      
+      OSGiBundleWrapper other = (OSGiBundleWrapper)obj;
+      return bundleState.equals(other.getBundleState());
+   }
+
+   @Override
+   public String toString()
+   {
+      return bundleState.toString();
    }
 }

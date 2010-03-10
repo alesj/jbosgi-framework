@@ -21,13 +21,17 @@
 */
 package org.jboss.test.osgi.bundle;
 
-import junit.framework.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
 import org.jboss.test.osgi.bundle.support.b.LifecycleService;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -38,24 +42,17 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.Diesler@jboss.com
  * @since 15-Dec-2009
  */
-public class BundleLifecycleTestCase extends FrameworkTest
+public class BundleLifecycleTestCase extends NativeFrameworkTest
 {
-   public static Test suite()
-   {
-      return suite(BundleLifecycleTestCase.class);
-   }
-
-   public BundleLifecycleTestCase(String name)
-   {
-      super(name);
-   }
 
    /**
     * Verifies that the service bundle can get started
     */
+   @Test
    public void testSimpleStart() throws Exception
    {
-      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
+      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
@@ -76,18 +73,21 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that the bundle state is RESOLVED after a failure in BundleActivator.start()
     */
+   @Test
    public void testDependencyNotAvailable() throws Exception
    {
-      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
+      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
          // BundleA not started - service not available  
-         ServiceReference sref = getSystemBundle().getBundleContext().getServiceReference(LifecycleService.class.getName());
+         ServiceReference sref = context.getServiceReference(LifecycleService.class.getName());
          assertNull("Service not available", sref);
 
-         Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
+         VirtualFile assemblyB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());
@@ -115,15 +115,18 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that BundleB can get started when the service is available
     */
+   @Test
    public void testDependencyAvailable() throws Exception
    {
-      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
+      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          bundleA.start();
          assertBundleState(Bundle.ACTIVE, bundleA.getState());
 
-         Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
+         VirtualFile assemblyB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
             bundleB.start();
@@ -145,14 +148,17 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that BundleB can get started when the service is made available 
     */
+   @Test
    public void testStartRetry() throws Exception
    {
-      Bundle bundleA = installBundle(assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class));
+      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
-         Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
+         VirtualFile assemblyB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());
@@ -191,17 +197,18 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that BundleB is still INSTALLED after a failure in PackageAdmin.resolve()
     */
+   @Test
    public void testFailToResolve() throws Exception
    {
-      Bundle bundleB = installBundle(assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class));
+      VirtualFile assemblyA = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+      Bundle bundleB = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleB.getState());
 
          // Get the PackageAdmin service
-         BundleContext sysContext = getSystemBundle().getBundleContext();
-         ServiceReference sref = sysContext.getServiceReference(PackageAdmin.class.getName());
-         PackageAdmin packageAdmin = (PackageAdmin)sysContext.getService(sref);
+         ServiceReference sref = context.getServiceReference(PackageAdmin.class.getName());
+         PackageAdmin packageAdmin = (PackageAdmin)context.getService(sref);
          
          // Attempt to explicitly resolve a bundle with missing dependency 
          boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleB });
@@ -220,11 +227,13 @@ public class BundleLifecycleTestCase extends FrameworkTest
    /**
     * Verifies that we get a BundleException when an invalid bundle is installed
     */
+   @Test
    public void testInstallInvalid() throws Exception
    {
       try
       {
-         installBundle(assembleBundle("missing-symbolic-name", "/bundles/lifecycle/invalid01"));
+         VirtualFile assembly = assembleBundle("missing-symbolic-name", "/bundles/lifecycle/invalid01");
+         context.installBundle(assembly.toURL().toExternalForm());
          fail("BundleException expected");
       }
       catch (BundleException ex)
@@ -234,7 +243,8 @@ public class BundleLifecycleTestCase extends FrameworkTest
       
       try
       {
-         installBundle(assembleBundle("invalid-export", "/bundles/lifecycle/invalid02"));
+         VirtualFile assembly = assembleBundle("invalid-export", "/bundles/lifecycle/invalid02");
+         context.installBundle(assembly.toURL().toExternalForm());
          fail("BundleException expected");
       }
       catch (BundleException ex)
