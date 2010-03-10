@@ -450,7 +450,7 @@ public class OSGiBundleManager
       VirtualFile root;
       try
       {
-         root = AbstractVFS.getChild(locationURL);
+         root = AbstractVFS.getRoot(locationURL);
       }
       catch (IOException e)
       {
@@ -682,7 +682,7 @@ public class OSGiBundleManager
       try
       {
          URL storageLocation = getBundleStorageLocation(in);
-         VirtualFile root = AbstractVFS.getChild(storageLocation);
+         VirtualFile root = AbstractVFS.getRoot(storageLocation);
 
          BundleInfo info = BundleInfo.createBundleInfo(root, location);
          Deployment dep = DeploymentFactory.createDeployment(info);
