@@ -21,12 +21,16 @@
  */
 package org.jboss.test.osgi.compendium;
 
-import junit.framework.Test;
+// $Id: $
 
-import org.jboss.osgi.framework.packageadmin.PackageAdminImpl;
-import org.jboss.test.osgi.FrameworkTest;
-import org.jboss.test.osgi.compendium.support.b.Other;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.compendium.support.a.PA;
+import org.jboss.test.osgi.compendium.support.b.Other;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -34,57 +38,46 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * Test PackageAdmin service.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
+ * @author thomas.diesler@jboss.com
  */
-public class PackageAdminTestCase extends FrameworkTest
+public class PackageAdminTestCase extends NativeFrameworkTest
 {
-   public PackageAdminTestCase(String name)
-   {
-      super(name);
-   }
-
-   public static Test suite()
-   {
-      return suite(PackageAdminTestCase.class);
-   }
-
-   protected PackageAdmin createPackageAdmin()
-   {
-      return new PackageAdminImpl(getBundleManager());
-   }
-
+   @Test
    public void testGetBudleFromClass() throws Exception
    {
-      Bundle bundle = installBundle(assembleBundle("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class));
+      VirtualFile assemblyA = assembleBundle("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle.start();
-         Class<?> paClass = assertLoadClass(bundle, PA.class);
+         bundleA.start();
+         Class<?> paClass = assertLoadClass(bundleA, PA.class.getName());
 
-         PackageAdmin pa = createPackageAdmin();
+         PackageAdmin pa = getPackageAdmin();
 
          Bundle found = pa.getBundle(paClass);
-         assertSame(bundle, found);
+         assertSame(bundleA, found);
 
          Bundle notFound = pa.getBundle(getClass());
          assertNull(notFound);
 
-         Bundle other = installBundle(assembleBundle("simple", "/bundles/simple/simple-bundle1", Other.class));
+         VirtualFile assemblyB = assembleBundle("simple", "/bundles/simple/simple-bundle1", Other.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            other.start();
-            Class<?> otherClass = assertLoadClass(other, Other.class);
+            bundleB.start();
+            Class<?> otherClass = assertLoadClass(bundleB, Other.class.getName());
 
             found = pa.getBundle(otherClass);
-            assertSame(other, found);
+            assertSame(bundleB, found);
          }
          finally
          {
-            other.uninstall();
+            bundleB.uninstall();
          }
       }
       finally
       {
-         bundle.uninstall();
+         bundleA.uninstall();
       }
    }
 }

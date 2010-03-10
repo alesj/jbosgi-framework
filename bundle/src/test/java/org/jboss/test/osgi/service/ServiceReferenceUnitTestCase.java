@@ -21,6 +21,8 @@
 */
 package org.jboss.test.osgi.service;
 
+import static org.junit.Assert.*;
+
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -28,10 +30,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import junit.framework.Test;
-
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.service.support.a.A;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -45,25 +47,17 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class ServiceReferenceUnitTestCase extends FrameworkTest
+public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
 {
-   public ServiceReferenceUnitTestCase(String name)
-   {
-      super(name);
-   }
-
-   public static Test suite()
-   {
-      return suite(ServiceReferenceUnitTestCase.class);
-   }
-
+   @Test
    public void testGetProperty() throws Exception
    {
       ServiceReference reference = null;
       String[] clazzes = new String[] { BundleContext.class.getName() };
       Object serviceID = null;
 
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -84,9 +78,9 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          assertNotNull(serviceID);
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID.toLowerCase()));
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID.toUpperCase()));
-         assertEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS));
-         assertEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS.toLowerCase()));
-         assertEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS.toUpperCase()));
+         assertArrayEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS));
+         assertArrayEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS.toLowerCase()));
+         assertArrayEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS.toUpperCase()));
          assertEquals("a", reference.getProperty("testA"));
          assertEquals("b", reference.getProperty("testB"));
          assertEquals("Case", reference.getProperty("MiXeD"));
@@ -143,7 +137,7 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
       
       assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
@@ -156,11 +150,13 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       assertNull(reference.getProperty(null));
    }
    
+   @Test
    public void testGetPropertyKeys() throws Exception
    {
       ServiceReference reference = null;
       
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -196,12 +192,12 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
       assertPropertyKeys(reference, "testA", "testB", "testC", "MiXeD");
    }
 
-   protected void assertPropertyKeys(ServiceReference reference, String... expectedKeys)
+   private void assertPropertyKeys(ServiceReference reference, String... expectedKeys)
    {
       Set<String> expected = new HashSet<String>();
       expected.add(Constants.SERVICE_ID);
@@ -216,9 +212,11 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       assertEquals(expected, actual);
    }
    
+   @Test
    public void testGetBundle() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -241,13 +239,15 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testGetBundleAfterStop() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -270,17 +270,19 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testUsingBundles() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
+         bundle1.start();
+         BundleContext bundleContext = bundle1.getBundleContext();
          assertNotNull(bundleContext);
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
@@ -291,7 +293,8 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          
          assertUsingBundles(reference);
          
-         Bundle bundle2 = addBundle("/bundles/simple/", "simple-bundle2");
+         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
             bundle2.start();
@@ -314,29 +317,31 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
 
             bundleContext.getService(reference);
             bundleContext2.getService(reference);
-            assertUsingBundles(reference, bundle, bundle2);
+            assertUsingBundles(reference, bundle1, bundle2);
             
             registration.unregister();
             assertUsingBundles(reference);
          }
          finally
          {
-            uninstall(bundle2);
+            bundle2.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle1.uninstall();
       }
    }
    
+   @Test
    public void testUsingBundlesAfterStop() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
+         bundle1.start();
+         BundleContext bundleContext = bundle1.getBundleContext();
          assertNotNull(bundleContext);
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
@@ -347,7 +352,8 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          
          assertUsingBundles(reference);
          
-         Bundle bundle2 = addBundle("/bundles/simple/", "simple-bundle2");
+         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
             bundle2.start();
@@ -356,25 +362,27 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
 
             bundleContext.getService(reference);
             bundleContext2.getService(reference);
-            assertUsingBundles(reference, bundle, bundle2);
+            assertUsingBundles(reference, bundle1, bundle2);
             
-            bundle.stop();
+            bundle1.stop();
             assertUsingBundles(reference);
          }
          finally
          {
-            uninstall(bundle2);
+            bundle2.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle1.uninstall();
       }
    }
    
+   @Test
    public void testIsAssignableToErrors() throws Exception
    {
-      Bundle bundle = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -392,9 +400,9 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
             reference.isAssignableTo(null, A.class.getName());
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -402,24 +410,26 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
             reference.isAssignableTo(bundle, null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }   
 
+   @Test
    public void testNotAssignableTo() throws Exception
    {
-      Bundle bundle = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
+      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
+         bundle1.start();
+         BundleContext bundleContext = bundle1.getBundleContext();
          assertNotNull(bundleContext);
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
@@ -428,7 +438,8 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
 
-         Bundle bundle2 = installBundle(assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class));
+         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class);
+         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
             assertFalse(reference.isAssignableTo(bundle2, A.class.getName()));
@@ -440,21 +451,23 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundle2.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle1.uninstall();
       }
    }
    
+   @Test
    public void testIsAssignableTo() throws Exception
    {
       //Bundle-Name: Service2
       //Bundle-SymbolicName: org.jboss.test.osgi.service2
       //Export-Package: org.jboss.test.osgi.service.support.a
-      Bundle bundle2 = installBundle(assembleBundle("service2", "/bundles/service/service-bundle2", A.class));
+      VirtualFile assembly2 = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
       
       try
       {
@@ -465,7 +478,8 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          //Bundle-Name: Service1
          //Bundle-SymbolicName: org.jboss.test.osgi.service1
          //Import-Package: org.jboss.test.osgi.service.support.a
-         Bundle bundle1 = installBundle(assembleBundle("service1", "/bundles/service/service-bundle1"));
+         VirtualFile assembly1 = assembleBundle("service1", "/bundles/service/service-bundle1");
+         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
          
          try
          {
@@ -489,18 +503,20 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle1);
+            bundle1.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle2);
+         bundle2.uninstall();
       }
    }
    
+   @Test
    public void testCompareTo() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -547,9 +563,9 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
             reference1.compareTo(null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -557,9 +573,9 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
             reference1.compareTo(new Object());
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
 
          properties = new Hashtable<String, Object>();
@@ -600,7 +616,7 @@ public class ServiceReferenceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    

@@ -21,11 +21,15 @@
 */
 package org.jboss.test.osgi.service;
 
-import junit.framework.Test;
+
+import static org.junit.Assert.*;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleWrapper;
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
+import org.jboss.test.osgi.service.support.a.A;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
@@ -39,24 +43,17 @@ import org.osgi.framework.ServiceRegistration;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision$
  */
-public class ServiceFactoryUnitTestCase extends FrameworkTest
+public class ServiceFactoryUnitTestCase extends NativeFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };
 
-   public static Test suite()
-   {
-      return suite(ServiceFactoryUnitTestCase.class);
-   }
 
-   public ServiceFactoryUnitTestCase(String name)
-   {
-      super(name);
-   }
-
+   @Test
    public void testRegisterServiceFactory() throws Exception
    {
-      Bundle bundleA = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assemblyA = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          bundleA.start();
@@ -80,7 +77,8 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
          assertEquals(bundleA.getSymbolicName(), serviceFactory.getBundle.getSymbolicName());
          assertEquals(1, serviceFactory.getCount);
 
-         Bundle bundleB = addBundle("/bundles/simple/", "simple-bundle2");
+         VirtualFile assemblyB = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
             bundleB.start();
@@ -97,12 +95,12 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundleB);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundleA);
+         bundleA.uninstall();
       }
    }
    
@@ -110,7 +108,8 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
    {
       String OBJCLASS = BundleContext.class.getName();
       
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -132,7 +131,7 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
@@ -140,7 +139,8 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
    {
       String OBJCLASS = BundleContext.class.getName();
       
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -159,14 +159,14 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
             bundleContext.getService(reference);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
@@ -174,7 +174,8 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
    {
       String[] OBJCLASSES = {String.class.getName(), BundleContext.class.getName()};
       
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -199,7 +200,7 @@ public class ServiceFactoryUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
 }

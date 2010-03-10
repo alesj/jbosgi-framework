@@ -21,11 +21,15 @@
 */
 package org.jboss.test.osgi.classloader;
 
-import junit.framework.Test;
+// $Id: $
 
-import org.jboss.test.osgi.FrameworkTest;
+import static org.junit.Assert.fail;
+
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.jboss.test.osgi.classloader.support.b.B;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -34,56 +38,53 @@ import org.osgi.framework.BundleException;
  *
  * TODO test security
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class RequireBundleUnitTestCase extends FrameworkTest
+public class RequireBundleUnitTestCase extends NativeFrameworkTest
 {
-   public RequireBundleUnitTestCase(String name)
-   {
-      super(name);
-   }
-
-   public static Test suite()
-   {
-      return suite(RequireBundleUnitTestCase.class);
-   }
-
+   @Test
    public void testSimpleRequireBundle() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("simplerequirebundleA", "/bundles/classloader/simplerequirebundleA", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("simplerequirebundleA", "/bundles/classloader/simplerequirebundleA", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            assertLoadClass(bundle2, A.class, bundle1);
-            assertLoadClass(bundle2, B.class, bundle2);
+            bundleB.start();
+            assertLoadClass(bundleB, A.class.getName(), bundleA);
+            assertLoadClass(bundleB, B.class.getName(), bundleB);
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testSimpleRequireBundleFails() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("simplerequirebundlefails", "/bundles/classloader/simplerequirebundlefails", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("simplerequirebundlefails", "/bundles/classloader/simplerequirebundlefails", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
+            bundleB.start();
             fail("Should not be here!");
          }
          catch (BundleException ex)
@@ -92,51 +93,57 @@ public class RequireBundleUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testVersionRequireBundle() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("versionrequirebundleA", "/bundles/classloader/versionrequirebundleA", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("versionrequirebundleA", "/bundles/classloader/versionrequirebundleA", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            assertLoadClass(bundle2, A.class, bundle1);
-            assertLoadClass(bundle2, B.class, bundle2);
+            bundleB.start();
+            assertLoadClass(bundleB, A.class.getName(), bundleA);
+            assertLoadClass(bundleB, B.class.getName(), bundleB);
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testVersionRequireBundleFails() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("versionrequirebundlefails", "/bundles/classloader/versionrequirebundlefails", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("versionrequirebundlefails", "/bundles/classloader/versionrequirebundlefails", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
+            bundleB.start();
             fail("Should not be here!");
          }
          catch (BundleException rte)
@@ -145,193 +152,213 @@ public class RequireBundleUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testOptionalRequireBundle() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("optionalrequirebundleA", "/bundles/classloader/optionalrequirebundleA", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("optionalrequirebundleA", "/bundles/classloader/optionalrequirebundleA", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            assertLoadClass(bundle2, A.class, bundle1);
-            assertLoadClass(bundle2, B.class, bundle2);
+            bundleB.start();
+            assertLoadClass(bundleB, A.class.getName(), bundleA);
+            assertLoadClass(bundleB, B.class.getName(), bundleB);
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testOptionalRequireBundleFails() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("optionalrequirebundlefails", "/bundles/classloader/optionalrequirebundlefails", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("optionalrequirebundlefails", "/bundles/classloader/optionalrequirebundlefails", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            assertLoadClassFail(bundle2, A.class);
-            assertLoadClass(bundle2, B.class);
+            bundleB.start();
+            assertLoadClassFail(bundleB, A.class.getName());
+            assertLoadClass(bundleB, B.class.getName());
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testReExportRequireBundle() throws Exception
    {
       //Bundle-Name: BundleA
       //Bundle-Version: 1.0.0
       //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleA;test=x
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
          
          //Bundle-Name: BundleB
          //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
          //Require-Bundle: org.jboss.test.osgi.classloader.bundleA;visibility:=reexport
          //Export-Package: org.jboss.test.osgi.classloader.support.b
-         Bundle bundle2 = installBundle(assembleBundle("reexportrequirebundleA", "/bundles/classloader/reexportrequirebundleA", B.class));
+         VirtualFile assemblyB = assembleBundle("reexportrequirebundleA", "/bundles/classloader/reexportrequirebundleA", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          
          try
          {
-            bundle2.start();
-            assertLoadClass(bundle2, A.class, bundle1);
-            assertLoadClass(bundle2, B.class, bundle2);
+            bundleB.start();
+            assertLoadClass(bundleB, A.class.getName(), bundleA);
+            assertLoadClass(bundleB, B.class.getName(), bundleB);
             
             //Bundle-Name: BundleC
             //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleC
             //Require-Bundle: org.jboss.test.osgi.classloader.bundleB
-            Bundle bundle3 = installBundle(assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB"));
+            VirtualFile assemblyC = assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB");
+            Bundle bundleC = context.installBundle(assemblyC.toURL().toExternalForm());
             
             try
             {
-               assertLoadClass(bundle3, A.class, bundle1);
-               assertLoadClass(bundle3, B.class, bundle2);
+               assertLoadClass(bundleC, A.class.getName(), bundleA);
+               assertLoadClass(bundleC, B.class.getName(), bundleB);
             }
             finally
             {
-               uninstall(bundle3);
+               bundleC.uninstall();
             }
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testNoReExportRequireBundle() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("noreexportrequirebundleA", "/bundles/classloader/noreexportrequirebundleA", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("noreexportrequirebundleA", "/bundles/classloader/noreexportrequirebundleA", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            assertLoadClass(bundle2, A.class, bundle1);
-            assertLoadClass(bundle2, B.class, bundle2);
-            Bundle bundle3 = installBundle(assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB"));
+            bundleB.start();
+            assertLoadClass(bundleB, A.class.getName(), bundleA);
+            assertLoadClass(bundleB, B.class.getName(), bundleB);
+            VirtualFile assemblyC = assembleBundle("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB");
+            Bundle bundleC = context.installBundle(assemblyC.toURL().toExternalForm());
             try
             {
-               assertLoadClassFail(bundle3, A.class);
-               assertLoadClass(bundle3, B.class, bundle2);
+               assertLoadClassFail(bundleC, A.class.getName());
+               assertLoadClass(bundleC, B.class.getName(), bundleB);
             }
             finally
             {
-               uninstall(bundle3);
+               bundleC.uninstall();
             }
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testAttributeRequireBundle() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
-         Bundle bundle2 = installBundle(assembleBundle("attributerequirebundleA", "/bundles/classloader/attributerequirebundleA", B.class));
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
+         VirtualFile assemblyB = assembleBundle("attributerequirebundleA", "/bundles/classloader/attributerequirebundleA", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            assertLoadClass(bundle2, A.class, bundle1);
-            assertLoadClass(bundle2, B.class, bundle2);
+            bundleB.start();
+            assertLoadClass(bundleB, A.class.getName(), bundleA);
+            assertLoadClass(bundleB, B.class.getName(), bundleB);
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testAttributeRequireBundleFails() throws Exception
    {
       // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleA;test=x
       // Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x
       // Bundle-Version: 1.0.0
-      Bundle bundle1 = installBundle(assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class));
+      VirtualFile assemblyA = assembleBundle("bundleA", "/bundles/classloader/bundleA", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         assertLoadClass(bundle1, A.class);
+         bundleA.start();
+         assertLoadClass(bundleA, A.class.getName());
          
          // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
          // Require-Bundle: org.jboss.test.osgi.classloader.bundleA;doesnotexist=true;test=y
-         Bundle bundle2 = installBundle(assembleBundle("attributerequirebundlefails", "/bundles/classloader/attributerequirebundlefails", B.class));
+         VirtualFile assemblyB = assembleBundle("attributerequirebundlefails", "/bundles/classloader/attributerequirebundlefails", B.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
+            bundleB.start();
             fail("Should not be here!");
          }
          catch (BundleException rte)
@@ -340,12 +367,12 @@ public class RequireBundleUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
 }

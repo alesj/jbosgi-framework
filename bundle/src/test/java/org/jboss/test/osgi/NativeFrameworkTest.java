@@ -23,11 +23,16 @@ package org.jboss.test.osgi;
 
 // $Id: $
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.logging.Logger;
@@ -48,6 +53,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.launch.Framework;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * Parent for native framework tests.  
@@ -89,6 +95,73 @@ public abstract class NativeFrameworkTest extends OSGiTest implements ServiceLis
       }
    }
 
+   protected PackageAdmin getPackageAdmin()
+   {
+      ServiceReference sref = context.getServiceReference(PackageAdmin.class.getName());
+      return (PackageAdmin)context.getService(sref);
+   }
+
+   protected void assertLoadClass(Bundle bundle, String className, Bundle exporter)
+   {
+      Class<?> clazz = assertLoadClass(bundle, className);
+      Bundle actual = getPackageAdmin().getBundle(clazz);
+      assertEquals(exporter, actual);
+   }
+
+   @Override
+   public void frameworkEvent(FrameworkEvent event)
+   {
+      synchronized (frameworkEvents)
+      {
+         log.debug("FrameworkEvent type=" + ConstantsHelper.frameworkEvent(event.getType()) + " for " + event);
+         frameworkEvents.add(event);
+         frameworkEvents.notifyAll();
+      }
+   }
+
+   protected void assertNoFrameworkEvent() throws Exception
+   {
+      log.debug("frameworkEvents=" + frameworkEvents);
+      assertEquals(0, frameworkEvents.size());
+   }
+
+   protected void assertFrameworkEvent(int type, Bundle bundle, Class<? extends Throwable> expectedThrowable) throws Exception
+   {
+      waitForEvent(frameworkEvents, type);
+      log.debug("frameworkEvents=" + frameworkEvents);
+      int size = frameworkEvents.size();
+      assertTrue("" + size, size > 0);
+      FrameworkEvent event = frameworkEvents.remove(0);
+      assertEquals(ConstantsHelper.frameworkEvent(type), ConstantsHelper.frameworkEvent(event.getType()));
+      Throwable t = event.getThrowable();
+      if (expectedThrowable == null)
+      {
+         if (t != null)
+         {
+            log.error("Unexpected error in Framework event: ", t);
+            fail("Unexpected throwable: " + t);
+         }
+      }
+      else
+      {
+         String message = expectedThrowable.getSimpleName() + " is assignable from " + t.getClass().getSimpleName();
+         assertTrue(message, expectedThrowable.isAssignableFrom(t.getClass()));
+      }
+      assertEquals(bundle, event.getSource());
+      assertEquals(bundle, event.getBundle());
+   }
+
+   @Override
+   public void bundleChanged(BundleEvent event)
+   {
+      synchronized (bundleEvents)
+      {
+         log.debug("BundleChanged type=" + ConstantsHelper.bundleEvent(event.getType()) + " for " + event);
+         bundleEvents.add(event);
+         bundleEvents.notifyAll();
+      }
+   }
+
    protected void assertNoBundleEvent() throws Exception
    {
       log.debug("bundleEvents=" + bundleEvents);
@@ -126,28 +199,6 @@ public abstract class NativeFrameworkTest extends OSGiTest implements ServiceLis
    }
 
    @Override
-   public void frameworkEvent(FrameworkEvent event)
-   {
-      synchronized (frameworkEvents)
-      {
-         log.debug("FrameworkEvent type=" + ConstantsHelper.frameworkEvent(event.getType()) + " for " + event);
-         frameworkEvents.add(event);
-         frameworkEvents.notifyAll();
-      }
-   }
-
-   @Override
-   public void bundleChanged(BundleEvent event)
-   {
-      synchronized (bundleEvents)
-      {
-         log.debug("BundleChanged type=" + ConstantsHelper.bundleEvent(event.getType()) + " for " + event);
-         bundleEvents.add(event);
-         bundleEvents.notifyAll();
-      }
-   }
-
-   @Override
    public void serviceChanged(ServiceEvent event)
    {
       synchronized (serviceEvents)
@@ -176,6 +227,132 @@ public abstract class NativeFrameworkTest extends OSGiTest implements ServiceLis
       assertEquals(reference, event.getServiceReference());
    }
 
+   protected void assertNoAllReferences(BundleContext bundleContext, String clazz) throws Exception
+   {
+      assertNoAllReferences(bundleContext, clazz, null);
+   }
+
+   protected void assertNoAllReferences(BundleContext bundleContext, String clazz, String filter) throws Exception
+   {
+      ServiceReference[] actual = bundleContext.getAllServiceReferences(clazz, filter);
+      if (actual != null)
+         log.debug(bundleContext + " got " + Arrays.asList(actual) + " for clazz=" + clazz + " filter=" + filter);
+      else
+         log.debug(bundleContext + " got nothing for clazz=" + clazz + " filter=" + filter);
+      assertNull("Expected no references for clazz=" + clazz + " filter=" + filter, actual);
+   }
+
+   protected void assertAllReferences(BundleContext bundleContext, String clazz, ServiceReference... expected) throws Exception
+   {
+      assertAllReferences(bundleContext, clazz, null, expected);
+   }
+
+   protected void assertAllReferences(BundleContext bundleContext, String clazz, String filter, ServiceReference... expected) throws Exception
+   {
+      ServiceReference[] actual = bundleContext.getAllServiceReferences(clazz, filter);
+      if (actual != null)
+         log.debug(bundleContext + " got " + Arrays.asList(actual) + " for clazz=" + clazz + " filter=" + filter);
+      else
+         log.debug(bundleContext + " got nothing for clazz=" + clazz + " filter=" + filter);
+      assertArrayEquals(bundleContext + " with clazz=" + clazz + " filter=" + filter, expected, actual);
+   }
+
+   protected void assertNoReferences(BundleContext bundleContext, String clazz) throws Exception
+   {
+      assertNoReferences(bundleContext, clazz, null);
+   }
+
+   protected void assertNoReferences(BundleContext bundleContext, String clazz, String filter) throws Exception
+   {
+      ServiceReference[] actual = bundleContext.getServiceReferences(clazz, filter);
+      if (actual != null)
+         log.debug(bundleContext + " got " + Arrays.asList(actual) + " for clazz=" + clazz + " filter=" + filter);
+      else
+         log.debug(bundleContext + " got nothing for clazz=" + clazz + " filter=" + filter);
+      assertNull("Expected no references for clazz=" + clazz + " filter=" + filter, actual);
+   }
+
+   protected void assertReferences(BundleContext bundleContext, String clazz, ServiceReference... expected) throws Exception
+   {
+      assertReferences(bundleContext, clazz, null, expected);
+   }
+
+   protected void assertReferences(BundleContext bundleContext, String clazz, String filter, ServiceReference... expected) throws Exception
+   {
+      ServiceReference[] actual = bundleContext.getServiceReferences(clazz, filter);
+      if (actual != null)
+         log.debug(bundleContext + " got " + Arrays.asList(actual) + " for clazz=" + clazz + " filter=" + filter);
+      else
+         log.debug(bundleContext + " got nothing for clazz=" + clazz + " filter=" + filter);
+      assertArrayEquals(bundleContext + " with clazz=" + clazz + " filter=" + filter, expected, actual);
+   }
+
+   protected void assertNoGetReference(BundleContext bundleContext, String clazz) throws Exception
+   {
+      ServiceReference actual = bundleContext.getServiceReference(clazz);
+      if (actual != null)
+         log.debug(bundleContext + " got " + actual + " for clazz=" + clazz);
+      else
+         log.debug(bundleContext + " got nothing for clazz=" + clazz);
+      assertNull("Expected no references for clazz=" + clazz, actual);
+   }
+
+   protected void assertGetReference(BundleContext bundleContext, String clazz, ServiceReference expected) throws Exception
+   {
+      ServiceReference actual = bundleContext.getServiceReference(clazz);
+      if (actual != null)
+         log.debug(bundleContext + " got " + Arrays.asList(actual) + " for clazz=" + clazz);
+      else
+         log.debug(bundleContext + " got nothing for clazz=" + clazz);
+      assertEquals(bundleContext + " with clazz=" + clazz, expected, actual);
+   }
+
+   protected void assertUsingBundles(ServiceReference reference, Bundle... bundles)
+   {
+      Set<Bundle> actual = new HashSet<Bundle>();
+      Bundle[] users = reference.getUsingBundles();
+      if (users != null)
+         actual.addAll(Arrays.asList(users));
+
+      Set<Bundle> expected = new HashSet<Bundle>();
+      expected.addAll(Arrays.asList(bundles));
+
+      log.debug(reference + " users=" + actual);
+
+      // switch - check expected on actual, since actual might be proxy
+      assertEquals(actual, expected);
+   }
+   
+   protected <T> T assertInstanceOf(Object o, Class<T> expectedType)
+   {
+      return assertInstanceOf(o, expectedType, false);
+   }
+
+   protected <T> T assertInstanceOf(Object o, Class<T> expectedType, boolean allowNull)
+   {
+      if (expectedType == null)
+         fail("Null expectedType");
+
+      if (o == null)
+      {
+         if (allowNull == false)
+            fail("Null object not allowed.");
+         else
+            return null;
+      }
+
+      try
+      {
+         return expectedType.cast(o);
+      }
+      catch (ClassCastException e)
+      {
+         fail("Object " + o + " of class " + o.getClass().getName() + " is not an instanceof " + expectedType.getName());
+         // should not reach this
+         return null;
+      }
+   }
+   
    @SuppressWarnings("rawtypes")
    private void waitForEvent(List events, int type) throws InterruptedException
    {

@@ -31,7 +31,7 @@ import java.net.URL;
 
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiTest;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;
@@ -50,7 +50,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
-public class FragmentTestCase extends OSGiTest
+public class FragmentTestCase extends NativeFrameworkTest
 {
    private Framework framework;
    private BundleContext context;
@@ -93,7 +93,7 @@ public class FragmentTestCase extends OSGiTest
       assertNull("Resource URL null", resourceURL);
 
       // Load a private class
-      assertBundleLoadClass(hostA, SubBeanA.class.getName(), true);
+      assertLoadClass(hostA, SubBeanA.class.getName());
 
       hostA.uninstall();
       assertBundleState(Bundle.UNINSTALLED, hostA.getState());
@@ -155,10 +155,10 @@ public class FragmentTestCase extends OSGiTest
       assertNotNull("Resource URL not null", resourceURL);
 
       // Load class provided by the fragment
-      assertBundleLoadClass(hostA, FragBeanA.class.getName(), true);
+      assertLoadClass(hostA, FragBeanA.class.getName());
 
       // Load a private class
-      assertBundleLoadClass(hostA, SubBeanA.class.getName(), true);
+      assertLoadClass(hostA, SubBeanA.class.getName());
 
       hostA.uninstall();
       assertBundleState(Bundle.UNINSTALLED, hostA.getState());
@@ -200,7 +200,7 @@ public class FragmentTestCase extends OSGiTest
 
       // The fragment contains an overwrites Private-Package with Import-Package
       // The SubBeanA is expected to come from HostB, which exports that package
-      assertBundleLoadClass(hostB, SubBeanA.class.getName(), true);
+      assertLoadClass(hostB, SubBeanA.class.getName());
 
       hostA.uninstall();
       assertBundleState(Bundle.UNINSTALLED, hostA.getState());

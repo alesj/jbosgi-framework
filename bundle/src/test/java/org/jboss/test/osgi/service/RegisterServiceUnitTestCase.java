@@ -21,12 +21,14 @@
 */
 package org.jboss.test.osgi.service;
 
+import static org.junit.Assert.*;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -41,27 +43,19 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class RegisterServiceUnitTestCase extends FrameworkTest
+public class RegisterServiceUnitTestCase extends NativeFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };
 
-   public static Test suite()
-   {
-      return suite(RegisterServiceUnitTestCase.class);
-   }
-
-   public RegisterServiceUnitTestCase(String name)
-   {
-      super(name);
-   }
-
+   @Test
    public void testRegisterServiceErrors() throws Exception
    {
       String OBJCLASS = BundleContext.class.getName();
       String[] OBJCLASSES = new String[] { OBJCLASS };
       
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -73,9 +67,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService((String) null, new Object(), null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -83,9 +77,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService((String[]) null, new Object(), null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -93,9 +87,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(new String[0], new Object(), null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -103,9 +97,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASS, null, null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -113,9 +107,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASSES, null, null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -123,9 +117,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASS, new Object(), null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -133,9 +127,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASSES, new Object(), null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
 
          Dictionary<String, Object> properties = new Hashtable<String, Object>();
@@ -146,9 +140,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASS, bundleContext, properties);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -156,9 +150,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASSES, bundleContext, properties);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          bundle.stop();
@@ -168,9 +162,9 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASS, bundleContext, null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
          
          try
@@ -178,23 +172,25 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             bundleContext.registerService(OBJCLASSES, bundleContext, null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testRegisterServiceOBJCLASS() throws Exception
    {
       Dictionary<String, Object> properties = new Hashtable<String, Object>();
       properties.put(Constants.OBJECTCLASS, new String[] { "rubbish" });
 
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -217,13 +213,15 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testRegisterService() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -242,13 +240,15 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
 
+   @Test
    public void testBundleUninstall() throws Exception
    {
-      Bundle bundle1 = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly1 = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
          bundle1.start();
@@ -260,7 +260,8 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         Bundle bundle2 = addBundle("/bundles/simple/", "simple-bundle2");
+         VirtualFile assembly2 = assembleBundle("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
+         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
             bundle2.start();
@@ -272,7 +273,7 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundle2.uninstall();
          }
 
          actual = bundleContext.getService(reference);
@@ -280,13 +281,15 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle1);
+         bundle1.uninstall();
       }
    }
 
+   @Test
    public void testRegisteredServices() throws Exception
    {
-      Bundle bundle1 = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly1 = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
          bundle1.start();
@@ -298,7 +301,8 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         Bundle bundle2 = addBundle("/bundles/simple/", "simple-bundle2");
+         VirtualFile assembly2 = assembleBundle("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
+         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
             bundle2.start();
@@ -312,11 +316,11 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
             assertNull(registered);
 
             registered = bundle1.getRegisteredServices();
-            assertEquals(new ServiceReference[]{reference}, registered);
+            assertArrayEquals(new ServiceReference[]{reference}, registered);
          }
          finally
          {
-            uninstall(bundle2);
+            bundle2.uninstall();
          }
 
          actual = bundleContext.getService(reference);
@@ -324,7 +328,22 @@ public class RegisterServiceUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle1);
+         bundle1.uninstall();
       }
+   }
+
+   protected void assertObjectClass(String expected, ServiceReference reference)
+   {
+      assertObjectClass(new String[] { expected }, reference);
+   }
+
+   protected void assertObjectClass(String[] expected, ServiceReference reference)
+   {
+      Object actual = reference.getProperty(Constants.OBJECTCLASS);
+      if (actual == null)
+         fail("no object class???");
+      if (actual instanceof String[] == false)
+         fail(actual + " is not a string array??? " + actual.getClass().getName());
+      assertArrayEquals(expected, (String[])actual);
    }
 }

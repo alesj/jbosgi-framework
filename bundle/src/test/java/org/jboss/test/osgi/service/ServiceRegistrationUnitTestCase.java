@@ -21,12 +21,19 @@
 */
 package org.jboss.test.osgi.service;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import java.util.Hashtable;
 
-import junit.framework.Test;
-
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -40,21 +47,14 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class ServiceRegistrationUnitTestCase extends FrameworkTest
+public class ServiceRegistrationUnitTestCase extends NativeFrameworkTest
 {
-   public ServiceRegistrationUnitTestCase(String name)
-   {
-      super(name);
-   }
 
-   public static Test suite()
-   {
-      return suite(ServiceRegistrationUnitTestCase.class);
-   }
-
+   @Test
    public void testGetReference() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -82,9 +82,9 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             registration.getReference();
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
 
          ServiceRegistration registration2 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
@@ -101,20 +101,22 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             registration2.getReference();
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testSetProperties() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -193,9 +195,9 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             registration.setProperties(properties);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          assertNoServiceEvent();
          
@@ -207,21 +209,23 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             registration.setProperties(new Hashtable<String, Object>());
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
          assertNoServiceEvent();
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testSetPropertiesAfterStop() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -238,25 +242,27 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             registration.setProperties(new Hashtable<String, Object>());
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
          assertNoServiceEvent();
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testUnregister() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
+         bundle1.start();
+         BundleContext bundleContext = bundle1.getBundleContext();
          assertNotNull(bundleContext);
 
          SimpleServiceFactory factory = new SimpleServiceFactory(bundleContext);
@@ -269,14 +275,15 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
          ServiceReference reference2 = bundleContext.getServiceReference(BundleContext.class.getName());
          assertEquals(reference, reference2);
 
-         ServiceReference[] inUse = bundle.getServicesInUse();
+         ServiceReference[] inUse = bundle1.getServicesInUse();
          assertNull(inUse);
          
          bundleContext.getService(reference);
-         inUse = bundle.getServicesInUse();
-         assertEquals(new ServiceReference[] { reference }, inUse);
+         inUse = bundle1.getServicesInUse();
+         assertArrayEquals(new ServiceReference[] { reference }, inUse);
 
-         Bundle bundle2 = addBundle("/bundles/simple/", "simple-bundle2");
+         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
             bundle2.start();
@@ -284,7 +291,7 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             assertNotNull(bundleContext2);
             bundleContext2.getService(reference);
             inUse = bundle2.getServicesInUse();
-            assertEquals(new ServiceReference[] { reference }, inUse);
+            assertArrayEquals(new ServiceReference[] { reference }, inUse);
 
             assertNull(factory.ungetBundle);
             assertNull(factory.ungetRegistration);
@@ -301,7 +308,7 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             
             assertServiceEvent(ServiceEvent.UNREGISTERING, reference);
 
-            inUse = bundle.getServicesInUse();
+            inUse = bundle1.getServicesInUse();
             assertNull(inUse);
             inUse = bundle2.getServicesInUse();
             assertNull(inUse);
@@ -311,7 +318,7 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundle2.uninstall();
          }
          
          try
@@ -319,20 +326,22 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             registration.unregister();
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle1.uninstall();
       }
    }
    
+   @Test
    public void testUnregisterAfterStop() throws Exception
    {
-      Bundle bundle = addBundle("/bundles/simple/", "simple-bundle1");
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
          bundle.start();
@@ -349,14 +358,14 @@ public class ServiceRegistrationUnitTestCase extends FrameworkTest
             registration.unregister();
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle);
+         bundle.uninstall();
       }
    }
 }

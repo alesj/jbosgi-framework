@@ -21,14 +21,18 @@
 */
 package org.jboss.test.osgi.service;
 
+// $Id: $
+
+import static org.junit.Assert.*;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-
-import org.jboss.test.osgi.FrameworkTest;
+import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.NativeFrameworkTest;
 import org.jboss.test.osgi.service.support.a.A;
 import org.jboss.test.osgi.service.support.b.B;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -41,27 +45,21 @@ import org.osgi.framework.ServiceRegistration;
  *
  * todo test service permissions
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class GetServiceReferencesUnitTestCase extends FrameworkTest
+public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
 {
-   public static Test suite()
-   {
-      return suite(GetServiceReferencesUnitTestCase.class);
-   }
 
-   public GetServiceReferencesUnitTestCase(String name)
-   {
-      super(name);
-   }
-
+   @Test
    public void testGetServiceReferences() throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         BundleContext bundleContext1 = bundle1.getBundleContext();
+         bundle.start();
+         BundleContext bundleContext1 = bundle.getBundleContext();
          assertNotNull(bundleContext1);
          
          assertNoGetReference(bundleContext1, A.class.getName());
@@ -71,7 +69,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          assertNoReferences(bundleContext1, B.class.getName());
          assertNoAllReferences(bundleContext1, B.class.getName());
 
-         Class<?> clazz = bundle1.loadClass(A.class.getName());
+         Class<?> clazz = bundle.loadClass(A.class.getName());
          Object service1 = clazz.newInstance();
          ServiceRegistration registration1 = bundleContext1.registerService(A.class.getName(), service1, null);
          assertNotNull(registration1);
@@ -99,9 +97,9 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
             bundleContext1.getServiceReference(null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalArgumentException t)
          {
-            checkThrowable(IllegalArgumentException.class, t);
+            // expected
          }
          
          try
@@ -109,9 +107,9 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
             bundleContext1.getServiceReferences(null, "invalid");
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (InvalidSyntaxException t)
          {
-            checkThrowable(InvalidSyntaxException.class, t);
+            // expected
          }
          
          try
@@ -119,21 +117,21 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
             bundleContext1.getAllServiceReferences(null, "invalid");
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (InvalidSyntaxException t)
          {
-            checkThrowable(InvalidSyntaxException.class, t);
+            // expected
          }
          
-         bundle1.stop();
+         bundle.stop();
          
          try
          {
             bundleContext1.getServiceReference(A.class.getName());
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
          
          try
@@ -141,9 +139,9 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
             bundleContext1.getServiceReferences(null, null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
          
          try
@@ -151,57 +149,61 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
             bundleContext1.getAllServiceReferences(null, null);
             fail("Should not be here!");
          }
-         catch (Throwable t)
+         catch (IllegalStateException t)
          {
-            checkThrowable(IllegalStateException.class, t);
+            // expected
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundle.uninstall();
       }
    }
    
+   @Test
    public void testGetServiceReferencesNoClassNotAssignable() throws Exception
    {
       assertGetServiceReferencesNotAssignable(null);
    }
    
+   @Test
    public void testGetServiceReferencesNotAssignable() throws Exception
    {
       assertGetServiceReferencesNotAssignable(A.class.getName());
    }
    
-   public void assertGetServiceReferencesNotAssignable(String className) throws Exception
+   private void assertGetServiceReferencesNotAssignable(String className) throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
+      VirtualFile assemblyA = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         BundleContext bundleContext1 = bundle1.getBundleContext();
+         bundleA.start();
+         BundleContext bundleContext1 = bundleA.getBundleContext();
          assertNotNull(bundleContext1);
          
          if (className != null)
             assertNoGetReference(bundleContext1, className);
 
-         Class<?> clazz = bundle1.loadClass(A.class.getName());
+         Class<?> clazz = bundleA.loadClass(A.class.getName());
          Object service1 = clazz.newInstance();
          ServiceRegistration registration1 = bundleContext1.registerService(A.class.getName(), service1, null);
          assertNotNull(registration1);
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         Bundle bundle2 = installBundle(assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class));
+         VirtualFile assemblyB = assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class);
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            BundleContext bundleContext2 = bundle2.getBundleContext();
+            bundleB.start();
+            BundleContext bundleContext2 = bundleB.getBundleContext();
             assertNotNull(bundleContext2);
 
             if (className != null)
                assertNoGetReference(bundleContext2, className);
 
-            clazz = bundle2.loadClass(A.class.getName());
+            clazz = bundleB.loadClass(A.class.getName());
             Object service2 = clazz.newInstance();
             ServiceRegistration registration2 = bundleContext2.registerService(A.class.getName(), service2, null);
             assertNotNull(registration2);
@@ -251,55 +253,59 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
 
+   @Test
    public void testGetServiceReferencesNoClassAssignable() throws Exception
    {
       assertGetServiceReferencesAssignable(null);
    }
 
+   @Test
    public void testGetServiceReferencesClassAssignable() throws Exception
    {
       assertGetServiceReferencesAssignable(A.class.getName());
    }
 
-   public void assertGetServiceReferencesAssignable(String className) throws Exception
+   private void assertGetServiceReferencesAssignable(String className) throws Exception
    {
-      Bundle bundle1 = installBundle(assembleBundle("service2", "/bundles/service/service-bundle2", A.class));
+      VirtualFile assemblyA = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         BundleContext bundleContext1 = bundle1.getBundleContext();
+         bundleA.start();
+         BundleContext bundleContext1 = bundleA.getBundleContext();
          assertNotNull(bundleContext1);
 
          if (className != null)
             assertNoGetReference(bundleContext1, className);
 
-         Class<?> clazz = bundle1.loadClass(A.class.getName());
+         Class<?> clazz = bundleA.loadClass(A.class.getName());
          Object service1 = clazz.newInstance();
          ServiceRegistration registration1 = bundleContext1.registerService(A.class.getName(), service1, null);
          assertNotNull(registration1);
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         Bundle bundle2 = installBundle(assembleBundle("service1", "/bundles/service/service-bundle1"));
+         VirtualFile assemblyB = assembleBundle("service1", "/bundles/service/service-bundle1");
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            BundleContext bundleContext2 = bundle2.getBundleContext();
+            bundleB.start();
+            BundleContext bundleContext2 = bundleB.getBundleContext();
             assertNotNull(bundleContext2);
 
             if (className != null)
                assertGetReference(bundleContext2, className, reference1);
 
-            clazz = bundle2.loadClass(A.class.getName());
+            clazz = bundleB.loadClass(A.class.getName());
             Object service2 = clazz.newInstance();
             ServiceRegistration registration2 = bundleContext2.registerService(A.class.getName(), service2, null);
             assertNotNull(registration2);
@@ -349,24 +355,26 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
 
+   @Test
    public void testGetServiceReferencesRankings() throws Exception
    {
       String className = A.class.getName();
       
-      Bundle bundle1 = installBundle(assembleBundle("service2", "/bundles/service/service-bundle2", A.class));
+      VirtualFile assemblyA = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         BundleContext bundleContext1 = bundle1.getBundleContext();
+         bundleA.start();
+         BundleContext bundleContext1 = bundleA.getBundleContext();
          assertNotNull(bundleContext1);
          
          assertNoGetReference(bundleContext1, className);
@@ -375,18 +383,19 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
 
          Dictionary<String, Object> properties1 = new Hashtable<String, Object>();
          properties1.put(Constants.SERVICE_RANKING, 1);
-         Class<?> clazz = bundle1.loadClass(className);
+         Class<?> clazz = bundleA.loadClass(className);
          Object service1 = clazz.newInstance();
          ServiceRegistration registration1 = bundleContext1.registerService(className, service1, properties1);
          assertNotNull(registration1);
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         Bundle bundle2 = installBundle(assembleBundle("service1", "/bundles/service/service-bundle1"));
+         VirtualFile assemblyB = assembleBundle("service1", "/bundles/service/service-bundle1");
+         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
-            bundle2.start();
-            BundleContext bundleContext2 = bundle2.getBundleContext();
+            bundleB.start();
+            BundleContext bundleContext2 = bundleB.getBundleContext();
             assertNotNull(bundleContext2);
 
             assertGetReference(bundleContext2, className, reference1);
@@ -395,7 +404,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
 
             Dictionary<String, Object> properties2 = new Hashtable<String, Object>();
             properties2.put(Constants.SERVICE_RANKING, 2);
-            clazz = bundle2.loadClass(className);
+            clazz = bundleB.loadClass(className);
             Object service2 = clazz.newInstance();
             ServiceRegistration registration2 = bundleContext2.registerService(className, service2, properties2);
             assertNotNull(registration2);
@@ -456,25 +465,27 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          }
          finally
          {
-            uninstall(bundle2);
+            bundleB.uninstall();
          }
       }
       finally
       {
-         uninstall(bundle1);
+         bundleA.uninstall();
       }
    }
    
+   @Test
    public void testGetServiceReferencesFilterted() throws Exception
    {
       String className = A.class.getName();
       String wrongClassName = B.class.getName();
       
-      Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class));
+      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
-         bundle1.start();
-         BundleContext bundleContext1 = bundle1.getBundleContext();
+         bundle.start();
+         BundleContext bundleContext1 = bundle.getBundleContext();
          assertNotNull(bundleContext1);
          
          assertNoGetReference(bundleContext1, A.class.getName());
@@ -507,7 +518,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
          properties.put("a", "b");
          properties.put("c", "d");
          
-         Class<?> clazz = bundle1.loadClass(A.class.getName());
+         Class<?> clazz = bundle.loadClass(A.class.getName());
          Object service1 = clazz.newInstance();
          ServiceRegistration registration1 = bundleContext1.registerService(A.class.getName(), service1, properties);
          assertNotNull(registration1);
@@ -570,7 +581,7 @@ public class GetServiceReferencesUnitTestCase extends FrameworkTest
       }
       finally
       {
-         uninstall(bundle1);
+         bundle.uninstall();
       }
    }
 }
