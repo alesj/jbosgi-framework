@@ -21,8 +21,11 @@
  */
 package org.jboss.test.osgi.service;
 
+// $Id: $
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -37,6 +40,7 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
+import org.jboss.osgi.framework.deployers.AbstractDeployment;
 import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.test.osgi.service.support.LazyBundle;
 import org.jboss.test.osgi.service.support.a.A;
@@ -53,6 +57,7 @@ import org.osgi.framework.ServiceRegistration;
  * Test MC's service mixture.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
  */
 public class ServiceMixUnitTestCase extends AbstractServiceMixTest
 {
@@ -63,7 +68,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
       try
       {
          VirtualFile assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
-         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         Bundle bundle1 = installBundle(assembly1);
          try
          {
             bundle1.start();
@@ -116,7 +121,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
          KernelControllerContext kcc = getControllerContext("C", null);
 
          VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
-         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         Bundle bundle1 = installBundle(assembly1);
          try
          {
             bundle1.start();
@@ -175,7 +180,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
          KernelControllerContext kcc = getControllerContext("C", null);
 
          VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
-         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         Bundle bundle1 = installBundle(assembly1);
          try
          {
             bundle1.start();
@@ -235,7 +240,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
       try
       {
          VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
-         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         Bundle bundle1 = installBundle(assembly1);
          try
          {
             bundle1.start();
@@ -290,7 +295,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
          try
          {
             VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle4");
-            Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+            Bundle bundle1 = installBundle(assembly1);
             try
             {
                bundle1.start();
@@ -358,7 +363,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
       try
       {
          VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle4");
-         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         Bundle bundle1 = installBundle(assembly1);
          try
          {
             bundle1.start();
@@ -425,7 +430,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
       try
       {
          VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle1");
-         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         Bundle bundle1 = installBundle(assembly1);
          try
          {
             bundle1.start();
@@ -480,14 +485,11 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
       }
    }
 
-   /*
    @Test
    public void testBeansMix() throws Throwable
    {
-      AssembledDirectory mix = createAssembledDirectory("beans1", "");
-      addPath(mix, "/bundles/service/service-beans1", "");
-      addPackage(mix, A.class);
-      Deployment deployment = addDeployment(mix);
+      VirtualFile assembly = assembleArchive("beans1", "/bundles/service/service-beans1", A.class);
+      Deployment deployment = addDeployment(AbstractDeployment.createDeployment(assembly));
       try
       {
          checkComplete();
@@ -518,7 +520,7 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
    public void testServiceInjection() throws Throwable
    {
       VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle2", A.class);
-      Bundle bundle = context.installBundle(assembly1.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly1);
       try
       {
          bundle.start();
@@ -532,10 +534,8 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
          ServiceRegistration reg1 = bundleContext1.registerService(A.class.getName(), a, table);
          assertNotNull(reg1);
 
-         AssembledDirectory mix = createAssembledDirectory("beans1", "");
-         addPath(mix, "/bundles/service/service-beans2", "");
-         addPackage(mix, C.class);
-         Deployment deployment = assertDeploy(mix);
+         VirtualFile assembly = assembleArchive("beans1", "/bundles/service/service-beans2", C.class);
+         Deployment deployment = addDeployment(AbstractDeployment.createDeployment(assembly));
          try
          {
             checkComplete();
@@ -556,5 +556,4 @@ public class ServiceMixUnitTestCase extends AbstractServiceMixTest
          bundle.uninstall();
       }
    }
-   */
 }

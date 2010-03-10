@@ -55,7 +55,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
    public void testGetServiceReferences() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -175,7 +175,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
    private void assertGetServiceReferencesNotAssignable(String className) throws Exception
    {
       VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
@@ -193,7 +193,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
          assertNotNull(reference1);
 
          VirtualFile assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             bundleB.start();
@@ -277,7 +277,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
    private void assertGetServiceReferencesAssignable(String className) throws Exception
    {
       VirtualFile assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
@@ -295,7 +295,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
          assertNotNull(reference1);
 
          VirtualFile assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             bundleB.start();
@@ -370,7 +370,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
       String className = A.class.getName();
       
       VirtualFile assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
@@ -391,7 +391,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
          assertNotNull(reference1);
 
          VirtualFile assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             bundleB.start();
@@ -481,7 +481,7 @@ public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
       String wrongClassName = B.class.getName();
       
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();

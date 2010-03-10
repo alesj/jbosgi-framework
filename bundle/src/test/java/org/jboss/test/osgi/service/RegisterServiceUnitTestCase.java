@@ -54,8 +54,8 @@ public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
       String OBJCLASS = BundleContext.class.getName();
       String[] OBJCLASSES = new String[] { OBJCLASS };
       
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -189,8 +189,8 @@ public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
       Dictionary<String, Object> properties = new Hashtable<String, Object>();
       properties.put(Constants.OBJECTCLASS, new String[] { "rubbish" });
 
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -220,8 +220,8 @@ public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testRegisterService() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -247,8 +247,8 @@ public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testBundleUninstall() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Bundle bundle1 = installBundle(assembly1);
       try
       {
          bundle1.start();
@@ -260,8 +260,8 @@ public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
-         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2");
+         Bundle bundle2 = installBundle(assembly2);
          try
          {
             bundle2.start();
@@ -288,8 +288,8 @@ public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testRegisteredServices() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Bundle bundle1 = installBundle(assembly1);
       try
       {
          bundle1.start();
@@ -301,8 +301,8 @@ public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
-         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2");
+         Bundle bundle2 = installBundle(assembly2);
          try
          {
             bundle2.start();

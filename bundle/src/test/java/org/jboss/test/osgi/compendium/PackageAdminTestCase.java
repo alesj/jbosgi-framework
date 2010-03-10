@@ -46,7 +46,7 @@ public class PackageAdminTestCase extends AbstractFrameworkTest
    public void testGetBudleFromClass() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
@@ -61,7 +61,7 @@ public class PackageAdminTestCase extends AbstractFrameworkTest
          assertNull(notFound);
 
          VirtualFile assemblyB = assembleArchive("simple", "/bundles/simple/simple-bundle1", Other.class);
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             bundleB.start();

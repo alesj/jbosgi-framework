@@ -23,7 +23,10 @@ package org.jboss.test.osgi.bundle;
 
 // $Id: $
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -32,7 +35,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -51,8 +53,7 @@ public class BundleEntriesUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testEntriesNotInstalled() throws Exception
    {
-      VirtualFile assembly = assembleArchive("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("entries-simple", "/bundles/entries/entries-simple"));
       bundle.uninstall();
       try
       {
@@ -77,8 +78,7 @@ public class BundleEntriesUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testFindEntriesNoPath() throws Exception
    {
-      VirtualFile assembly = assembleArchive("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("entries-simple", "/bundles/entries/entries-simple"));
       try
       {
          bundle.findEntries(null, "root.xml", false);
@@ -97,8 +97,7 @@ public class BundleEntriesUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testEntries() throws Exception
    {
-      VirtualFile assembly = assembleArchive("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("entries-simple", "/bundles/entries/entries-simple"));
       try
       {
          assertEntry(bundle, "");

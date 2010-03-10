@@ -57,7 +57,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
       Object serviceID = null;
 
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -156,7 +156,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
       ServiceReference reference = null;
       
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -216,7 +216,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
    public void testGetBundle() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -247,7 +247,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
    public void testGetBundleAfterStop() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -278,7 +278,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
    public void testUsingBundles() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+      Bundle bundle1 = installBundle(assembly1);
       try
       {
          bundle1.start();
@@ -294,7 +294,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
          assertUsingBundles(reference);
          
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
-         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+         Bundle bundle2 = installBundle(assembly2);
          try
          {
             bundle2.start();
@@ -337,7 +337,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
    public void testUsingBundlesAfterStop() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+      Bundle bundle1 = installBundle(assembly1);
       try
       {
          bundle1.start();
@@ -353,7 +353,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
          assertUsingBundles(reference);
          
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
-         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+         Bundle bundle2 = installBundle(assembly2);
          try
          {
             bundle2.start();
@@ -382,7 +382,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
    public void testIsAssignableToErrors() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -425,7 +425,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
    public void testNotAssignableTo() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
-      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+      Bundle bundle1 = installBundle(assembly1);
       try
       {
          bundle1.start();
@@ -439,7 +439,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
          assertNotNull(reference);
 
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
-         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+         Bundle bundle2 = installBundle(assembly2);
          try
          {
             assertFalse(reference.isAssignableTo(bundle2, A.class.getName()));
@@ -467,7 +467,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
       //Bundle-SymbolicName: org.jboss.test.osgi.service2
       //Export-Package: org.jboss.test.osgi.service.support.a
       VirtualFile assembly2 = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
-      Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+      Bundle bundle2 = installBundle(assembly2);
       
       try
       {
@@ -479,7 +479,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
          //Bundle-SymbolicName: org.jboss.test.osgi.service1
          //Import-Package: org.jboss.test.osgi.service.support.a
          VirtualFile assembly1 = assembleArchive("service1", "/bundles/service/service-bundle1");
-         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         Bundle bundle1 = installBundle(assembly1);
          
          try
          {
@@ -516,7 +516,7 @@ public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
    public void testCompareTo() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();

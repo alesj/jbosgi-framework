@@ -52,7 +52,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    public void testSimpleStart() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
@@ -77,7 +77,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    public void testDependencyNotAvailable() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
@@ -87,7 +87,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          assertNull("Service not available", sref);
 
          VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());
@@ -119,14 +119,14 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    public void testDependencyAvailable() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
          assertBundleState(Bundle.ACTIVE, bundleA.getState());
 
          VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             bundleB.start();
@@ -152,13 +152,13 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    public void testStartRetry() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
          VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             assertBundleState(Bundle.INSTALLED, bundleB.getState());
@@ -201,7 +201,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    public void testFailToResolve() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
-      Bundle bundleB = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleB = installBundle(assemblyA);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleB.getState());
@@ -232,8 +232,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    {
       try
       {
-         VirtualFile assembly = assembleArchive("missing-symbolic-name", "/bundles/lifecycle/invalid01");
-         context.installBundle(assembly.toURL().toExternalForm());
+         installBundle(assembleArchive("missing-symbolic-name", "/bundles/lifecycle/invalid01"));
          fail("BundleException expected");
       }
       catch (BundleException ex)
@@ -243,8 +242,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
       
       try
       {
-         VirtualFile assembly = assembleArchive("invalid-export", "/bundles/lifecycle/invalid02");
-         context.installBundle(assembly.toURL().toExternalForm());
+         installBundle(assembleArchive("invalid-export", "/bundles/lifecycle/invalid02"));
          fail("BundleException expected");
       }
       catch (BundleException ex)

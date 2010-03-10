@@ -43,6 +43,7 @@ import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
 import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.jboss.osgi.testing.OSGiTest;
+import org.jboss.osgi.vfs.VirtualFile;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.osgi.framework.Bundle;
@@ -108,6 +109,11 @@ public abstract class AbstractFrameworkTest extends OSGiTest implements ServiceL
       return ((OSGiFramework)framework).getBundleManager();
    }
 
+   protected Bundle installBundle(VirtualFile archive) throws Exception
+   {
+      return context.installBundle(archive.toURL().toExternalForm());
+      
+   }
    protected void assertLoadClass(Bundle bundle, String className, Bundle exporter)
    {
       Class<?> clazz = assertLoadClass(bundle, className);

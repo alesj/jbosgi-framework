@@ -38,7 +38,6 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
-import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -62,8 +61,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testGetBundle() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+      Bundle bundle1 = installBundle(assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1"));
       BundleContext context1 = null;
       try
       {
@@ -77,8 +75,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
          Set<Bundle> expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
          assertEquals(expected, actual);
          
-         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
-         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+         Bundle bundle2 = installBundle(assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2"));
          BundleContext context2 = null;
          try
          {
@@ -176,8 +173,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testProperties() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1"));
       try
       {
          bundle.start();
@@ -258,8 +254,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testServiceListener() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1"));
       try
       {
          bundle.start();
@@ -351,8 +346,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testBundleListener() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1"));
       try
       {
          bundle.start();
@@ -409,8 +403,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testFrameworkListener() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1"));
       try
       {
          bundle.start();
@@ -448,8 +441,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testGetDataFile() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1"));
       try
       {
          bundle.start();
@@ -469,8 +461,7 @@ public class BundleContextUnitTestCase extends AbstractFrameworkTest
    @Test
    public void testStopedBundleContext() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1"));
       try
       {
          bundle.start();

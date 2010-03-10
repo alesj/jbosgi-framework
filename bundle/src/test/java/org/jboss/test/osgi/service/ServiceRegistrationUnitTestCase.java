@@ -54,7 +54,7 @@ public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
    public void testGetReference() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -116,7 +116,7 @@ public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
    public void testSetProperties() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -225,7 +225,7 @@ public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
    public void testSetPropertiesAfterStop() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -258,7 +258,7 @@ public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
    public void testUnregister() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+      Bundle bundle1 = installBundle(assembly1);
       try
       {
          bundle1.start();
@@ -283,7 +283,7 @@ public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
          assertArrayEquals(new ServiceReference[] { reference }, inUse);
 
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
-         Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
+         Bundle bundle2 = installBundle(assembly2);
          try
          {
             bundle2.start();
@@ -341,7 +341,7 @@ public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
    public void testUnregisterAfterStop() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();

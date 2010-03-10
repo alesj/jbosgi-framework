@@ -53,7 +53,7 @@ public class ServiceFactoryUnitTestCase extends AbstractFrameworkTest
    public void testRegisterServiceFactory() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
-      Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
@@ -78,7 +78,7 @@ public class ServiceFactoryUnitTestCase extends AbstractFrameworkTest
          assertEquals(1, serviceFactory.getCount);
 
          VirtualFile assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
-         Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             bundleB.start();
@@ -109,7 +109,7 @@ public class ServiceFactoryUnitTestCase extends AbstractFrameworkTest
       String OBJCLASS = BundleContext.class.getName();
       
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -140,7 +140,7 @@ public class ServiceFactoryUnitTestCase extends AbstractFrameworkTest
       String OBJCLASS = BundleContext.class.getName();
       
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();
@@ -175,7 +175,7 @@ public class ServiceFactoryUnitTestCase extends AbstractFrameworkTest
       String[] OBJCLASSES = {String.class.getName(), BundleContext.class.getName()};
       
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
+      Bundle bundle = installBundle(assembly);
       try
       {
          bundle.start();

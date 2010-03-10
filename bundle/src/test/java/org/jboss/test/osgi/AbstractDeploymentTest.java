@@ -31,6 +31,7 @@ import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.DeployerClient;
 import org.jboss.deployers.client.spi.Deployment;
+import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.structure.spi.main.MainDeployerStructure;
@@ -158,6 +159,11 @@ public abstract class AbstractDeploymentTest extends AbstractFrameworkTest
       MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
       att.addAttachment(BeanMetaData.class, bmd);
 
+      return addDeployment(deployment);
+   }
+
+   protected Deployment addDeployment(Deployment deployment) throws DeploymentException
+   {
       getDeployerClient().addDeployment(deployment);
       getDeployerClient().process();
       return deployment;
