@@ -167,14 +167,19 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.jboss.osgi.deployers</groupId>
+      <artifactId>jboss-osgi-deployers-vfs30</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework-vfs21</artifactId>
+      <artifactId>jboss-osgi-framework-vfs30</artifactId>
       <version>${version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.osgi.vfs</groupId>
-      <artifactId>jboss-osgi-vfs21</artifactId>
+      <artifactId>jboss-osgi-vfs30</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -312,7 +317,7 @@
       <dependencies>
         <dependency>
           <groupId>org.jboss.osgi.framework</groupId>
-          <artifactId>jboss-osgi-framework-vfs21</artifactId>
+          <artifactId>jboss-osgi-framework-vfs30</artifactId>
           <version>${version}</version>
         </dependency>
       </dependencies>
@@ -333,7 +338,7 @@
       <dependencies>
         <dependency>
           <groupId>org.jboss.osgi.framework</groupId>
-          <artifactId>jboss-osgi-framework-vfs21</artifactId>
+          <artifactId>jboss-osgi-framework-vfs30</artifactId>
           <version>${version}</version>
         </dependency>
       </dependencies>

@@ -27,12 +27,6 @@
     <version>1.0.0.Alpha4-SNAPSHOT</version>
   </parent>
 
-  <!-- Properties -->
-  <properties>
-    <version.jboss.classloading>2.2.0.Alpha3</version.jboss.classloading>
-    <version.jboss.deployers>2.2.0.Alpha3</version.jboss.deployers>
-  </properties>
-  
   <!-- Dependencies -->
   <dependencies>
     <dependency>
