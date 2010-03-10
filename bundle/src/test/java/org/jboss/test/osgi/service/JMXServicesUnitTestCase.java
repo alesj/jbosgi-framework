@@ -21,35 +21,44 @@
  */
 package org.jboss.test.osgi.service;
 
-import junit.framework.Test;
-import org.jboss.test.osgi.service.support.MockInvokerMBean;
+// $Id: $
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.net.URL;
 
 import javax.management.ObjectName;
+
+import org.jboss.test.osgi.AbstractDeploymentTest;
+import org.jboss.test.osgi.service.support.MockInvokerMBean;
+import org.junit.Test;
 
 /**
  * Test MC's jmx support.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
  */
-public class JMXServicesUnitTestCase extends ServicesTest
+public class JMXServicesUnitTestCase extends AbstractDeploymentTest
 {
-   public JMXServicesUnitTestCase(String name)
-   {
-      super(name);
-   }
-
-   public static Test suite()
-   {
-      return suite(JMXServicesUnitTestCase.class);
-   }
-
+   @Test
    public void testAtJmx() throws Throwable
    {
-      MockInvokerMBean invoker = (MockInvokerMBean) getBean("Invoker");
-      assertNotNull(invoker.getServer());
-      ObjectName name = invoker.getServiceName();
-      assertNotNull(name);
-      assertEquals("jboss:service=invoker,type=unified", name.getCanonicalName());
+      URL beans = getResourceURL("service/jmx-services.xml");
+      deploy(beans);
+      try
+      {
+         MockInvokerMBean invoker = (MockInvokerMBean)getBean("Invoker");
+         assertNotNull(invoker.getServer());
+         ObjectName name = invoker.getServiceName();
+         assertNotNull(name);
+         assertEquals("jboss:service=invoker,type=unified", name.getCanonicalName());
+      }
+      finally
+      {
+         undeploy(beans);
+      }
    }
 
    public void testMBeans() throws Throwable

@@ -27,7 +27,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -43,7 +43,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class RegisterServiceUnitTestCase extends NativeFrameworkTest
+public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };
@@ -54,7 +54,7 @@ public class RegisterServiceUnitTestCase extends NativeFrameworkTest
       String OBJCLASS = BundleContext.class.getName();
       String[] OBJCLASSES = new String[] { OBJCLASS };
       
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -189,7 +189,7 @@ public class RegisterServiceUnitTestCase extends NativeFrameworkTest
       Dictionary<String, Object> properties = new Hashtable<String, Object>();
       properties.put(Constants.OBJECTCLASS, new String[] { "rubbish" });
 
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -220,7 +220,7 @@ public class RegisterServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testRegisterService() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -247,7 +247,7 @@ public class RegisterServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testBundleUninstall() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
@@ -260,7 +260,7 @@ public class RegisterServiceUnitTestCase extends NativeFrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         VirtualFile assembly2 = assembleBundle("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
+         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
@@ -288,7 +288,7 @@ public class RegisterServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testRegisteredServices() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
@@ -301,7 +301,7 @@ public class RegisterServiceUnitTestCase extends NativeFrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         VirtualFile assembly2 = assembleBundle("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
+         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {

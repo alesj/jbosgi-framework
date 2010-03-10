@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleWrapper;
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
 import org.jboss.test.osgi.service.support.a.A;
 import org.junit.Test;
@@ -43,7 +43,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision$
  */
-public class ServiceFactoryUnitTestCase extends NativeFrameworkTest
+public class ServiceFactoryUnitTestCase extends AbstractFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };
@@ -52,7 +52,7 @@ public class ServiceFactoryUnitTestCase extends NativeFrameworkTest
    @Test
    public void testRegisterServiceFactory() throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -77,7 +77,7 @@ public class ServiceFactoryUnitTestCase extends NativeFrameworkTest
          assertEquals(bundleA.getSymbolicName(), serviceFactory.getBundle.getSymbolicName());
          assertEquals(1, serviceFactory.getCount);
 
-         VirtualFile assemblyB = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         VirtualFile assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
@@ -108,7 +108,7 @@ public class ServiceFactoryUnitTestCase extends NativeFrameworkTest
    {
       String OBJCLASS = BundleContext.class.getName();
       
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -139,7 +139,7 @@ public class ServiceFactoryUnitTestCase extends NativeFrameworkTest
    {
       String OBJCLASS = BundleContext.class.getName();
       
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -174,7 +174,7 @@ public class ServiceFactoryUnitTestCase extends NativeFrameworkTest
    {
       String[] OBJCLASSES = {String.class.getName(), BundleContext.class.getName()};
       
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {

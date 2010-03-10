@@ -24,7 +24,7 @@ package org.jboss.test.osgi.service;
 import static org.junit.Assert.*;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.BrokenServiceFactory;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -41,14 +41,14 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class GetUnGetServiceUnitTestCase extends NativeFrameworkTest
+public class GetUnGetServiceUnitTestCase extends AbstractFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
 
    @Test
    public void testGetUnServiceErrors() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -87,7 +87,7 @@ public class GetUnGetServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testGetService() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -114,7 +114,7 @@ public class GetUnGetServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testGetServiceAfterStop() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -148,7 +148,7 @@ public class GetUnGetServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testErrorInGetService() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -174,7 +174,7 @@ public class GetUnGetServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testErrorInUnGetService() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -203,7 +203,7 @@ public class GetUnGetServiceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testUnGetServiceResult() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
@@ -222,7 +222,7 @@ public class GetUnGetServiceUnitTestCase extends NativeFrameworkTest
          assertTrue(bundleContext.ungetService(reference));
          assertFalse(bundleContext.ungetService(reference));
 
-         VirtualFile assembly2 = assembleBundle("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
+         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {

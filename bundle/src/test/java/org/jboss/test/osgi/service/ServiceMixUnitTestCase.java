@@ -21,22 +21,29 @@
  */
 package org.jboss.test.osgi.service;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-
-import junit.framework.Test;
 
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
+import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.test.osgi.service.support.LazyBundle;
 import org.jboss.test.osgi.service.support.a.A;
 import org.jboss.test.osgi.service.support.c.C;
 import org.jboss.test.osgi.service.support.d.D;
-import org.jboss.virtual.AssembledDirectory;
+import org.jboss.test.osgi.service.support.e.E;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -47,24 +54,16 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class ServiceMixUnitTestCase extends ServicesTest
+public class ServiceMixUnitTestCase extends AbstractServiceMixTest
 {
-   public ServiceMixUnitTestCase(String name)
-   {
-      super(name);
-   }
-
-   public static Test suite()
-   {
-      return suite(ServiceMixUnitTestCase.class);
-   }
-
+   @Test
    public void testGetServiceReferenceFromMC() throws Throwable
    {
-      Deployment bean = deployBean("beanA", A.class);
+      Deployment bean = deployBeans("beanA", A.class);
       try
       {
-         Bundle bundle1 = installBundle(assembleBundle("simple1", "/bundles/service/service-bundle1"));
+         VirtualFile assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
+         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
          try
          {
             bundle1.start();
@@ -76,13 +75,13 @@ public class ServiceMixUnitTestCase extends ServicesTest
             try
             {
                Bundle refsBundle = ref1.getBundle();
-               assertBundle(refsBundle, getBundle(bean));
+               assertEquals(refsBundle, getBundle(bean));
 
                assertNotNull(bundleContext1.getService(ref1));
                assertUsingBundles(ref1, bundle1);
 
                ServiceReference[] inUse = bundle1.getServicesInUse();
-               assertEquals(new ServiceReference[]{ref1}, inUse);
+               assertArrayEquals(new ServiceReference[] { ref1 }, inUse);
             }
             finally
             {
@@ -96,7 +95,7 @@ public class ServiceMixUnitTestCase extends ServicesTest
          }
          finally
          {
-            uninstall(bundle1);
+            bundle1.uninstall();
          }
       }
       finally
@@ -105,17 +104,19 @@ public class ServiceMixUnitTestCase extends ServicesTest
       }
    }
 
+   @Test
    public void testInjectionToMC() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
       builder.addPropertyMetaData("a", builder.createContextualInject());
       BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean = addBean("beanA", C.class, bmd, A.class);
+      Deployment bean = addBeans("beanA", bmd, A.class, C.class);
       try
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
-         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle3"));
+         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
+         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
          try
          {
             bundle1.start();
@@ -153,7 +154,7 @@ public class ServiceMixUnitTestCase extends ServicesTest
          }
          finally
          {
-            uninstall(bundle1);
+            bundle1.uninstall();
          }
       }
       finally
@@ -162,17 +163,19 @@ public class ServiceMixUnitTestCase extends ServicesTest
       }
    }
 
+   @Test
    public void testInjectionToMCNamedService() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
       builder.addPropertyMetaData("a", builder.createInject("A"));
       BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean = addBean("beanA", C.class, bmd, A.class);
+      Deployment bean = addBeans("beanA", bmd, C.class, A.class);
       try
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
-         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle3"));
+         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
+         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
          try
          {
             bundle1.start();
@@ -212,7 +215,7 @@ public class ServiceMixUnitTestCase extends ServicesTest
          }
          finally
          {
-            uninstall(bundle1);
+            bundle1.uninstall();
          }
       }
       finally
@@ -221,16 +224,18 @@ public class ServiceMixUnitTestCase extends ServicesTest
       }
    }
 
+   @Test
    public void testInvokeDispatch() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
       builder.addPropertyMetaData("msg", builder.createInject("A", "msg"));
       builder.addInstall("calc", "A", int.class.getName(), 123);
       BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean = addBean("beanA", C.class, bmd, A.class);
+      Deployment bean = addBeans("beanA", bmd, C.class, A.class);
       try
       {
-         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle3"));
+         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
+         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
          try
          {
             bundle1.start();
@@ -259,7 +264,7 @@ public class ServiceMixUnitTestCase extends ServicesTest
          }
          finally
          {
-            uninstall(bundle1);
+            bundle1.uninstall();
          }
       }
       finally
@@ -268,22 +273,24 @@ public class ServiceMixUnitTestCase extends ServicesTest
       }
    }
 
+   @Test
    @SuppressWarnings("rawtypes")
    public void testServiceFactoryInjection() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C1", C.class.getName());
       builder.addPropertyMetaData("a", builder.createInject("A"));
       BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean1 = addBean("beanA1", C.class, bmd, A.class, D.class);
+      Deployment bean1 = addBeans("beanA1", bmd, C.class, A.class, D.class);
       try
       {
          builder = BeanMetaDataBuilder.createBuilder("C2", C.class.getName());
          builder.addPropertyMetaData("a", builder.createInject("A"));
          bmd = builder.getBeanMetaData();
-         Deployment bean2 = addBean("beanA2", null, bmd);
+         Deployment bean2 = addBeans("beanA2", bmd, E.class);
          try
          {
-            Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle4"));
+            VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle4");
+            Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
             try
             {
                bundle1.start();
@@ -326,7 +333,7 @@ public class ServiceMixUnitTestCase extends ServicesTest
             }
             finally
             {
-               uninstall(bundle1);
+               bundle1.uninstall();
             }
          }
          finally
@@ -340,68 +347,70 @@ public class ServiceMixUnitTestCase extends ServicesTest
       }
    }
 
+   @Test
    @SuppressWarnings("rawtypes")
    public void testServiceFactoryMix() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C1", C.class.getName());
       builder.addPropertyMetaData("a", builder.createInject("A"));
       BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean1 = addBean("beanA1", C.class, bmd, A.class, D.class);
+      Deployment bean1 = addBeans("beanA1", bmd, C.class, A.class, D.class);
       try
       {
-            Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle4"));
+         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle4");
+         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
+         try
+         {
+            bundle1.start();
+            BundleContext bundleContext1 = bundle1.getBundleContext();
+            assertNotNull(bundleContext1);
+
+            Class<?> dClass = bundle1.loadClass(D.class.getName());
+            Object d = dClass.newInstance();
+            Hashtable<String, Object> table = new Hashtable<String, Object>();
+            table.put("service.alias.1", "A");
+            ServiceRegistration reg1 = bundleContext1.registerService(A.class.getName(), d, table);
+            assertNotNull(reg1);
+            ServiceReference refA = reg1.getReference();
+            assertNotNull(refA);
+
+            Object a = null;
             try
             {
-               bundle1.start();
-               BundleContext bundleContext1 = bundle1.getBundleContext();
-               assertNotNull(bundleContext1);
+               checkComplete();
 
-               Class<?> dClass = bundle1.loadClass(D.class.getName());
-               Object d = dClass.newInstance();
-               Hashtable<String, Object> table = new Hashtable<String, Object>();
-               table.put("service.alias.1", "A");
-               ServiceRegistration reg1 = bundleContext1.registerService(A.class.getName(), d, table);
-               assertNotNull(reg1);
-               ServiceReference refA = reg1.getReference();
-               assertNotNull(refA);
+               Object c1 = getBean("C1");
+               a = getter(c1, "getA", "C1");
 
-               Object a = null;
-               try
-               {
-                  checkComplete();
+               ServiceReference refD = bundleContext1.getServiceReference(C.class.getName());
+               Bundle beanBundle = refD.getBundle();
+               assertNotNull(beanBundle);
+               BundleContext beanBC = beanBundle.getBundleContext();
+               assertNotNull(beanBC);
+               Object service = beanBC.getService(refA);
+               assertSame(a, service);
 
-                  Object c1 = getBean("C1");
-                  a = getter(c1, "getA", "C1");
-
-                  ServiceReference refD = bundleContext1.getServiceReference(C.class.getName());
-                  Bundle beanBundle = refD.getBundle();
-                  assertNotNull(beanBundle);
-                  BundleContext beanBC = beanBundle.getBundleContext();
-                  assertNotNull(beanBC);
-                  Object service = beanBC.getService(refA);
-                  assertSame(a, service);
-
-                  KernelControllerContext cCC = getControllerContext("C1", null);
-                  change(cCC, ControllerState.INSTANTIATED);
-
-                  List as = assertInstanceOf(getter(d, "getAs", "A"), List.class);
-                  assertNotNull(as);
-                  assertEmpty(as); // SF is still in use
-               }
-               finally
-               {
-                  reg1.unregister();
-               }
+               KernelControllerContext cCC = getControllerContext("C1", null);
+               change(cCC, ControllerState.INSTANTIATED);
 
                List as = assertInstanceOf(getter(d, "getAs", "A"), List.class);
                assertNotNull(as);
-               assertEquals(1, as.size());
-               assertTrue(as.contains(a));
+               assertTrue(as.isEmpty()); // SF is still in use
             }
             finally
             {
-               uninstall(bundle1);
+               reg1.unregister();
             }
+
+            List as = assertInstanceOf(getter(d, "getAs", "A"), List.class);
+            assertNotNull(as);
+            assertEquals(1, as.size());
+            assertTrue(as.contains(a));
+         }
+         finally
+         {
+            bundle1.uninstall();
+         }
       }
       finally
       {
@@ -409,85 +418,14 @@ public class ServiceMixUnitTestCase extends ServicesTest
       }
    }
 
-   public void testBeansMix() throws Throwable
-   {
-      AssembledDirectory mix = createAssembledDirectory("beans1", "");
-      addPath(mix, "/bundles/service/service-beans1", "");
-      addPackage(mix, A.class);
-      Deployment deployment = addDeployment(mix);
-      try
-      {
-         checkComplete();
-
-         Bundle bundle = getBundle(getDeploymentUnit(deployment));
-         bundle.start();
-
-         ServiceReference[] refs = bundle.getRegisteredServices();
-         assertNotNull(refs);
-         assertEquals(1, refs.length);
-         ServiceReference ref = refs[0];
-         assertEquals(bundle, ref.getBundle());
-         Class<?> aClass = bundle.loadClass(A.class.getName());
-         BundleContext bc = bundle.getBundleContext();
-         assertNotNull(bc);
-         Object service = bc.getService(ref);
-         assertInstanceOf(service, aClass, false);
-         assertSame(service, getBean("A"));
-         assertFalse(bc.ungetService(ref));
-      }
-      finally
-      {
-         undeploy(deployment);
-      }
-   }
-
-   public void testServiceInjection() throws Throwable
-   {
-      Bundle bundle = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle2", A.class));
-      try
-      {
-         bundle.start();
-         BundleContext bundleContext1 = bundle.getBundleContext();
-         assertNotNull(bundleContext1);
-
-         Class<?> aClass = bundle.loadClass(A.class.getName());
-         Object a = aClass.newInstance();
-         Hashtable<String, Object> table = new Hashtable<String, Object>();
-         table.put("a", "b");
-         ServiceRegistration reg1 = bundleContext1.registerService(A.class.getName(), a, table);
-         assertNotNull(reg1);
-
-         AssembledDirectory mix = createAssembledDirectory("beans1", "");
-         addPath(mix, "/bundles/service/service-beans2", "");
-         addPackage(mix, C.class);
-         Deployment deployment = assertDeploy(mix);
-         try
-         {
-            checkComplete();
-
-            Bundle beans = getBundle(getDeploymentUnit(deployment));
-            beans.start();
-
-            Object c = getBean("C");
-            assertEquals(a, getter(c, "getA", "C"));
-         }
-         finally
-         {
-            undeploy(deployment);
-         }
-      }
-      finally
-      {
-         uninstall(bundle);
-      }
-   }
-
+   @Test
    public void testFiltering() throws Throwable
    {
-      Deployment bean = addBean("beanA", A.class);
+      Deployment bean = deployBeans("beanA", A.class);
       try
       {
-         Bundle bundle1 = installBundle(assembleBundle("simple2", "/bundles/service/service-bundle1"));
+         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle1");
+         Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
          try
          {
             bundle1.start();
@@ -524,7 +462,7 @@ public class ServiceMixUnitTestCase extends ServicesTest
                assertNotNull(refs);
                assertEquals(2, refs.length);
                assertEquals(osgiRef, refs[0]);
-               assertEquals(mcRef, refs[1]);               
+               assertEquals(mcRef, refs[1]);
             }
             finally
             {
@@ -533,7 +471,7 @@ public class ServiceMixUnitTestCase extends ServicesTest
          }
          finally
          {
-            uninstall(bundle1);
+            bundle1.uninstall();
          }
       }
       finally
@@ -541,4 +479,82 @@ public class ServiceMixUnitTestCase extends ServicesTest
          undeploy(bean);
       }
    }
+
+   /*
+   @Test
+   public void testBeansMix() throws Throwable
+   {
+      AssembledDirectory mix = createAssembledDirectory("beans1", "");
+      addPath(mix, "/bundles/service/service-beans1", "");
+      addPackage(mix, A.class);
+      Deployment deployment = addDeployment(mix);
+      try
+      {
+         checkComplete();
+
+         Bundle bundle = getBundle(getDeploymentUnit(deployment));
+         bundle.start();
+
+         ServiceReference[] refs = bundle.getRegisteredServices();
+         assertNotNull(refs);
+         assertEquals(1, refs.length);
+         ServiceReference ref = refs[0];
+         assertEquals(bundle, ref.getBundle());
+         Class<?> aClass = bundle.loadClass(A.class.getName());
+         BundleContext bc = bundle.getBundleContext();
+         assertNotNull(bc);
+         Object service = bc.getService(ref);
+         assertInstanceOf(service, aClass, false);
+         assertSame(service, getBean("A"));
+         assertFalse(bc.ungetService(ref));
+      }
+      finally
+      {
+         undeploy(deployment);
+      }
+   }
+
+   @Test
+   public void testServiceInjection() throws Throwable
+   {
+      VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle2", A.class);
+      Bundle bundle = context.installBundle(assembly1.toURL().toExternalForm());
+      try
+      {
+         bundle.start();
+         BundleContext bundleContext1 = bundle.getBundleContext();
+         assertNotNull(bundleContext1);
+
+         Class<?> aClass = bundle.loadClass(A.class.getName());
+         Object a = aClass.newInstance();
+         Hashtable<String, Object> table = new Hashtable<String, Object>();
+         table.put("a", "b");
+         ServiceRegistration reg1 = bundleContext1.registerService(A.class.getName(), a, table);
+         assertNotNull(reg1);
+
+         AssembledDirectory mix = createAssembledDirectory("beans1", "");
+         addPath(mix, "/bundles/service/service-beans2", "");
+         addPackage(mix, C.class);
+         Deployment deployment = assertDeploy(mix);
+         try
+         {
+            checkComplete();
+
+            Bundle beans = getBundle(getDeploymentUnit(deployment));
+            beans.start();
+
+            Object c = getBean("C");
+            assertEquals(a, getter(c, "getA", "C"));
+         }
+         finally
+         {
+            undeploy(deployment);
+         }
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
+   }
+   */
 }

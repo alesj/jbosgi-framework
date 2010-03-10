@@ -27,7 +27,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.compendium.support.a.PA;
 import org.jboss.test.osgi.compendium.support.b.Other;
 import org.junit.Test;
@@ -40,12 +40,12 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  * @author thomas.diesler@jboss.com
  */
-public class PackageAdminTestCase extends NativeFrameworkTest
+public class PackageAdminTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testGetBudleFromClass() throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
+      VirtualFile assemblyA = assembleArchive("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -60,7 +60,7 @@ public class PackageAdminTestCase extends NativeFrameworkTest
          Bundle notFound = pa.getBundle(getClass());
          assertNull(notFound);
 
-         VirtualFile assemblyB = assembleBundle("simple", "/bundles/simple/simple-bundle1", Other.class);
+         VirtualFile assemblyB = assembleArchive("simple", "/bundles/simple/simple-bundle1", Other.class);
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {

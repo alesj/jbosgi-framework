@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.a.A;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -47,7 +47,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
+public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testGetProperty() throws Exception
@@ -56,7 +56,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
       String[] clazzes = new String[] { BundleContext.class.getName() };
       Object serviceID = null;
 
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -155,7 +155,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    {
       ServiceReference reference = null;
       
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -215,7 +215,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testGetBundle() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -246,7 +246,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testGetBundleAfterStop() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -277,7 +277,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testUsingBundles() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
@@ -293,7 +293,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
          
          assertUsingBundles(reference);
          
-         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
@@ -336,7 +336,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testUsingBundlesAfterStop() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
@@ -352,7 +352,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
          
          assertUsingBundles(reference);
          
-         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
@@ -381,7 +381,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testIsAssignableToErrors() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -424,7 +424,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testNotAssignableTo() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
@@ -438,7 +438,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
 
-         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class);
+         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
@@ -466,7 +466,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
       //Bundle-Name: Service2
       //Bundle-SymbolicName: org.jboss.test.osgi.service2
       //Export-Package: org.jboss.test.osgi.service.support.a
-      VirtualFile assembly2 = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      VirtualFile assembly2 = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
       
       try
@@ -478,7 +478,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
          //Bundle-Name: Service1
          //Bundle-SymbolicName: org.jboss.test.osgi.service1
          //Import-Package: org.jboss.test.osgi.service.support.a
-         VirtualFile assembly1 = assembleBundle("service1", "/bundles/service/service-bundle1");
+         VirtualFile assembly1 = assembleArchive("service1", "/bundles/service/service-bundle1");
          Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
          
          try
@@ -515,7 +515,7 @@ public class ServiceReferenceUnitTestCase extends NativeFrameworkTest
    @Test
    public void testCompareTo() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {

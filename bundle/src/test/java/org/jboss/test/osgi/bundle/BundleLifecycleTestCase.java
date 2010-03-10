@@ -27,7 +27,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
 import org.jboss.test.osgi.bundle.support.b.LifecycleService;
 import org.junit.Test;
@@ -42,7 +42,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.Diesler@jboss.com
  * @since 15-Dec-2009
  */
-public class BundleLifecycleTestCase extends NativeFrameworkTest
+public class BundleLifecycleTestCase extends AbstractFrameworkTest
 {
 
    /**
@@ -51,7 +51,7 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
    @Test
    public void testSimpleStart() throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -76,7 +76,7 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
    @Test
    public void testDependencyNotAvailable() throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -86,7 +86,7 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
          ServiceReference sref = context.getServiceReference(LifecycleService.class.getName());
          assertNull("Service not available", sref);
 
-         VirtualFile assemblyB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
@@ -118,14 +118,14 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
    @Test
    public void testDependencyAvailable() throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          bundleA.start();
          assertBundleState(Bundle.ACTIVE, bundleA.getState());
 
-         VirtualFile assemblyB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
@@ -151,13 +151,13 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
    @Test
    public void testStartRetry() throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
-         VirtualFile assemblyB = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
@@ -200,7 +200,7 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
    @Test
    public void testFailToResolve() throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+      VirtualFile assemblyA = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
       Bundle bundleB = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -232,7 +232,7 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
    {
       try
       {
-         VirtualFile assembly = assembleBundle("missing-symbolic-name", "/bundles/lifecycle/invalid01");
+         VirtualFile assembly = assembleArchive("missing-symbolic-name", "/bundles/lifecycle/invalid01");
          context.installBundle(assembly.toURL().toExternalForm());
          fail("BundleException expected");
       }
@@ -243,7 +243,7 @@ public class BundleLifecycleTestCase extends NativeFrameworkTest
       
       try
       {
-         VirtualFile assembly = assembleBundle("invalid-export", "/bundles/lifecycle/invalid02");
+         VirtualFile assembly = assembleArchive("invalid-export", "/bundles/lifecycle/invalid02");
          context.installBundle(assembly.toURL().toExternalForm());
          fail("BundleException expected");
       }

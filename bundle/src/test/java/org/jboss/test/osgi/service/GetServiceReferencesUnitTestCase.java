@@ -29,7 +29,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.a.A;
 import org.jboss.test.osgi.service.support.b.B;
 import org.junit.Test;
@@ -48,13 +48,13 @@ import org.osgi.framework.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
+public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
 {
 
    @Test
    public void testGetServiceReferences() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -174,7 +174,7 @@ public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
    
    private void assertGetServiceReferencesNotAssignable(String className) throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -192,7 +192,7 @@ public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         VirtualFile assemblyB = assembleBundle("simple2", "/bundles/simple/simple-bundle2", A.class);
+         VirtualFile assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
@@ -276,7 +276,7 @@ public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
 
    private void assertGetServiceReferencesAssignable(String className) throws Exception
    {
-      VirtualFile assemblyA = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      VirtualFile assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -294,7 +294,7 @@ public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         VirtualFile assemblyB = assembleBundle("service1", "/bundles/service/service-bundle1");
+         VirtualFile assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
@@ -369,7 +369,7 @@ public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
    {
       String className = A.class.getName();
       
-      VirtualFile assemblyA = assembleBundle("service2", "/bundles/service/service-bundle2", A.class);
+      VirtualFile assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundleA = context.installBundle(assemblyA.toURL().toExternalForm());
       try
       {
@@ -390,7 +390,7 @@ public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
-         VirtualFile assemblyB = assembleBundle("service1", "/bundles/service/service-bundle1");
+         VirtualFile assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
          Bundle bundleB = context.installBundle(assemblyB.toURL().toExternalForm());
          try
          {
@@ -480,7 +480,7 @@ public class GetServiceReferencesUnitTestCase extends NativeFrameworkTest
       String className = A.class.getName();
       String wrongClassName = B.class.getName();
       
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1", A.class);
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {

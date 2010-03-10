@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
@@ -46,12 +46,12 @@ import org.osgi.framework.Bundle;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleEntriesUnitTestCase extends NativeFrameworkTest
+public class BundleEntriesUnitTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testEntriesNotInstalled() throws Exception
    {
-      VirtualFile assembly = assembleBundle("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
+      VirtualFile assembly = assembleArchive("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       bundle.uninstall();
       try
@@ -77,7 +77,7 @@ public class BundleEntriesUnitTestCase extends NativeFrameworkTest
    @Test
    public void testFindEntriesNoPath() throws Exception
    {
-      VirtualFile assembly = assembleBundle("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
+      VirtualFile assembly = assembleArchive("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -97,7 +97,7 @@ public class BundleEntriesUnitTestCase extends NativeFrameworkTest
    @Test
    public void testEntries() throws Exception
    {
-      VirtualFile assembly = assembleBundle("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
+      VirtualFile assembly = assembleArchive("entries-simple", "/bundles/entries/entries-simple", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {

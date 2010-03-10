@@ -19,38 +19,8 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.osgi.service;
+package org.jboss.test.osgi.service.support.e;
 
-import java.lang.reflect.Method;
-
-import org.jboss.test.osgi.DeployersTest;
-
-/**
- * Test MC's services.
- *
- * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
- */
-public abstract class ServicesTest extends DeployersTest
+public class E 
 {
-   public ServicesTest(String name)
-   {
-      super(name);
-   }
-
-   protected static Object getter(Object target, String getter, String name) throws Throwable
-   {
-      assertNotNull("Target " + name + " is not null", target);
-      Class<?> clazz = target.getClass();
-      Method m = clazz.getDeclaredMethod(getter);
-      return m.invoke(target);
-   }
-
-   protected static Object setter(Object target, String setter, Object value, String name) throws Throwable
-   {
-      assertNotNull("Target " + name + " is not null", target);
-      assertNotNull("Value is not null", value);
-      Class<?> clazz = target.getClass();
-      Method m = clazz.getDeclaredMethod(setter, value.getClass());
-      return m.invoke(target, value);
-   }
 }

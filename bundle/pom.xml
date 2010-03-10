@@ -289,9 +289,8 @@
             </property>
           </systemProperties>
           <excludes>
-            <!-- excludes listed here need to have a jira issue associated 
+            <!-- excludes listed here need to have a jira issue associated -->
             <exclude>org/jboss/test/osgi/service/ServiceMixUnitTestCase.class</exclude> 
-            -->
           </excludes>
         </configuration>
       </plugin>

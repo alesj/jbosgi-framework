@@ -31,7 +31,7 @@ import static org.junit.Assert.fail;
 import java.util.Hashtable;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -47,13 +47,13 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class ServiceRegistrationUnitTestCase extends NativeFrameworkTest
+public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
 {
 
    @Test
    public void testGetReference() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -115,7 +115,7 @@ public class ServiceRegistrationUnitTestCase extends NativeFrameworkTest
    @Test
    public void testSetProperties() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -224,7 +224,7 @@ public class ServiceRegistrationUnitTestCase extends NativeFrameworkTest
    @Test
    public void testSetPropertiesAfterStop() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -257,7 +257,7 @@ public class ServiceRegistrationUnitTestCase extends NativeFrameworkTest
    @Test
    public void testUnregister() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       try
       {
@@ -282,7 +282,7 @@ public class ServiceRegistrationUnitTestCase extends NativeFrameworkTest
          inUse = bundle1.getServicesInUse();
          assertArrayEquals(new ServiceReference[] { reference }, inUse);
 
-         VirtualFile assembly2 = assembleBundle("simple2", "/bundles/simple/simple-bundle2");
+         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          try
          {
@@ -340,7 +340,7 @@ public class ServiceRegistrationUnitTestCase extends NativeFrameworkTest
    @Test
    public void testUnregisterAfterStop() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple1", "/bundles/simple/simple-bundle1");
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {

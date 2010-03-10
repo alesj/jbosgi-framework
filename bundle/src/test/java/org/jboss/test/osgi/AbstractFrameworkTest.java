@@ -37,6 +37,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.launch.OSGiFramework;
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
 import org.jboss.osgi.spi.util.ConstantsHelper;
@@ -61,10 +63,10 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author Thomas.Diesler@jboss.com
  * @since 10-Mar-2010
  */
-public abstract class NativeFrameworkTest extends OSGiTest implements ServiceListener, SynchronousBundleListener, FrameworkListener
+public abstract class AbstractFrameworkTest extends OSGiTest implements ServiceListener, SynchronousBundleListener, FrameworkListener
 {
    // Provide logging
-   private static final Logger log = Logger.getLogger(NativeFrameworkTest.class);
+   private static final Logger log = Logger.getLogger(AbstractFrameworkTest.class);
 
    protected static Framework framework;
    protected static BundleContext context;
@@ -99,6 +101,11 @@ public abstract class NativeFrameworkTest extends OSGiTest implements ServiceLis
    {
       ServiceReference sref = context.getServiceReference(PackageAdmin.class.getName());
       return (PackageAdmin)context.getService(sref);
+   }
+   
+   protected OSGiBundleManager getBundleManager()
+   {
+      return ((OSGiFramework)framework).getBundleManager();
    }
 
    protected void assertLoadClass(Bundle bundle, String className, Bundle exporter)

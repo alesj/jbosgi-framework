@@ -31,7 +31,7 @@ import java.net.URL;
 
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;
@@ -50,7 +50,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
-public class FragmentTestCase extends NativeFrameworkTest
+public class FragmentTestCase extends AbstractFrameworkTest
 {
    private Framework framework;
    private BundleContext context;

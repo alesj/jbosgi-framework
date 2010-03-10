@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -42,7 +42,7 @@ import org.osgi.framework.Constants;
  * @author thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class SystemBundleUnitTestCase extends NativeFrameworkTest
+public class SystemBundleUnitTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testBundleId() throws Exception

@@ -39,7 +39,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.test.osgi.NativeFrameworkTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -57,12 +57,12 @@ import org.osgi.framework.ServiceRegistration;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleContextUnitTestCase extends NativeFrameworkTest
+public class BundleContextUnitTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testGetBundle() throws Exception
    {
-      VirtualFile assembly1 = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle1 = context.installBundle(assembly1.toURL().toExternalForm());
       BundleContext context1 = null;
       try
@@ -77,7 +77,7 @@ public class BundleContextUnitTestCase extends NativeFrameworkTest
          Set<Bundle> expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
          assertEquals(expected, actual);
          
-         VirtualFile assembly2 = assembleBundle("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
+         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2", new Class[0]);
          Bundle bundle2 = context.installBundle(assembly2.toURL().toExternalForm());
          BundleContext context2 = null;
          try
@@ -176,7 +176,7 @@ public class BundleContextUnitTestCase extends NativeFrameworkTest
    @Test
    public void testProperties() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -258,7 +258,7 @@ public class BundleContextUnitTestCase extends NativeFrameworkTest
    @Test
    public void testServiceListener() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -351,7 +351,7 @@ public class BundleContextUnitTestCase extends NativeFrameworkTest
    @Test
    public void testBundleListener() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -409,7 +409,7 @@ public class BundleContextUnitTestCase extends NativeFrameworkTest
    @Test
    public void testFrameworkListener() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -448,7 +448,7 @@ public class BundleContextUnitTestCase extends NativeFrameworkTest
    @Test
    public void testGetDataFile() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
@@ -469,7 +469,7 @@ public class BundleContextUnitTestCase extends NativeFrameworkTest
    @Test
    public void testStopedBundleContext() throws Exception
    {
-      VirtualFile assembly = assembleBundle("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
+      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1", new Class[0]);
       Bundle bundle = context.installBundle(assembly.toURL().toExternalForm());
       try
       {
