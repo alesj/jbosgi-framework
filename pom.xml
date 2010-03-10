@@ -287,6 +287,11 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.osgi.vfs</groupId>
+        <artifactId>jboss-osgi-vfs21</artifactId>
+        <version>${version.jboss.osgi.vfs}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.osgi.vfs</groupId>
         <artifactId>jboss-osgi-vfs30</artifactId>
         <version>${version.jboss.osgi.vfs}</version>
       </dependency>

@@ -90,7 +90,6 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          
          allPackages.add("org.jboss.osgi.deployment.deployer");
          allPackages.add("org.jboss.osgi.deployment.interceptor");
-         allPackages.add("org.jboss.osgi.microcontainer");
 
          String[] corePackages = OSGiCoreClassFilter.getCorePackages();
          allPackageNames.addAll(Arrays.asList(corePackages));

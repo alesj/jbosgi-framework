@@ -35,9 +35,12 @@
       <version>${version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jboss.osgi.deployers</groupId>
+      <artifactId>jboss-osgi-deployers-vfs30</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.osgi.vfs</groupId>
       <artifactId>jboss-osgi-vfs30</artifactId>
-      <version>${version.jboss.osgi.vfs}</version>
     </dependency>
   </dependencies>
 

@@ -167,11 +167,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.deployers</groupId>
-      <artifactId>jboss-osgi-deployers-vfs30</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.osgi.framework</groupId>
       <artifactId>jboss-osgi-framework-vfs30</artifactId>
       <version>${version}</version>
