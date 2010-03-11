@@ -111,9 +111,10 @@ public abstract class AbstractFrameworkTest extends OSGiTest implements ServiceL
 
    protected Bundle installBundle(VirtualFile archive) throws Exception
    {
-      return context.installBundle(archive.toURL().toExternalForm());
-      
+      String location = archive.toURL().toExternalForm();
+      return context.installBundle(location, archive.openStream());
    }
+   
    protected void assertLoadClass(Bundle bundle, String className, Bundle exporter)
    {
       Class<?> clazz = assertLoadClass(bundle, className);
