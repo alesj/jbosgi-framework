@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiTest;
+import org.jboss.osgi.testing.OSGiRuntimeTest;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -39,7 +39,7 @@ import org.osgi.framework.launch.Framework;
  * @author Thomas.Diesler@jboss.com
  * @since 07-Oct-2009
  */
-public class BundleClassPathTest extends OSGiTest
+public class BundleClassPathTest extends OSGiRuntimeTest
 {
    @Test
    public void testBundleClassPath() throws Exception

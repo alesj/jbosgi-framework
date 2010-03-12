@@ -36,7 +36,7 @@ import org.jboss.osgi.framework.resolver.Resolver;
 import org.jboss.osgi.framework.resolver.ResolverBundle;
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiTest;
+import org.jboss.osgi.testing.OSGiRuntimeTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -48,7 +48,7 @@ import org.osgi.framework.BundleException;
  * @author thomas.diesler@jboss.com
  * @since 27-Jul-2009
  */
-public class ResolverSmokeTest extends OSGiTest
+public class ResolverSmokeTest extends OSGiRuntimeTest
 {
    @Test
    public void testRandomBundleResolution() throws BundleException

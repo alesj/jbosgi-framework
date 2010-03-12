@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
 import org.jboss.osgi.spi.util.ServiceLoader;
 import org.jboss.osgi.testing.OSGiBundle;
 import org.jboss.osgi.testing.OSGiRuntime;
-import org.jboss.osgi.testing.OSGiTestHelper;
+import org.jboss.osgi.testing.OSGiRuntimeHelper;
 import org.jboss.test.osgi.integration.simple.bundleA.SimpleService;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -54,7 +54,7 @@ public class SimpleBundleTestCase
       Framework framework = factory.newFramework(null);
       framework.start();
       
-      OSGiTestHelper helper = new OSGiTestHelper();
+      OSGiRuntimeHelper helper = new OSGiRuntimeHelper();
       
       BundleContext sysContext = framework.getBundleContext();
       Bundle bundle = sysContext.installBundle(helper.getTestArchivePath("simple-bundle.jar"));
@@ -85,7 +85,7 @@ public class SimpleBundleTestCase
    public void testBundleInstallRuntimeAPI() throws Exception
    {
       // Uses the JBossOSGi SPI provided runtime abstraction
-      OSGiRuntime runtime = new OSGiTestHelper().getEmbeddedRuntime();
+      OSGiRuntime runtime = new OSGiRuntimeHelper().getEmbeddedRuntime();
       OSGiBundle bundle = runtime.installBundle("simple-bundle.jar");
 
       assertEquals("simple-bundle", bundle.getSymbolicName());

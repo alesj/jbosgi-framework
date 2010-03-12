@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.jar.Manifest;
 
-import org.jboss.osgi.testing.OSGiTestHelper;
+import org.jboss.osgi.testing.OSGiRuntimeHelper;
 import org.jboss.test.BaseTestCase;
 
 /**
@@ -65,7 +65,7 @@ public abstract class AbstractManifestTestCase extends BaseTestCase
 
    protected InputStream getManifestInputStream(String name) throws IOException
    {
-      URL url = new OSGiTestHelper().getResourceURL(name);
+      URL url = new OSGiRuntimeHelper().getResourceURL(name);
       if (url == null)
          fail(name + " not found");
       return url.openStream();

@@ -34,7 +34,7 @@ import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiTest;
+import org.jboss.osgi.testing.OSGiRuntimeTest;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -49,7 +49,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.diesler@jboss.com
  * @since 09-Nov-2009
  */
-public abstract class AbstractResolverTest extends OSGiTest
+public abstract class AbstractResolverTest extends OSGiRuntimeTest
 {
    protected static OSGiFramework framework;
 

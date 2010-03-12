@@ -30,7 +30,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import org.jboss.osgi.spi.util.ServiceLoader;
-import org.jboss.osgi.testing.OSGiTest;
+import org.jboss.osgi.testing.OSGiRuntimeTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -45,7 +45,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  * @author thomas.diesler@jboss.com
  * @since 18-Aug-2009
  */
-public class SimpleLogServiceTest extends OSGiTest
+public class SimpleLogServiceTest extends OSGiRuntimeTest
 {
    @Before
    public void setUp()
