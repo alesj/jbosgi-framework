@@ -167,11 +167,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-mdr</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.osgi</groupId>
       <artifactId>jboss-osgi-testing</artifactId>
       <scope>test</scope>

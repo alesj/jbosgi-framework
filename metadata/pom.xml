@@ -35,6 +35,14 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-client-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
+      <artifactId>jboss-deployers-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.deployers</groupId>
       <artifactId>jboss-deployers-vfs</artifactId>
     </dependency>
     <dependency>

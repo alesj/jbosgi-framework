@@ -84,8 +84,23 @@
     <dependencies>
       <dependency>
         <groupId>org.jboss.cl</groupId>
+        <artifactId>jboss-classloading</artifactId>
+        <version>${version.jboss.classloading}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.cl</groupId>
         <artifactId>jboss-classloading-vfs</artifactId>
         <version>${version.jboss.classloading}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.deployers</groupId>
+        <artifactId>jboss-deployers-client-spi</artifactId>
+        <version>${version.jboss.deployers}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.deployers</groupId>
+        <artifactId>jboss-deployers-spi</artifactId>
+        <version>${version.jboss.deployers}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.deployers</groupId>
