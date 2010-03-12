@@ -34,18 +34,13 @@
 
   <dependencies>
     <dependency>
+      <groupId>biz.aQute</groupId>
+      <artifactId>bnd</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.osgi.framework</groupId>
       <artifactId>jboss-osgi-framework-core</artifactId>
       <version>${version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework-metadata</artifactId>
-      <version>${version}</version>
-    </dependency>
-    <dependency>
-      <groupId>biz.aQute</groupId>
-      <artifactId>bnd</artifactId>
     </dependency>
     
     <!-- Test bundles dependencies -->
@@ -160,6 +155,21 @@
           <artifactId>jboss-logging-spi</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.kernel</groupId>
+      <artifactId>jboss-jmx-aop-mc-int</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.kernel</groupId>
+      <artifactId>jboss-jmx-mc-int</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-mdr</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.osgi</groupId>

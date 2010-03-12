@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- ====================================================================== -->
-<!-- -->
-<!-- JBoss, the OpenSource J2EE webOS -->
-<!-- -->
-<!-- Distributable under LGPL license. -->
-<!-- See terms of license at http://www.gnu.org. -->
-<!-- -->
+<!--                                                                        -->
+<!-- JBoss, the OpenSource J2EE webOS                                       -->
+<!--                                                                        -->
+<!-- Distributable under LGPL license.                                      -->
+<!-- See terms of license at http://www.gnu.org.                            -->
+<!--                                                                        -->
 <!-- ====================================================================== -->
 
 <!-- $Id$ -->
@@ -29,75 +29,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework-metadata</artifactId>
-      <version>${version}</version>
-    </dependency>
-    <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.cl</groupId>
-      <artifactId>jboss-classloader</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.cl</groupId>
-      <artifactId>jboss-classloading</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.deployers</groupId>
-      <artifactId>jboss-deployers-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.deployers</groupId>
-      <artifactId>jboss-deployers-client-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.deployers</groupId>
-      <artifactId>jboss-deployers-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.deployers</groupId>
-      <artifactId>jboss-deployers-core-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.deployers</groupId>
-      <artifactId>jboss-deployers-impl</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jboss</groupId>
-          <artifactId>jboss-vfs</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.deployers</groupId>
-      <artifactId>jboss-deployers-structure-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.kernel</groupId>
-      <artifactId>jboss-kernel</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.kernel</groupId>
-      <artifactId>jboss-jmx-aop-mc-int</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.kernel</groupId>
-      <artifactId>jboss-jmx-mc-int</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.kernel</groupId>
-      <artifactId>jboss-dependency</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-mdr</artifactId>
+      <groupId>org.jboss.osgi.framework</groupId>
+      <artifactId>jboss-osgi-framework-metadata</artifactId>
+      <version>${version}</version>
     </dependency>
     
     <!-- JBoss OSGi Dependencies -->
@@ -119,11 +57,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
-
   </dependencies>
 
-  <build>
-    <plugins>
-    </plugins>
-  </build>
 </project>
