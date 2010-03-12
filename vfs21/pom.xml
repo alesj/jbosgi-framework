@@ -31,6 +31,7 @@
   <properties>
     <version.jboss.classloading>2.2.0.Alpha1</version.jboss.classloading>
     <version.jboss.deployers>2.2.0.Alpha1</version.jboss.deployers>
+    <version.jboss.kernel>2.2.0.Alpha1</version.jboss.kernel>
   </properties>
   
   <!-- Dependencies -->

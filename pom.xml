@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- ====================================================================== -->
-<!-- -->
-<!-- JBoss, the OpenSource J2EE webOS -->
-<!-- -->
-<!-- Distributable under LGPL license. -->
-<!-- See terms of license at http://www.gnu.org. -->
-<!-- -->
-<!-- ====================================================================== -->
+  <!-- ====================================================================== -->
+  <!--                                                                        -->
+  <!--  JBoss, the OpenSource J2EE webOS                                      -->
+  <!--                                                                        -->
+  <!--  Distributable under LGPL license.                                     -->
+  <!--  See terms of license at http://www.gnu.org.                           -->
+  <!--                                                                        -->
+  <!-- ====================================================================== -->
 
-<!-- $Id$ -->
+  <!-- $Id$ -->
 
 <!-- 
   Set these VM properties in your IDE debugger
@@ -84,62 +84,12 @@
     <dependencies>
       <dependency>
         <groupId>org.jboss.cl</groupId>
-        <artifactId>jboss-classloader</artifactId>
-        <version>${version.jboss.classloading}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.cl</groupId>
-        <artifactId>jboss-classloading</artifactId>
-        <version>${version.jboss.classloading}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.cl</groupId>
         <artifactId>jboss-classloading-vfs</artifactId>
         <version>${version.jboss.classloading}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-client</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-client-spi</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-core</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-core-spi</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-impl</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-structure-spi</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-vfs-spi</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
         <artifactId>jboss-deployers-vfs</artifactId>
-        <version>${version.jboss.deployers}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.deployers</groupId>
-        <artifactId>jboss-deployers-jmx</artifactId>
         <version>${version.jboss.deployers}</version>
       </dependency>
       <dependency>
@@ -156,16 +106,6 @@
         <groupId>org.jboss.kernel</groupId>
         <artifactId>jboss-jmx-mc-int</artifactId>
         <version>${version.jboss.kernel}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.kernel</groupId>
-        <artifactId>jboss-dependency</artifactId>
-        <version>${version.jboss.kernel}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.logging</groupId>
-        <artifactId>jboss-logging-spi</artifactId>
-        <version>${version.jboss.logging}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss</groupId>
