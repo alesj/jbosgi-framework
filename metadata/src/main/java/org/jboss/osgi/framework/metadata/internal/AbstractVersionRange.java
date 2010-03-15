@@ -52,7 +52,7 @@ public class AbstractVersionRange extends org.jboss.classloading.spi.version.Ver
     * @param rangeSpec the range spec
     * @return the version range
     */
-   public static VersionRange valueOf(String rangeSpec)
+   public static AbstractVersionRange valueOf(String rangeSpec)
    {
       return parseRangeSpec(rangeSpec);
    }
@@ -63,7 +63,7 @@ public class AbstractVersionRange extends org.jboss.classloading.spi.version.Ver
     * @param rangeSpec
     * @return the version range
     */
-   public static VersionRange parseRangeSpec(String rangeSpec)
+   public static AbstractVersionRange parseRangeSpec(String rangeSpec)
    {
       if (rangeSpec == null)
          throw new IllegalArgumentException("Null rangeSpec");
