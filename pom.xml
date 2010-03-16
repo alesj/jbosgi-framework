@@ -62,7 +62,6 @@
     <version.jboss.osgi.jndi>1.0.3-SNAPSHOT</version.jboss.osgi.jndi>
     <version.jboss.osgi.reflect>2.2.0</version.jboss.osgi.reflect>
     <version.jboss.osgi.spi>1.0.5-SNAPSHOT</version.jboss.osgi.spi>
-    <version.jboss.osgi.testing>1.0.0-SNAPSHOT</version.jboss.osgi.testing>
     <version.jboss.osgi.vfs>1.0.0-SNAPSHOT</version.jboss.osgi.vfs>
     <version.jboss.osgi.xml.binding>2.0.2.Beta4</version.jboss.osgi.xml.binding>
     <version.jboss.test>1.1.4.GA</version.jboss.test>
@@ -234,11 +233,6 @@
         <groupId>org.jboss.test</groupId>
         <artifactId>jboss-test</artifactId>
         <version>${version.jboss.test}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi</groupId>
-        <artifactId>jboss-osgi-testing</artifactId>
-        <version>${version.jboss.osgi.testing}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.osgi.vfs</groupId>
