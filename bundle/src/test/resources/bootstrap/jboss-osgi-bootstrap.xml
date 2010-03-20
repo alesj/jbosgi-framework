@@ -59,11 +59,6 @@
       <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
     </constructor>
   </bean>
-  <!-- 
-  <bean name="OSGiBundleResolver" class="org.jboss.osgi.framework.resolver.internal.basic.BasicResolverImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-  </bean>
-  -->
   <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
@@ -95,9 +90,6 @@
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="PackageAdminService" class="org.jboss.osgi.framework.packageadmin.PackageAdminImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-  </bean>
-  <bean name="DeployerService" class="org.jboss.osgi.framework.service.internal.DeployerServiceImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="LifecycleInterceptorService" class="org.jboss.osgi.framework.service.internal.LifecycleInterceptorServiceImpl">

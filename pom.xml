@@ -50,6 +50,7 @@
     <version.jboss.deployers>2.2.0.Alpha4</version.jboss.deployers>
     <version.jboss.kernel>2.2.0.Alpha9</version.jboss.kernel>
     <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
+    <version.jboss.vfs>3.0.0.CR5</version.jboss.vfs>
     <version.jboss.mdr>2.2.0.Alpha2</version.jboss.mdr>
     <version.jboss.osgi.apache.xerces>2.9.1.SP3</version.jboss.osgi.apache.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
@@ -126,6 +127,11 @@
         <artifactId>jboss-mdr</artifactId>
         <version>${version.jboss.mdr}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-vfs</artifactId>
+        <version>${version.jboss.vfs}</version>
+      </dependency>
       
       <!-- JBoss OSGi Dependencies -->
       <dependency>
@@ -144,7 +150,7 @@
         <version>${version.jboss.osgi.deployers}</version>
       </dependency>
       <dependency>
-        <groupId>org.jboss.osgi.runtime</groupId>
+        <groupId>org.jboss.osgi.deployment</groupId>
         <artifactId>jboss-osgi-deployment</artifactId>
         <version>${version.jboss.osgi.deployment}</version>
       </dependency>

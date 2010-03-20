@@ -89,7 +89,7 @@
   <bean name="StartLevelService" class="org.jboss.osgi.framework.service.internal.StartLevelImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
-  <bean name="PackageAdminService" class="org.jboss.osgi.framework.service.internal.PackageAdminImpl">
+  <bean name="PackageAdminService" class="org.jboss.osgi.framework.packageadmin.PackageAdminImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   
