@@ -52,7 +52,7 @@ import org.jboss.vfs.VirtualFile;
 /**
  * The ClassLoaderPolicy for OSGi bundles.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 11-Sep-2009
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy

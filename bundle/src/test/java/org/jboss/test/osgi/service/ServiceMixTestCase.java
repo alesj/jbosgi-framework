@@ -57,9 +57,9 @@ import org.osgi.framework.ServiceRegistration;
  * Test MC's service mixture.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  */
-public class ServiceMixUnitTestCase extends AbstractServiceMixTest
+public class ServiceMixTestCase extends AbstractServiceMixTest
 {
    @Test
    public void testGetServiceReferenceFromMC() throws Throwable

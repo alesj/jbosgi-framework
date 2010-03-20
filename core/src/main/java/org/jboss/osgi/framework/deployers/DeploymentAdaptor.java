@@ -30,7 +30,7 @@ import org.jboss.osgi.vfs.VirtualFile;
 /**
  * An abstraction of the VFSDeploymentFactory. 
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 03-Mar-2010
  */
 public interface DeploymentAdaptor 

@@ -36,14 +36,15 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * RegisterServiceUnitTestCase.
+ * RegisterServiceTest.
  *
  * todo test secutiry
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class RegisterServiceUnitTestCase extends AbstractFrameworkTest
+public class RegisterServiceTestCase extends AbstractFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };

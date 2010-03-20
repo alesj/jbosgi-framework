@@ -47,7 +47,7 @@ import org.jboss.virtual.VirtualFile;
 /**
  * OSGiClassLoaderDomain.<p>
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 03-Sep-2009
  */
 public class OSGiClassLoaderDomain extends ClassLoaderDomain

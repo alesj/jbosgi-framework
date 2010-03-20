@@ -31,7 +31,7 @@
   <parent>
     <groupId>org.jboss.osgi</groupId>
     <artifactId>jboss-osgi-parent</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5-SNAPSHOT</version>
   </parent>
 
   <!-- Subversion -->
@@ -247,8 +247,9 @@
     </dependencies>
   </dependencyManagement>
 
+  <!-- Profiles -->
   <profiles>
-
+  
     <!-- 
       Name: distro 
       Desc: Build the distribution 
@@ -289,7 +290,6 @@
         </plugins>
       </build>
     </profile>
-    
   </profiles>
 
 </project>

@@ -36,7 +36,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
  *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  */
 public class OSGiBundleStateCreateDeployer extends AbstractRealDeployer
 {

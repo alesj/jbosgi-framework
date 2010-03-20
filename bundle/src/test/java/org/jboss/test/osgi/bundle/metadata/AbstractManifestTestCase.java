@@ -33,7 +33,7 @@ import org.jboss.test.BaseTestCase;
  * Uses Manifest.mf file for actual tests.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  */
 public abstract class AbstractManifestTestCase extends BaseTestCase
 {

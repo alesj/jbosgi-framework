@@ -34,7 +34,7 @@ import org.osgi.framework.BundleException;
 /**
  * The state of a fragment {@link Bundle}.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 25-Dec-2009
  */
 public class OSGiFragmentState extends AbstractDeployedBundleState

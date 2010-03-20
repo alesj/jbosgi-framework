@@ -40,15 +40,15 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 /**
- * BundleEntriesUnitTestCase.
+ * BundleEntriesTest.
  * 
  * TODO test security
  * TODO test fragments
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleEntriesUnitTestCase extends AbstractFrameworkTest
+public class BundleEntriesTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testEntriesNotInstalled() throws Exception

@@ -35,14 +35,14 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 /**
- * SystemBundleUnitTestCase.
+ * SystemBundleTest.
  *
  * TODO test security
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class SystemBundleUnitTestCase extends AbstractFrameworkTest
+public class SystemBundleTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testBundleId() throws Exception

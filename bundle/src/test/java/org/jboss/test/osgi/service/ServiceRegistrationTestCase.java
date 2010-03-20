@@ -42,14 +42,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * ServiceRegistrationUnitTestCase.
+ * ServiceRegistrationTest.
  *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class ServiceRegistrationUnitTestCase extends AbstractFrameworkTest
+public class ServiceRegistrationTestCase extends AbstractFrameworkTest
 {
-
    @Test
    public void testGetReference() throws Exception
    {

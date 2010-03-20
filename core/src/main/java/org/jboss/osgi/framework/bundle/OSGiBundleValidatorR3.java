@@ -26,7 +26,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 /**
  * A bundle validator for OSGi R3.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 19-Dec-2009
  */
 public class OSGiBundleValidatorR3 implements OSGiBundleValidator

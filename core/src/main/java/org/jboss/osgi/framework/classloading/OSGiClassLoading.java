@@ -28,7 +28,7 @@ import org.jboss.classloading.spi.dependency.ClassLoading;
 /**
  * The ClassLoading for OSGi bundles.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 05-Jan-2010
  */
 public class OSGiClassLoading extends ClassLoading

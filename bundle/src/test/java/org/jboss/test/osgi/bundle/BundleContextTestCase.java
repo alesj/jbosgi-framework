@@ -49,14 +49,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * BundleContextUnitTestCase.
+ * BundleContextTest.
  *
  * TODO test security
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleContextUnitTestCase extends AbstractFrameworkTest
+public class BundleContextTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testGetBundle() throws Exception

@@ -32,7 +32,7 @@ import org.osgi.framework.Constants;
 /**
  * A bundle validator for OSGi R4.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
 public class OSGiBundleValidatorR4 implements OSGiBundleValidator

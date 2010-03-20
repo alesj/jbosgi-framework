@@ -19,34 +19,49 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.osgi.framework.deployers;
+package org.jboss.test.osgi.service;
 
-// $Id: AbstractOSGiClassLoadingDeployer.java 101391 2010-02-24 12:58:50Z thomas.diesler@jboss.com $
+// Id: $
 
-import org.jboss.deployers.client.spi.Deployment;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.deployers.vfs.spi.client.VFSDeploymentFactory;
-import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
-import org.jboss.osgi.vfs.AbstractVFS;
+import static org.junit.Assert.assertNotNull;
+
 import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.test.osgi.AbstractFrameworkTest;
+import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceRegistration;
 
 /**
- * An abstraction of the VFSDeploymentFactory for jboss-vfs-3.0.x 
- * 
+ * Test {@link ServiceListener} registration.
+ *
  * @author thomas.diesler@jboss.com
- * @since 03-Mar-2010
+ * @since 20-Mar-2010
  */
-public class DeploymentAdaptor30 implements DeploymentAdaptor 
+public class ServiceListenerTestCase extends AbstractFrameworkTest
 {
-   public Deployment createDeployment(VirtualFile root)
+   @Test
+   public void testGetReference() throws Exception
    {
-      VFSDeploymentFactory factory = VFSDeploymentFactory.getInstance();
-      return factory.createVFSDeployment((org.jboss.vfs.VirtualFile)AbstractVFS.adapt(root));
-   }
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = installBundle(assembly);
+      try
+      {
+         bundle.start();
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-   public VirtualFile getRoot(DeploymentUnit unit)
-   {
-      VFSDeploymentUnit vfsUnit = (VFSDeploymentUnit)unit;
-      return AbstractVFS.adapt(vfsUnit.getRoot());
+         assertNoServiceEvent();
+         
+         ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
+         assertNotNull(sreg);
+         
+         assertNoServiceEvent();
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
    }
 }

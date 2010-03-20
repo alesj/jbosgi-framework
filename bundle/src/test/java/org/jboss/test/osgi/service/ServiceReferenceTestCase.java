@@ -41,13 +41,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * ServiceReferenceUnitTestCase.
+ * ServiceReferenceTest.
  *
  * todo more isAssignableTests
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class ServiceReferenceUnitTestCase extends AbstractFrameworkTest
+public class ServiceReferenceTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testGetProperty() throws Exception

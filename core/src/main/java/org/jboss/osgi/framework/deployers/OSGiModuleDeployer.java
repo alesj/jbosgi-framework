@@ -30,7 +30,7 @@ import org.jboss.osgi.framework.classloading.OSGiModule;
 /**
  * The OSGiModuleDeployer creates the {@link OSGiModule}.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision$
  */
 public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer

@@ -41,7 +41,7 @@ import org.jboss.vfs.VirtualFile;
  * 
  * Creates the OSGiClassLoader
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 11-Sep-2209
  */
 public class OSGiClassLoaderFactory implements ClassLoaderFactory

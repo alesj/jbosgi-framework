@@ -38,9 +38,9 @@ import org.junit.Test;
  * Test MC's jmx support.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  */
-public class JMXServicesUnitTestCase extends AbstractDeploymentTest
+public class JMXServicesTestCase extends AbstractDeploymentTest
 {
    @Test
    public void testAtJmx() throws Throwable

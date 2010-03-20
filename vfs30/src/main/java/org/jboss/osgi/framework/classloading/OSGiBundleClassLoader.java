@@ -29,7 +29,7 @@ import org.jboss.classloader.spi.base.BaseClassLoader;
 /**
  * An OSGi bundle class loader.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 19-Dec-2009
  */
 public class OSGiBundleClassLoader extends BaseClassLoader

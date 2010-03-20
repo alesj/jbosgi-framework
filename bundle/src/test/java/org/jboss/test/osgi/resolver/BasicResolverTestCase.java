@@ -33,7 +33,7 @@ import org.jboss.osgi.framework.resolver.internal.basic.BasicResolverImpl;
  * @author thomas.diesler@jboss.com
  * @since 10-Nov-2009
  */
-public class BasicResolverTest extends AbstractImportExportTest
+public class BasicResolverTestCase extends AbstractImportExportTest
 {
    @Override
    protected Resolver getTestResolver()

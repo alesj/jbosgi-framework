@@ -33,7 +33,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
  * for non-fragment bundles.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
 public class OSGiBundleClassLoadingDeployer extends AbstractOSGiClassLoadingDeployer

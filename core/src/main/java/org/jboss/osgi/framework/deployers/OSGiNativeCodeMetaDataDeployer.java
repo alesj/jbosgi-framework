@@ -48,7 +48,7 @@ import org.osgi.framework.Constants;
 /**
  * A deployer that takes care of loading native code libraries.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 19-Dec-2009
  */
 public class OSGiNativeCodeMetaDataDeployer extends AbstractRealDeployer

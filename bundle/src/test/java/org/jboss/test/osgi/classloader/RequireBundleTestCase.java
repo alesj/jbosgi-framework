@@ -34,14 +34,14 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 /**
- * RequireBundleUnitTestCase.
+ * RequireBundleTest.
  *
  * TODO test security
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class RequireBundleUnitTestCase extends AbstractFrameworkTest
+public class RequireBundleTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testSimpleRequireBundle() throws Exception

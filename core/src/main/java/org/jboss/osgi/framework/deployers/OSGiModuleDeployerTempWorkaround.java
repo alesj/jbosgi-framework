@@ -35,7 +35,7 @@ import org.jboss.osgi.framework.classloading.OSGiModule;
  * [TODO] Remove this deployer when the VFSClassLoaderDescribeDeployer 
  * suports an already attached Module.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 100143 $
  */
 public class OSGiModuleDeployerTempWorkaround extends VFSClassLoaderDescribeDeployer

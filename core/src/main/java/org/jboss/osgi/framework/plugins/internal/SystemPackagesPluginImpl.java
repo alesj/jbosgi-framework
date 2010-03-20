@@ -69,8 +69,14 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          allPackages.add("javax.imageio.stream");
          
          allPackages.add("javax.management");
-         allPackages.add("javax.management.remote");
+         allPackages.add("javax.management.loading");
+         allPackages.add("javax.management.modelmbean");
+         allPackages.add("javax.management.monitor");
          allPackages.add("javax.management.openmbean");
+         allPackages.add("javax.management.relation");
+         allPackages.add("javax.management.remote");
+         allPackages.add("javax.management.remote.rmi");
+         allPackages.add("javax.management.timer");
          
          allPackages.add("javax.naming");
          allPackages.add("javax.naming.event");

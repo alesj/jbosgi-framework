@@ -39,7 +39,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 /**
  * BundleLifecycleTestCase.
  *
- * @author thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 15-Dec-2009
  */
 public class BundleLifecycleTestCase extends AbstractFrameworkTest

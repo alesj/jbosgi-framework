@@ -48,7 +48,7 @@ import org.osgi.framework.BundleException;
  * @author thomas.diesler@jboss.com
  * @since 27-Jul-2009
  */
-public class ResolverSmokeTest extends OSGiRuntimeTest
+public class ResolverSmokeTestCase extends OSGiRuntimeTest
 {
    @Test
    public void testRandomBundleResolution() throws BundleException

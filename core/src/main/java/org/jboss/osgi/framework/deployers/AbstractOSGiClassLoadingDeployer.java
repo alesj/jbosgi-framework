@@ -49,7 +49,7 @@ import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 /**
  * An abstract OSGi classloading deployer, that maps {@link OSGiMetaData} into {@link ClassLoadingMetaData}.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
 public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer<OSGiMetaData>

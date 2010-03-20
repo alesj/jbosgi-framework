@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * A BundleActivator that fails on start.
  *
- * @author thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 15-Dec-2009
  */
 public class FailOnStartActivator implements BundleActivator

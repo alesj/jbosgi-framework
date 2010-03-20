@@ -45,7 +45,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  * @author thomas.diesler@jboss.com
  * @since 18-Aug-2009
  */
-public class SimpleLogServiceTest extends OSGiRuntimeTest
+public class SimpleLogServiceTestCase extends OSGiRuntimeTest
 {
    @Before
    public void setUp()

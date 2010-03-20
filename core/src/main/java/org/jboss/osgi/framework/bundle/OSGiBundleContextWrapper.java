@@ -43,7 +43,7 @@ import org.osgi.framework.ServiceRegistration;
  * A wrapper around the bundle state that just exposes the BundleContext API.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
 public class OSGiBundleContextWrapper implements BundleContext

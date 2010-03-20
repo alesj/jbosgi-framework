@@ -29,7 +29,7 @@ import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolic
 /**
  * The {@link Module} that represents and OSGi bundle deployment.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision$
  */
 public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule

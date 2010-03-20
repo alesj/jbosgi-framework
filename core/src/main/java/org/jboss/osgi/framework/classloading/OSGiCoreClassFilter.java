@@ -28,7 +28,7 @@ import org.jboss.classloader.spi.filter.PackageClassFilter;
 /**
  * A class filter for OSGi Core packages.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 02-Feb-2010
  */
 public final class OSGiCoreClassFilter extends PackageClassFilter

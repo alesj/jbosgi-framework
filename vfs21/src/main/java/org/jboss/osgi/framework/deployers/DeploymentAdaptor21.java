@@ -33,7 +33,7 @@ import org.jboss.osgi.vfs.VirtualFile;
 /**
  * An abstraction of the VFSDeploymentFactory for jboss-vfs-2.1.x 
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 03-Mar-2010
  */
 public class DeploymentAdaptor21 implements DeploymentAdaptor 

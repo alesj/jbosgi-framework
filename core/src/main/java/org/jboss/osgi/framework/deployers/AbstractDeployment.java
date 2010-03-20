@@ -30,7 +30,7 @@ import org.jboss.osgi.vfs.VirtualFile;
 /**
  * The AbstractDeployment delegates to the jboss-vfs specific {@link DeploymentAdaptor}.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 03-Mar-2010
  */
 public abstract class AbstractDeployment

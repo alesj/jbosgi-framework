@@ -49,7 +49,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 /**
  * A Deployers implementation that wraps the deployers that are associated with the MainDeployer.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 04-Sep-2009
  */
 public class OSGiDeployersWrapper implements Deployers

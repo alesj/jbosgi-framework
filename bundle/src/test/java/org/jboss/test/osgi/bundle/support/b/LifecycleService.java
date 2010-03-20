@@ -25,7 +25,7 @@ package org.jboss.test.osgi.bundle.support.b;
 /**
  * A marker service.
  *
- * @author thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 15-Dec-2009
  */
 public interface LifecycleService

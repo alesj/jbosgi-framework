@@ -39,7 +39,7 @@ import org.jboss.osgi.framework.bundle.OSGiBundleState;
  * The OSGi ClassLoaderSystem.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
 public class OSGiClassLoaderSystem extends ClassLoaderSystem

@@ -46,7 +46,7 @@ import org.osgi.framework.Bundle;
  * the relevant definitions of the fragment bundles to the host’s definitions
  * before the host is resolved. 
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 08-Jan-2010
  */
 public class OSGiFragmentAttachmentDeployer extends AbstractSimpleRealDeployer<ClassLoadingMetaData>

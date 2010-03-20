@@ -41,14 +41,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * GetServiceReferencesUnitTestCase.
+ * GetServiceReferencesTest.
  *
  * todo test service permissions
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author thomas.diesler@jboss.com
+ * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class GetServiceReferencesUnitTestCase extends AbstractFrameworkTest
+public class GetServiceReferencesTestCase extends AbstractFrameworkTest
 {
 
    @Test

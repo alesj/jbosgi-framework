@@ -31,7 +31,7 @@ import org.jboss.osgi.framework.resolver.Resolver;
  * @author thomas.diesler@jboss.com
  * @since 23-Nov-2009
  */
-public class NoExternalResolverTest extends AbstractImportExportTest
+public class NoExternalResolverTestCase extends AbstractImportExportTest
 {
    @Override
    protected Resolver getTestResolver()

@@ -49,7 +49,7 @@ import org.osgi.framework.Version;
  * @author thomas.diesler@jboss.com
  * @since 09-Nov-2009
  */
-public class ResolverMetadataTest extends AbstractResolverTest
+public class ResolverMetadataTestCase extends AbstractResolverTest
 {
    @Test
    public void testSimpleExport() throws Exception

@@ -36,10 +36,10 @@ import org.osgi.framework.launch.Framework;
 /**
  * BundleClassPathTest.
  *
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 07-Oct-2009
  */
-public class BundleClassPathTest extends OSGiRuntimeTest
+public class BundleClassPathTestCase extends OSGiRuntimeTest
 {
    @Test
    public void testBundleClassPath() throws Exception

@@ -34,7 +34,7 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
  * 
  * This causes the bundle to get INSTALLED.
  *
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 19-Feb-2010
  */
 public class OSGiBundleStateInstallDeployer extends AbstractSimpleRealDeployer<AbstractBundleState>

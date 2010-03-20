@@ -89,7 +89,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * OSGiBundleManager.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */

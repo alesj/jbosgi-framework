@@ -35,7 +35,7 @@ import org.osgi.framework.Version;
  * An extension of {@link ClassLoadingMetaData} that captures OSGi specific 
  * classloading metadata.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 08-Jan-2010
  */
 public class OSGiClassLoadingMetaData extends ClassLoadingMetaData

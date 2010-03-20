@@ -32,7 +32,7 @@ import org.osgi.framework.Bundle;
 /**
  * A deployer that sets the bundle state to RESOLVED when the ClassLoader becomes available.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 24-Feb-2010
  */
 public class OSGiBundleStateResolveDeployer extends AbstractSimpleRealDeployer<OSGiBundleState>

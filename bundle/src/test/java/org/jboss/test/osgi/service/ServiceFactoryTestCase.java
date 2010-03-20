@@ -37,13 +37,13 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * GetUnGetServiceUnitTestCase.
+ * GetUnGetServiceTest.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision$
  */
-public class ServiceFactoryUnitTestCase extends AbstractFrameworkTest
+public class ServiceFactoryTestCase extends AbstractFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };

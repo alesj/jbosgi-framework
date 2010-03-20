@@ -39,7 +39,7 @@ import org.osgi.framework.Version;
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
  * for fragment bundles.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
 public class OSGiFragmentClassLoadingDeployer extends AbstractOSGiClassLoadingDeployer

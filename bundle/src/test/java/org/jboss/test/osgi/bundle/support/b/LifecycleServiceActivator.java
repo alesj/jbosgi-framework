@@ -27,7 +27,7 @@ import org.osgi.framework.BundleContext;
 /**
  * A BundleActivator that registers the LifecycleService.
  *
- * @author thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 15-Dec-2009
  */
 public class LifecycleServiceActivator implements BundleActivator

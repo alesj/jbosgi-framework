@@ -25,7 +25,7 @@ package org.jboss.osgi.framework.bundle;
 /**
  * A bundle validator.
  * 
- * @author Thomas.Diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @since 19-Dec-2009
  */
 public interface OSGiBundleValidator
