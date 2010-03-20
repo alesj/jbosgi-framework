@@ -860,15 +860,21 @@ public class OSGiBundleManager
       validateBundle(bundleState);
       
       allBundles.add(bundleState);
-      
-      bundleState.changeState(Bundle.INSTALLED, true);
+      try
+      {
+         bundleState.changeState(Bundle.INSTALLED, true);
 
-      // Add the bundle to the resolver
-      // Note, plugins are not registered when the system bundle is added 
-      ResolverPlugin bundleResolver = getOptionalPlugin(ResolverPlugin.class);
-      if (bundleResolver != null)
-         bundleResolver.addBundle(bundleState);
-
+         // Add the bundle to the resolver
+         // Note, plugins are not registered when the system bundle is added 
+         ResolverPlugin bundleResolver = getOptionalPlugin(ResolverPlugin.class);
+         if (bundleResolver != null)
+            bundleResolver.addBundle(bundleState);
+      }
+      catch (RuntimeException rte)
+      {
+         allBundles.remove(bundleState);
+         throw rte;
+      }
       log.debug("Added: " + bundleState);
    }
 

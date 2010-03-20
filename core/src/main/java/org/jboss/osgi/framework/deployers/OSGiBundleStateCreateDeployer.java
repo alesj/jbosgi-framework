@@ -30,7 +30,7 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 
 /**
- * A deployer that creates the bundle state through the bundle manager.
+ * A deployer that creates the {@link AbstractBundleState} through the {@link OSGiBundleManager}.
  * 
  * The bundle is not yet INSTALLED.
  *

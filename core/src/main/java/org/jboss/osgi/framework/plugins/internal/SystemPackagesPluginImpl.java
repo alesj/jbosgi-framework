@@ -120,6 +120,7 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
       
       for (String name : allPackages)
       {
+         log.debug("   " + name);
          int semiIndex = name.indexOf(';');
          if (semiIndex > 0)
             name = name.substring(0, semiIndex);

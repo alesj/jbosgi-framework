@@ -30,7 +30,7 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 
 /**
- * A deployer that adds the bundle state to the bundle manager.
+ * A deployer that adds the {@link AbstractBundleState} to the {@link OSGiBundleManager}.
  * 
  * This causes the bundle to get INSTALLED.
  *
