@@ -27,6 +27,11 @@
     <version>1.0.0.Alpha4-SNAPSHOT</version>
   </parent>
 
+  <!-- Properties -->
+  <properties>
+    <version.jboss.vfs>3.0.0.CR5</version.jboss.vfs>
+  </properties>
+  
   <!-- Dependencies -->
   <dependencies>
     <dependency>
@@ -41,6 +46,11 @@
     <dependency>
       <groupId>org.jboss.osgi.vfs</groupId>
       <artifactId>jboss-osgi-vfs30</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-vfs</artifactId>
+      <version>${version.jboss.vfs}</version>
     </dependency>
   </dependencies>
 
