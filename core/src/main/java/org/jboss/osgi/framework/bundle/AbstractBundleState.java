@@ -484,7 +484,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    {
       checkValidBundleContext();
       ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
-      return plugin.getAllServiceReferences(this, clazz, filter);
+      return plugin.getServiceReferences(this, clazz, filter, false);
    }
 
    public Object getService(ServiceReference reference)
@@ -505,7 +505,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    {
       checkValidBundleContext();
       ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
-      return plugin.getServiceReferences(this, clazz, filter);
+      return plugin.getServiceReferences(this, clazz, filter, true);
    }
 
    @SuppressWarnings({ "rawtypes" })

@@ -74,7 +74,7 @@ public class ServiceEventHookTestCase extends AbstractFrameworkTest
                contexts.add(context);
                fail("Cannot add a context");
             }
-            catch (RuntimeException ex)
+            catch (UnsupportedOperationException ex)
             {
                // expected
             }

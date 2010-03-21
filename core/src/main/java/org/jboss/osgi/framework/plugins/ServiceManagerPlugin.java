@@ -63,21 +63,10 @@ public interface ServiceManagerPlugin extends Plugin
    /**
     * Returns an array of <code>ServiceReference</code> objects. The returned
     * array of <code>ServiceReference</code> objects contains services that
-    * were registered under the specified class and match the specified filter
+    * were registered under the specified class, match the specified filter
     * expression.
     * 
-    * @param clazz The class name with which the service was registered or <code>null</code> for all services.
-    * @param filter The filter expression or <code>null</code> for all services.
-    * @return An array of <code>ServiceReference</code> objects or <code>null</code> 
-    *    if no services are registered which satisfy the  search.
-    */
-   ServiceReference[] getAllServiceReferences(AbstractBundleState bundleState, String clazz, String filter) throws InvalidSyntaxException;
-
-   /**
-    * Returns an array of <code>ServiceReference</code> objects. The returned
-    * array of <code>ServiceReference</code> objects contains services that
-    * were registered under the specified class, match the specified filter
-    * expression, and the packages for the class names under which the services
+    * If checkAssignable is true, the packages for the class names under which the services
     * were registered match the context bundle's packages as defined in
     * {@link ServiceReference#isAssignableTo(Bundle, String)}.
     * 
@@ -85,7 +74,7 @@ public interface ServiceManagerPlugin extends Plugin
     * @param clazz The class name with which the service was registered or <code>null</code> for all services.
     * @param filter The filter expression or <code>null</code> for all services.
     */
-   ServiceReference[] getServiceReferences(AbstractBundleState bundleState, String clazz, String filter) throws InvalidSyntaxException;
+   ServiceReference[] getServiceReferences(AbstractBundleState bundleState, String clazz, String filter, boolean checkAssignable) throws InvalidSyntaxException;
 
    /**
     * Returns a <code>ServiceReference</code> object for a service that

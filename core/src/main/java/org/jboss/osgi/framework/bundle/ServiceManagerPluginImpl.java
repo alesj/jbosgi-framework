@@ -55,13 +55,16 @@ import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
 import org.jboss.osgi.framework.util.KernelUtils;
 import org.jboss.osgi.framework.util.NoFilter;
+import org.jboss.osgi.framework.util.RemoveOnlyCollection;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.hooks.service.FindHook;
 import org.osgi.framework.hooks.service.ListenerHook;
 import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
@@ -90,11 +93,11 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    /** Enable MDR usage */
    private boolean enableMDRUsage = true;
-   
+
    public ServiceManagerPluginImpl(OSGiBundleManager bundleManager, DeploymentRegistry registry)
    {
       super(bundleManager);
-      
+
       if (registry == null)
          throw new IllegalArgumentException("Null deployment registry");
 
@@ -135,7 +138,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       }
       if (result.isEmpty())
          return null;
-      
+
       return result.toArray(new ServiceReference[result.size()]);
    }
 
@@ -156,22 +159,8 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
       if (references.isEmpty())
          return null;
-      
+
       return references.toArray(new ServiceReference[references.size()]);
-   }
-
-   @Override
-   public ServiceReference[] getAllServiceReferences(AbstractBundleState bundle, String clazz, String filterStr) throws InvalidSyntaxException
-   {
-      Filter filter = NoFilter.INSTANCE;
-      if (filterStr != null)
-         filter = FrameworkUtil.createFilter(filterStr);
-
-      Collection<ServiceReference> services = getServices(bundle, clazz, filter, false);
-      if (services == null || services.isEmpty())
-         return null;
-
-      return services.toArray(new ServiceReference[services.size()]);
    }
 
    @Override
@@ -191,13 +180,13 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       }
       return bundles;
    }
-   
+
    @Override
    public Object getService(AbstractBundleState bundleState, ServiceReference reference)
    {
       if (reference == null)
          throw new IllegalArgumentException("Null reference");
-      
+
       ControllerContextHandle handle = (ControllerContextHandle)reference;
       ControllerContext context = handle.getContext();
       if (KernelUtils.isUnregistered(context)) // we're probably not installed anymore
@@ -213,26 +202,70 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    {
       if (clazz == null)
          throw new IllegalArgumentException("Null clazz");
-      
-      Collection<ServiceReference> services = getServices(bundle, clazz, null, true);
-      if (services == null || services.isEmpty())
+
+      Collection<ServiceReference> srefs = getServiceReferencesInternal(bundle, clazz, null, true);
+      srefs = processFindHooks(bundle, clazz, null, true, srefs);
+      if (srefs.isEmpty())
          return null;
 
-      return services.iterator().next();
+      return srefs.iterator().next();
    }
 
    @Override
-   public ServiceReference[] getServiceReferences(AbstractBundleState bundle, String clazz, String filterStr) throws InvalidSyntaxException
+   public ServiceReference[] getServiceReferences(AbstractBundleState bundle, String clazz, String filterStr, boolean checkAssignable)
+         throws InvalidSyntaxException
    {
-      Filter filter = NoFilter.INSTANCE;
+      Filter filter = null;
       if (filterStr != null)
          filter = FrameworkUtil.createFilter(filterStr);
 
-      Collection<ServiceReference> services = getServices(bundle, clazz, filter, true);
-      if (services == null || services.isEmpty())
+      Collection<ServiceReference> srefs = getServiceReferencesInternal(bundle, clazz, filter, checkAssignable);
+      srefs = processFindHooks(bundle, clazz, filterStr, checkAssignable, srefs);
+      if (srefs.isEmpty())
          return null;
 
-      return services.toArray(new ServiceReference[services.size()]);
+      return srefs.toArray(new ServiceReference[srefs.size()]);
+   }
+
+   /*
+    * The FindHook is called when a target bundle searches the service registry
+    * with the getServiceReference or getServiceReferences methods. A registered 
+    * FindHook service gets a chance to inspect the returned set of service
+    * references and can optionally shrink the set of returned services. The order
+    * in which the find hooks are called is the reverse compareTo ordering of
+    * their Service References.
+    */
+   @SuppressWarnings("unchecked")
+   private Collection<ServiceReference> processFindHooks(AbstractBundleState bundle, String clazz, String filterStr, boolean checkAssignable, Collection<ServiceReference> srefs)
+   {
+      BundleContext context = bundle.getBundleContext();
+      if (context == null)
+         return srefs;
+         
+      // Get and sort the FindHook refs
+      Collection<ServiceReference> hookRefs = getServiceReferencesInternal(bundle, FindHook.class.getName(), null, true);
+      List<ServiceReference> sortedHookRefs = new ArrayList<ServiceReference>(hookRefs);
+      Collections.sort(sortedHookRefs);
+      Collections.reverse(sortedHookRefs);
+      
+      srefs = new RemoveOnlyCollection<ServiceReference>(srefs);
+      
+      List<FindHook> hooks = new ArrayList<FindHook>();
+      for(ServiceReference hookRef : sortedHookRefs)
+         hooks.add((FindHook)context.getService(hookRef));
+      
+      for (FindHook hook : hooks)
+      {
+         try
+         {
+            hook.find(context, clazz, filterStr, !checkAssignable, srefs);
+         }
+         catch (Exception ex)
+         {
+            log.warn("Error while calling FindHook: " + hook, ex);
+         }
+      }
+      return srefs;
    }
 
    @Override
@@ -247,7 +280,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
          listenerInfos = eventsPlugin.getServiceListenerInfos(null);
       }
-      
+
       OSGiServiceState result = new OSGiServiceState(bundleState, clazzes, service, properties);
       result.internalRegister();
       try
@@ -272,11 +305,11 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          ListenerHook listenerHook = (ListenerHook)service;
          listenerHook.added(listenerInfos);
       }
-      
+
       // This event is synchronously delivered after the service has been registered with the Framework. 
       FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
       eventsPlugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
-      
+
       return result;
    }
 
@@ -284,15 +317,15 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    public void unregisterService(OSGiServiceState serviceState)
    {
       AbstractBundleState bundleState = serviceState.getBundleState();
-      
+
       // This event is synchronously delivered before the service has completed unregistering. 
       FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
       plugin.fireServiceEvent(bundleState, ServiceEvent.UNREGISTERING, serviceState);
-      
+
       internalUnregister(serviceState);
       if (bundleState instanceof OSGiBundleState)
          removeContext(serviceState, ((OSGiBundleState)bundleState).getDeploymentUnit());
-      
+
       Controller controller = kernel.getController();
       controller.uninstall(serviceState.getName());
    }
@@ -309,17 +342,17 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
             Set<AbstractBundleState> used = new HashSet<AbstractBundleState>();
             OSGiBundleManager manager = bundleState.getBundleManager();
             ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-            
+
             for (Object user : users)
             {
                AbstractBundleState using = plugin.getBundleForUser(user);
-               if (used.add(using) == true) 
+               if (used.add(using) == true)
                {
                   // ungetService will cleanup service cache
                   int count = ct.getUsedByCount(serviceState, using);
                   while (count > 0)
                   {
-                     using.ungetContext(serviceState); 
+                     using.ungetContext(serviceState);
                      count--;
                   }
                }
@@ -328,7 +361,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       }
       serviceState.clearTarget();
    }
-   
+
    @Override
    public boolean ungetService(AbstractBundleState bundleState, ServiceReference reference)
    {
@@ -339,7 +372,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       ControllerContext context = serviceReference.getContext();
       if (KernelUtils.isUnregistered(context))
          return false;
-      
+
       return bundleState.removeContextInUse(context);
    }
 
@@ -420,7 +453,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return mdrFactory;
    }
 
-   private Collection<ServiceReference> getServices(AbstractBundleState bundle, String clazz, Filter filter, boolean checkAssignable)
+   private Collection<ServiceReference> getServiceReferencesInternal(AbstractBundleState bundle, String clazz, Filter filter, boolean checkAssignable)
    {
       Set<ControllerContext> contexts;
       KernelController controller = kernel.getController();
@@ -435,7 +468,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       {
          Class<?> type = getBundleManager().loadClassFailsafe(bundle, clazz);
          if (type == null)
-            return null; // or check all?
+            return Collections.emptyList();
 
          contexts = controller.getContexts(type, ControllerState.INSTALLED);
       }
@@ -445,7 +478,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       }
 
       if (contexts == null || contexts.isEmpty())
-         return null;
+         return Collections.emptyList();
 
       if (filter == null)
          filter = NoFilter.INSTANCE;
