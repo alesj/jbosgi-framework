@@ -69,12 +69,12 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          context1 = bundle1.getBundleContext();
          assertEquals(bundle1, context1.getBundle());
          assertEquals(bundle1, context1.getBundle(bundle1.getBundleId()));
-         
+
          Bundle[] bundles = context1.getBundles();
          Set<Bundle> actual = new HashSet<Bundle>(Arrays.asList(bundles));
          Set<Bundle> expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
          assertEquals(expected, actual);
-         
+
          Bundle bundle2 = installBundle(assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2"));
          BundleContext context2 = null;
          try
@@ -82,12 +82,12 @@ public class BundleContextTestCase extends AbstractFrameworkTest
             bundle2.start();
             context2 = bundle2.getBundleContext();
             assertEquals(bundle2, context2.getBundle());
-            
+
             bundles = context1.getBundles();
             actual = new HashSet<Bundle>(Arrays.asList(bundles));
             expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1, bundle2));
             assertEquals(expected, actual);
-            
+
             assertEquals(bundle1, context2.getBundle(bundle1.getBundleId()));
             assertEquals(bundle2, context1.getBundle(bundle2.getBundleId()));
          }
@@ -98,12 +98,12 @@ public class BundleContextTestCase extends AbstractFrameworkTest
 
          assertEquals(bundle1, context1.getBundle(bundle1.getBundleId()));
          assertNull(context1.getBundle(bundle2.getBundleId()));
-         
+
          bundles = context1.getBundles();
          actual = new HashSet<Bundle>(Arrays.asList(bundles));
          expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
          assertEquals(expected, actual);
-         
+
          try
          {
             context2.getBundle();
@@ -113,7 +113,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             context2.getBundle(bundle1.getBundleId());
@@ -123,7 +123,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             context2.getBundles();
@@ -138,7 +138,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       {
          bundle1.uninstall();
       }
-      
+
       try
       {
          context1.getBundle();
@@ -148,7 +148,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       {
          // expected
       }
-      
+
       try
       {
          context1.getBundle(bundle1.getBundleId());
@@ -158,7 +158,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       {
          // expected
       }
-      
+
       try
       {
          context1.getBundles();
@@ -169,7 +169,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          // expected
       }
    }
-   
+
    @Test
    public void testProperties() throws Exception
    {
@@ -179,13 +179,13 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.start();
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
-         assertEquals("1.5", bundleContext.getProperty(Constants.FRAMEWORK_VERSION)); 
+         assertEquals("1.5", bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
          assertEquals("jboss.org", bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
          assertEquals(Locale.getDefault().getISO3Language(), bundleContext.getProperty(Constants.FRAMEWORK_LANGUAGE));
          assertSystemProperty(bundleContext, "os.name", Constants.FRAMEWORK_OS_NAME);
          assertSystemProperty(bundleContext, "os.version", Constants.FRAMEWORK_OS_VERSION);
          assertSystemProperty(bundleContext, "os.arch", Constants.FRAMEWORK_PROCESSOR);
-         
+
          assertNull(bundleContext.getProperty(getClass().getName()));
          System.setProperty(getClass().getName(), "test");
          assertEquals("test", bundleContext.getProperty(getClass().getName()));
@@ -206,7 +206,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    @Test
    public void testInstallBundle() throws Exception
    {
@@ -222,7 +222,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.uninstall();
          assertBundleState(Bundle.UNINSTALLED, bundle.getState());
       }
-      
+
       // Test file location
       String location = getTestArchivePath("bundles/jboss-osgi-common.jar");
       bundle = context.installBundle(location);
@@ -236,7 +236,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.uninstall();
          assertBundleState(Bundle.UNINSTALLED, bundle.getState());
       }
-      
+
       // Test symbolic location
       bundle = context.installBundle("/symbolic/location", url.openStream());
       try
@@ -260,7 +260,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.start();
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
-         
+
          try
          {
             bundleContext.addServiceListener(null);
@@ -270,7 +270,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext.addServiceListener(null, "(a=b)");
@@ -280,7 +280,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext.removeServiceListener(null);
@@ -290,48 +290,48 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          bundleContext.addServiceListener(this);
          bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
-         
+
          bundleContext.addServiceListener(this);
          bundleContext.removeServiceListener(this);
          bundleContext = assertServiceLifecycle(bundle, false);
-         
+
          bundleContext.addServiceListener(this);
          bundleContext.addServiceListener(this);
          bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
-         
+
          bundleContext.addServiceListener(this, null);
          bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
-         
+
          bundleContext.addServiceListener(this, null);
          bundleContext.removeServiceListener(this);
          bundleContext = assertServiceLifecycle(bundle, false);
-         
+
          bundleContext.addServiceListener(this, null);
          bundleContext.addServiceListener(this, null);
          bundleContext = assertServiceLifecycle(bundle, true);
          bundleContext.removeServiceListener(this);
-         
+
          Dictionary<String, Object> properties = new Hashtable<String, Object>();
          properties.put("a", "b");
-         
+
          bundleContext.addServiceListener(this, ("(a=b)"));
          bundleContext = assertServiceLifecycle(bundle, properties, true);
          bundleContext.removeServiceListener(this);
-         
+
          bundleContext.addServiceListener(this, ("(c=d)"));
          bundleContext = assertServiceLifecycle(bundle, properties, false);
          bundleContext.removeServiceListener(this);
-         
+
          bundleContext.addServiceListener(this, "(a=b)");
          bundleContext.removeServiceListener(this);
          bundleContext = assertServiceLifecycle(bundle, properties, false);
-         
+
          bundleContext.addServiceListener(this, "(c=d)");
          bundleContext.addServiceListener(this, "(a=b)");
          bundleContext = assertServiceLifecycle(bundle, properties, true);
@@ -342,7 +342,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    @Test
    public void testBundleListener() throws Exception
    {
@@ -352,7 +352,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.start();
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
-         
+
          try
          {
             bundleContext.addBundleListener(null);
@@ -362,7 +362,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext.removeBundleListener(null);
@@ -372,22 +372,22 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          bundleContext.addBundleListener(this);
          bundleContext = assertBundleLifecycle(bundle, true);
          bundleContext.removeBundleListener(this);
-         
+
          bundleContext.addBundleListener(this);
          bundleContext.removeBundleListener(this);
          bundleContext = assertBundleLifecycle(bundle, false);
-         
+
          bundleContext.addBundleListener(this);
          bundleContext.addBundleListener(this);
          bundleContext = assertBundleLifecycle(bundle, true);
          bundleContext.removeBundleListener(this);
 
          bundleContext.addBundleListener(this);
-         
+
          // todo test asynch BundleListener
       }
       finally
@@ -399,7 +399,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       // todo assertBundleEvent(BundleEvent.UNRESOLVED, bundle);
       assertBundleEvent(BundleEvent.UNINSTALLED, bundle);
    }
-   
+
    @Test
    public void testFrameworkListener() throws Exception
    {
@@ -409,7 +409,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.start();
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
-         
+
          try
          {
             bundleContext.addFrameworkListener(null);
@@ -419,7 +419,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext.removeFrameworkListener(null);
@@ -429,7 +429,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          // todo test events
       }
       finally
@@ -437,7 +437,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    @Test
    public void testGetDataFile() throws Exception
    {
@@ -447,7 +447,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.start();
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
-         
+
          File dataFile = bundleContext.getDataFile("blah");
          assertNotNull(dataFile);
          assertTrue(dataFile.toString().endsWith(File.separator + "blah"));
@@ -457,7 +457,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    @Test
    public void testStopedBundleContext() throws Exception
    {
@@ -479,7 +479,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          // The context should not become reusable after we restart the bundle
          bundle.start();
          try
@@ -497,11 +497,11 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    private BundleContext assertBundleLifecycle(Bundle bundle, boolean events) throws Exception
    {
       assertNoBundleEvent();
-      
+
       bundle.stop();
       if (events)
       {
@@ -512,7 +512,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       {
          assertNoBundleEvent();
       }
-      
+
       bundle.start();
       if (events)
       {
@@ -523,10 +523,10 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       {
          assertNoBundleEvent();
       }
-      
+
       return bundle.getBundleContext();
    }
-   
+
    private void assertSystemProperty(BundleContext bundleContext, String property, String osgiProperty)
    {
       String expected = System.getProperty(property);
@@ -538,15 +538,15 @@ public class BundleContextTestCase extends AbstractFrameworkTest
    {
       return assertServiceLifecycle(bundle, null, events);
    }
-   
+
    private BundleContext assertServiceLifecycle(Bundle bundle, Dictionary<String, Object> properties, boolean events) throws Exception
    {
       assertNoServiceEvent();
-      
+
       BundleContext bundleContext = bundle.getBundleContext();
       ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
       ServiceReference reference = registration.getReference();
-      
+
       if (events)
          assertServiceEvent(ServiceEvent.REGISTERED, reference);
       else
@@ -563,7 +563,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          assertServiceEvent(ServiceEvent.UNREGISTERING, reference);
       else
          assertNoServiceEvent();
-      
+
       registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
       reference = registration.getReference();
       if (events)
@@ -576,7 +576,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
          assertServiceEvent(ServiceEvent.UNREGISTERING, reference);
       else
          assertNoServiceEvent();
-      
+
       try
       {
          bundleContext.addServiceListener(this);
@@ -586,11 +586,11 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       {
          // expected
       }
-      
+
       bundle.start();
       bundleContext = bundle.getBundleContext();
       assertNotNull(bundleContext);
-      
+
       return bundleContext;
    }
 }

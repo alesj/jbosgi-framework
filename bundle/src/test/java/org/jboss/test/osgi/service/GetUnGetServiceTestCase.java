@@ -21,7 +21,12 @@
 */
 package org.jboss.test.osgi.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.test.osgi.AbstractFrameworkTest;
@@ -31,6 +36,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.ServiceException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -46,8 +52,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
 
-   @Test
-   public void testGetUnServiceErrors() throws Exception
+   @Test public void testGetUnServiceErrors() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -85,8 +90,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testGetService() throws Exception
+   @Test public void testGetService() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -112,8 +116,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testGetServiceAfterStop() throws Exception
+   @Test public void testGetServiceAfterStop() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -146,8 +149,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testErrorInGetService() throws Exception
+   @Test public void testErrorInGetService() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -164,7 +166,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
          Object actual = bundleContext.getService(reference);
          assertNull("" + actual, actual);
          
-         assertFrameworkEvent(FrameworkEvent.ERROR, bundle, BundleException.class);
+         assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);
       }
       finally
       {
@@ -172,8 +174,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testErrorInUnGetService() throws Exception
+   @Test public void testErrorInUnGetService() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -201,8 +202,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test
-   public void testUnGetServiceResult() throws Exception
+   @Test public void testUnGetServiceResult() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);

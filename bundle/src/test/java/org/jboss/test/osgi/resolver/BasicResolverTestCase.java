@@ -26,6 +26,7 @@ package org.jboss.test.osgi.resolver;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.resolver.Resolver;
 import org.jboss.osgi.framework.resolver.internal.basic.BasicResolverImpl;
+import org.junit.Test;
 
 /**
  * Test the basic {@link Resolver}
@@ -48,37 +49,37 @@ public class BasicResolverTestCase extends AbstractImportExportTest
       return resolver;
    }
 
-   @Override
+   @Test
    public void testOptionalImportPackageWired() throws Exception
    {
       // WONTFIX: testOptionalImportPackageWired
    }
 
-   @Override
+   @Test
    public void testRequireBundleVersionFails() throws Exception
    {
       // WONTFIX: testRequireBundleVersionFails
    }
 
-   @Override
+   @Test
    public void testPreferredExporterHigherVersion() throws Exception
    {
       // WONTFIX: testPreferredExporterHigherVersion
    }
 
-   @Override
+   @Test
    public void testPreferredExporterLowerId() throws Exception
    {
       // WONTFIX: testPreferredExporterLowerId
    }
 
-   @Override
+   @Test
    public void testPreferredExporterLowerIdReverse() throws Exception
    {
       // WONTFIX: testPreferredExporterLowerIdReverse
    }
-   
-   @Override
+
+   @Test
    public void testPackageAttributeMandatoryFails() throws Exception
    {
       // WONTFIX: testPackageAttributeMandatoryFails

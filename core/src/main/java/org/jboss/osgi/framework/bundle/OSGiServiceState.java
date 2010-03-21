@@ -21,6 +21,8 @@
 */
 package org.jboss.osgi.framework.bundle;
 
+// $Id: $
+
 import java.security.AccessControlContext;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,11 +36,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.beans.info.spi.BeanInfo;
-import org.jboss.dependency.plugins.AbstractControllerContext;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ScopeInfo;
 import org.jboss.dependency.spi.dispatch.InvokeDispatchContext;
-import org.jboss.dependency.spi.tracker.ContextTracker;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.kernel.Kernel;
 import org.jboss.kernel.spi.config.KernelConfigurator;
@@ -49,13 +49,12 @@ import org.jboss.osgi.framework.metadata.CaseInsensitiveDictionary;
 import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.spi.util.BundleClassLoader;
-import org.jboss.util.collection.CollectionsFactory;
-import org.jboss.util.id.GUID;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
@@ -66,13 +65,11 @@ import org.osgi.framework.ServiceRegistration;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiServiceState extends AbstractControllerContext implements ServiceReference, ServiceRegistration, InvokeDispatchContext
+public class OSGiServiceState extends OSGiControllerContext implements ServiceReference, ServiceRegistration, InvokeDispatchContext
 {
-   /** The alias constant */
-   private static final String SERVICE_ALIAS = "service.alias";
-
    /** The get classloader permission */
    private static final RuntimePermission GET_CLASSLOADER_PERMISSION = new RuntimePermission("getClassLoader");
 
@@ -118,11 +115,10 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
     * @param properties the properties
     * @throws IllegalArgumentException for a null parameter
     */
-   @SuppressWarnings({ "rawtypes", "unchecked" })
+   @SuppressWarnings({ "rawtypes" })
    public OSGiServiceState(AbstractBundleState bundleState, String[] clazzes, Object service, Dictionary properties)
    {
-      // name is random / unique, we use aliases
-      super(GUID.asString(), getAlias(properties), OSGiControllerContextActions.ACTIONS, null, service);
+      super(service, properties);
 
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle state");
@@ -151,35 +147,6 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
       serviceRegistration = new OSGiServiceRegistrationWrapper(this);
 
       initOSGiScopeInfo();
-   }
-
-   /**
-    * Check if there is an alias in properties.
-    *
-    * @param properties the properties
-    * @return alias or null
-    */
-   protected static Set<Object> getAlias(Dictionary<String, Object> properties)
-   {
-      if (properties != null)
-      {
-         Set<Object> aliases = null;
-         Enumeration<String> keys = properties.keys();
-         while (keys.hasMoreElements())
-         {
-            String key = keys.nextElement();
-            if (key.startsWith(SERVICE_ALIAS))
-            {
-               if (aliases == null)
-                  aliases = CollectionsFactory.createLazySet();
-
-               Object alias = properties.get(key);
-               aliases.add(alias);
-            }
-         }
-         return aliases;
-      }
-      return null;
    }
 
    /**
@@ -285,6 +252,11 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
    public Object getTarget()
    {
       return isServiceFactory ? null : serviceOrFactory;
+   }
+
+   void clearTarget()
+   {
+      serviceOrFactory = null;
    }
 
    protected Object getActualUser(ControllerContext context)
@@ -396,14 +368,18 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
             ServiceFactory serviceFactory = (ServiceFactory)serviceOrFactory;
             try
             {
-               service = checkObjClass(serviceFactory.getService(bundleState.getBundle(), getRegistration()));
+               service = serviceFactory.getService(bundleState.getBundle(), getRegistration());
+               service = checkObjClass(service);
                serviceCache.put(bundleState, service);
             }
             catch (Throwable t)
             {
+               // If the service object returned by the ServiceFactory object is not an instanceof all the classes named when 
+               // the service was registered or the ServiceFactory object throws an exception, null is returned and a Framework 
+               // event of type FrameworkEvent.ERROR containing a ServiceException  describing the error is fired. 
                log.error("Error from getService for " + this, t);
                FrameworkEventsPlugin plugin = bundleState.getBundleManager().getPlugin(FrameworkEventsPlugin.class);
-               plugin.fireFrameworkEvent(bundleState, FrameworkEvent.ERROR, new BundleException("Error using service factory:" + serviceFactory, t));
+               plugin.fireFrameworkEvent(bundleState, FrameworkEvent.ERROR, new ServiceException("Error using service factory:" + serviceFactory, t));
                return null;
             }
          }
@@ -430,15 +406,15 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
 
          service = serviceCache.get(bundleState);
 
-         ContextTracker ct = getContextTracker();
-         int count = ct.getUsedByCount(this, bundleState);
-         if (count == 0) // remove & unget
+         // Call ungetService if this is the last reference
+         int count = getContextTracker().getUsedByCount(this, bundleState);
+         if (count == 1)
          {
             serviceCache.remove(bundleState);
             ServiceFactory serviceFactory = (ServiceFactory)serviceOrFactory;
             try
             {
-               serviceFactory.ungetService(bundleState, getRegistration(), service);
+               serviceFactory.ungetService(bundleState.getBundle(), getRegistration(), service);
             }
             catch (Throwable t)
             {
@@ -533,23 +509,29 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
       plugin.fireServiceEvent(bundleState, ServiceEvent.MODIFIED, this);
    }
 
+   @Override
    public Bundle[] getUsingBundles()
    {
-      ContextTracker ct = getContextTracker();
-      if (ct == null)
+      Set<Bundle> bundles = getUsingBundleInternal();
+      if (bundles.size() == 0)
          return null;
 
+      return bundles.toArray(new Bundle[bundles.size()]);
+   }
+
+   private Set<Bundle> getUsingBundleInternal()
+   {
       OSGiBundleManager manager = bundleState.getBundleManager();
       ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-      
-      Set<Object> users = ct.getUsers(this);
+
+      Set<Object> users = getContextTracker().getUsers(this);
       Set<Bundle> bundles = new HashSet<Bundle>();
       for (Object user : users)
       {
          AbstractBundleState abs = plugin.getBundleForUser(user);
          bundles.add(abs.getBundleInternal());
       }
-      return bundles.toArray(new Bundle[bundles.size()]);
+      return bundles;
    }
 
    public boolean isAssignableTo(Bundle bundle, String className)
@@ -657,40 +639,6 @@ public class OSGiServiceState extends AbstractControllerContext implements Servi
    void internalRegister()
    {
       checkPermission("register", true);
-   }
-
-   /**
-    * Unregister the service
-    */
-   void internalUnregister()
-   {
-      ContextTracker ct = getContextTracker();
-      if (ct != null) // nobody used us?
-      {
-         Set<Object> users = ct.getUsers(this);
-         if (users.isEmpty() == false)
-         {
-            Set<AbstractBundleState> used = new HashSet<AbstractBundleState>();
-            OSGiBundleManager manager = bundleState.getBundleManager();
-            ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-            
-            for (Object user : users)
-            {
-               AbstractBundleState using = plugin.getBundleForUser(user);
-               if (used.add(using)) // add so we don't do duplicate work
-               {
-                  int count = ct.getUsedByCount(this, using);
-                  while (count > 0)
-                  {
-                     using.ungetContext(this); // ungetService will cleanup service cache
-                     count--;
-                  }
-               }
-            }
-         }
-      }
-
-      serviceOrFactory = null;
    }
 
    /**

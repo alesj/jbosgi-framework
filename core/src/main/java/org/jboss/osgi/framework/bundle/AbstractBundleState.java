@@ -419,21 +419,24 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    public void addServiceListener(ServiceListener listener)
    {
-      addServiceListenerInternal(listener, null);
+      try
+      {
+         addServiceListenerInternal(listener, null);
+      }
+      catch (InvalidSyntaxException ex)
+      {
+         // ignore
+      }
    }
 
    public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException
    {
-      Filter theFilter = null;
-      if (filter != null)
-         theFilter = createFilter(filter);
-      addServiceListenerInternal(listener, theFilter);
+      addServiceListenerInternal(listener, filter);
    }
 
-   public void addServiceListenerInternal(ServiceListener listener, Filter filter)
+   public void addServiceListenerInternal(ServiceListener listener, String filter) throws InvalidSyntaxException
    {
       checkValidBundleContext();
-
       FrameworkEventsPlugin plugin = getBundleManager().getPlugin(FrameworkEventsPlugin.class);
       plugin.addServiceListener(this, listener, filter);
    }
@@ -452,22 +455,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
       ServiceManagerPlugin plugin = getBundleManager().getPlugin(ServiceManagerPlugin.class);
       return plugin.getRegisteredServices(this);
-   }
-
-   /**
-    * Increment the use count of a context for this bundle
-    * 
-    * @param context the context
-    * @return target
-    */
-   Object addContextInUse(ControllerContext context)
-   {
-      if (context instanceof ContextTracking)
-      {
-         ContextTracking ct = (ContextTracking)context;
-         return ct.getTarget(this);
-      }
-      return context.getTarget();
    }
 
    /**

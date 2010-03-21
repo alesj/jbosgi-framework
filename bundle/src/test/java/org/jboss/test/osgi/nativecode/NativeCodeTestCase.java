@@ -61,8 +61,7 @@ public class NativeCodeTestCase extends OSGiRuntimeTest
       }
    }
 
-   @Test
-   public void testNativeCode() throws Exception
+   @Test public void testNativeCode() throws Exception
    {
       BundleContext context = framework.getBundleContext();
       

@@ -44,38 +44,32 @@ import org.osgi.framework.Constants;
  */
 public class SystemBundleTestCase extends AbstractFrameworkTest
 {
-   @Test
-   public void testBundleId() throws Exception
+   @Test public void testBundleId() throws Exception
    {
       assertEquals(0, framework.getBundleId());
    }
    
-   @Test
-   public void testSymbolicName() throws Exception
+   @Test public void testSymbolicName() throws Exception
    {
       assertEquals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, framework.getSymbolicName());
    }
    
-   @Test
-   public void testState() throws Exception
+   @Test public void testState() throws Exception
    {
       assertEquals(Bundle.ACTIVE, framework.getState());
    }
    
-   @Test
-   public void testStartStop() throws Exception
+   @Test public void testStartStop() throws Exception
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
-   @Test
-   public void testUpdate() throws Exception
+   @Test public void testUpdate() throws Exception
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
-   @Test
-   public void testUninstall() throws Exception
+   @Test public void testUninstall() throws Exception
    {
       try
       {
@@ -102,44 +96,37 @@ public class SystemBundleTestCase extends AbstractFrameworkTest
       assertEquals(expected, dictionary);
    }
    
-   @Test
-   public void testLocation() throws Exception
+   @Test public void testLocation() throws Exception
    {
       assertEquals(Constants.SYSTEM_BUNDLE_LOCATION, framework.getLocation());
    }
    
-   @Test
-   public void testGetEntry()
+   @Test public void testGetEntry()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
-   @Test
-   public void testGetEntryPath()
+   @Test public void testGetEntryPath()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
-   @Test
-   public void testFindEntries()
+   @Test public void testFindEntries()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
-   @Test
-   public void testLoadClass()
+   @Test public void testLoadClass()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
-   @Test
-   public void testGetResource()
+   @Test public void testGetResource()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
    
-   @Test
-   public void testGetResources()
+   @Test public void testGetResources()
    {
       System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }

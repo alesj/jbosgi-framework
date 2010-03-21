@@ -21,8 +21,11 @@
 */
 package org.jboss.test.osgi.service;
 
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleWrapper;
 import org.jboss.osgi.vfs.VirtualFile;
@@ -33,11 +36,13 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * GetUnGetServiceTest.
+ * Test {@link ServiceFactory} functionality. 
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
@@ -47,7 +52,6 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };
-
 
    @Test
    public void testRegisterServiceFactory() throws Exception
@@ -62,14 +66,14 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
 
          SimpleServiceFactory serviceFactory = new SimpleServiceFactory(contextA);
          ServiceRegistration sregA = contextA.registerService(OBJCLASS, serviceFactory, null);
-         
+
          ServiceReference srefA = sregA.getReference();
          Object actual = contextA.getService(srefA);
          assertEquals(contextA, actual);
          assertInstanceOf(serviceFactory.getBundle, OSGiBundleWrapper.class);
          assertEquals(bundleA.getSymbolicName(), serviceFactory.getBundle.getSymbolicName());
          assertEquals(1, serviceFactory.getCount);
-         
+
          srefA = contextA.getServiceReference(OBJCLASS);
          actual = contextA.getService(srefA);
          assertEquals(contextA, actual);
@@ -89,7 +93,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
             actual = contextB.getService(srefB);
             assertEquals(contextA, actual);
             assertInstanceOf(serviceFactory.getBundle, OSGiBundleWrapper.class);
-            
+
             assertEquals(bundleB.getSymbolicName(), serviceFactory.getBundle.getSymbolicName());
             assertEquals(2, serviceFactory.getCount);
          }
@@ -103,11 +107,12 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
+
+   @Test
    public void testGetServiceFactory() throws Exception
    {
       String OBJCLASS = BundleContext.class.getName();
-      
+
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
@@ -124,7 +129,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
 
          actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
-         
+
          registration.unregister();
          actual = bundleContext.getService(reference);
          assertNull("" + actual, actual);
@@ -134,11 +139,12 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
+   @Test
    public void testGetServiceFactoryAfterStop() throws Exception
    {
       String OBJCLASS = BundleContext.class.getName();
-      
+
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
@@ -152,7 +158,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
 
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
-         
+
          bundle.stop();
          try
          {
@@ -169,11 +175,12 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
+   @Test
    public void testGetWrongInterfacesForServiceFactory() throws Exception
    {
-      String[] OBJCLASSES = {String.class.getName(), BundleContext.class.getName()};
-      
+      String[] OBJCLASSES = { String.class.getName(), BundleContext.class.getName() };
+
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
@@ -183,24 +190,81 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
          assertNotNull(bundleContext);
 
          bundleContext.addFrameworkListener(this);
-         
+
          ServiceRegistration registration = bundleContext.registerService(String.class.getName(), new SimpleServiceFactory(bundleContext), null);
          ServiceReference reference = registration.getReference();
          Object actual = bundleContext.getService(reference);
          assertNull("" + actual, actual);
-         
-         assertFrameworkEvent(FrameworkEvent.ERROR, bundle, IllegalArgumentException.class);
-         
+
+         assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);
+
          registration = bundleContext.registerService(OBJCLASSES, new SimpleServiceFactory(bundleContext), null);
          reference = registration.getReference();
          actual = bundleContext.getService(reference);
          assertNull("" + actual, actual);
-         
-         assertFrameworkEvent(FrameworkEvent.ERROR, bundle, IllegalArgumentException.class);
+
+         assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);
       }
       finally
       {
          bundle.uninstall();
       }
+   }
+
+   @Test
+   public void testServiceFactoryUsingBundles() throws Exception
+   {
+      final boolean[] allGood = new boolean[2];
+      
+      ServiceFactory factory = new ServiceFactory()
+      {
+         @Override
+         public Object getService(Bundle bundle, ServiceRegistration sreg)
+         {
+            ServiceReference sref = sreg.getReference();
+            Bundle[] users = sref.getUsingBundles();
+            assertNotNull("Users not null", users);
+            assertEquals(1, users.length);
+            assertEquals(bundle, users[0]);
+            allGood[0] = true;
+            return new Runnable()
+            {
+               public void run()
+               {
+               }
+            };
+         }
+
+         @Override
+         public void ungetService(Bundle bundle, ServiceRegistration sreg, Object service)
+         {
+            ServiceReference sref = sreg.getReference();
+            Bundle[] users = sref.getUsingBundles();
+            assertNotNull("Users not null", users);
+            assertEquals(1, users.length);
+            assertEquals(bundle, users[0]);
+            allGood[1] = true;
+         }
+      };
+      BundleContext context = framework.getBundleContext();
+      ServiceRegistration sreg = context.registerService(Runnable.class.getName(), factory, null);
+      ServiceReference sref = sreg.getReference();
+
+      Bundle[] users = sref.getUsingBundles();
+      assertNull("Null users", users);
+
+      Runnable was = (Runnable)context.getService(sref);
+      assertNotNull("Service not null", was);
+      users = sref.getUsingBundles();
+      assertNotNull("Users not null", users);
+      assertEquals(1, users.length);
+      assertEquals(context.getBundle(), users[0]);
+      assertTrue("getService good", allGood[0]);
+      
+      sreg.unregister();
+      
+      was = (Runnable)context.getService(sref);
+      assertNull("Service null", was);
+      assertTrue("ungetService good", allGood[1]);
    }
 }

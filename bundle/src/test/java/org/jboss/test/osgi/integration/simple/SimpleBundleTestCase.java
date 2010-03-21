@@ -46,8 +46,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  */
 public class SimpleBundleTestCase
 {
-   @Test
-   public void testBundleInstallLauchAPI() throws Exception
+   @Test public void testBundleInstallLauchAPI() throws Exception
    {
       // Uses the OSGi Framework launch API
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
@@ -81,8 +80,7 @@ public class SimpleBundleTestCase
       framework.stop();
    }
 
-   @Test
-   public void testBundleInstallRuntimeAPI() throws Exception
+   @Test public void testBundleInstallRuntimeAPI() throws Exception
    {
       // Uses the JBossOSGi SPI provided runtime abstraction
       OSGiRuntime runtime = new OSGiRuntimeHelper().getEmbeddedRuntime();

@@ -24,6 +24,7 @@ package org.jboss.test.osgi.resolver;
 // $Id$
 
 import org.jboss.osgi.framework.resolver.Resolver;
+import org.junit.Test;
 
 /**
  * Test resolver functionality without external resolver.
@@ -39,7 +40,7 @@ public class NoExternalResolverTestCase extends AbstractImportExportTest
       return null;
    }
 
-   @Override
+   @Test
    public void testPreferredExporterHigherVersion() throws Exception
    {
       System.out.println("FIXME [JBCL-133] Implement resolver preferences");

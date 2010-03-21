@@ -50,8 +50,7 @@ import org.osgi.framework.Bundle;
  */
 public class BundleEntriesTestCase extends AbstractFrameworkTest
 {
-   @Test
-   public void testEntriesNotInstalled() throws Exception
+   @Test public void testEntriesNotInstalled() throws Exception
    {
       Bundle bundle = installBundle(assembleArchive("entries-simple", "/bundles/entries/entries-simple"));
       bundle.uninstall();
@@ -75,8 +74,7 @@ public class BundleEntriesTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testFindEntriesNoPath() throws Exception
+   @Test public void testFindEntriesNoPath() throws Exception
    {
       Bundle bundle = installBundle(assembleArchive("entries-simple", "/bundles/entries/entries-simple"));
       try
@@ -94,8 +92,7 @@ public class BundleEntriesTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testEntries() throws Exception
+   @Test public void testEntries() throws Exception
    {
       Bundle bundle = installBundle(assembleArchive("entries-simple", "/bundles/entries/entries-simple"));
       try

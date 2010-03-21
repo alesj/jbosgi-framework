@@ -51,8 +51,7 @@ import org.osgi.framework.ServiceRegistration;
 public class GetServiceReferencesTestCase extends AbstractFrameworkTest
 {
 
-   @Test
-   public void testGetServiceReferences() throws Exception
+   @Test public void testGetServiceReferences() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
@@ -160,14 +159,12 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testGetServiceReferencesNoClassNotAssignable() throws Exception
+   @Test public void testGetServiceReferencesNoClassNotAssignable() throws Exception
    {
       assertGetServiceReferencesNotAssignable(null);
    }
    
-   @Test
-   public void testGetServiceReferencesNotAssignable() throws Exception
+   @Test public void testGetServiceReferencesNotAssignable() throws Exception
    {
       assertGetServiceReferencesNotAssignable(A.class.getName());
    }
@@ -262,14 +259,12 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test
-   public void testGetServiceReferencesNoClassAssignable() throws Exception
+   @Test public void testGetServiceReferencesNoClassAssignable() throws Exception
    {
       assertGetServiceReferencesAssignable(null);
    }
 
-   @Test
-   public void testGetServiceReferencesClassAssignable() throws Exception
+   @Test public void testGetServiceReferencesClassAssignable() throws Exception
    {
       assertGetServiceReferencesAssignable(A.class.getName());
    }
@@ -364,8 +359,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test
-   public void testGetServiceReferencesRankings() throws Exception
+   @Test public void testGetServiceReferencesRankings() throws Exception
    {
       String className = A.class.getName();
       
@@ -474,8 +468,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testGetServiceReferencesFilterted() throws Exception
+   @Test public void testGetServiceReferencesFilterted() throws Exception
    {
       String className = A.class.getName();
       String wrongClassName = B.class.getName();

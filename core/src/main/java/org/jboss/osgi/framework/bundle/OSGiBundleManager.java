@@ -821,12 +821,12 @@ public class OSGiBundleManager
 
       // Attach the abstract bundle state
       unit.addAttachment(AbstractBundleState.class, absBundle);
-      
+
       if (absBundle.isFragment())
          unit.addAttachment(OSGiFragmentState.class, (OSGiFragmentState)absBundle);
       else
          unit.addAttachment(OSGiBundleState.class, (OSGiBundleState)absBundle);
-      
+
       return absBundle;
    }
 
@@ -851,14 +851,14 @@ public class OSGiBundleManager
          DeploymentUnit unit = ((AbstractDeployedBundleState)bundleState).getDeploymentUnit();
          if (unit.getAttachment(ClassLoadingMetaData.class) == null)
             throw new IllegalStateException("Cannot obtain ClassLoadingMetaData");
-            
+
          Deployment dep = unit.getAttachment(Deployment.class);
          if (dep != null && dep.isBundleUpdate())
             return;
       }
 
       validateBundle(bundleState);
-      
+
       allBundles.add(bundleState);
       try
       {
@@ -890,7 +890,7 @@ public class OSGiBundleManager
          return;
 
       OSGiBundleValidator validator;
-      
+
       // Delegate to the validator for the appropriate revision
       if (osgiMetaData.getBundleManifestVersion() > 1)
          validator = new OSGiBundleValidatorR4(this);
@@ -1126,7 +1126,11 @@ public class OSGiBundleManager
          packageAdmin.resolveBundles(null);
 
          if (bundleState.getState() != Bundle.RESOLVED)
-            throw new BundleException("Cannot resolve bundle: " + bundleState);
+         {
+            DeploymentUnit unit = bundleState.getDeploymentUnit();
+            DeploymentException ex = unit.removeAttachment(DeploymentException.class);
+            throw new BundleException("Cannot resolve bundle: " + bundleState, ex);
+         }
       }
 
       // [TODO] If the START_ACTIVATION_POLICY option is set and this bundle's declared activation policy is lazy then:

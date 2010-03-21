@@ -43,8 +43,7 @@ import org.osgi.framework.BundleException;
  */
 public class RequireBundleTestCase extends AbstractFrameworkTest
 {
-   @Test
-   public void testSimpleRequireBundle() throws Exception
+   @Test public void testSimpleRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -71,8 +70,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testSimpleRequireBundleFails() throws Exception
+   @Test public void testSimpleRequireBundleFails() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -102,8 +100,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testVersionRequireBundle() throws Exception
+   @Test public void testVersionRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -130,8 +127,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testVersionRequireBundleFails() throws Exception
+   @Test public void testVersionRequireBundleFails() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -161,8 +157,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testOptionalRequireBundle() throws Exception
+   @Test public void testOptionalRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -189,8 +184,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testOptionalRequireBundleFails() throws Exception
+   @Test public void testOptionalRequireBundleFails() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -217,8 +211,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testReExportRequireBundle() throws Exception
+   @Test public void testReExportRequireBundle() throws Exception
    {
       //Bundle-Name: BundleA
       //Bundle-Version: 1.0.0
@@ -272,8 +265,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testNoReExportRequireBundle() throws Exception
+   @Test public void testNoReExportRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -311,8 +303,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testAttributeRequireBundle() throws Exception
+   @Test public void testAttributeRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -339,8 +330,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testAttributeRequireBundleFails() throws Exception
+   @Test public void testAttributeRequireBundleFails() throws Exception
    {
       // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleA;test=x
       // Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x

@@ -50,8 +50,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ServiceRegistrationTestCase extends AbstractFrameworkTest
 {
-   @Test
-   public void testGetReference() throws Exception
+   @Test public void testGetReference() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -112,8 +111,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testSetProperties() throws Exception
+   @Test public void testSetProperties() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -221,8 +219,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testSetPropertiesAfterStop() throws Exception
+   @Test public void testSetPropertiesAfterStop() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -254,8 +251,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testUnregister() throws Exception
+   @Test public void testUnregister() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
@@ -337,8 +333,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testUnregisterAfterStop() throws Exception
+   @Test public void testUnregisterAfterStop() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);

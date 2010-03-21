@@ -23,12 +23,15 @@ package org.jboss.osgi.framework.plugins;
 
 //$Id: SystemPackagesPlugin.java 92761 2009-08-24 22:10:03Z thomas.diesler@jboss.com $
 
+import java.util.Collection;
+
 import org.jboss.osgi.framework.bundle.OSGiServiceState;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleListener;
-import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
 /**
  * A plugin that handles the various OSGi event types.  
@@ -54,8 +57,10 @@ public interface FrameworkEventsPlugin extends Plugin
 
    void removeFrameworkListeners(Bundle bundle);
 
-   void addServiceListener(Bundle bundle, ServiceListener listener, Filter filter);
+   void addServiceListener(Bundle bundle, ServiceListener listener, String filter) throws InvalidSyntaxException;
 
+   Collection<ListenerInfo> getServiceListenerInfos(Bundle bundle);
+   
    void removeServiceListener(Bundle bundle, ServiceListener listener);
    
    void removeServiceListeners(Bundle bundle);

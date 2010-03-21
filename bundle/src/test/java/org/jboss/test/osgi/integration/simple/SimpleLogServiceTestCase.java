@@ -53,8 +53,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       System.clearProperty("simple-logservice-bundle");
    }
 
-   @Test
-   public void testNoLogService() throws Exception
+   @Test public void testNoLogService() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
@@ -76,8 +75,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       framework.stop();
    }
 
-   @Test
-   public void testLogServiceFromThirdParty() throws Exception
+   @Test public void testLogServiceFromThirdParty() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
@@ -109,8 +107,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       framework.stop();
    }
 
-   @Test
-   public void testLogServiceFromCompendium() throws Exception
+   @Test public void testLogServiceFromCompendium() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
@@ -133,8 +130,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       framework.stop();
    }
 
-   @Test
-   public void testLogServiceFromTwoExporters() throws Exception
+   @Test public void testLogServiceFromTwoExporters() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);

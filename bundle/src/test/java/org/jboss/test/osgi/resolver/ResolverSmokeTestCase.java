@@ -50,8 +50,7 @@ import org.osgi.framework.BundleException;
  */
 public class ResolverSmokeTestCase extends OSGiRuntimeTest
 {
-   @Test
-   public void testRandomBundleResolution() throws BundleException
+   @Test public void testRandomBundleResolution() throws BundleException
    {
       OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
       OSGiFramework framework = (OSGiFramework)bootProvider.getFramework();

@@ -30,7 +30,10 @@ import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -41,8 +44,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ServiceListenerTestCase extends AbstractFrameworkTest
 {
-   @Test
-   public void testGetReference() throws Exception
+   @Test public void testServiceListener() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -53,10 +55,68 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
          assertNotNull(context);
 
          assertNoServiceEvent();
+         context.addServiceListener(this);
          
          ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
-         assertNotNull(sreg);
+         ServiceReference sref = sreg.getReference();
          
+         assertServiceEvent(ServiceEvent.REGISTERED, sref);
+         
+         sreg.unregister();
+         assertServiceEvent(ServiceEvent.UNREGISTERING, sref);
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
+   }
+
+   @Test public void testObjectClassFilter() throws Exception
+   {
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = installBundle(assembly);
+      try
+      {
+         bundle.start();
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
+         assertNoServiceEvent();
+         
+         String filter = "(" + Constants.OBJECTCLASS + "=" + BundleContext.class.getName() + ")";
+         context.addServiceListener(this, filter);
+         
+         ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
+         ServiceReference sref = sreg.getReference();
+         
+         assertServiceEvent(ServiceEvent.REGISTERED, sref);
+         
+         sreg.unregister();
+         assertServiceEvent(ServiceEvent.UNREGISTERING, sref);
+      }
+      finally
+      {
+         bundle.uninstall();
+      }
+   }
+
+   @Test public void testObjectClassFilterNegative() throws Exception
+   {
+      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Bundle bundle = installBundle(assembly);
+      try
+      {
+         bundle.start();
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
+         assertNoServiceEvent();
+         
+         String filter = "(objectClass=dummy)";
+         context.addServiceListener(this, filter);
+         
+         ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
+         assertNoServiceEvent();
+         
+         sreg.unregister();
          assertNoServiceEvent();
       }
       finally

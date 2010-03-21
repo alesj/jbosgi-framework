@@ -75,8 +75,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test
-   public void testHostOnly() throws Exception
+   @Test public void testHostOnly() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
@@ -99,8 +98,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, hostA.getState());
    }
 
-   @Test
-   public void testFragmentOnly() throws Exception
+   @Test public void testFragmentOnly() throws Exception
    {
       // Bundle-SymbolicName: simple-fragA
       // Export-Package: org.jboss.test.osgi.fragments.fragA
@@ -129,8 +127,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragA.getState());
    }
 
-   @Test
-   public void testAttachedFragment() throws Exception
+   @Test public void testAttachedFragment() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
@@ -168,8 +165,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragA.getState());
    }
 
-   @Test
-   public void testFragmentHidesPrivatePackage() throws Exception
+   @Test public void testFragmentHidesPrivatePackage() throws Exception
    {
       if (context != null)
       {
@@ -213,8 +209,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragB.getState());
    }
 
-   @Test
-   public void testFragmentExportsPackage() throws Exception
+   @Test public void testFragmentExportsPackage() throws Exception
    {
       if (context != null)
       {
@@ -293,8 +288,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragA.getState());
    }
 
-   @Test
-   public void testFragmentRequireBundle() throws Exception
+   @Test public void testFragmentRequireBundle() throws Exception
    {
       if (context != null)
       {

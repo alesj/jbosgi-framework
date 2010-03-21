@@ -7,6 +7,7 @@ import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.metadata.VersionRange;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.test.BaseTestCase;
+import org.junit.Test;
 import org.osgi.framework.Version;
 
 /**
@@ -18,12 +19,13 @@ import org.osgi.framework.Version;
 public class VersionRangeTestCase extends BaseTestCase
 {
    final Logger log = Logger.getLogger(VersionRangeTestCase.class);
-   
+
    public VersionRangeTestCase(String name)
    {
       super(name);
    }
 
+   @Test
    public void testRangeSpecRE() throws Exception
    {
       String rangeSpec = "1.0.0";
@@ -42,6 +44,7 @@ public class VersionRangeTestCase extends BaseTestCase
       }
    }
 
+   @Test
    public void testExclusiveRanges() throws Exception
    {
       VersionRange v100to110ExclusiveRange = AbstractVersionRange.parseRangeSpec("(1.0.0,1.1.0)");
@@ -60,6 +63,7 @@ public class VersionRangeTestCase extends BaseTestCase
       assertTrue("1.0.2 is in " + v100GAto110GAExclusvieRange, v100GAto110GAExclusvieRange.isInRange(v102));
    }
 
+   @Test
    public void testInclusiveRanges() throws Exception
    {
       VersionRange v100to110InclusiveRange = AbstractVersionRange.parseRangeSpec("[1.0.0,1.1.0]");
@@ -78,6 +82,7 @@ public class VersionRangeTestCase extends BaseTestCase
       assertTrue("1.0.2 is in " + v100GAto110GAInclusiveRange, v100GAto110GAInclusiveRange.isInRange(v102));
    }
 
+   @Test
    public void testMixedRanges() throws Exception
    {
       VersionRange v100to110InclusiveLowerExclusiveUpperRange = AbstractVersionRange.parseRangeSpec("[1.0.0,1.1.0)");
@@ -103,6 +108,7 @@ public class VersionRangeTestCase extends BaseTestCase
       assertTrue("1.0.2 is in " + v100GAto110GAExclusiveLowerInclusiveUpperRange, v100GAto110GAExclusiveLowerInclusiveUpperRange.isInRange(v102));
    }
 
+   @Test
    public void testSingleRange() throws Exception
    {
       VersionRange v100Range = AbstractVersionRange.parseRangeSpec("1.0.0");

@@ -367,6 +367,8 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          {
             unit.setRequiredStage(requiredStage);
             context.setRequiredState(requiredState);
+            unit.addAttachment(DeploymentException.class, ex);
+            ex.printStackTrace();
             log.error("Error resolving bundle: " + bundleState, ex);
          }
       }

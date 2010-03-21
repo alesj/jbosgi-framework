@@ -51,8 +51,7 @@ import org.osgi.framework.Version;
  */
 public class ResolverMetadataTestCase extends AbstractResolverTest
 {
-   @Test
-   public void testSimpleExport() throws Exception
+   @Test public void testSimpleExport() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -106,8 +105,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testSimpleImport() throws Exception
+   @Test public void testSimpleImport() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -139,8 +137,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testSingleton() throws Exception
+   @Test public void testSingleton() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -161,8 +158,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testRequireBundle() throws Exception
+   @Test public void testRequireBundle() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -188,8 +184,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testRequireBundleOptional() throws Exception
+   @Test public void testRequireBundleOptional() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -215,8 +210,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testRequireBundleVersion() throws Exception
+   @Test public void testRequireBundleVersion() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -242,8 +236,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testPackageAttribute() throws Exception
+   @Test public void testPackageAttribute() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -300,8 +293,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testPackageAttributeFails() throws Exception
+   @Test public void testPackageAttributeFails() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -343,8 +335,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testPackageAttributeMandatory() throws Exception
+   @Test public void testPackageAttributeMandatory() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
@@ -388,8 +379,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test
-   public void testPackageAttributeMandatoryFails() throws Exception
+   @Test public void testPackageAttributeMandatoryFails() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)

@@ -41,6 +41,7 @@ import org.jboss.osgi.framework.metadata.internal.AbstractPackageAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.OSGiParameters;
+import org.junit.Test;
 
 /**
  * Test OSGi header values.
@@ -54,6 +55,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       super(name);
    }
 
+   @Test
    public void testSerializable() throws Exception
    {
       Manifest manifest = getManifest(createName(null));
@@ -73,6 +75,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       assertEquals(excludes, Arrays.asList("com.acme"));
    }
 
+   @Test
    public void testSimpleManifest() throws Exception
    {
       Manifest manifest = getManifest(createName("Simple"));
@@ -90,6 +93,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       assertEquals(Arrays.asList("ena", "dva", "tri"), metaData.getRequiredExecutionEnvironment());
    }
 
+   @Test
    public void testJavaccManifest() throws Exception
    {
       Manifest manifest = getManifest(createName("JavaCC"));
@@ -108,7 +112,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       List<ParameterizedAttribute> metadataBNC = metaData.getBundleNativeCode();
       assertNotNull(metadataBNC);
       assertEquals(bundleNativeCode.size(), metadataBNC.size());
-      for(int i=0; i < metadataBNC.size(); i++)
+      for (int i = 0; i < metadataBNC.size(); i++)
       {
          ParameterizedAttribute paMD = metadataBNC.get(i);
          ParameterizedAttribute myPA = bundleNativeCode.get(i);
@@ -129,7 +133,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       List<PackageAttribute> metadataDyna = metaData.getDynamicImports();
       assertNotNull(metadataDyna);
       assertEquals(dynamicImports.size(), metadataDyna.size());
-      for(int i=0; i < metadataDyna.size(); i++)
+      for (int i = 0; i < metadataDyna.size(); i++)
       {
          PackageAttribute paMD = metadataDyna.get(i);
          PackageAttribute myPA = dynamicImports.get(i);
@@ -149,7 +153,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       List<PackageAttribute> metadataExport = metaData.getExportPackages();
       assertNotNull(metadataExport);
       assertEquals(exportPackages.size(), metadataExport.size());
-      for(int i=0; i < metadataExport.size(); i++)
+      for (int i = 0; i < metadataExport.size(); i++)
       {
          PackageAttribute paMD = metadataExport.get(i);
          PackageAttribute myPA = exportPackages.get(i);
@@ -191,7 +195,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       List<PackageAttribute> metadataImport = metaData.getImportPackages();
       assertNotNull(metadataImport);
       assertEquals(importPackages.size(), metadataImport.size());
-      for(int i=0; i < metadataImport.size(); i++)
+      for (int i = 0; i < metadataImport.size(); i++)
       {
          PackageAttribute paMD = metadataImport.get(i);
          PackageAttribute myPA = importPackages.get(i);
@@ -216,7 +220,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
       List<ParameterizedAttribute> metadataRB = metaData.getRequireBundles();
       assertNotNull(metadataRB);
       assertEquals(requireBundles.size(), metadataRB.size());
-      for(int i=0; i < metadataRB.size(); i++)
+      for (int i = 0; i < metadataRB.size(); i++)
       {
          ParameterizedAttribute paMD = metadataRB.get(i);
          ParameterizedAttribute myPA = requireBundles.get(i);

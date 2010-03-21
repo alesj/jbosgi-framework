@@ -32,7 +32,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class D implements ServiceFactory
+public class ServiceMixFactory implements ServiceFactory
 {
    private List<Object> as = new ArrayList<Object>();
 

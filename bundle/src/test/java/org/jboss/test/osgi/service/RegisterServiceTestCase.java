@@ -49,8 +49,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };
 
-   @Test
-   public void testRegisterServiceErrors() throws Exception
+   @Test public void testRegisterServiceErrors() throws Exception
    {
       String OBJCLASS = BundleContext.class.getName();
       String[] OBJCLASSES = new String[] { OBJCLASS };
@@ -184,8 +183,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testRegisterServiceOBJCLASS() throws Exception
+   @Test public void testRegisterServiceOBJCLASS() throws Exception
    {
       Dictionary<String, Object> properties = new Hashtable<String, Object>();
       properties.put(Constants.OBJECTCLASS, new String[] { "rubbish" });
@@ -218,8 +216,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
       }
    }
    
-   @Test
-   public void testRegisterService() throws Exception
+   @Test public void testRegisterService() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -245,8 +242,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test
-   public void testBundleUninstall() throws Exception
+   @Test public void testBundleUninstall() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
@@ -286,8 +282,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test
-   public void testRegisteredServices() throws Exception
+   @Test public void testRegisteredServices() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);

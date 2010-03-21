@@ -60,4 +60,10 @@ public class NoFilter implements Filter
    {
       return true;
    }
+
+   @Override
+   public String toString()
+   {
+      return null;
+   }
 }

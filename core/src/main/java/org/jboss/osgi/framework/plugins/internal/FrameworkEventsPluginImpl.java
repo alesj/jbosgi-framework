@@ -26,6 +26,8 @@ package org.jboss.osgi.framework.plugins.internal;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,15 +46,20 @@ import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.framework.util.NoFilter;
 import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.framework.hooks.service.ListenerHook;
+import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
 /**
  * A plugin that installs/starts bundles on framework startup.
@@ -80,7 +87,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
    private boolean synchronous;
    /** The set of bundle events that are delivered to an (asynchronous) BundleListener */
    private Set<Integer> asyncBundleEvents = new HashSet<Integer>();
-   
+
    public FrameworkEventsPluginImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
@@ -99,16 +106,19 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       this.synchronous = synchronous;
    }
 
+   @Override
    public boolean isActive()
    {
       return active;
    }
 
+   @Override
    public void setActive(boolean active)
    {
       this.active = active;
    }
 
+   @Override
    public void addBundleListener(Bundle bundle, BundleListener listener)
    {
       if (listener == null)
@@ -129,6 +139,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
    }
 
+   @Override
    public void removeBundleListener(Bundle bundle, BundleListener listener)
    {
       if (listener == null)
@@ -149,6 +160,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
    }
 
+   @Override
    public void removeBundleListeners(Bundle bundle)
    {
       synchronized (bundleListeners)
@@ -158,6 +170,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
    }
 
+   @Override
    public void addFrameworkListener(Bundle bundle, FrameworkListener listener)
    {
       if (listener == null)
@@ -178,6 +191,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
    }
 
+   @Override
    public void removeFrameworkListener(Bundle bundle, FrameworkListener listener)
    {
       if (listener == null)
@@ -198,6 +212,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
    }
 
+   @Override
    public void removeFrameworkListeners(Bundle bundle)
    {
       synchronized (frameworkListeners)
@@ -207,7 +222,8 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
    }
 
-   public void addServiceListener(Bundle bundle, ServiceListener listener, Filter filter)
+   @Override
+   public void addServiceListener(Bundle bundle, ServiceListener listener, String filterstr) throws InvalidSyntaxException
    {
       if (listener == null)
          throw new IllegalArgumentException("Null listener");
@@ -223,12 +239,52 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
             serviceListeners.put(bundle, listeners);
          }
 
-         ServiceListenerRegistration registration = new ServiceListenerRegistration(listener, filter);
-         if (listeners.contains(registration) == false)
-            listeners.add(registration);
+         // If the context bundle's list of listeners already contains a listener l such that (l==listener), 
+         // then this method replaces that listener's filter (which may be null) with the specified one (which may be null). 
+         removeServiceListener(bundle, listener);
+         
+         // Create the new listener registration
+         Filter filter = (filterstr != null ? FrameworkUtil.createFilter(filterstr) : NoFilter.INSTANCE); 
+         ServiceListenerRegistration slreg = new ServiceListenerRegistration(bundle, listener, filter);
+         
+         // The {@link ListenerHook} added method is called to provide the hook implementation with information on newly added service listeners. 
+         // This method will be called as service listeners are added while this hook is registered
+         for (ListenerHook hook : getServiceListenerHooks())
+         {
+            try
+            {
+               hook.added(Collections.singleton(slreg.getListenerInfo()));
+            }
+            catch (RuntimeException ex)
+            {
+               log.error("Error processing ListenerHook: " + hook, ex);
+            }
+         }
+
+         // Add the listener to the list
+         listeners.add(slreg);
       }
    }
 
+   @Override
+   public Collection<ListenerInfo> getServiceListenerInfos(Bundle bundle)
+   {
+      Collection<ListenerInfo> listeners = new ArrayList<ListenerInfo>();
+      for (Entry<Bundle, List<ServiceListenerRegistration>> entry : serviceListeners.entrySet())
+      {
+         if (bundle == null || assertBundle(bundle).equals(entry.getKey()))
+         {
+            for (ServiceListenerRegistration aux : entry.getValue())
+            {
+               ListenerInfo info = aux.getListenerInfo();
+               listeners.add(info);
+            }
+         }
+      }
+      return Collections.unmodifiableCollection(listeners);
+   }
+
+   @Override
    public void removeServiceListener(Bundle bundle, ServiceListener listener)
    {
       if (listener == null)
@@ -241,23 +297,79 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
          List<ServiceListenerRegistration> listeners = serviceListeners.get(bundle);
          if (listeners != null)
          {
-            if (listeners.size() > 1)
-               listeners.remove(listener);
-            else
-               removeServiceListeners(bundle);
+            ServiceListenerRegistration slreg = new ServiceListenerRegistration(bundle, listener, NoFilter.INSTANCE);
+            int index = listeners.indexOf(slreg);
+            if (index >= 0)
+            {
+               slreg = listeners.remove(index);
+
+               // The {@link ListenerHook} 'removed' method is called to provide the hook implementation with information on newly removed service listeners. 
+               // This method will be called as service listeners are removed while this hook is registered. 
+               for (ListenerHook hook : getServiceListenerHooks())
+               {
+                  try
+                  {
+                     ListenerInfoImpl info = (ListenerInfoImpl)slreg.getListenerInfo();
+                     info.setRemoved(true);
+                     hook.removed(Collections.singleton(info));
+                  }
+                  catch (RuntimeException ex)
+                  {
+                     log.error("Error processing ListenerHook: " + hook, ex);
+                  }
+               }
+            }
          }
       }
    }
 
+   @Override
    public void removeServiceListeners(Bundle bundle)
    {
       synchronized (serviceListeners)
       {
-         bundle = assertBundle(bundle);
-         serviceListeners.remove(bundle);
+         Collection<ListenerInfo> listenerInfos = getServiceListenerInfos(bundle);
+         serviceListeners.remove(assertBundle(bundle));
+
+         // The {@link ListenerHook} 'removed' method is called to provide the hook implementation with information on newly removed service listeners. 
+         // This method will be called as service listeners are removed while this hook is registered. 
+         for (ListenerHook hook : getServiceListenerHooks())
+         {
+            try
+            {
+               hook.removed(listenerInfos);
+            }
+            catch (RuntimeException ex)
+            {
+               log.error("Error processing ListenerHook: " + hook, ex);
+            }
+         }
       }
    }
 
+   private List<ListenerHook> getServiceListenerHooks()
+   {
+      BundleContext context = getBundleManager().getSystemContext();
+      ServiceReference[] srefs = null;
+      try
+      {
+         srefs = context.getServiceReferences(ListenerHook.class.getName(), null);
+      }
+      catch (InvalidSyntaxException e)
+      {
+         // ignore
+      }
+      if (srefs == null)
+         return Collections.emptyList();
+
+      List<ListenerHook> hooks = new ArrayList<ListenerHook>();
+      for (ServiceReference sref : srefs)
+         hooks.add((ListenerHook)context.getService(sref));
+
+      return Collections.unmodifiableList(hooks);
+   }
+
+   @Override
    public void fireBundleEvent(final Bundle bundle, final int type)
    {
       // Get a snapshot of the current listeners
@@ -332,6 +444,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       fireEvent(runnable, synchronous);
    }
 
+   @Override
    public void fireFrameworkEvent(final Bundle bundle, final int type, final Throwable throwable)
    {
       // Get a snapshot of the current listeners
@@ -383,7 +496,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
                catch (RuntimeException ex)
                {
                   log.warn("Error while firing " + typeName + " for framework", ex);
-                  
+
                   // The Framework must publish a FrameworkEvent.ERROR if a callback to an
                   // event listener generates an unchecked exception - except when the callback
                   // happens while delivering a FrameworkEvent.ERROR
@@ -404,6 +517,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       fireEvent(runnable, synchronous);
    }
 
+   @Override
    public void fireServiceEvent(Bundle bundle, int type, final OSGiServiceState service)
    {
       // Get a snapshot of the current listeners
@@ -443,7 +557,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
             // This event is only delivered to listeners which were added with a non-null filter where 
             // the filter matched the service properties prior to the modification but the filter does 
             // not match the modified service properties. 
-            
+
             if (registration.filter.match(service))
             {
                AccessControlContext accessControlContext = registration.accessControlContext;
@@ -458,7 +572,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
    }
 
-   private Bundle assertBundle(Bundle bundle)
+   private static Bundle assertBundle(Bundle bundle)
    {
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
@@ -487,32 +601,35 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
     */
    static class ServiceListenerRegistration
    {
-      // Any filter
-      Filter filter;
-      ServiceListener listener;
+      private Bundle bundle;
+      private ServiceListener listener;
+      private Filter filter;
+      private ListenerInfo info;
 
       // Any access control context
       AccessControlContext accessControlContext;
 
-      /**
-       * Create a new ServiceListenerRegistration.
-       *
-       * @param listener service listener
-       * @param filter the filter
-       */
-      public ServiceListenerRegistration(ServiceListener listener, Filter filter)
+      ServiceListenerRegistration(Bundle bundle, ServiceListener listener, Filter filter)
       {
+         if (bundle == null)
+            throw new IllegalArgumentException("Null bundle");
          if (listener == null)
             throw new IllegalArgumentException("Null listener");
-
          if (filter == null)
-            filter = NoFilter.INSTANCE;
+            throw new IllegalArgumentException("Null filter");
 
+         this.bundle = assertBundle(bundle);
          this.listener = listener;
          this.filter = filter;
+         this.info = new ListenerInfoImpl(this);
 
          if (System.getSecurityManager() != null)
             accessControlContext = AccessController.getContext();
+      }
+
+      public ListenerInfo getListenerInfo()
+      {
+         return info;
       }
 
       @Override
@@ -527,8 +644,68 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
          if (obj instanceof ServiceListenerRegistration == false)
             return false;
 
+         // Only the ServiceListener instance determins equality
          ServiceListenerRegistration other = (ServiceListenerRegistration)obj;
-         return other.listener.equals(listener) && other.filter.equals(filter);
+         return other.listener.equals(listener);
+      }
+   }
+
+   static class ListenerInfoImpl implements ListenerInfo
+   {
+      private BundleContext context;
+      private ServiceListener listener;
+      private String filter;
+      private boolean removed;
+
+      ListenerInfoImpl(ServiceListenerRegistration slreg)
+      {
+         this.context = slreg.bundle.getBundleContext();
+         this.listener = slreg.listener;
+         this.filter = slreg.filter.toString();
+      }
+
+      @Override
+      public BundleContext getBundleContext()
+      {
+         return context;
+      }
+
+      @Override
+      public String getFilter()
+      {
+         return filter;
+      }
+
+      @Override
+      public boolean isRemoved()
+      {
+         return removed;
+      }
+
+      public void setRemoved(boolean removed)
+      {
+         this.removed = removed;
+      }
+
+      @Override
+      public int hashCode()
+      {
+         return toString().hashCode();
+      }
+
+      @Override
+      public boolean equals(Object obj)
+      {
+         // Two ListenerInfos are equals if they refer to the same listener for a given addition and removal life cycle. 
+         // If the same listener is added again, it must have a different ListenerInfo which is not equal to this ListenerInfo. 
+         return super.equals(obj);
+      }
+
+      @Override
+      public String toString()
+      {
+         String simpleName = listener.getClass().getSimpleName();
+         return "ListenerInfo[" + context + "," + simpleName + "," + removed + "]";
       }
    }
 

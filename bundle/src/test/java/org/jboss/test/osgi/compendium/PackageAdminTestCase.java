@@ -42,8 +42,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  */
 public class PackageAdminTestCase extends AbstractFrameworkTest
 {
-   @Test
-   public void testGetBudleFromClass() throws Exception
+   @Test public void testGetBudleFromClass() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
       Bundle bundleA = installBundle(assemblyA);

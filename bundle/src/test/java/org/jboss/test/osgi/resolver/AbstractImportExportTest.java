@@ -96,7 +96,7 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
 
          // Verify bundle states
          assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
-         
+
          // Verify that the class load
          assertLoadFails(bundleA, A.class);
       }
@@ -125,15 +125,15 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
             PackageAdmin packageAdmin = getPackageAdmin();
             boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleB });
             assertTrue("All resolved", allResolved);
-            
+
             // Verify bundle states
             assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
             assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-            
+
             // Verify that the class can be loaded
             assertLoaderBundle(bundleB, bundleA, A.class);
             assertLoaderBundle(bundleB, bundleB, A.class);
-            
+
             // Verify bundle states
             assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
          }
@@ -237,7 +237,7 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
             // Verify bundle states
             assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
             assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-            
+
             // Verify that the class load
             assertLoadFails(bundleA, A.class);
             assertLoaderBundle(bundleB, bundleB, A.class);
@@ -269,7 +269,7 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
 
          // Verify bundle states
          assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-         
+
          // Verify that the class load
          assertLoadFails(bundleA, A.class);
       }
@@ -519,9 +519,10 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    }
 
    @Test
-   // [TODO] require bundle visibility
    public void testRequireBundle() throws Exception
    {
+      // [TODO] require bundle visibility
+      
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");

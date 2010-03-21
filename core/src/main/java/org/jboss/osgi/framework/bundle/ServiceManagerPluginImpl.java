@@ -35,6 +35,7 @@ import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.dependency.spi.tracker.ContextTracker;
+import org.jboss.dependency.spi.tracker.ContextTracking;
 import org.jboss.deployers.structure.spi.DeploymentRegistry;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.kernel.Kernel;
@@ -60,6 +61,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.hooks.service.ListenerHook;
+import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
 /**
  * A plugin that manages OSGi services.
@@ -184,7 +187,9 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       if (KernelUtils.isUnregistered(context)) // we're probably not installed anymore
          return null;
 
-      return bundleState.addContextInUse(context);
+      ContextTracking ct = (ContextTracking)context;
+      Object target = ct.getTarget(bundleState);
+      return target;
    }
 
    public ServiceReference getServiceReference(AbstractBundleState bundle, String clazz)
@@ -215,6 +220,15 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    @SuppressWarnings("rawtypes")
    public OSGiServiceState registerService(AbstractBundleState bundleState, String[] clazzes, Object service, Dictionary properties)
    {
+      // Immediately after registration of a {@link ListenerHook}, the ListenerHook.added() method will be called 
+      // to provide the current collection of service listeners which had been added prior to the hook being registered.
+      Collection<ListenerInfo> listenerInfos = null;
+      if (service instanceof ListenerHook)
+      {
+         FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
+         listenerInfos = eventsPlugin.getServiceListenerInfos(null);
+      }
+      
       OSGiServiceState result = new OSGiServiceState(bundleState, clazzes, service, properties);
       result.internalRegister();
       try
@@ -233,6 +247,13 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          putContext(result, ((OSGiBundleState)bundleState).getDeploymentUnit());
       }
 
+      // Call the newly added ListenerHook.added() method
+      if (service instanceof ListenerHook)
+      {
+         ListenerHook listenerHook = (ListenerHook)service;
+         listenerHook.added(listenerInfos);
+      }
+      
       // This event is synchronously delivered after the service has been registered with the Framework. 
       FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
       eventsPlugin.fireServiceEvent(bundleState, ServiceEvent.REGISTERED, result);
@@ -248,16 +269,49 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       FrameworkEventsPlugin plugin = getPlugin(FrameworkEventsPlugin.class);
       plugin.fireServiceEvent(bundleState, ServiceEvent.UNREGISTERING, serviceState);
       
+      internalUnregister(serviceState);
       if (bundleState instanceof OSGiBundleState)
-      {
          removeContext(serviceState, ((OSGiBundleState)bundleState).getDeploymentUnit());
-      }
-
+      
       Controller controller = kernel.getController();
       controller.uninstall(serviceState.getName());
-      serviceState.internalUnregister();
    }
 
+   /**
+    * Unregister the service
+    */
+   private void internalUnregister(OSGiServiceState serviceState)
+   {
+      AbstractBundleState bundleState = serviceState.getBundleState();
+      ContextTracker ct = serviceState.getContextTracker();
+      if (ct != null) // nobody used us?
+      {
+         Set<Object> users = ct.getUsers(serviceState);
+         if (users.isEmpty() == false)
+         {
+            Set<AbstractBundleState> used = new HashSet<AbstractBundleState>();
+            OSGiBundleManager manager = bundleState.getBundleManager();
+            ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+            
+            for (Object user : users)
+            {
+               AbstractBundleState using = plugin.getBundleForUser(user);
+               if (used.add(using) == true) 
+               {
+                  // ungetService will cleanup service cache
+                  int count = ct.getUsedByCount(serviceState, using);
+                  while (count > 0)
+                  {
+                     using.ungetContext(serviceState); 
+                     count--;
+                  }
+               }
+            }
+         }
+      }
+      serviceState.clearTarget();
+   }
+   
    public boolean ungetService(AbstractBundleState bundleState, ServiceReference reference)
    {
       if (reference == null)

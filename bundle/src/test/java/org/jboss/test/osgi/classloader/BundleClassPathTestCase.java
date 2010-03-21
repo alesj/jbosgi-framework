@@ -41,8 +41,7 @@ import org.osgi.framework.launch.Framework;
  */
 public class BundleClassPathTestCase extends OSGiRuntimeTest
 {
-   @Test
-   public void testBundleClassPath() throws Exception
+   @Test public void testBundleClassPath() throws Exception
    {
       OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
       Framework framework = bootProvider.getFramework();

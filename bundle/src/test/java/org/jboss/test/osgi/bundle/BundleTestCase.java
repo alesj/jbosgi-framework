@@ -83,7 +83,7 @@ public class BundleTestCase extends AbstractFrameworkTest
       assertEquals(id2, bundle.getBundleId());
       assertTrue("Ids should be different" + id1 + "," + id2, id1 != id2);
    }
-   
+
    @Test
    public void testSymbolicName() throws Exception
    {
@@ -99,7 +99,7 @@ public class BundleTestCase extends AbstractFrameworkTest
       }
       assertEquals("org.jboss.test.osgi.simple1", bundle.getSymbolicName());
    }
-   
+
    @Test
    public void testState() throws Exception
    {
@@ -121,7 +121,7 @@ public class BundleTestCase extends AbstractFrameworkTest
       }
       assertEquals(Bundle.UNINSTALLED, bundle.getState());
    }
-   
+
    @Test
    public void testGetBundleContext() throws Exception
    {
@@ -131,11 +131,11 @@ public class BundleTestCase extends AbstractFrameworkTest
       {
          BundleContext bundleContext = bundle.getBundleContext();
          assertNull(bundleContext);
-         
+
          bundle.start();
          bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
-         
+
          bundle.stop();
          bundleContext = bundle.getBundleContext();
          assertNull(bundleContext);
@@ -145,43 +145,43 @@ public class BundleTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    @Test
    public void testLastModified() throws Exception
    {
       // TODO testLastModified
    }
-   
+
    @Test
    public void testStartStop() throws Exception
    {
       // TODO testStartStop
    }
-   
+
    @Test
    public void testUpdate() throws Exception
    {
       VirtualFile assemble1 = assembleArchive("bundle1", "/bundles/update/update-bundle1");
       VirtualFile assemble2 = assembleArchive("bundle2", "/bundles/update/update-bundle2");
-      
+
       Manifest manifest = VFSUtils.getManifest(assemble2);
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       new JarOutputStream(baos, manifest).close();
       ByteArrayInputStream updateStream = new ByteArrayInputStream(baos.toByteArray());
-      
+
       Bundle bundle = installBundle(assemble1);
       try
       {
          int beforeCount = context.getBundles().length;
-         
+
          bundle.start();
          assertBundleState(Bundle.ACTIVE, bundle.getState());
          assertEquals("Bundle-Version", "1.0.0", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
-         
+
          bundle.update(updateStream);
          assertBundleState(Bundle.ACTIVE, bundle.getState());
          assertEquals("Bundle-Version", "1.0.1", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
-         
+
          int afterCount = context.getBundles().length;
          assertEquals("Bundle count", beforeCount, afterCount);
       }
@@ -190,13 +190,13 @@ public class BundleTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    @Test
    public void testUninstall() throws Exception
    {
       // TODO testUninstall
    }
-   
+
    @Test
    public void testSingleton() throws Exception
    {
@@ -218,7 +218,7 @@ public class BundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
+
    @Test
    public void testNotSingleton() throws Exception
    {
@@ -242,7 +242,7 @@ public class BundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
+
    @Test
    @SuppressWarnings({ "rawtypes", "unchecked" })
    public void testGetHeaders() throws Exception
@@ -259,7 +259,7 @@ public class BundleTestCase extends AbstractFrameworkTest
          expected.put(Attributes.Name.IMPLEMENTATION_TITLE.toString(), "JBoss OSGi tests");
          expected.put(Attributes.Name.IMPLEMENTATION_VENDOR.toString(), "jboss.org");
          expected.put(Attributes.Name.IMPLEMENTATION_VERSION.toString(), "test");
-         
+
          Dictionary dictionary = bundle.getHeaders();
          assertEquals(expected, dictionary);
       }
@@ -268,37 +268,37 @@ public class BundleTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    @Test
    public void testLocation() throws Exception
    {
       // TODO testGetLocation
    }
-   
+
    @Test
    public void testGetRegisteredServices() throws Exception
    {
       // TODO testGetRegisteredServices
    }
-   
+
    @Test
    public void testServicesInUse() throws Exception
    {
       // TODO testServicesInUse
    }
-   
+
    @Test
    public void testHasPermission() throws Exception
    {
       // TODO testHasPermission
    }
-   
+
    @Test
    public void testGetResources() throws Exception
    {
       // TODO testGetResource(s)
    }
-   
+
    @Test
    public void testLoadClass() throws Exception
    {
