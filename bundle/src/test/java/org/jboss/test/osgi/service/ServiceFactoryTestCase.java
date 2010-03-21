@@ -215,7 +215,6 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
    public void testServiceFactoryUsingBundles() throws Exception
    {
       final boolean[] allGood = new boolean[2];
-      
       ServiceFactory factory = new ServiceFactory()
       {
          @Override
