@@ -22,6 +22,7 @@
 package org.jboss.osgi.framework.plugins;
 
 import java.util.Dictionary;
+import java.util.Set;
 
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiServiceState;
@@ -104,6 +105,13 @@ public interface ServiceManagerPlugin extends Plugin
     */
    Object getService(AbstractBundleState bundleState, ServiceReference reference);
 
+   
+   /**
+    * Returns the bundles that are using the service.
+    * @return A set of bundles or an empty set.
+    */
+   Set<Bundle> getUsingBundles(OSGiServiceState serviceState);
+   
    /**
     * Releases the service object referenced by the specified
     * <code>ServiceReference</code> object. If the context bundle's use count

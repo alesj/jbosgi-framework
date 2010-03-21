@@ -55,6 +55,7 @@ import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
 import org.jboss.osgi.framework.util.KernelUtils;
 import org.jboss.osgi.framework.util.NoFilter;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -118,6 +119,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          applyMDRUsage(false);
    }
 
+   @Override
    public ServiceReference[] getRegisteredServices(AbstractBundleState bundleState)
    {
       Set<ControllerContext> contexts = getRegisteredContexts(bundleState);
@@ -137,6 +139,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return result.toArray(new ServiceReference[result.size()]);
    }
 
+   @Override
    public ServiceReference[] getServicesInUse(AbstractBundleState bundleState)
    {
       Set<ControllerContext> contexts = bundleState.getUsedContexts(bundleState);
@@ -157,6 +160,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return references.toArray(new ServiceReference[references.size()]);
    }
 
+   @Override
    public ServiceReference[] getAllServiceReferences(AbstractBundleState bundle, String clazz, String filterStr) throws InvalidSyntaxException
    {
       Filter filter = NoFilter.INSTANCE;
@@ -170,13 +174,25 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return services.toArray(new ServiceReference[services.size()]);
    }
 
-   /**
-    * Get a service
-    * 
-    * @param bundleState the bundle that requests the service
-    * @param reference the service reference
-    * @return the service
-    */
+   @Override
+   public Set<Bundle> getUsingBundles(OSGiServiceState serviceState)
+   {
+      AbstractBundleState bundleState = serviceState.getBundleState();
+      OSGiBundleManager manager = bundleState.getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+
+      ContextTracker contextTracker = serviceState.getContextTracker();
+      Set<Object> users = contextTracker.getUsers(serviceState);
+      Set<Bundle> bundles = new HashSet<Bundle>();
+      for (Object user : users)
+      {
+         AbstractBundleState abs = plugin.getBundleForUser(user);
+         bundles.add(abs.getBundleInternal());
+      }
+      return bundles;
+   }
+   
+   @Override
    public Object getService(AbstractBundleState bundleState, ServiceReference reference)
    {
       if (reference == null)
@@ -192,6 +208,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return target;
    }
 
+   @Override
    public ServiceReference getServiceReference(AbstractBundleState bundle, String clazz)
    {
       if (clazz == null)
@@ -204,6 +221,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return services.iterator().next();
    }
 
+   @Override
    public ServiceReference[] getServiceReferences(AbstractBundleState bundle, String clazz, String filterStr) throws InvalidSyntaxException
    {
       Filter filter = NoFilter.INSTANCE;
@@ -217,6 +235,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return services.toArray(new ServiceReference[services.size()]);
    }
 
+   @Override
    @SuppressWarnings("rawtypes")
    public OSGiServiceState registerService(AbstractBundleState bundleState, String[] clazzes, Object service, Dictionary properties)
    {
@@ -261,6 +280,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return result;
    }
 
+   @Override
    public void unregisterService(OSGiServiceState serviceState)
    {
       AbstractBundleState bundleState = serviceState.getBundleState();
@@ -277,9 +297,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       controller.uninstall(serviceState.getName());
    }
 
-   /**
-    * Unregister the service
-    */
    private void internalUnregister(OSGiServiceState serviceState)
    {
       AbstractBundleState bundleState = serviceState.getBundleState();
@@ -312,6 +329,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       serviceState.clearTarget();
    }
    
+   @Override
    public boolean ungetService(AbstractBundleState bundleState, ServiceReference reference)
    {
       if (reference == null)
@@ -325,6 +343,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return bundleState.removeContextInUse(context);
    }
 
+   @Override
    public void unregisterServices(AbstractBundleState bundleState)
    {
       unregisterContexts(bundleState);

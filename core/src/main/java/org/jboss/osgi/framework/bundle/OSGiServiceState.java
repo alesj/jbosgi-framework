@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +47,7 @@ import org.jboss.metadata.spi.scope.ScopeKey;
 import org.jboss.osgi.framework.metadata.CaseInsensitiveDictionary;
 import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
+import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.spi.util.BundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -282,11 +282,13 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
          return getTarget();
    }
 
+   @Override
    public Object invoke(String name, Object[] parameters, String[] signature) throws Throwable
    {
       return getBeanInfo().invoke(getTarget(), name, signature, parameters);
    }
 
+   @Override
    public ClassLoader getClassLoader() throws Throwable
    {
       return getClassLoaderInternal();
@@ -301,11 +303,13 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       return BundleClassLoader.createClassLoader(getBundle());
    }
 
+   @Override
    public Object get(String name) throws Throwable
    {
       return getBeanInfo().getProperty(getTarget(), name);
    }
 
+   @Override
    public void set(String name, Object value) throws Throwable
    {
       getBeanInfo().setProperty(getTarget(), name, value);
@@ -388,7 +392,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
    }
 
    /**
-    * Unget from cache.
+    * Unget the service from cache.
     *
     * @param bundleState the bundle state
     * @return ungot service
@@ -427,16 +431,12 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       return service;
    }
 
-   /**
-    * Get the service registration
-    * 
-    * @return the service registration
-    */
-   public ServiceRegistration getRegistration()
+   ServiceRegistration getRegistration()
    {
       return serviceRegistration;
    }
 
+   @Override
    public ServiceReference getReference()
    {
       checkUnregistered();
@@ -450,6 +450,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       return serviceReference;
    }
 
+   @Override
    public Bundle getBundle()
    {
       if (isUnregistered())
@@ -467,6 +468,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       return bundleState;
    }
 
+	@Override
    public Object getProperty(String key)
    {
       if (key == null)
@@ -480,6 +482,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       return properties.get(key);
    }
 
+   @Override
    public String[] getPropertyKeys()
    {
       ArrayList<String> result = new ArrayList<String>();
@@ -494,6 +497,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       return result.toArray(new String[result.size()]);
    }
 
+   @Override
    @SuppressWarnings("rawtypes")
    public void setProperties(Dictionary properties)
    {
@@ -512,33 +516,22 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
    @Override
    public Bundle[] getUsingBundles()
    {
-      Set<Bundle> bundles = getUsingBundleInternal();
+      OSGiBundleManager manager = bundleState.getBundleManager();
+      ServiceManagerPlugin plugin = manager.getPlugin(ServiceManagerPlugin.class);
+      Set<Bundle> bundles = plugin.getUsingBundles(this);
       if (bundles.size() == 0)
          return null;
 
       return bundles.toArray(new Bundle[bundles.size()]);
    }
-
-   private Set<Bundle> getUsingBundleInternal()
-   {
-      OSGiBundleManager manager = bundleState.getBundleManager();
-      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-
-      Set<Object> users = getContextTracker().getUsers(this);
-      Set<Bundle> bundles = new HashSet<Bundle>();
-      for (Object user : users)
-      {
-         AbstractBundleState abs = plugin.getBundleForUser(user);
-         bundles.add(abs.getBundleInternal());
-      }
-      return bundles;
-   }
-
+   
+   @Override
    public boolean isAssignableTo(Bundle bundle, String className)
    {
       return MDRUtils.isAssignableTo(this, bundleState, bundle, className);
    }
 
+   @Override
    public void unregister()
    {
       checkUnregistered();
@@ -556,6 +549,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       }
    }
 
+   @Override
    public int compareTo(Object reference)
    {
       if (reference == null)
