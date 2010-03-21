@@ -41,7 +41,7 @@ public class SimpleLogServiceActivator implements BundleActivator
    {
       final String symName = context.getBundle().getSymbolicName();
       addMessage(symName, "startBundleActivator");
-      
+
       ServiceReference sref = context.getServiceReference(LogService.class.getName());
       if (sref != null)
       {
@@ -49,7 +49,7 @@ public class SimpleLogServiceActivator implements BundleActivator
          String message = "getService: " + service.getClass().getName();
          addMessage(symName, message);
       }
-      
+
       ServiceTracker tracker = new ServiceTracker(context, LogService.class.getName(), null)
       {
          @Override

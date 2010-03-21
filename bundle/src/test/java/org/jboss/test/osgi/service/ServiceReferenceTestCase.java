@@ -50,7 +50,8 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ServiceReferenceTestCase extends AbstractFrameworkTest
 {
-   @Test public void testGetProperty() throws Exception
+   @Test
+   public void testGetProperty() throws Exception
    {
       ServiceReference reference = null;
       String[] clazzes = new String[] { BundleContext.class.getName() };
@@ -70,17 +71,17 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          properties.put("MiXeD", "Case");
          ServiceRegistration registration = bundleContext.registerService(clazzes, bundleContext, properties);
          assertNotNull(registration);
-         
+
          reference = registration.getReference();
          assertNotNull(reference);
-         
+
          serviceID = reference.getProperty(Constants.SERVICE_ID);
          assertNotNull(serviceID);
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID.toLowerCase()));
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID.toUpperCase()));
-         assertArrayEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS));
-         assertArrayEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS.toLowerCase()));
-         assertArrayEquals(clazzes, (String[]) reference.getProperty(Constants.OBJECTCLASS.toUpperCase()));
+         assertArrayEquals(clazzes, (String[])reference.getProperty(Constants.OBJECTCLASS));
+         assertArrayEquals(clazzes, (String[])reference.getProperty(Constants.OBJECTCLASS.toLowerCase()));
+         assertArrayEquals(clazzes, (String[])reference.getProperty(Constants.OBJECTCLASS.toUpperCase()));
          assertEquals("a", reference.getProperty("testA"));
          assertEquals("b", reference.getProperty("testB"));
          assertEquals("Case", reference.getProperty("MiXeD"));
@@ -88,14 +89,14 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          assertEquals("Case", reference.getProperty("MIXED"));
          assertNull(reference.getProperty(null));
          assertNull(reference.getProperty("doesNotExist"));
-         
+
          properties.put("testA", "notA");
          assertEquals("a", reference.getProperty("testA"));
          properties.put(Constants.SERVICE_ID, "rubbish");
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
          properties.put(Constants.OBJECTCLASS, "rubbish");
          assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
-         
+
          registration.setProperties(properties);
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
          assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
@@ -104,7 +105,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          assertEquals("Case", reference.getProperty("MiXeD"));
          assertEquals("Case", reference.getProperty("mixed"));
          assertEquals("Case", reference.getProperty("MIXED"));
-         
+
          registration.setProperties(null);
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
          assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
@@ -114,7 +115,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          assertNull(reference.getProperty("mixed"));
          assertNull(reference.getProperty("MIXED"));
          assertNull(reference.getProperty(null));
-         
+
          registration.setProperties(properties);
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
          assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
@@ -124,7 +125,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          assertEquals("Case", reference.getProperty("mixed"));
          assertEquals("Case", reference.getProperty("MIXED"));
          assertNull(reference.getProperty(null));
-         
+
          registration.unregister();
          assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
          assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
@@ -139,7 +140,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
       {
          bundle.uninstall();
       }
-      
+
       assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
       assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
       assertEquals("notA", reference.getProperty("testA"));
@@ -149,11 +150,12 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
       assertEquals("Case", reference.getProperty("MIXED"));
       assertNull(reference.getProperty(null));
    }
-   
-   @Test public void testGetPropertyKeys() throws Exception
+
+   @Test
+   public void testGetPropertyKeys() throws Exception
    {
       ServiceReference reference = null;
-      
+
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
@@ -168,7 +170,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          properties.put("MiXeD", "Case");
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
          assertNotNull(registration);
-         
+
          reference = registration.getReference();
          assertNotNull(reference);
 
@@ -185,7 +187,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          registration.setProperties(properties);
          assertPropertyKeys(reference, "testA", "testB", "testC", "MiXeD");
-         
+
          registration.unregister();
          assertPropertyKeys(reference, "testA", "testB", "testC", "MiXeD");
       }
@@ -203,15 +205,16 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
       expected.add(Constants.OBJECTCLASS);
       for (String key : expectedKeys)
          expected.add(key);
-      
+
       Set<String> actual = new HashSet<String>();
       for (String key : reference.getPropertyKeys())
          actual.add(key);
-      
+
       assertEquals(expected, actual);
    }
-   
-   @Test public void testGetBundle() throws Exception
+
+   @Test
+   public void testGetBundle() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -223,15 +226,15 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration);
-         
+
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
-         
+
          Bundle other = reference.getBundle();
          assertEquals(bundle, other);
-         
+
          registration.unregister();
-         
+
          other = reference.getBundle();
          assertNull("" + other, other);
       }
@@ -240,8 +243,9 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
-   @Test public void testGetBundleAfterStop() throws Exception
+
+   @Test
+   public void testGetBundleAfterStop() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -253,15 +257,15 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration);
-         
+
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
-         
+
          Bundle other = reference.getBundle();
          assertEquals(bundle, other);
 
          bundle.stop();
-         
+
          other = reference.getBundle();
          assertNull("" + other, other);
       }
@@ -270,8 +274,9 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
-   @Test public void testUsingBundles() throws Exception
+
+   @Test
+   public void testUsingBundles() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
@@ -283,12 +288,12 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration);
-         
+
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
-         
+
          assertUsingBundles(reference);
-         
+
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
@@ -296,13 +301,13 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
             bundle2.start();
             BundleContext bundleContext2 = bundle2.getBundleContext();
             assertNotNull(bundleContext2);
-            
+
             bundleContext2.getService(reference);
             assertUsingBundles(reference, bundle2);
-            
+
             bundleContext2.ungetService(reference);
             assertUsingBundles(reference);
-            
+
             bundleContext2.getService(reference);
             bundleContext2.getService(reference);
             assertUsingBundles(reference, bundle2);
@@ -314,7 +319,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
             bundleContext.getService(reference);
             bundleContext2.getService(reference);
             assertUsingBundles(reference, bundle1, bundle2);
-            
+
             registration.unregister();
             assertUsingBundles(reference);
          }
@@ -328,8 +333,9 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          bundle1.uninstall();
       }
    }
-   
-   @Test public void testUsingBundlesAfterStop() throws Exception
+
+   @Test
+   public void testUsingBundlesAfterStop() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
@@ -341,12 +347,12 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration);
-         
+
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
-         
+
          assertUsingBundles(reference);
-         
+
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
@@ -358,7 +364,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
             bundleContext.getService(reference);
             bundleContext2.getService(reference);
             assertUsingBundles(reference, bundle1, bundle2);
-            
+
             bundle1.stop();
             assertUsingBundles(reference);
          }
@@ -372,8 +378,9 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          bundle1.uninstall();
       }
    }
-   
-   @Test public void testIsAssignableToErrors() throws Exception
+
+   @Test
+   public void testIsAssignableToErrors() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
@@ -385,10 +392,10 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration);
-         
+
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
-         
+
          try
          {
             reference.isAssignableTo(null, A.class.getName());
@@ -398,7 +405,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             reference.isAssignableTo(bundle, null);
@@ -413,9 +420,10 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
       {
          bundle.uninstall();
       }
-   }   
+   }
 
-   @Test public void testNotAssignableTo() throws Exception
+   @Test
+   public void testNotAssignableTo() throws Exception
    {
       VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle1 = installBundle(assembly1);
@@ -427,7 +435,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration);
-         
+
          ServiceReference reference = registration.getReference();
          assertNotNull(reference);
 
@@ -437,7 +445,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          {
             assertFalse(reference.isAssignableTo(bundle2, A.class.getName()));
             assertTrue(reference.isAssignableTo(bundle2, String.class.getName()));
-            
+
             registration.unregister();
             assertFalse(reference.isAssignableTo(bundle2, A.class.getName()));
             assertFalse(reference.isAssignableTo(bundle2, String.class.getName())); // review ???
@@ -452,15 +460,16 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          bundle1.uninstall();
       }
    }
-   
-   @Test public void testIsAssignableTo() throws Exception
+
+   @Test
+   public void testIsAssignableTo() throws Exception
    {
       //Bundle-Name: Service2
       //Bundle-SymbolicName: org.jboss.test.osgi.service2
       //Export-Package: org.jboss.test.osgi.service.support.a
       VirtualFile assembly2 = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundle2 = installBundle(assembly2);
-      
+
       try
       {
          bundle2.start();
@@ -472,13 +481,13 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          //Import-Package: org.jboss.test.osgi.service.support.a
          VirtualFile assembly1 = assembleArchive("service1", "/bundles/service/service-bundle1");
          Bundle bundle1 = installBundle(assembly1);
-         
+
          try
          {
 
             ServiceRegistration registration = bundleContext2.registerService(BundleContext.class.getName(), bundleContext2, null);
             assertNotNull(registration);
-            
+
             ServiceReference reference = registration.getReference();
             assertNotNull(reference);
 
@@ -486,7 +495,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
             assertTrue(reference.isAssignableTo(bundle2, String.class.getName()));
             assertTrue(reference.isAssignableTo(bundle1, A.class.getName()));
             assertTrue(reference.isAssignableTo(bundle1, String.class.getName()));
-            
+
             registration.unregister();
             assertTrue(reference.isAssignableTo(bundle2, A.class.getName()));
             assertTrue(reference.isAssignableTo(bundle2, String.class.getName()));
@@ -503,8 +512,9 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          bundle2.uninstall();
       }
    }
-   
-   @Test public void testCompareTo() throws Exception
+
+   @Test
+   public void testCompareTo() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -516,13 +526,13 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          ServiceRegistration registration1 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration1);
-         
+
          ServiceReference reference1 = registration1.getReference();
          assertNotNull(reference1);
 
          ServiceRegistration registration2 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
          assertNotNull(registration2);
-         
+
          ServiceReference reference2 = registration2.getReference();
          assertNotNull(reference2);
 
@@ -530,7 +540,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          properties.put(Constants.SERVICE_RANKING, 10);
          ServiceRegistration registration3 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
          assertNotNull(registration3);
-         
+
          ServiceReference reference3 = registration3.getReference();
          assertNotNull(reference3);
 
@@ -538,17 +548,17 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          properties.put(Constants.SERVICE_RANKING, -10);
          ServiceRegistration registration4 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
          assertNotNull(registration4);
-         
+
          ServiceReference reference4 = registration4.getReference();
          assertNotNull(reference4);
-         
+
          assertGreaterRanking(reference1, reference2);
          assertGreaterRanking(reference3, reference1);
          assertGreaterRanking(reference3, reference2);
          assertGreaterRanking(reference1, reference4);
          assertGreaterRanking(reference2, reference4);
          assertGreaterRanking(reference3, reference4);
-         
+
          try
          {
             reference1.compareTo(null);
@@ -558,7 +568,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             reference1.compareTo(new Object());
@@ -573,12 +583,12 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          properties.put(Constants.SERVICE_RANKING, "NotANumber");
          ServiceRegistration registration5 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
          assertNotNull(registration5);
-         
+
          ServiceReference reference5 = registration5.getReference();
          assertNotNull(reference5);
 
          assertGreaterRanking(reference1, reference5); // review ???
-         
+
          Set<ServiceReference> ordering = new TreeSet<ServiceReference>();
          ordering.add(reference1);
          ordering.add(reference2);
@@ -591,7 +601,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          assertEquals(reference2, iterator.next());
          assertEquals(reference1, iterator.next());
          assertEquals(reference3, iterator.next());
-         
+
          ordering = new TreeSet<ServiceReference>();
          ordering.add(reference5);
          ordering.add(reference4);
@@ -610,7 +620,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
+
    protected void assertGreaterRanking(ServiceReference reference1, ServiceReference reference2) throws Exception
    {
       assertTrue(reference1 + " > " + reference2, reference1.compareTo(reference2) > 0);

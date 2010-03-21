@@ -373,7 +373,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
             // Construct the ServiceFactory
             Class<?> factoryClass = bundle.loadClass(ServiceMixFactory.class.getName());
             Object factory = factoryClass.newInstance();
-            
+
             // Register the ServiceFactory
             Hashtable<String, Object> props = new Hashtable<String, Object>();
             props.put("service.alias.1", "A");
@@ -403,7 +403,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
 
                List as = assertInstanceOf(getter(factory, "getAs", "A"), List.class);
                assertNotNull(as);
-               
+
                System.out.println("FIXME: Verify ServiceFactory still in use");
                //assertTrue(as.isEmpty()); // SF is still in use
             }
@@ -414,7 +414,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
 
             List as = assertInstanceOf(getter(factory, "getAs", "A"), List.class);
             assertNotNull(as);
-            
+
             System.out.println("FIXME: Verify ServiceFactory still in use");
             //assertEquals(1, as.size());
             //assertTrue(as.contains(a));

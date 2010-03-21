@@ -43,7 +43,8 @@ import org.osgi.framework.BundleException;
  */
 public class RequireBundleTestCase extends AbstractFrameworkTest
 {
-   @Test public void testSimpleRequireBundle() throws Exception
+   @Test
+   public void testSimpleRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -69,8 +70,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testSimpleRequireBundleFails() throws Exception
+
+   @Test
+   public void testSimpleRequireBundleFails() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -99,8 +101,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testVersionRequireBundle() throws Exception
+
+   @Test
+   public void testVersionRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -126,8 +129,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testVersionRequireBundleFails() throws Exception
+
+   @Test
+   public void testVersionRequireBundleFails() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -156,8 +160,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testOptionalRequireBundle() throws Exception
+
+   @Test
+   public void testOptionalRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -183,8 +188,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testOptionalRequireBundleFails() throws Exception
+
+   @Test
+   public void testOptionalRequireBundleFails() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -210,8 +216,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testReExportRequireBundle() throws Exception
+
+   @Test
+   public void testReExportRequireBundle() throws Exception
    {
       //Bundle-Name: BundleA
       //Bundle-Version: 1.0.0
@@ -219,31 +226,31 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
-      
+
       try
       {
          bundleA.start();
          assertLoadClass(bundleA, A.class.getName());
-         
+
          //Bundle-Name: BundleB
          //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
          //Require-Bundle: org.jboss.test.osgi.classloader.bundleA;visibility:=reexport
          //Export-Package: org.jboss.test.osgi.classloader.support.b
          VirtualFile assemblyB = assembleArchive("reexportrequirebundleA", "/bundles/classloader/reexportrequirebundleA", B.class);
          Bundle bundleB = installBundle(assemblyB);
-         
+
          try
          {
             bundleB.start();
             assertLoadClass(bundleB, A.class.getName(), bundleA);
             assertLoadClass(bundleB, B.class.getName(), bundleB);
-            
+
             //Bundle-Name: BundleC
             //Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleC
             //Require-Bundle: org.jboss.test.osgi.classloader.bundleB
             VirtualFile assemblyC = assembleArchive("reexportrequirebundleB", "/bundles/classloader/reexportrequirebundleB");
             Bundle bundleC = installBundle(assemblyC);
-            
+
             try
             {
                assertLoadClass(bundleC, A.class.getName(), bundleA);
@@ -264,8 +271,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testNoReExportRequireBundle() throws Exception
+
+   @Test
+   public void testNoReExportRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -302,8 +310,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testAttributeRequireBundle() throws Exception
+
+   @Test
+   public void testAttributeRequireBundle() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -329,8 +338,9 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testAttributeRequireBundleFails() throws Exception
+
+   @Test
+   public void testAttributeRequireBundleFails() throws Exception
    {
       // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleA;test=x
       // Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x
@@ -341,7 +351,7 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
       {
          bundleA.start();
          assertLoadClass(bundleA, A.class.getName());
-         
+
          // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
          // Require-Bundle: org.jboss.test.osgi.classloader.bundleA;doesnotexist=true;test=y
          VirtualFile assemblyB = assembleArchive("attributerequirebundlefails", "/bundles/classloader/attributerequirebundlefails", B.class);

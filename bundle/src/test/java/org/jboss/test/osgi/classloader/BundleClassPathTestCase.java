@@ -41,7 +41,8 @@ import org.osgi.framework.launch.Framework;
  */
 public class BundleClassPathTestCase extends OSGiRuntimeTest
 {
-   @Test public void testBundleClassPath() throws Exception
+   @Test
+   public void testBundleClassPath() throws Exception
    {
       OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
       Framework framework = bootProvider.getFramework();
@@ -55,7 +56,7 @@ public class BundleClassPathTestCase extends OSGiRuntimeTest
 
       Class<?> clazz = bundle.loadClass(A.class.getName());
       assertNotNull("Loaded class", clazz);
-      
+
       bundle.uninstall();
       assertEquals("Bundle state", Bundle.UNINSTALLED, bundle.getState());
 

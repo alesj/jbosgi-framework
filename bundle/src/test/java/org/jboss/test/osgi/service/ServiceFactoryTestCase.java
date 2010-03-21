@@ -259,9 +259,9 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
       assertEquals(1, users.length);
       assertEquals(context.getBundle(), users[0]);
       assertTrue("getService good", allGood[0]);
-      
+
       sreg.unregister();
-      
+
       was = (Runnable)context.getService(sref);
       assertNull("Service null", was);
       assertTrue("ungetService good", allGood[1]);

@@ -36,9 +36,7 @@ public class LazyBundle
 {
    public static Bundle getBundle(DeploymentUnit unit) throws Exception
    {
-      return (Bundle)Proxy.newProxyInstance(Bundle.class.getClassLoader(),
-            new Class<?>[]{Bundle.class},
-            new LazyBundleHandler(unit));
+      return (Bundle)Proxy.newProxyInstance(Bundle.class.getClassLoader(), new Class<?>[] { Bundle.class }, new LazyBundleHandler(unit));
    }
 
    private static class LazyBundleHandler implements InvocationHandler
@@ -63,7 +61,7 @@ public class LazyBundle
             AbstractBundleState bundle = unit.getAttachment(AbstractBundleState.class);
             if (bundle == null)
                throw new IllegalArgumentException("No such OSGiBundleState attachment: " + unit);
-            this.bundle = bundle.getBundleInternal();                        
+            this.bundle = bundle.getBundleInternal();
          }
          return bundle;
       }

@@ -34,10 +34,10 @@ import org.osgi.framework.ServiceRegistration;
 public class SimpleServiceFactory implements ServiceFactory
 {
    public Object service;
-   
+
    public Bundle getBundle;
    public int getCount;
-   
+
    public Bundle ungetBundle;
    public ServiceRegistration ungetRegistration;
    public Object ungetService;

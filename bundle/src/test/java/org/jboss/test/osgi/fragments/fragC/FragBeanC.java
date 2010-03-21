@@ -23,7 +23,6 @@ package org.jboss.test.osgi.fragments.fragC;
 
 //$Id: FragmentService.java 99106 2010-01-07 11:02:59Z thomas.diesler@jboss.com $
 
-
 public class FragBeanC
 {
 }

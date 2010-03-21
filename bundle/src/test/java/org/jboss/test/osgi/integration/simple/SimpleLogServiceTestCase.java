@@ -53,7 +53,8 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       System.clearProperty("simple-logservice-bundle");
    }
 
-   @Test public void testNoLogService() throws Exception
+   @Test
+   public void testNoLogService() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
@@ -75,7 +76,8 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       framework.stop();
    }
 
-   @Test public void testLogServiceFromThirdParty() throws Exception
+   @Test
+   public void testLogServiceFromThirdParty() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
@@ -83,7 +85,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
 
       BundleContext sysContext = framework.getBundleContext();
       sysContext.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar")).start();
-      
+
       Bundle bundle = sysContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
       try
       {
@@ -95,7 +97,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       }
 
       assumeTrue(bundle.getState() == Bundle.ACTIVE);
-      
+
       // The bundle activator is expected to set this property
       String result = System.getProperty(bundle.getSymbolicName());
       assertNotNull("Result property not null", result);
@@ -103,11 +105,12 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       assertTrue("BundleActivator start", result.indexOf("startBundleActivator") > 0);
       assertFalse("getService", result.indexOf("getService") > 0);
       assertFalse("addingService", result.indexOf("addingService") > 0);
-      
+
       framework.stop();
    }
 
-   @Test public void testLogServiceFromCompendium() throws Exception
+   @Test
+   public void testLogServiceFromCompendium() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
@@ -115,7 +118,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
 
       BundleContext sysContext = framework.getBundleContext();
       sysContext.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
-      
+
       Bundle bundle = sysContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
       bundle.start();
 
@@ -130,7 +133,8 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       framework.stop();
    }
 
-   @Test public void testLogServiceFromTwoExporters() throws Exception
+   @Test
+   public void testLogServiceFromTwoExporters() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);

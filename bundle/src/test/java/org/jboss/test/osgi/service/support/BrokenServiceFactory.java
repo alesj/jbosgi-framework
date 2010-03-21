@@ -41,7 +41,7 @@ public class BrokenServiceFactory implements ServiceFactory
       this.service = service;
       this.inGet = inGet;
    }
-   
+
    public Object getService(Bundle bundle, ServiceRegistration registration)
    {
       if (inGet)

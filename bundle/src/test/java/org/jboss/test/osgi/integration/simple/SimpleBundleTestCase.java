@@ -46,51 +46,53 @@ import org.osgi.framework.launch.FrameworkFactory;
  */
 public class SimpleBundleTestCase
 {
-   @Test public void testBundleInstallLauchAPI() throws Exception
+   @Test
+   public void testBundleInstallLauchAPI() throws Exception
    {
       // Uses the OSGi Framework launch API
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
       framework.start();
-      
+
       OSGiRuntimeHelper helper = new OSGiRuntimeHelper();
-      
+
       BundleContext sysContext = framework.getBundleContext();
       Bundle bundle = sysContext.installBundle(helper.getTestArchivePath("simple-bundle.jar"));
-      
+
       assertEquals("simple-bundle", bundle.getSymbolicName());
-      
+
       bundle.start();
       assertEquals("Bundle state", Bundle.ACTIVE, bundle.getState());
-      
+
       BundleContext bndContext = bundle.getBundleContext();
       assertNotNull("BundleContext not null", bndContext);
-      
+
       // getServiceReference from bundle context
       ServiceReference sref = bndContext.getServiceReference(SimpleService.class.getName());
       assertNotNull("ServiceReference not null", sref);
-      
+
       // getServiceReference from system context
       sref = sysContext.getServiceReference(SimpleService.class.getName());
       assertNotNull("ServiceReference not null", sref);
-      
+
       bundle.uninstall();
       assertEquals("Bundle state", Bundle.UNINSTALLED, bundle.getState());
 
       framework.stop();
    }
 
-   @Test public void testBundleInstallRuntimeAPI() throws Exception
+   @Test
+   public void testBundleInstallRuntimeAPI() throws Exception
    {
       // Uses the JBossOSGi SPI provided runtime abstraction
       OSGiRuntime runtime = new OSGiRuntimeHelper().getEmbeddedRuntime();
       OSGiBundle bundle = runtime.installBundle("simple-bundle.jar");
 
       assertEquals("simple-bundle", bundle.getSymbolicName());
-      
+
       bundle.start();
       assertEquals("Bundle state", Bundle.ACTIVE, bundle.getState());
-      
+
       bundle.uninstall();
       assertEquals("Bundle state", Bundle.UNINSTALLED, bundle.getState());
 

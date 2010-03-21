@@ -522,7 +522,7 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    public void testRequireBundle() throws Exception
    {
       // [TODO] require bundle visibility
-      
+
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");

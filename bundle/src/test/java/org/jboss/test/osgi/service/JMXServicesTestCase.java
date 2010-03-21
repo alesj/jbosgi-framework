@@ -42,7 +42,8 @@ import org.junit.Test;
  */
 public class JMXServicesTestCase extends AbstractDeploymentTest
 {
-   @Test public void testAtJmx() throws Throwable
+   @Test
+   public void testAtJmx() throws Throwable
    {
       URL beans = getResourceURL("service/jmx-services.xml");
       deploy(beans);
@@ -60,7 +61,8 @@ public class JMXServicesTestCase extends AbstractDeploymentTest
       }
    }
 
-   @Test public void testMBeans() throws Throwable
+   @Test
+   public void testMBeans() throws Throwable
    {
       // mix mbean services with bundles -- TODO
    }

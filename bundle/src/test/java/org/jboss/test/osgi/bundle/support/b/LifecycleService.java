@@ -21,7 +21,6 @@
 */
 package org.jboss.test.osgi.bundle.support.b;
 
-
 /**
  * A marker service.
  *

@@ -51,7 +51,8 @@ import org.osgi.framework.ServiceRegistration;
 public class GetServiceReferencesTestCase extends AbstractFrameworkTest
 {
 
-   @Test public void testGetServiceReferences() throws Exception
+   @Test
+   public void testGetServiceReferences() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
@@ -60,7 +61,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          bundle.start();
          BundleContext bundleContext1 = bundle.getBundleContext();
          assertNotNull(bundleContext1);
-         
+
          assertNoGetReference(bundleContext1, A.class.getName());
          assertNoReferences(bundleContext1, A.class.getName());
          assertNoAllReferences(bundleContext1, A.class.getName());
@@ -81,16 +82,16 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          assertNoGetReference(bundleContext1, B.class.getName());
          assertNoReferences(bundleContext1, B.class.getName());
          assertNoAllReferences(bundleContext1, B.class.getName());
-         
+
          registration1.unregister();
-         
+
          assertNoGetReference(bundleContext1, A.class.getName());
          assertNoReferences(bundleContext1, A.class.getName());
          assertNoAllReferences(bundleContext1, A.class.getName());
          assertNoGetReference(bundleContext1, B.class.getName());
          assertNoReferences(bundleContext1, B.class.getName());
          assertNoAllReferences(bundleContext1, B.class.getName());
-         
+
          try
          {
             bundleContext1.getServiceReference(null);
@@ -100,7 +101,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext1.getServiceReferences(null, "invalid");
@@ -110,7 +111,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext1.getAllServiceReferences(null, "invalid");
@@ -120,9 +121,9 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          bundle.stop();
-         
+
          try
          {
             bundleContext1.getServiceReference(A.class.getName());
@@ -132,7 +133,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext1.getServiceReferences(null, null);
@@ -142,7 +143,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          {
             // expected
          }
-         
+
          try
          {
             bundleContext1.getAllServiceReferences(null, null);
@@ -158,17 +159,19 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          bundle.uninstall();
       }
    }
-   
-   @Test public void testGetServiceReferencesNoClassNotAssignable() throws Exception
+
+   @Test
+   public void testGetServiceReferencesNoClassNotAssignable() throws Exception
    {
       assertGetServiceReferencesNotAssignable(null);
    }
-   
-   @Test public void testGetServiceReferencesNotAssignable() throws Exception
+
+   @Test
+   public void testGetServiceReferencesNotAssignable() throws Exception
    {
       assertGetServiceReferencesNotAssignable(A.class.getName());
    }
-   
+
    private void assertGetServiceReferencesNotAssignable(String className) throws Exception
    {
       VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
@@ -178,7 +181,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          bundleA.start();
          BundleContext bundleContext1 = bundleA.getBundleContext();
          assertNotNull(bundleContext1);
-         
+
          if (className != null)
             assertNoGetReference(bundleContext1, className);
 
@@ -206,15 +209,15 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
             assertNotNull(registration2);
             ServiceReference reference2 = registration2.getReference();
             assertNotNull(reference2);
-            
+
             if (className != null)
                assertGetReference(bundleContext1, className, reference1);
 
             if (className != null)
                assertGetReference(bundleContext2, className, reference2);
-            
+
             registration1.unregister();
-            
+
             if (className != null)
                assertNoGetReference(bundleContext1, className);
 
@@ -225,23 +228,23 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
             assertNotNull(registration1);
             reference1 = registration1.getReference();
             assertNotNull(reference1);
-            
+
             if (className != null)
                assertGetReference(bundleContext1, className, reference1);
 
             if (className != null)
                assertGetReference(bundleContext2, className, reference2);
-            
+
             registration2.unregister();
-            
+
             if (className != null)
                assertGetReference(bundleContext1, className, reference1);
 
             if (className != null)
                assertNoGetReference(bundleContext2, className);
-            
+
             registration1.unregister();
-            
+
             if (className != null)
                assertNoGetReference(bundleContext1, className);
 
@@ -259,12 +262,14 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test public void testGetServiceReferencesNoClassAssignable() throws Exception
+   @Test
+   public void testGetServiceReferencesNoClassAssignable() throws Exception
    {
       assertGetServiceReferencesAssignable(null);
    }
 
-   @Test public void testGetServiceReferencesClassAssignable() throws Exception
+   @Test
+   public void testGetServiceReferencesClassAssignable() throws Exception
    {
       assertGetServiceReferencesAssignable(A.class.getName());
    }
@@ -306,15 +311,15 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
             assertNotNull(registration2);
             ServiceReference reference2 = registration2.getReference();
             assertNotNull(reference2);
-            
+
             if (className != null)
                assertGetReference(bundleContext1, className, reference1);
 
             if (className != null)
                assertGetReference(bundleContext2, className, reference1);
-            
+
             registration1.unregister();
-            
+
             if (className != null)
                assertGetReference(bundleContext1, className, reference2);
 
@@ -325,23 +330,23 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
             assertNotNull(registration1);
             reference1 = registration1.getReference();
             assertNotNull(reference1);
-            
+
             if (className != null)
                assertGetReference(bundleContext1, className, reference2);
 
             if (className != null)
                assertGetReference(bundleContext2, className, reference2);
-            
+
             registration2.unregister();
-            
+
             if (className != null)
                assertGetReference(bundleContext1, className, reference1);
 
             if (className != null)
                assertGetReference(bundleContext2, className, reference1);
-            
+
             registration1.unregister();
-            
+
             if (className != null)
                assertNoGetReference(bundleContext1, className);
 
@@ -359,10 +364,11 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test public void testGetServiceReferencesRankings() throws Exception
+   @Test
+   public void testGetServiceReferencesRankings() throws Exception
    {
       String className = A.class.getName();
-      
+
       VirtualFile assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundleA = installBundle(assemblyA);
       try
@@ -370,7 +376,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          bundleA.start();
          BundleContext bundleContext1 = bundleA.getBundleContext();
          assertNotNull(bundleContext1);
-         
+
          assertNoGetReference(bundleContext1, className);
          assertNoReferences(bundleContext1, className);
          assertNoAllReferences(bundleContext1, className);
@@ -393,8 +399,8 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
             assertNotNull(bundleContext2);
 
             assertGetReference(bundleContext2, className, reference1);
-            assertReferences(bundleContext2, className,  reference1);
-            assertAllReferences(bundleContext2, className,  reference1);
+            assertReferences(bundleContext2, className, reference1);
+            assertAllReferences(bundleContext2, className, reference1);
 
             Dictionary<String, Object> properties2 = new Hashtable<String, Object>();
             properties2.put(Constants.SERVICE_RANKING, 2);
@@ -404,50 +410,50 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
             assertNotNull(registration2);
             ServiceReference reference2 = registration2.getReference();
             assertNotNull(reference2);
-            
+
             assertGetReference(bundleContext1, className, reference2);
-            assertReferences(bundleContext1, className,  reference2, reference1);
-            assertAllReferences(bundleContext1, className,  reference2, reference1);
+            assertReferences(bundleContext1, className, reference2, reference1);
+            assertAllReferences(bundleContext1, className, reference2, reference1);
 
             assertGetReference(bundleContext2, className, reference2);
-            assertReferences(bundleContext2, className,  reference2, reference1);
-            assertAllReferences(bundleContext2, className,  reference2, reference1);
-            
+            assertReferences(bundleContext2, className, reference2, reference1);
+            assertAllReferences(bundleContext2, className, reference2, reference1);
+
             registration1.unregister();
-            
+
             assertGetReference(bundleContext1, className, reference2);
-            assertReferences(bundleContext1, className,  reference2);
-            assertAllReferences(bundleContext1, className,  reference2);
+            assertReferences(bundleContext1, className, reference2);
+            assertAllReferences(bundleContext1, className, reference2);
 
             assertGetReference(bundleContext2, className, reference2);
-            assertReferences(bundleContext2, className,  reference2);
-            assertAllReferences(bundleContext2, className,  reference2);
+            assertReferences(bundleContext2, className, reference2);
+            assertAllReferences(bundleContext2, className, reference2);
 
             registration1 = bundleContext1.registerService(className, service1, properties1);
             assertNotNull(registration1);
             reference1 = registration1.getReference();
             assertNotNull(reference1);
-            
+
             assertGetReference(bundleContext1, className, reference2);
-            assertReferences(bundleContext1, className,  reference2, reference1);
-            assertAllReferences(bundleContext1, className,  reference2, reference1);
+            assertReferences(bundleContext1, className, reference2, reference1);
+            assertAllReferences(bundleContext1, className, reference2, reference1);
 
             assertGetReference(bundleContext2, className, reference2);
-            assertReferences(bundleContext2, className,  reference2, reference1);
-            assertAllReferences(bundleContext2, className,  reference2, reference1);
-            
+            assertReferences(bundleContext2, className, reference2, reference1);
+            assertAllReferences(bundleContext2, className, reference2, reference1);
+
             registration2.unregister();
-            
+
             assertGetReference(bundleContext1, className, reference1);
-            assertReferences(bundleContext1, className,  reference1);
-            assertAllReferences(bundleContext1, className,  reference1);
+            assertReferences(bundleContext1, className, reference1);
+            assertAllReferences(bundleContext1, className, reference1);
 
             assertGetReference(bundleContext2, className, reference1);
-            assertReferences(bundleContext2, className,  reference1);
-            assertAllReferences(bundleContext2, className,  reference1);
-            
+            assertReferences(bundleContext2, className, reference1);
+            assertAllReferences(bundleContext2, className, reference1);
+
             registration1.unregister();
-            
+
             assertNoGetReference(bundleContext1, className);
             assertNoReferences(bundleContext1, className);
             assertNoAllReferences(bundleContext1, className);
@@ -467,12 +473,13 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          bundleA.uninstall();
       }
    }
-   
-   @Test public void testGetServiceReferencesFilterted() throws Exception
+
+   @Test
+   public void testGetServiceReferencesFilterted() throws Exception
    {
       String className = A.class.getName();
       String wrongClassName = B.class.getName();
-      
+
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
       try
@@ -480,7 +487,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          bundle.start();
          BundleContext bundleContext1 = bundle.getBundleContext();
          assertNotNull(bundleContext1);
-         
+
          assertNoGetReference(bundleContext1, A.class.getName());
          assertNoReferences(bundleContext1, null, "(a=b)");
          assertNoAllReferences(bundleContext1, null, "(a=b)");
@@ -510,7 +517,7 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          Dictionary<String, Object> properties = new Hashtable<String, Object>();
          properties.put("a", "b");
          properties.put("c", "d");
-         
+
          Class<?> clazz = bundle.loadClass(A.class.getName());
          Object service1 = clazz.newInstance();
          ServiceRegistration registration1 = bundleContext1.registerService(A.class.getName(), service1, properties);
@@ -543,9 +550,9 @@ public class GetServiceReferencesTestCase extends AbstractFrameworkTest
          assertNoAllReferences(bundleContext1, className, "(x=d)");
          assertNoReferences(bundleContext1, wrongClassName, "(x=d)");
          assertNoAllReferences(bundleContext1, wrongClassName, "(x=d)");
-         
+
          registration1.unregister();
-         
+
          assertNoGetReference(bundleContext1, A.class.getName());
          assertNoReferences(bundleContext1, null, "(a=b)");
          assertNoAllReferences(bundleContext1, null, "(a=b)");

@@ -50,12 +50,13 @@ import org.osgi.framework.BundleException;
  */
 public class ResolverSmokeTestCase extends OSGiRuntimeTest
 {
-   @Test public void testRandomBundleResolution() throws BundleException
+   @Test
+   public void testRandomBundleResolution() throws BundleException
    {
       OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
       OSGiFramework framework = (OSGiFramework)bootProvider.getFramework();
       framework.start();
-      
+
       try
       {
          List<String> bundlePaths = new ArrayList<String>();
@@ -94,7 +95,7 @@ public class ResolverSmokeTestCase extends OSGiRuntimeTest
             List<ResolverBundle> resolved = resolver.resolve(unresolved);
             assertEquals("All bundles resolved", unresolved.size(), resolved.size());
          }
-         
+
          System.out.println("FIXME [JBKERNEL-54] Cannot resolve circular dependencies");
          //PackageAdminPlugin packageAdmin = bundleManager.getPlugin(PackageAdminPlugin.class);
          //boolean allResolved = packageAdmin.resolveBundles(null);

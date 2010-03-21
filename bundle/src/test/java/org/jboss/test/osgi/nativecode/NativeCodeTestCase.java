@@ -61,10 +61,11 @@ public class NativeCodeTestCase extends OSGiRuntimeTest
       }
    }
 
-   @Test public void testNativeCode() throws Exception
+   @Test
+   public void testNativeCode() throws Exception
    {
       BundleContext context = framework.getBundleContext();
-      
+
       Bundle bundleA = context.installBundle(getTestArchivePath("simple-nativecode.jar"));
       assertBundleState(Bundle.INSTALLED, bundleA.getState());
 

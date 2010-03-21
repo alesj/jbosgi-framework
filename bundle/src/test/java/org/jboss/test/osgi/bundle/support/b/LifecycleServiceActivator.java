@@ -35,7 +35,9 @@ public class LifecycleServiceActivator implements BundleActivator
 
    public void start(BundleContext context) throws Exception
    {
-      context.registerService(LifecycleService.class.getName(), new LifecycleService(){}, null);
+      context.registerService(LifecycleService.class.getName(), new LifecycleService()
+      {
+      }, null);
    }
 
    public void stop(BundleContext context) throws Exception

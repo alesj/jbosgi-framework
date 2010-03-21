@@ -51,12 +51,13 @@ import org.osgi.framework.Version;
  */
 public class ResolverMetadataTestCase extends AbstractResolverTest
 {
-   @Test public void testSimpleExport() throws Exception
+   @Test
+   public void testSimpleExport() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
@@ -105,12 +106,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testSimpleImport() throws Exception
+   @Test
+   public void testSimpleImport() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
@@ -137,12 +139,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testSingleton() throws Exception
+   @Test
+   public void testSingleton() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       // Bundle-SymbolicName: singleton;singleton:=true
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/singleton", A.class);
@@ -158,12 +161,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testRequireBundle() throws Exception
+   @Test
+   public void testRequireBundle() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");
@@ -184,12 +188,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testRequireBundleOptional() throws Exception
+   @Test
+   public void testRequireBundleOptional() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport;resolution:=optional
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundleoptional");
@@ -210,12 +215,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testRequireBundleVersion() throws Exception
+   @Test
+   public void testRequireBundleVersion() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport;bundle-version="[0.0.0,1.0.0]"
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundleversion");
@@ -236,12 +242,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testPackageAttribute() throws Exception
+   @Test
+   public void testPackageAttribute() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       //Bundle-SymbolicName: packageexportattribute
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute");
@@ -277,7 +284,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
             ImportPackage importPackage = resBundleB.getImportPackage("org.jboss.test.osgi.classloader.support.a");
-            Set<String>  importAttributes = importPackage.getAttributes();
+            Set<String> importAttributes = importPackage.getAttributes();
             assertTrue("Contains attr", importAttributes.contains("test"));
             assertEquals("x", importPackage.getAttribute("test"));
             assertTrue("Attribute match", exportPackage.matchAttributes(importPackage));
@@ -293,12 +300,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testPackageAttributeFails() throws Exception
+   @Test
+   public void testPackageAttributeFails() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       //Bundle-SymbolicName: packageexportattribute
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute");
@@ -319,7 +327,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
             ImportPackage importPackage = resBundleB.getImportPackage("org.jboss.test.osgi.classloader.support.a");
-            Set<String>  importAttributes = importPackage.getAttributes();
+            Set<String> importAttributes = importPackage.getAttributes();
             assertTrue("Contains attr", importAttributes.contains("test"));
             assertEquals("y", importPackage.getAttribute("test"));
             assertFalse("Attribute no match", exportPackage.matchAttributes(importPackage));
@@ -335,12 +343,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testPackageAttributeMandatory() throws Exception
+   @Test
+   public void testPackageAttributeMandatory() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       //Bundle-SymbolicName: packageexportattributemandatory
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x;mandatory:=test
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory");
@@ -363,7 +372,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
             ImportPackage importPackage = resBundleB.getImportPackage("org.jboss.test.osgi.classloader.support.a");
-            Set<String>  importAttributes = importPackage.getAttributes();
+            Set<String> importAttributes = importPackage.getAttributes();
             assertTrue("Contains attr", importAttributes.contains("test"));
             assertEquals("x", importPackage.getAttribute("test"));
             assertTrue("Attribute match", exportPackage.matchAttributes(importPackage));
@@ -379,12 +388,13 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       }
    }
 
-   @Test public void testPackageAttributeMandatoryFails() throws Exception
+   @Test
+   public void testPackageAttributeMandatoryFails() throws Exception
    {
       Resolver resolver = getTestResolver();
       if (resolver == null)
          return;
-      
+
       //Bundle-SymbolicName: packageexportattributemandatory
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x;mandatory:=test
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory");
@@ -422,7 +432,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
             ImportPackage importPackage = resBundleB.getImportPackage("org.jboss.test.osgi.classloader.support.a");
-            Set<String>  importAttributes = importPackage.getAttributes();
+            Set<String> importAttributes = importPackage.getAttributes();
             assertTrue("Contains attr", importAttributes.contains("test"));
             assertEquals("y", importPackage.getAttribute("test"));
             assertFalse("Attribute no match", exportPackage.matchAttributes(importPackage));

@@ -44,7 +44,8 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ServiceListenerTestCase extends AbstractFrameworkTest
 {
-   @Test public void testServiceListener() throws Exception
+   @Test
+   public void testServiceListener() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -56,12 +57,12 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
 
          assertNoServiceEvent();
          context.addServiceListener(this);
-         
+
          ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
          ServiceReference sref = sreg.getReference();
-         
+
          assertServiceEvent(ServiceEvent.REGISTERED, sref);
-         
+
          sreg.unregister();
          assertServiceEvent(ServiceEvent.UNREGISTERING, sref);
       }
@@ -71,7 +72,8 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test public void testObjectClassFilter() throws Exception
+   @Test
+   public void testObjectClassFilter() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -81,15 +83,15 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
          BundleContext context = bundle.getBundleContext();
          assertNotNull(context);
          assertNoServiceEvent();
-         
+
          String filter = "(" + Constants.OBJECTCLASS + "=" + BundleContext.class.getName() + ")";
          context.addServiceListener(this, filter);
-         
+
          ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
          ServiceReference sref = sreg.getReference();
-         
+
          assertServiceEvent(ServiceEvent.REGISTERED, sref);
-         
+
          sreg.unregister();
          assertServiceEvent(ServiceEvent.UNREGISTERING, sref);
       }
@@ -99,7 +101,8 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test public void testObjectClassFilterNegative() throws Exception
+   @Test
+   public void testObjectClassFilterNegative() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -109,13 +112,13 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
          BundleContext context = bundle.getBundleContext();
          assertNotNull(context);
          assertNoServiceEvent();
-         
+
          String filter = "(objectClass=dummy)";
          context.addServiceListener(this, filter);
-         
+
          ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
          assertNoServiceEvent();
-         
+
          sreg.unregister();
          assertNoServiceEvent();
       }

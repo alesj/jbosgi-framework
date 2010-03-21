@@ -31,7 +31,7 @@ import org.osgi.framework.BundleContext;
  * @author thomas.diesler@jboss.com
  * @since 24-Apr-2009
  */
-public class SimpleService 
+public class SimpleService
 {
    public SimpleService(BundleContext context)
    {

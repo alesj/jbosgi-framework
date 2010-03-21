@@ -48,7 +48,8 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    /**
     * Verifies that the service bundle can get started
     */
-   @Test public void testSimpleStart() throws Exception
+   @Test
+   public void testSimpleStart() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -72,7 +73,8 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    /**
     * Verifies that the bundle state is RESOLVED after a failure in BundleActivator.start()
     */
-   @Test public void testDependencyNotAvailable() throws Exception
+   @Test
+   public void testDependencyNotAvailable() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -113,7 +115,8 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    /**
     * Verifies that BundleB can get started when the service is available
     */
-   @Test public void testDependencyAvailable() throws Exception
+   @Test
+   public void testDependencyAvailable() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -145,7 +148,8 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    /**
     * Verifies that BundleB can get started when the service is made available 
     */
-   @Test public void testStartRetry() throws Exception
+   @Test
+   public void testStartRetry() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -193,7 +197,8 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    /**
     * Verifies that BundleB is still INSTALLED after a failure in PackageAdmin.resolve()
     */
-   @Test public void testFailToResolve() throws Exception
+   @Test
+   public void testFailToResolve() throws Exception
    {
       VirtualFile assemblyA = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
       Bundle bundleB = installBundle(assemblyA);
@@ -204,11 +209,11 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          // Get the PackageAdmin service
          ServiceReference sref = context.getServiceReference(PackageAdmin.class.getName());
          PackageAdmin packageAdmin = (PackageAdmin)context.getService(sref);
-         
+
          // Attempt to explicitly resolve a bundle with missing dependency 
          boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleB });
          assertFalse("Resolve fails", allResolved);
-         
+
          // Verify that the bundkle is still in state INSTALLED
          assertBundleState(Bundle.INSTALLED, bundleB.getState());
       }
@@ -222,7 +227,8 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    /**
     * Verifies that we get a BundleException when an invalid bundle is installed
     */
-   @Test public void testInstallInvalid() throws Exception
+   @Test
+   public void testInstallInvalid() throws Exception
    {
       try
       {
@@ -233,7 +239,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
       {
          // expected
       }
-      
+
       try
       {
          installBundle(assembleArchive("invalid-export", "/bundles/lifecycle/invalid02"));
