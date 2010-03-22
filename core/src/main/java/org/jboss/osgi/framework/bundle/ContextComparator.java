@@ -21,37 +21,51 @@
 */
 package org.jboss.osgi.framework.bundle;
 
+// $Id: $
+
 import java.util.Comparator;
 
 import org.jboss.dependency.spi.ControllerContext;
 
 /**
- * Compare controller contexts.
- *
+ * If this ServiceReference and the specified ServiceReference have the same service id they are equal. 
+ * This ServiceReference is less than the specified ServiceReference if it has a lower service ranking 
+ * and greater if it has a higher service ranking. 
+ * 
+ * Otherwise, if this ServiceReference and the specified ServiceReference have the same service ranking, 
+ * this ServiceReference is less than the specified ServiceReference if it has a higher service id and 
+ * greater if it has a lower service id.
+ *      
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author thomas.diesler@jboss.com
+ * @since 21-Mar-2010
  */
 class ContextComparator implements Comparator<ControllerContext>
 {
-   public static final Comparator<ControllerContext> INSTANCE = new ContextComparator();
-   
+   private static final Comparator<ControllerContext> INSTANCE = new ContextComparator();
+
+   static Comparator<ControllerContext> getInstance()
+   {
+      return INSTANCE;
+   }
+
    public int compare(ControllerContext c1, ControllerContext c2)
    {
+      if (c1.equals(c2))
+         return 0;
+
+      Long id1 = MDRUtils.getId(c1);
+      Long id2 = MDRUtils.getId(c2);
+      if (id1 != null && id1.equals(id2))
+         throw new IllegalStateException("Compare not consistent with equals: " + c1 + " != " + c2);
+
       Integer ranking1 = MDRUtils.getRanking(c1);
       Integer ranking2 = MDRUtils.getRanking(c2);
-      int diff = ranking2 - ranking1;
-      if (diff == 0)
-      {
-         Long id1 = MDRUtils.getId(c1);
-         Long id2 = MDRUtils.getId(c2);
-         if (id1 == null && id2 == null)
-            return 0;
-         if (id1 != null && id2 == null)
-            return -1;
-         if (id2 != null && id1 == null)
-            return 1;
+      if (ranking1.equals(ranking2) == false)
+         return (ranking1 < ranking2 ? -1 : 1);
 
-         return (id2 > id1) ? -1 : 1;
-      }
-      return diff;
+      id1 = (id1 != null ? id1 : Long.MAX_VALUE);
+      id2 = (id2 != null ? id2 : Long.MAX_VALUE);
+      return (id1 > id2 ? -1 : 1);
    }
 }

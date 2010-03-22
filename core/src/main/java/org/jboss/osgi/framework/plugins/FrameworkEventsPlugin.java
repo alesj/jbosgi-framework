@@ -69,6 +69,5 @@ public interface FrameworkEventsPlugin extends Plugin
 
    void fireFrameworkEvent(Bundle bundle, int type, Throwable throwable);
 
-   // [TODO] remove dependecy on propriatary API
    void fireServiceEvent(Bundle bundle, int type, OSGiServiceState service);
 }

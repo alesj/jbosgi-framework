@@ -60,14 +60,14 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         bundleContext.registerService(OBJCLASS, bundleContext, null);
+         context.registerService(OBJCLASS, context, null);
 
          try
          {
-            bundleContext.getService(null);
+            context.getService(null);
             fail("Should not be here!");
          }
          catch (IllegalArgumentException t)
@@ -77,7 +77,7 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
 
          try
          {
-            bundleContext.ungetService(null);
+            context.ungetService(null);
             fail("Should not be here!");
          }
          catch (IllegalArgumentException t)
@@ -99,17 +99,17 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, bundleContext, null);
-         ServiceReference reference = registration.getReference();
+         ServiceRegistration sreg = context.registerService(OBJCLASS, context, null);
+         ServiceReference sref = sreg.getReference();
 
-         Object actual = bundleContext.getService(reference);
-         assertEquals(bundleContext, actual);
+         Object actual = context.getService(sref);
+         assertEquals(context, actual);
 
-         registration.unregister();
-         actual = bundleContext.getService(reference);
+         sreg.unregister();
+         actual = context.getService(sref);
          assertNull("" + actual, actual);
       }
       finally
@@ -126,19 +126,19 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, bundleContext, null);
-         ServiceReference reference = registration.getReference();
+         ServiceRegistration sreg = context.registerService(OBJCLASS, context, null);
+         ServiceReference sref = sreg.getReference();
 
-         Object actual = bundleContext.getService(reference);
-         assertEquals(bundleContext, actual);
+         Object actual = context.getService(sref);
+         assertEquals(context, actual);
 
          bundle.stop();
          try
          {
-            bundleContext.getService(reference);
+            context.getService(sref);
             fail("Should not be here!");
          }
          catch (IllegalStateException t)
@@ -160,14 +160,14 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         bundleContext.addFrameworkListener(this);
+         context.addFrameworkListener(this);
 
-         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, new BrokenServiceFactory(bundleContext, true), null);
-         ServiceReference reference = registration.getReference();
-         Object actual = bundleContext.getService(reference);
+         ServiceRegistration sreg = context.registerService(OBJCLASS, new BrokenServiceFactory(context, true), null);
+         ServiceReference sref = sreg.getReference();
+         Object actual = context.getService(sref);
          assertNull("" + actual, actual);
 
          assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);
@@ -186,18 +186,18 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         bundleContext.addFrameworkListener(this);
+         context.addFrameworkListener(this);
 
-         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, new BrokenServiceFactory(bundleContext, false), null);
-         ServiceReference reference = registration.getReference();
-         Object actual = bundleContext.getService(reference);
-         assertEquals(bundleContext, actual);
+         ServiceRegistration sreg = context.registerService(OBJCLASS, new BrokenServiceFactory(context, false), null);
+         ServiceReference sref = sreg.getReference();
+         Object actual = context.getService(sref);
+         assertEquals(context, actual);
          assertNoFrameworkEvent();
 
-         registration.unregister();
+         sreg.unregister();
 
          assertFrameworkEvent(FrameworkEvent.WARNING, bundle, BundleException.class);
       }
@@ -215,34 +215,36 @@ public class GetUnGetServiceTestCase extends AbstractFrameworkTest
       try
       {
          bundle1.start();
-         BundleContext bundleContext = bundle1.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context1 = bundle1.getBundleContext();
+         assertNotNull(context1);
 
-         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, bundleContext, null);
-         ServiceReference reference = registration.getReference();
-         Object actual = bundleContext.getService(reference);
-         assertEquals(bundleContext, actual);
-         assertFalse(bundleContext.ungetService(reference));
+         ServiceRegistration sreg = context1.registerService(OBJCLASS, context1, null);
+         ServiceReference sref = sreg.getReference();
+         Object actual = context1.getService(sref);
+         assertEquals(context1, actual);
+         assertTrue(context1.ungetService(sref));
+         assertFalse(context1.ungetService(sref));
 
-         bundleContext.getService(reference);
-         bundleContext.getService(reference);
-         assertTrue(bundleContext.ungetService(reference));
-         assertFalse(bundleContext.ungetService(reference));
+         context1.getService(sref);
+         context1.getService(sref);
+         assertTrue(context1.ungetService(sref));
+         assertTrue(context1.ungetService(sref));
+         assertFalse(context1.ungetService(sref));
 
          VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
          {
             bundle2.start();
-            BundleContext bundleContext2 = bundle2.getBundleContext();
-            assertNotNull(bundleContext2);
+            BundleContext context2 = bundle2.getBundleContext();
+            assertNotNull(context2);
 
-            bundleContext2.getService(reference);
-
-            bundleContext.getService(reference);
-            assertFalse(bundleContext.ungetService(reference));
-
-            assertFalse(bundleContext2.ungetService(reference));
+            context2.getService(sref);
+            context1.getService(sref);
+            assertTrue(context1.ungetService(sref));
+            assertFalse(context1.ungetService(sref));
+            assertTrue(context2.ungetService(sref));
+            assertFalse(context2.ungetService(sref));
          }
          finally
          {

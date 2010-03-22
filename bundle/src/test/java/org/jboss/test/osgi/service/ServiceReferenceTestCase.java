@@ -21,7 +21,13 @@
 */
 package org.jboss.test.osgi.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -53,7 +59,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testGetProperty() throws Exception
    {
-      ServiceReference reference = null;
+      ServiceReference sref = null;
       String[] clazzes = new String[] { BundleContext.class.getName() };
       Object serviceID = null;
 
@@ -69,92 +75,92 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          properties.put("testA", "a");
          properties.put("testB", "b");
          properties.put("MiXeD", "Case");
-         ServiceRegistration registration = bundleContext.registerService(clazzes, bundleContext, properties);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(clazzes, bundleContext, properties);
+         assertNotNull(sreg);
 
-         reference = registration.getReference();
-         assertNotNull(reference);
+         sref = sreg.getReference();
+         assertNotNull(sref);
 
-         serviceID = reference.getProperty(Constants.SERVICE_ID);
+         serviceID = sref.getProperty(Constants.SERVICE_ID);
          assertNotNull(serviceID);
-         assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID.toLowerCase()));
-         assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID.toUpperCase()));
-         assertArrayEquals(clazzes, (String[])reference.getProperty(Constants.OBJECTCLASS));
-         assertArrayEquals(clazzes, (String[])reference.getProperty(Constants.OBJECTCLASS.toLowerCase()));
-         assertArrayEquals(clazzes, (String[])reference.getProperty(Constants.OBJECTCLASS.toUpperCase()));
-         assertEquals("a", reference.getProperty("testA"));
-         assertEquals("b", reference.getProperty("testB"));
-         assertEquals("Case", reference.getProperty("MiXeD"));
-         assertEquals("Case", reference.getProperty("mixed"));
-         assertEquals("Case", reference.getProperty("MIXED"));
-         assertNull(reference.getProperty(null));
-         assertNull(reference.getProperty("doesNotExist"));
+         assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID.toLowerCase()));
+         assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID.toUpperCase()));
+         assertArrayEquals(clazzes, (String[])sref.getProperty(Constants.OBJECTCLASS));
+         assertArrayEquals(clazzes, (String[])sref.getProperty(Constants.OBJECTCLASS.toLowerCase()));
+         assertArrayEquals(clazzes, (String[])sref.getProperty(Constants.OBJECTCLASS.toUpperCase()));
+         assertEquals("a", sref.getProperty("testA"));
+         assertEquals("b", sref.getProperty("testB"));
+         assertEquals("Case", sref.getProperty("MiXeD"));
+         assertEquals("Case", sref.getProperty("mixed"));
+         assertEquals("Case", sref.getProperty("MIXED"));
+         assertNull(sref.getProperty(null));
+         assertNull(sref.getProperty("doesNotExist"));
 
          properties.put("testA", "notA");
-         assertEquals("a", reference.getProperty("testA"));
+         assertEquals("a", sref.getProperty("testA"));
          properties.put(Constants.SERVICE_ID, "rubbish");
-         assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
+         assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID));
          properties.put(Constants.OBJECTCLASS, "rubbish");
-         assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
+         assertEquals(clazzes, sref.getProperty(Constants.OBJECTCLASS));
 
-         registration.setProperties(properties);
-         assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
-         assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
-         assertEquals("notA", reference.getProperty("testA"));
-         assertEquals("b", reference.getProperty("testB"));
-         assertEquals("Case", reference.getProperty("MiXeD"));
-         assertEquals("Case", reference.getProperty("mixed"));
-         assertEquals("Case", reference.getProperty("MIXED"));
+         sreg.setProperties(properties);
+         assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID));
+         assertEquals(clazzes, sref.getProperty(Constants.OBJECTCLASS));
+         assertEquals("notA", sref.getProperty("testA"));
+         assertEquals("b", sref.getProperty("testB"));
+         assertEquals("Case", sref.getProperty("MiXeD"));
+         assertEquals("Case", sref.getProperty("mixed"));
+         assertEquals("Case", sref.getProperty("MIXED"));
 
-         registration.setProperties(null);
-         assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
-         assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
-         assertNull(reference.getProperty("testA"));
-         assertNull(reference.getProperty("testB"));
-         assertNull(reference.getProperty("MiXeD"));
-         assertNull(reference.getProperty("mixed"));
-         assertNull(reference.getProperty("MIXED"));
-         assertNull(reference.getProperty(null));
+         sreg.setProperties(null);
+         assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID));
+         assertEquals(clazzes, sref.getProperty(Constants.OBJECTCLASS));
+         assertNull(sref.getProperty("testA"));
+         assertNull(sref.getProperty("testB"));
+         assertNull(sref.getProperty("MiXeD"));
+         assertNull(sref.getProperty("mixed"));
+         assertNull(sref.getProperty("MIXED"));
+         assertNull(sref.getProperty(null));
 
-         registration.setProperties(properties);
-         assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
-         assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
-         assertEquals("notA", reference.getProperty("testA"));
-         assertEquals("b", reference.getProperty("testB"));
-         assertEquals("Case", reference.getProperty("MiXeD"));
-         assertEquals("Case", reference.getProperty("mixed"));
-         assertEquals("Case", reference.getProperty("MIXED"));
-         assertNull(reference.getProperty(null));
+         sreg.setProperties(properties);
+         assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID));
+         assertEquals(clazzes, sref.getProperty(Constants.OBJECTCLASS));
+         assertEquals("notA", sref.getProperty("testA"));
+         assertEquals("b", sref.getProperty("testB"));
+         assertEquals("Case", sref.getProperty("MiXeD"));
+         assertEquals("Case", sref.getProperty("mixed"));
+         assertEquals("Case", sref.getProperty("MIXED"));
+         assertNull(sref.getProperty(null));
 
-         registration.unregister();
-         assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
-         assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
-         assertEquals("notA", reference.getProperty("testA"));
-         assertEquals("b", reference.getProperty("testB"));
-         assertEquals("Case", reference.getProperty("MiXeD"));
-         assertEquals("Case", reference.getProperty("mixed"));
-         assertEquals("Case", reference.getProperty("MIXED"));
-         assertNull(reference.getProperty(null));
+         sreg.unregister();
+         assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID));
+         assertEquals(clazzes, sref.getProperty(Constants.OBJECTCLASS));
+         assertEquals("notA", sref.getProperty("testA"));
+         assertEquals("b", sref.getProperty("testB"));
+         assertEquals("Case", sref.getProperty("MiXeD"));
+         assertEquals("Case", sref.getProperty("mixed"));
+         assertEquals("Case", sref.getProperty("MIXED"));
+         assertNull(sref.getProperty(null));
       }
       finally
       {
          bundle.uninstall();
       }
 
-      assertEquals(serviceID, reference.getProperty(Constants.SERVICE_ID));
-      assertEquals(clazzes, reference.getProperty(Constants.OBJECTCLASS));
-      assertEquals("notA", reference.getProperty("testA"));
-      assertEquals("b", reference.getProperty("testB"));
-      assertEquals("Case", reference.getProperty("MiXeD"));
-      assertEquals("Case", reference.getProperty("mixed"));
-      assertEquals("Case", reference.getProperty("MIXED"));
-      assertNull(reference.getProperty(null));
+      assertEquals(serviceID, sref.getProperty(Constants.SERVICE_ID));
+      assertEquals(clazzes, sref.getProperty(Constants.OBJECTCLASS));
+      assertEquals("notA", sref.getProperty("testA"));
+      assertEquals("b", sref.getProperty("testB"));
+      assertEquals("Case", sref.getProperty("MiXeD"));
+      assertEquals("Case", sref.getProperty("mixed"));
+      assertEquals("Case", sref.getProperty("MIXED"));
+      assertNull(sref.getProperty(null));
    }
 
    @Test
    public void testGetPropertyKeys() throws Exception
    {
-      ServiceReference reference = null;
+      ServiceReference sref = null;
 
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -168,37 +174,37 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          properties.put("testA", "a");
          properties.put("testB", "b");
          properties.put("MiXeD", "Case");
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
+         assertNotNull(sreg);
 
-         reference = registration.getReference();
-         assertNotNull(reference);
+         sref = sreg.getReference();
+         assertNotNull(sref);
 
-         assertPropertyKeys(reference, "testA", "testB", "MiXeD");
+         assertPropertyKeys(sref, "testA", "testB", "MiXeD");
 
          properties.put("testC", "c");
-         assertPropertyKeys(reference, "testA", "testB", "MiXeD");
+         assertPropertyKeys(sref, "testA", "testB", "MiXeD");
 
-         registration.setProperties(properties);
-         assertPropertyKeys(reference, "testA", "testB", "testC", "MiXeD");
+         sreg.setProperties(properties);
+         assertPropertyKeys(sref, "testA", "testB", "testC", "MiXeD");
 
-         registration.setProperties(null);
-         assertPropertyKeys(reference);
+         sreg.setProperties(null);
+         assertPropertyKeys(sref);
 
-         registration.setProperties(properties);
-         assertPropertyKeys(reference, "testA", "testB", "testC", "MiXeD");
+         sreg.setProperties(properties);
+         assertPropertyKeys(sref, "testA", "testB", "testC", "MiXeD");
 
-         registration.unregister();
-         assertPropertyKeys(reference, "testA", "testB", "testC", "MiXeD");
+         sreg.unregister();
+         assertPropertyKeys(sref, "testA", "testB", "testC", "MiXeD");
       }
       finally
       {
          bundle.uninstall();
       }
-      assertPropertyKeys(reference, "testA", "testB", "testC", "MiXeD");
+      assertPropertyKeys(sref, "testA", "testB", "testC", "MiXeD");
    }
 
-   private void assertPropertyKeys(ServiceReference reference, String... expectedKeys)
+   private void assertPropertyKeys(ServiceReference sref, String... expectedKeys)
    {
       Set<String> expected = new HashSet<String>();
       expected.add(Constants.SERVICE_ID);
@@ -207,7 +213,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          expected.add(key);
 
       Set<String> actual = new HashSet<String>();
-      for (String key : reference.getPropertyKeys())
+      for (String key : sref.getPropertyKeys())
          actual.add(key);
 
       assertEquals(expected, actual);
@@ -224,18 +230,18 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
 
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+         assertNotNull(sreg);
 
-         ServiceReference reference = registration.getReference();
-         assertNotNull(reference);
+         ServiceReference sref = sreg.getReference();
+         assertNotNull(sref);
 
-         Bundle other = reference.getBundle();
+         Bundle other = sref.getBundle();
          assertEquals(bundle, other);
 
-         registration.unregister();
+         sreg.unregister();
 
-         other = reference.getBundle();
+         other = sref.getBundle();
          assertNull("" + other, other);
       }
       finally
@@ -255,18 +261,18 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
 
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+         assertNotNull(sreg);
 
-         ServiceReference reference = registration.getReference();
-         assertNotNull(reference);
+         ServiceReference sref = sreg.getReference();
+         assertNotNull(sref);
 
-         Bundle other = reference.getBundle();
+         Bundle other = sref.getBundle();
          assertEquals(bundle, other);
 
          bundle.stop();
 
-         other = reference.getBundle();
+         other = sref.getBundle();
          assertNull("" + other, other);
       }
       finally
@@ -286,13 +292,13 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          BundleContext bundleContext = bundle1.getBundleContext();
          assertNotNull(bundleContext);
 
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+         assertNotNull(sreg);
 
-         ServiceReference reference = registration.getReference();
-         assertNotNull(reference);
+         ServiceReference sref = sreg.getReference();
+         assertNotNull(sref);
 
-         assertUsingBundles(reference);
+         assertUsingBundles(sref);
 
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
@@ -302,26 +308,26 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
             BundleContext bundleContext2 = bundle2.getBundleContext();
             assertNotNull(bundleContext2);
 
-            bundleContext2.getService(reference);
-            assertUsingBundles(reference, bundle2);
+            bundleContext2.getService(sref);
+            assertUsingBundles(sref, bundle2);
 
-            bundleContext2.ungetService(reference);
-            assertUsingBundles(reference);
+            bundleContext2.ungetService(sref);
+            assertUsingBundles(sref);
 
-            bundleContext2.getService(reference);
-            bundleContext2.getService(reference);
-            assertUsingBundles(reference, bundle2);
-            bundleContext2.ungetService(reference);
-            assertUsingBundles(reference, bundle2);
-            bundleContext2.ungetService(reference);
-            assertUsingBundles(reference);
+            bundleContext2.getService(sref);
+            bundleContext2.getService(sref);
+            assertUsingBundles(sref, bundle2);
+            bundleContext2.ungetService(sref);
+            assertUsingBundles(sref, bundle2);
+            bundleContext2.ungetService(sref);
+            assertUsingBundles(sref);
 
-            bundleContext.getService(reference);
-            bundleContext2.getService(reference);
-            assertUsingBundles(reference, bundle1, bundle2);
+            bundleContext.getService(sref);
+            bundleContext2.getService(sref);
+            assertUsingBundles(sref, bundle1, bundle2);
 
-            registration.unregister();
-            assertUsingBundles(reference);
+            sreg.unregister();
+            assertUsingBundles(sref);
          }
          finally
          {
@@ -345,13 +351,13 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          BundleContext bundleContext = bundle1.getBundleContext();
          assertNotNull(bundleContext);
 
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+         assertNotNull(sreg);
 
-         ServiceReference reference = registration.getReference();
-         assertNotNull(reference);
+         ServiceReference sref = sreg.getReference();
+         assertNotNull(sref);
 
-         assertUsingBundles(reference);
+         assertUsingBundles(sref);
 
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
@@ -361,12 +367,12 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
             BundleContext bundleContext2 = bundle2.getBundleContext();
             assertNotNull(bundleContext2);
 
-            bundleContext.getService(reference);
-            bundleContext2.getService(reference);
-            assertUsingBundles(reference, bundle1, bundle2);
+            bundleContext.getService(sref);
+            bundleContext2.getService(sref);
+            assertUsingBundles(sref, bundle1, bundle2);
 
             bundle1.stop();
-            assertUsingBundles(reference);
+            assertUsingBundles(sref);
          }
          finally
          {
@@ -390,15 +396,15 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          BundleContext bundleContext = bundle.getBundleContext();
          assertNotNull(bundleContext);
 
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+         assertNotNull(sreg);
 
-         ServiceReference reference = registration.getReference();
-         assertNotNull(reference);
+         ServiceReference sref = sreg.getReference();
+         assertNotNull(sref);
 
          try
          {
-            reference.isAssignableTo(null, A.class.getName());
+            sref.isAssignableTo(null, A.class.getName());
             fail("Should not be here!");
          }
          catch (IllegalArgumentException t)
@@ -408,7 +414,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          try
          {
-            reference.isAssignableTo(bundle, null);
+            sref.isAssignableTo(bundle, null);
             fail("Should not be here!");
          }
          catch (IllegalArgumentException t)
@@ -433,22 +439,22 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          BundleContext bundleContext = bundle1.getBundleContext();
          assertNotNull(bundleContext);
 
-         ServiceRegistration registration = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration);
+         ServiceRegistration sreg = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+         assertNotNull(sreg);
 
-         ServiceReference reference = registration.getReference();
-         assertNotNull(reference);
+         ServiceReference sref = sreg.getReference();
+         assertNotNull(sref);
 
          VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
          Bundle bundle2 = installBundle(assembly2);
          try
          {
-            assertFalse(reference.isAssignableTo(bundle2, A.class.getName()));
-            assertTrue(reference.isAssignableTo(bundle2, String.class.getName()));
+            assertFalse(sref.isAssignableTo(bundle2, A.class.getName()));
+            assertTrue(sref.isAssignableTo(bundle2, String.class.getName()));
 
-            registration.unregister();
-            assertFalse(reference.isAssignableTo(bundle2, A.class.getName()));
-            assertFalse(reference.isAssignableTo(bundle2, String.class.getName())); // review ???
+            sreg.unregister();
+            assertFalse(sref.isAssignableTo(bundle2, A.class.getName()));
+            assertFalse(sref.isAssignableTo(bundle2, String.class.getName())); // review ???
          }
          finally
          {
@@ -485,22 +491,22 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          try
          {
 
-            ServiceRegistration registration = bundleContext2.registerService(BundleContext.class.getName(), bundleContext2, null);
-            assertNotNull(registration);
+            ServiceRegistration sreg = bundleContext2.registerService(BundleContext.class.getName(), bundleContext2, null);
+            assertNotNull(sreg);
 
-            ServiceReference reference = registration.getReference();
-            assertNotNull(reference);
+            ServiceReference sref = sreg.getReference();
+            assertNotNull(sref);
 
-            assertTrue(reference.isAssignableTo(bundle2, A.class.getName()));
-            assertTrue(reference.isAssignableTo(bundle2, String.class.getName()));
-            assertTrue(reference.isAssignableTo(bundle1, A.class.getName()));
-            assertTrue(reference.isAssignableTo(bundle1, String.class.getName()));
+            assertTrue(sref.isAssignableTo(bundle2, A.class.getName()));
+            assertTrue(sref.isAssignableTo(bundle2, String.class.getName()));
+            assertTrue(sref.isAssignableTo(bundle1, A.class.getName()));
+            assertTrue(sref.isAssignableTo(bundle1, String.class.getName()));
 
-            registration.unregister();
-            assertTrue(reference.isAssignableTo(bundle2, A.class.getName()));
-            assertTrue(reference.isAssignableTo(bundle2, String.class.getName()));
-            assertFalse(reference.isAssignableTo(bundle1, A.class.getName()));
-            assertFalse(reference.isAssignableTo(bundle1, String.class.getName())); // review ???
+            sreg.unregister();
+            assertTrue(sref.isAssignableTo(bundle2, A.class.getName()));
+            assertTrue(sref.isAssignableTo(bundle2, String.class.getName()));
+            assertFalse(sref.isAssignableTo(bundle1, A.class.getName()));
+            assertFalse(sref.isAssignableTo(bundle1, String.class.getName())); // review ???
          }
          finally
          {
@@ -516,114 +522,159 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testCompareTo() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
-      Bundle bundle = installBundle(assembly);
+      BundleContext bundleContext = framework.getBundleContext();
+      assertNotNull(bundleContext);
+
+      ServiceRegistration sreg1 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+      assertNotNull(sreg1);
+
+      ServiceReference sref1 = sreg1.getReference();
+      assertNotNull(sref1);
+
+      ServiceRegistration sreg2 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+      assertNotNull(sreg2);
+
+      ServiceReference sref2 = sreg2.getReference();
+      assertNotNull(sref2);
+
+      Dictionary<String, Object> properties = new Hashtable<String, Object>();
+      properties.put(Constants.SERVICE_RANKING, 10);
+      ServiceRegistration sreg3 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
+      assertNotNull(sreg3);
+
+      ServiceReference sref3 = sreg3.getReference();
+      assertNotNull(sref3);
+
+      properties = new Hashtable<String, Object>();
+      properties.put(Constants.SERVICE_RANKING, -10);
+      ServiceRegistration sreg4 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
+      assertNotNull(sreg4);
+
+      ServiceReference sref4 = sreg4.getReference();
+      assertNotNull(sref4);
+
+      assertGreaterRanking(sref1, sref2);
+      assertGreaterRanking(sref3, sref1);
+      assertGreaterRanking(sref3, sref2);
+      assertGreaterRanking(sref1, sref4);
+      assertGreaterRanking(sref2, sref4);
+      assertGreaterRanking(sref3, sref4);
+
       try
       {
-         bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
-
-         ServiceRegistration registration1 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration1);
-
-         ServiceReference reference1 = registration1.getReference();
-         assertNotNull(reference1);
-
-         ServiceRegistration registration2 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
-         assertNotNull(registration2);
-
-         ServiceReference reference2 = registration2.getReference();
-         assertNotNull(reference2);
-
-         Dictionary<String, Object> properties = new Hashtable<String, Object>();
-         properties.put(Constants.SERVICE_RANKING, 10);
-         ServiceRegistration registration3 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
-         assertNotNull(registration3);
-
-         ServiceReference reference3 = registration3.getReference();
-         assertNotNull(reference3);
-
-         properties = new Hashtable<String, Object>();
-         properties.put(Constants.SERVICE_RANKING, -10);
-         ServiceRegistration registration4 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
-         assertNotNull(registration4);
-
-         ServiceReference reference4 = registration4.getReference();
-         assertNotNull(reference4);
-
-         assertGreaterRanking(reference1, reference2);
-         assertGreaterRanking(reference3, reference1);
-         assertGreaterRanking(reference3, reference2);
-         assertGreaterRanking(reference1, reference4);
-         assertGreaterRanking(reference2, reference4);
-         assertGreaterRanking(reference3, reference4);
-
-         try
-         {
-            reference1.compareTo(null);
-            fail("Should not be here!");
-         }
-         catch (IllegalArgumentException t)
-         {
-            // expected
-         }
-
-         try
-         {
-            reference1.compareTo(new Object());
-            fail("Should not be here!");
-         }
-         catch (IllegalArgumentException t)
-         {
-            // expected
-         }
-
-         properties = new Hashtable<String, Object>();
-         properties.put(Constants.SERVICE_RANKING, "NotANumber");
-         ServiceRegistration registration5 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
-         assertNotNull(registration5);
-
-         ServiceReference reference5 = registration5.getReference();
-         assertNotNull(reference5);
-
-         assertGreaterRanking(reference1, reference5); // review ???
-
-         Set<ServiceReference> ordering = new TreeSet<ServiceReference>();
-         ordering.add(reference1);
-         ordering.add(reference2);
-         ordering.add(reference3);
-         ordering.add(reference4);
-         ordering.add(reference5);
-         Iterator<ServiceReference> iterator = ordering.iterator();
-         assertEquals(reference4, iterator.next());
-         assertEquals(reference5, iterator.next());
-         assertEquals(reference2, iterator.next());
-         assertEquals(reference1, iterator.next());
-         assertEquals(reference3, iterator.next());
-
-         ordering = new TreeSet<ServiceReference>();
-         ordering.add(reference5);
-         ordering.add(reference4);
-         ordering.add(reference3);
-         ordering.add(reference2);
-         ordering.add(reference1);
-         iterator = ordering.iterator();
-         assertEquals(reference4, iterator.next());
-         assertEquals(reference5, iterator.next());
-         assertEquals(reference2, iterator.next());
-         assertEquals(reference1, iterator.next());
-         assertEquals(reference3, iterator.next());
+         sref1.compareTo(null);
+         fail("Should not be here!");
       }
-      finally
+      catch (IllegalArgumentException t)
       {
-         bundle.uninstall();
+         // expected
       }
+
+      try
+      {
+         sref1.compareTo(new Object());
+         fail("Should not be here!");
+      }
+      catch (IllegalArgumentException t)
+      {
+         // expected
+      }
+
+      properties = new Hashtable<String, Object>();
+      properties.put(Constants.SERVICE_RANKING, "NotANumber");
+      ServiceRegistration sreg5 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
+      assertNotNull(sreg5);
+
+      ServiceReference sref5 = sreg5.getReference();
+      assertNotNull(sref5);
+
+      assertGreaterRanking(sref1, sref5); 
+
+      Set<ServiceReference> ordering = new TreeSet<ServiceReference>();
+      ordering.add(sref1);
+      ordering.add(sref2);
+      ordering.add(sref3);
+      ordering.add(sref4);
+      ordering.add(sref5);
+      Iterator<ServiceReference> iterator = ordering.iterator();
+      assertEquals(sref4, iterator.next());
+      assertEquals(sref5, iterator.next());
+      assertEquals(sref2, iterator.next());
+      assertEquals(sref1, iterator.next());
+      assertEquals(sref3, iterator.next());
+
+      ordering = new TreeSet<ServiceReference>();
+      ordering.add(sref5);
+      ordering.add(sref4);
+      ordering.add(sref3);
+      ordering.add(sref2);
+      ordering.add(sref1);
+      iterator = ordering.iterator();
+      assertEquals(sref4, iterator.next());
+      assertEquals(sref5, iterator.next());
+      assertEquals(sref2, iterator.next());
+      assertEquals(sref1, iterator.next());
+      assertEquals(sref3, iterator.next());
    }
 
-   protected void assertGreaterRanking(ServiceReference reference1, ServiceReference reference2) throws Exception
+   @Test
+   public void testServiceReferenceOrder() throws Exception
    {
-      assertTrue(reference1 + " > " + reference2, reference1.compareTo(reference2) > 0);
-      assertTrue(reference2 + " < " + reference1, reference2.compareTo(reference1) < 0);
+      Runnable runIt = new Runnable()
+      {
+         public void run()
+         {
+         }
+      };
+      
+      BundleContext context = framework.getBundleContext();
+      Hashtable<String, Object> props = new Hashtable<String, Object>();
+      props.put(Constants.SERVICE_DESCRIPTION, "min value");
+      props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
+      ServiceRegistration sreg1 = context.registerService(Runnable.class.getName(), runIt, props);
+      ServiceReference sref1 = sreg1.getReference();
+      
+      props.put(Constants.SERVICE_DESCRIPTION, "max value 1");
+      props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+      ServiceRegistration sreg2 = context.registerService(Runnable.class.getName(), runIt, props);
+      ServiceReference sref2 = sreg2.getReference();
+      
+      props.put(Constants.SERVICE_DESCRIPTION, "max value 2");
+      props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+      ServiceRegistration sreg3 = context.registerService(Runnable.class.getName(), runIt, props);
+      ServiceReference sref3 = sreg3.getReference();
+      
+      props.put(Constants.SERVICE_DESCRIPTION, "max value 3");
+      props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+      ServiceRegistration sreg4 = context.registerService(Runnable.class.getName(), runIt, props);
+      ServiceReference sref4 = sreg4.getReference();
+      
+      ServiceReference[] srefs = context.getServiceReferences(Runnable.class.getName(), null);
+      assertEquals(4, srefs.length);
+      assertEquals(sref1, srefs[0]);
+      assertEquals(sref4, srefs[1]);
+      assertEquals(sref3, srefs[2]);
+      assertEquals(sref2, srefs[3]);
+      
+      ServiceReference sref = context.getServiceReference(Runnable.class.getName());
+      assertEquals(sref2, sref);
+      sreg2.unregister();
+      
+      sref = context.getServiceReference(Runnable.class.getName());
+      assertEquals(sref3, sref);
+      sreg3.unregister();
+      
+      sref = context.getServiceReference(Runnable.class.getName());
+      assertEquals(sref4, sref);
+      sreg4.unregister();
+
+      sref = context.getServiceReference(Runnable.class.getName());
+      assertEquals(sref1, sref);
+   }
+
+   protected void assertGreaterRanking(ServiceReference sref1, ServiceReference sref2) throws Exception
+   {
+      assertTrue(sref1 + " > " + sref2, sref1.compareTo(sref2) > 0);
+      assertTrue(sref2 + " < " + sref1, sref2.compareTo(sref1) < 0);
    }
 }

@@ -541,8 +541,8 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       }
 
       // Expose the wrapper not the state itself
-      final ServiceEvent event = new OSGiServiceEvent(type, service.getReferenceInternal());
-      final String typeName = ConstantsHelper.serviceEvent(event.getType());
+      ServiceEvent event = new OSGiServiceEvent(type, service.getReferenceInternal());
+      String typeName = ConstantsHelper.serviceEvent(event.getType());
 
       log.info("Service " + typeName + ": " + service);
 
@@ -558,21 +558,31 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
          return;
 
       // Call the listeners. All service events are synchronously delivered
-      for (ServiceListenerRegistration registration : listeners)
+      for (ServiceListenerRegistration listener : listeners)
       {
          try
          {
-            // [TODO] MODIFIED_ENDMATCH
-            // This event is synchronously delivered after the service properties have been modified. 
+            String filterstr = listener.filter.toString();
+            if (listener.filter.match(service))
+            {
+               AccessControlContext accessControlContext = listener.accessControlContext;
+               if (accessControlContext == null || service.hasPermission(accessControlContext))
+                  listener.listener.serviceChanged(event);
+            }
+            
+            // The MODIFIED_ENDMATCH event is synchronously delivered after the service properties have been modified. 
             // This event is only delivered to listeners which were added with a non-null filter where 
             // the filter matched the service properties prior to the modification but the filter does 
             // not match the modified service properties. 
-
-            if (registration.filter.match(service))
+            else if (filterstr != null && ServiceEvent.MODIFIED == event.getType())
             {
-               AccessControlContext accessControlContext = registration.accessControlContext;
-               if (accessControlContext == null || service.hasPermission(accessControlContext))
-                  registration.listener.serviceChanged(event);
+               if (listener.filter.match(service.getPreviousProperties()))
+               {
+                  event = new OSGiServiceEvent(ServiceEvent.MODIFIED_ENDMATCH, service.getReferenceInternal());
+                  AccessControlContext accessControlContext = listener.accessControlContext;
+                  if (accessControlContext == null || service.hasPermission(accessControlContext))
+                     listener.listener.serviceChanged(event);
+               }
             }
          }
          catch (Throwable t)
@@ -622,7 +632,6 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       return listeners;
    }
 
-   @SuppressWarnings("unchecked")
    private List<EventHook> getEventHooks()
    {
       List<EventHook> hooks = new ArrayList<EventHook>();
@@ -641,7 +650,6 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
          // The calling order of the hooks is defined by the reversed compareTo ordering of their Service
          // Reference objects. That is, the service with the highest ranking number is called first. 
          List<ServiceReference> sortedRefs = new ArrayList<ServiceReference>(Arrays.asList(srefs));
-         Collections.sort(sortedRefs);
          Collections.reverse(sortedRefs);
 
          for (ServiceReference sref : sortedRefs)

@@ -27,8 +27,10 @@ import java.security.AccessControlContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,7 +103,8 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
    private Map<AbstractBundleState, Object> serviceCache;
 
    /** The properties */
-   private CaseInsensitiveDictionary properties;
+   private CaseInsensitiveDictionary prevProperties;
+   private CaseInsensitiveDictionary currProperties;
 
    /** The bean info */
    private BeanInfo beanInfo;
@@ -115,7 +118,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
     * @param properties the properties
     * @throws IllegalArgumentException for a null parameter
     */
-   @SuppressWarnings({ "rawtypes" })
+   @SuppressWarnings({ "rawtypes", "unchecked" })
    public OSGiServiceState(AbstractBundleState bundleState, String[] clazzes, Object service, Dictionary properties)
    {
       super(service, properties);
@@ -141,8 +144,12 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       if (isServiceFactory == false)
          checkObjClass(service);
 
-      if (properties != null)
-         this.properties = new CaseInsensitiveDictionary(properties);
+      if (properties == null)
+         properties = new Hashtable();
+      
+      properties.put(Constants.SERVICE_ID, getServiceId());
+      properties.put(Constants.OBJECTCLASS, getClasses());
+      this.currProperties = new CaseInsensitiveDictionary(properties);
 
       serviceRegistration = new OSGiServiceRegistrationWrapper(this);
 
@@ -370,20 +377,32 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
          if (service == null)
          {
             ServiceFactory serviceFactory = (ServiceFactory)serviceOrFactory;
+            boolean gotService = false;
+            
+            // If the service object returned by the ServiceFactory object is not an instanceof all the classes named when 
+            // the service was registered or the ServiceFactory object throws an exception, null is returned and a Framework 
+            // event of type FrameworkEvent.ERROR containing a ServiceException  describing the error is fired. 
             try
             {
                service = serviceFactory.getService(bundleState.getBundle(), getRegistration());
+               gotService = true;
+               
                service = checkObjClass(service);
                serviceCache.put(bundleState, service);
             }
             catch (Throwable t)
             {
-               // If the service object returned by the ServiceFactory object is not an instanceof all the classes named when 
-               // the service was registered or the ServiceFactory object throws an exception, null is returned and a Framework 
-               // event of type FrameworkEvent.ERROR containing a ServiceException  describing the error is fired. 
-               log.error("Error from getService for " + this, t);
+               Throwable cause = t;
+               String message = "Cannot get service from: " + serviceFactory;
+               if (gotService == true)
+               {
+                  message += "." + t.getMessage();
+                  cause = null;
+               }
+               ServiceException serviceException = new ServiceException(message, cause);
+               log.error("Cannot getService from ServiceFactory", serviceException);
                FrameworkEventsPlugin plugin = bundleState.getBundleManager().getPlugin(FrameworkEventsPlugin.class);
-               plugin.fireFrameworkEvent(bundleState, FrameworkEvent.ERROR, new ServiceException("Error using service factory:" + serviceFactory, t));
+               plugin.fireFrameworkEvent(bundleState, FrameworkEvent.ERROR, serviceException);
                return null;
             }
          }
@@ -468,49 +487,54 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       return bundleState;
    }
 
-	@Override
+   @Override
    public Object getProperty(String key)
    {
       if (key == null)
          return null;
-      if (Constants.SERVICE_ID.equalsIgnoreCase(key))
-         return getServiceId();
-      if (Constants.OBJECTCLASS.equalsIgnoreCase(key))
-         return getClasses();
-      if (properties == null)
-         return null;
-      return properties.get(key);
+      return currProperties.get(key);
    }
 
    @Override
    public String[] getPropertyKeys()
    {
       ArrayList<String> result = new ArrayList<String>();
-      if (properties != null)
+      if (currProperties != null)
       {
-         Enumeration<String> keys = properties.keys();
+         Enumeration<String> keys = currProperties.keys();
          while (keys.hasMoreElements())
             result.add(keys.nextElement());
       }
-      result.add(Constants.SERVICE_ID);
-      result.add(Constants.OBJECTCLASS);
       return result.toArray(new String[result.size()]);
    }
 
    @Override
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings({ "rawtypes", "unchecked" })
    public void setProperties(Dictionary properties)
    {
       checkUnregistered();
 
+      // Remember the previous properties for a potential
+      // delivery of the MODIFIED_ENDMATCH event
+      prevProperties = currProperties;
+      
       if (properties == null)
-         this.properties = null;
-      else
-         this.properties = new CaseInsensitiveDictionary(properties);
+         properties = new Hashtable();
+      
+      properties.put(Constants.SERVICE_ID, getServiceId());
+      properties.put(Constants.OBJECTCLASS, getClasses());
+      currProperties = new CaseInsensitiveDictionary(properties);
 
       // This event is synchronously delivered after the service properties have been modified. 
       FrameworkEventsPlugin plugin = bundleState.getBundleManager().getPlugin(FrameworkEventsPlugin.class);
       plugin.fireServiceEvent(bundleState, ServiceEvent.MODIFIED, this);
+   }
+
+   
+   @SuppressWarnings("rawtypes")
+   public Dictionary getPreviousProperties()
+   {
+      return prevProperties;
    }
 
    @Override
@@ -524,7 +548,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
 
       return bundles.toArray(new Bundle[bundles.size()]);
    }
-   
+
    @Override
    public boolean isAssignableTo(Bundle bundle, String className)
    {
@@ -549,6 +573,15 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       }
    }
 
+   /*
+    * If this ServiceReference and the specified ServiceReference have the same service id they are equal. 
+    * This ServiceReference is less than the specified ServiceReference if it has a lower service ranking 
+    * and greater if it has a higher service ranking. 
+    * 
+    * Otherwise, if this ServiceReference and the specified ServiceReference have the same service ranking, 
+    * this ServiceReference is less than the specified ServiceReference if it has a higher service id and 
+    * greater if it has a lower service id.     
+    */
    @Override
    public int compareTo(Object reference)
    {
@@ -563,66 +596,21 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       else
          throw new IllegalArgumentException(reference + " is not a service reference");
 
-      Long otherServiceId = MDRUtils.getId(other);
-      if (otherServiceId == null)
-         return -1; // TODO?
-
-      long thisServiceId = getServiceId();
-      if (thisServiceId == otherServiceId)
-         return 0;
-
-      Integer otherRanking = MDRUtils.getRanking(other);
-      int thisRanking = getServiceRanking();
-      int ranking = thisRanking - otherRanking;
-      if (ranking != 0)
-         return ranking;
-
-      return (thisServiceId > otherServiceId) ? -1 : 1;
+      Comparator<ControllerContext> comparator = ContextComparator.getInstance();
+      return comparator.compare(this, other);
    }
 
-   @Override
-   public boolean equals(Object obj)
-   {
-      if (obj == null)
-         return false;
-
-      OSGiServiceState other;
-      if (obj instanceof OSGiServiceState)
-         other = (OSGiServiceState)obj;
-      else if (obj instanceof OSGiServiceReferenceWrapper)
-         other = ((OSGiServiceReferenceWrapper)obj).getServiceState();
-      else
-         return false;
-      return this == other;
-   }
-
-   @Override
-   public int hashCode()
-   {
-      return toString().hashCode();
-   }
-
-   @Override
-   public String toString()
+   String toLongString()
    {
       StringBuilder builder = new StringBuilder();
+      String desc = (String)getProperty(Constants.SERVICE_DESCRIPTION);
       builder.append("Service{");
       builder.append("id=").append(getServiceId());
-      builder.append(" classes=").append(Arrays.asList(getClasses()));
-      builder.append("}");
-      return builder.toString();
-   }
-
-   public String toLongString()
-   {
-      StringBuilder builder = new StringBuilder();
-      builder.append("Service{");
-      builder.append("id=").append(getServiceId());
-      builder.append(" bundle=").append(getBundleState().getCanonicalName());
-      builder.append(" classes=").append(Arrays.asList(getClasses()));
-      builder.append(isServiceFactory ? " factory=" : " service=").append(serviceOrFactory);
-      if (properties != null)
-         builder.append(" properties=").append(properties);
+      builder.append(desc != null ? ",desc=" + desc : "");
+      builder.append(",bundle=").append(getBundleState().getCanonicalName());
+      builder.append(",classes=").append(Arrays.asList(getClasses()));
+      builder.append(isServiceFactory ? ",factory=" : ",service=").append(serviceOrFactory);
+      builder.append(",props=").append(currProperties);
       builder.append("}");
       return builder.toString();
    }
@@ -785,5 +773,42 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
    synchronized boolean isUnregistered()
    {
       return serviceRegistration == null;
+   }
+   
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == null)
+         return false;
+
+      OSGiServiceState other;
+      if (obj instanceof OSGiServiceState)
+         other = (OSGiServiceState)obj;
+      else if (obj instanceof OSGiServiceReferenceWrapper)
+         other = ((OSGiServiceReferenceWrapper)obj).getServiceState();
+      else
+         return false;
+      return this == other;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return toString().hashCode();
+   }
+
+   @Override
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+      Object desc = getProperty(Constants.SERVICE_DESCRIPTION);
+      Object rank = getProperty(Constants.SERVICE_RANKING);
+      builder.append("Service{");
+      builder.append("id=").append(getServiceId());
+      builder.append(rank != null ? ",rank=" + rank : "");
+      builder.append(desc != null ? ",desc=" + desc : "");
+      builder.append(",classes=").append(Arrays.asList(getClasses()));
+      builder.append("}");
+      return builder.toString();
    }
 }

@@ -21,6 +21,8 @@
 */
 package org.jboss.osgi.framework.bundle;
 
+// $Id: $
+
 import org.jboss.dependency.spi.ControllerContext;
 import org.osgi.framework.Bundle;
 
@@ -29,51 +31,63 @@ import org.osgi.framework.Bundle;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiServiceReferenceWrapper extends ControllerContextHandle
+class OSGiServiceReferenceWrapper extends ControllerContextHandle
 {
    /** The service state */
    private OSGiServiceState serviceState;
 
-   /**
-    * Create a new OSGiServiceReferenceWrapper.
-    * 
-    * @param serviceState the service state
-    * @throws IllegalArgumentException for a null parameter
-    */
-   public OSGiServiceReferenceWrapper(OSGiServiceState serviceState)
+   OSGiServiceReferenceWrapper(OSGiServiceState serviceState)
    {
       if (serviceState == null)
          throw new IllegalArgumentException("Null service state");
       this.serviceState = serviceState;
    }
 
+   @Override
    public Bundle getBundle()
    {
       return serviceState.getBundle();
    }
 
+   @Override
    public Object getProperty(String key)
    {
       return serviceState.getProperty(key);
    }
 
+   @Override
    public String[] getPropertyKeys()
    {
       return serviceState.getPropertyKeys();
    }
 
+   @Override
    public Bundle[] getUsingBundles()
    {
       return serviceState.getUsingBundles();
    }
 
+   @Override
    public boolean isAssignableTo(Bundle bundle, String className)
    {
       return serviceState.isAssignableTo(bundle, className);
    }
 
+   OSGiServiceState getServiceState()
+   {
+      return serviceState;
+   }
+
+   @Override
+   ControllerContext getContext()
+   {
+      return getServiceState();
+   }
+
+   @Override
    public int compareTo(Object reference)
    {
       return serviceState.compareTo(reference);
@@ -95,15 +109,5 @@ public class OSGiServiceReferenceWrapper extends ControllerContextHandle
    public String toString()
    {
       return serviceState.toString();
-   }
-
-   OSGiServiceState getServiceState()
-   {
-      return serviceState;
-   }
-
-   ControllerContext getContext()
-   {
-      return getServiceState();
    }
 }

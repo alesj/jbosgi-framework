@@ -208,7 +208,10 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       if (srefs.isEmpty())
          return null;
 
-      return srefs.iterator().next();
+      // If multiple such services exist, the service with the highest ranking is returned.
+      // If there is a tie in ranking, the service with the lowest service ID is returned. 
+      ArrayList<ServiceReference> list = new ArrayList<ServiceReference>(srefs);
+      return list.get(list.size() - 1);
    }
 
    @Override
@@ -235,25 +238,29 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
     * in which the find hooks are called is the reverse compareTo ordering of
     * their Service References.
     */
-   @SuppressWarnings("unchecked")
-   private Collection<ServiceReference> processFindHooks(AbstractBundleState bundle, String clazz, String filterStr, boolean checkAssignable, Collection<ServiceReference> srefs)
+   private Collection<ServiceReference> processFindHooks(AbstractBundleState bundle, String clazz, String filterStr, boolean checkAssignable,
+         Collection<ServiceReference> srefs)
    {
       BundleContext context = bundle.getBundleContext();
-      if (context == null)
-         return srefs;
-         
-      // Get and sort the FindHook refs
       Collection<ServiceReference> hookRefs = getServiceReferencesInternal(bundle, FindHook.class.getName(), null, true);
+      if (context == null || hookRefs.isEmpty())
+         return srefs;
+
+      // Event and Find Hooks can not be used to hide the services from the framework.
+      if (clazz != null && clazz.startsWith(FindHook.class.getPackage().getName()))
+         return srefs;
+
+      // The order in which the find hooks are called is the reverse compareTo ordering of
+      // their ServiceReferences. That is, the service with the highest ranking number must be called first.
       List<ServiceReference> sortedHookRefs = new ArrayList<ServiceReference>(hookRefs);
-      Collections.sort(sortedHookRefs);
       Collections.reverse(sortedHookRefs);
-      
+
       srefs = new RemoveOnlyCollection<ServiceReference>(srefs);
-      
+
       List<FindHook> hooks = new ArrayList<FindHook>();
-      for(ServiceReference hookRef : sortedHookRefs)
+      for (ServiceReference hookRef : sortedHookRefs)
          hooks.add((FindHook)context.getService(hookRef));
-      
+
       for (FindHook hook : hooks)
       {
          try
@@ -453,9 +460,9 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return mdrFactory;
    }
 
-   private Collection<ServiceReference> getServiceReferencesInternal(AbstractBundleState bundle, String clazz, Filter filter, boolean checkAssignable)
+   private List<ServiceReference> getServiceReferencesInternal(AbstractBundleState bundle, String clazz, Filter filter, boolean checkAssignable)
    {
-      Set<ControllerContext> contexts;
+      Set<ControllerContext> contexts = null;
       KernelController controller = kernel.getController();
 
       // Don't check assignabilty for the system bundle
@@ -463,46 +470,50 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       if (isSystemBundle)
          checkAssignable = false;
 
-      // TODO - a bit slow for system bundle
+      // Load the service class from the given bundle
       if (clazz != null && isSystemBundle == false)
       {
+         // Use all contexts the are of the given service type
          Class<?> type = getBundleManager().loadClassFailsafe(bundle, clazz);
-         if (type == null)
+         if (type != null)
+            contexts = controller.getContexts(type, ControllerState.INSTALLED);
+
+         // No services found
+         if (contexts == null || contexts.isEmpty())
             return Collections.emptyList();
-
-         contexts = controller.getContexts(type, ControllerState.INSTALLED);
       }
-      else
-      {
+
+      // Use all installed contexts
+      if (contexts == null)
          contexts = controller.getContextsByState(ControllerState.INSTALLED);
-      }
 
+      // No services found
       if (contexts == null || contexts.isEmpty())
          return Collections.emptyList();
 
       if (filter == null)
          filter = NoFilter.INSTANCE;
 
+      // Sort by the spec, should bubble up
       List<ControllerContext> sorted = new ArrayList<ControllerContext>(contexts);
-      Collections.sort(sorted, ContextComparator.INSTANCE); // Sort by the spec, should bubble up
-      Collection<ServiceReference> result = new ArrayList<ServiceReference>();
+      Collections.sort(sorted, ContextComparator.getInstance());
+      
+      List<ServiceReference> result = new ArrayList<ServiceReference>();
       for (ControllerContext context : sorted)
       {
-         // re-check?? -- we already only get INSTALLED 
-         if (KernelUtils.isUnregistered(context) == false)
+         ServiceReference sref = getServiceReferenceForContext(context);
+         if (filter.match(sref) && hasPermission(context))
          {
-            ServiceReference ref = getServiceReferenceForContext(context);
-            if (filter.match(ref) && hasPermission(context))
+            // True if the context contains the given class name
+            if (clazz == null || MDRUtils.matchClass(context, clazz))
             {
-               if (clazz == null || isSystemBundle == false || MDRUtils.matchClass(context, clazz))
-               {
-                  // Check the assignability
-                  if (checkAssignable == false || MDRUtils.isAssignableTo(context, bundle))
-                     result.add(ref);
-               }
+               // Check the assignability
+               if (checkAssignable == false || MDRUtils.isAssignableTo(context, bundle))
+                  result.add(sref);
             }
          }
       }
+      //Collections.sort(result, ServiceReferenceComparator.getInstance());
       return result;
    }
 

@@ -41,6 +41,17 @@
     <url>http://fisheye.jboss.com/qsearch/JBossOSGi</url>
   </scm>
 
+  <!-- Modules -->
+  <modules>
+    <module>core</module>
+    <!-- 
+    <module>metadata</module>
+    <module>vfs21</module>
+    <module>vfs30</module>
+    -->
+    <module>bundle</module>
+  </modules>
+  
   <!-- Properties -->
   <properties>
     <version.apache.felix.configadmin>1.0.10</version.apache.felix.configadmin>
@@ -69,15 +80,6 @@
     <version.osgi>4.2.0</version.osgi>
   </properties>
 
-  <!-- Modules -->
-  <modules>
-    <module>core</module>
-    <module>metadata</module>
-    <module>vfs21</module>
-    <module>vfs30</module>
-    <module>bundle</module>
-  </modules>
-  
   <!-- Dependency Management -->
   <dependencyManagement>
     <dependencies>

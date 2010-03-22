@@ -22,6 +22,7 @@
 package org.jboss.test.osgi.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -118,20 +119,24 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, new SimpleServiceFactory(bundleContext), null);
-         ServiceReference reference = registration.getReference();
+         ServiceRegistration sreg = context.registerService(OBJCLASS, new SimpleServiceFactory(context), null);
+         ServiceReference sref = sreg.getReference();
 
-         Object actual = bundleContext.getService(reference);
-         assertEquals(bundleContext, actual);
+         Object actual = context.getService(sref);
+         assertEquals(context, actual);
 
-         actual = bundleContext.getService(reference);
-         assertEquals(bundleContext, actual);
+         actual = context.getService(sref);
+         assertEquals(context, actual);
+         
+         assertTrue(context.ungetService(sref));
+         assertTrue(context.ungetService(sref));
+         assertFalse(context.ungetService(sref));
 
-         registration.unregister();
-         actual = bundleContext.getService(reference);
+         sreg.unregister();
+         actual = context.getService(sref);
          assertNull("" + actual, actual);
       }
       finally
@@ -150,19 +155,19 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         ServiceRegistration registration = bundleContext.registerService(OBJCLASS, new SimpleServiceFactory(bundleContext), null);
-         ServiceReference reference = registration.getReference();
+         ServiceRegistration sreg = context.registerService(OBJCLASS, new SimpleServiceFactory(context), null);
+         ServiceReference sref = sreg.getReference();
 
-         Object actual = bundleContext.getService(reference);
-         assertEquals(bundleContext, actual);
+         Object actual = context.getService(sref);
+         assertEquals(context, actual);
 
          bundle.stop();
          try
          {
-            bundleContext.getService(reference);
+            context.getService(sref);
             fail("Should not be here!");
          }
          catch (IllegalStateException t)
@@ -186,21 +191,21 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
       try
       {
          bundle.start();
-         BundleContext bundleContext = bundle.getBundleContext();
-         assertNotNull(bundleContext);
+         BundleContext context = bundle.getBundleContext();
+         assertNotNull(context);
 
-         bundleContext.addFrameworkListener(this);
+         context.addFrameworkListener(this);
 
-         ServiceRegistration registration = bundleContext.registerService(String.class.getName(), new SimpleServiceFactory(bundleContext), null);
-         ServiceReference reference = registration.getReference();
-         Object actual = bundleContext.getService(reference);
+         ServiceRegistration sreg = context.registerService(String.class.getName(), new SimpleServiceFactory(context), null);
+         ServiceReference sref = sreg.getReference();
+         Object actual = context.getService(sref);
          assertNull("" + actual, actual);
 
          assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);
 
-         registration = bundleContext.registerService(OBJCLASSES, new SimpleServiceFactory(bundleContext), null);
-         reference = registration.getReference();
-         actual = bundleContext.getService(reference);
+         sreg = context.registerService(OBJCLASSES, new SimpleServiceFactory(context), null);
+         sref = sreg.getReference();
+         actual = context.getService(sref);
          assertNull("" + actual, actual);
 
          assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);

@@ -465,12 +465,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     */
    boolean removeContextInUse(ControllerContext context)
    {
+      int usedByCount = getUsedByCount(context, this);
       if (context instanceof ContextTracking)
       {
          ContextTracking ct = (ContextTracking)context;
          ct.ungetTarget(this);
       }
-      return getUsedByCount(context, this) > 0;
+      return usedByCount > 0;
    }
 
    public ServiceReference[] getServicesInUse()

@@ -39,6 +39,8 @@ public class RemoveOnlyCollection<T> implements Collection<T>
 
    public RemoveOnlyCollection(Collection<T> delegate)
    {
+      if (delegate == null)
+         throw new IllegalArgumentException("Null delegate");
       this.delegate = delegate;
    }
 
@@ -119,5 +121,23 @@ public class RemoveOnlyCollection<T> implements Collection<T>
    public void clear()
    {
       delegate.clear();
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return delegate.hashCode();
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      return delegate.equals(obj);
+   }
+
+   @Override
+   public String toString()
+   {
+      return delegate.toString();
    }
 }

@@ -25,6 +25,8 @@ package org.jboss.test.osgi.service;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Hashtable;
+
 import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
@@ -94,6 +96,15 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
 
          sreg.unregister();
          assertServiceEvent(ServiceEvent.UNREGISTERING, sref);
+         
+         filter = "(objectClass=dummy)";
+         context.addServiceListener(this, filter);
+
+         sreg = context.registerService(BundleContext.class.getName(), context, null);
+         assertNoServiceEvent();
+
+         sreg.unregister();
+         assertNoServiceEvent();
       }
       finally
       {
@@ -102,7 +113,7 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
    }
 
    @Test
-   public void testObjectClassFilterNegative() throws Exception
+   public void testModifyServiceProperties() throws Exception
    {
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
@@ -113,14 +124,30 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
          assertNotNull(context);
          assertNoServiceEvent();
 
-         String filter = "(objectClass=dummy)";
+         String filter = "(&(objectClass=org.osgi.framework.BundleContext)(foo=bar))";
          context.addServiceListener(this, filter);
 
-         ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, null);
-         assertNoServiceEvent();
+         Hashtable<String, Object> props = new Hashtable<String, Object>();
+         props.put("foo", "bar");
+         ServiceRegistration sreg = context.registerService(BundleContext.class.getName(), context, props);
+         ServiceReference sref = sreg.getReference();
 
+         assertServiceEvent(ServiceEvent.REGISTERED, sref);
+
+         props.put("xxx", "yyy");
+         sreg.setProperties(props);
+         assertServiceEvent(ServiceEvent.MODIFIED, sref);
+         
+         props.put("foo", "notbar");
+         sreg.setProperties(props);
+         assertServiceEvent(ServiceEvent.MODIFIED_ENDMATCH, sref);
+         
+         props.put("foo", "bar");
+         sreg.setProperties(props);
+         assertServiceEvent(ServiceEvent.MODIFIED, sref);
+         
          sreg.unregister();
-         assertNoServiceEvent();
+         assertServiceEvent(ServiceEvent.UNREGISTERING, sref);
       }
       finally
       {
