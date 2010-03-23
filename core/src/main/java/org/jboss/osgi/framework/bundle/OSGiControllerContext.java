@@ -57,17 +57,29 @@ public class OSGiControllerContext extends AbstractControllerContext
       // The reason is that the OSGi {@link ServiceFactory} getService() method
       // is called with a {@link ServiceReference} that expects the given tracker 
       // (i.e. the using bundle) already be included in getUsingBundles.  
-      
+
       if (tracker != null)
       {
          ContextTracker myTracker = getContextTracker();
          if (myTracker != null && myTracker != tracker)
             myTracker.incrementUsedBy(this, tracker);
-         
+
          tracker.incrementUsedBy(this, tracker);
       }
-      
+
+      // Get the service object
       Object result = getTargetForActualUser(tracker);
+      
+      // In case the ServiceFactory.getService() returns null decrement the usage count again
+      if (result == null)
+      {
+         ContextTracker myTracker = getContextTracker();
+         if (myTracker != null && myTracker != tracker)
+            myTracker.decrementUsedBy(this, tracker);
+
+         tracker.decrementUsedBy(this, tracker);
+      }
+
       return result;
    }
 
@@ -81,7 +93,7 @@ public class OSGiControllerContext extends AbstractControllerContext
       // The reason is that the OSGi {@link ServiceFactory} ungetService() method
       // is called with a {@link ServiceReference} that expects the given tracker 
       // (i.e. the using bundle) already be included in getUsingBundles.
-      
+
       Object result = ungetTargetForActualUser(tracker);
       if (tracker != null)
       {

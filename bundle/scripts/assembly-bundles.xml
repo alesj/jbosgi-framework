@@ -30,7 +30,7 @@
         <include>*:pax-web-jetty-bundle:jar</include>
       </includes>
       <useStrictFiltering>true</useStrictFiltering>
-      <scope>test</scope>
+      <scope>provided</scope>
       <unpack>false</unpack>
     </dependencySet>
     

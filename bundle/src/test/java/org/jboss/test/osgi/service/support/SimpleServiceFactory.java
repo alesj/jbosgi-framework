@@ -33,7 +33,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class SimpleServiceFactory implements ServiceFactory
 {
-   public Object service;
+   Object service;
 
    public Bundle getBundle;
    public int getCount;
@@ -55,11 +55,11 @@ public class SimpleServiceFactory implements ServiceFactory
       return service;
    }
 
-   public void ungetService(Bundle bundle, ServiceRegistration registration, Object service)
+   public void ungetService(Bundle bundle, ServiceRegistration registration, Object unget)
    {
       ungetBundle = bundle;
       ungetRegistration = registration;
-      ungetService = service;
+      ungetService = unget;
       ungetCount++;
    }
 

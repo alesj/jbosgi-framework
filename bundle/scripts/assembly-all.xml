@@ -35,11 +35,14 @@
         <include>*:jboss-managed:jar</include>
         <include>*:jboss-mdr:jar</include>
         <include>*:jboss-metatype:jar</include>
+        <include>*:jboss-osgi-deployers-vfs30:jar</include>
         <include>*:jboss-osgi-deployment:jar</include>
         <include>*:jboss-osgi-framework-core:jar</include>
         <include>*:jboss-osgi-framework-metadata:jar</include>
+        <include>*:jboss-osgi-framework-vfs30:jar</include>
         <include>*:jboss-osgi-spi:jar</include>
         <include>*:jboss-osgi-vfs:jar</include>
+        <include>*:jboss-osgi-vfs30:jar</include>
         <include>*:jboss-reflect:jar</include>
         <include>*:jboss-vfs:jar</include>
         <include>*:jbossxb:jar</include>
@@ -48,16 +51,13 @@
         <include>*:org.osgi.compendium:jar</include>
       </includes>
       <useStrictFiltering>true</useStrictFiltering>
-      <scope>compile</scope>
+      <scope>provided</scope>
       <unpack>true</unpack>
     </dependencySet>
     <dependencySet>
       <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
       <includes>
         <include>*:jboss-logging-log4j:jar</include>
-        <include>*:jboss-osgi-deployers-vfs30:jar</include>
-        <include>*:jboss-osgi-framework-vfs30:jar</include>
-        <include>*:jboss-osgi-vfs30:jar</include>
         <include>*:log4j:jar</include>
       </includes>
       <useStrictFiltering>true</useStrictFiltering>

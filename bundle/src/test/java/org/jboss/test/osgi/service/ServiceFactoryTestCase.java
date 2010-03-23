@@ -112,8 +112,6 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
    @Test
    public void testGetServiceFactory() throws Exception
    {
-      String OBJCLASS = BundleContext.class.getName();
-
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
@@ -137,7 +135,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
 
          sreg.unregister();
          actual = context.getService(sref);
-         assertNull("" + actual, actual);
+         assertNull("Service null", actual);
       }
       finally
       {
@@ -184,6 +182,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
    @Test
    public void testGetWrongInterfacesForServiceFactory() throws Exception
    {
+      String[] OBJCLASS = { String.class.getName() };
       String[] OBJCLASSES = { String.class.getName(), BundleContext.class.getName() };
 
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
@@ -196,17 +195,23 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
 
          context.addFrameworkListener(this);
 
-         ServiceRegistration sreg = context.registerService(String.class.getName(), new SimpleServiceFactory(context), null);
+         SimpleServiceFactory factory = new SimpleServiceFactory(context);
+         ServiceRegistration sreg = context.registerService(OBJCLASS, factory, null);
          ServiceReference sref = sreg.getReference();
          Object actual = context.getService(sref);
-         assertNull("" + actual, actual);
+         assertNull("Service null", actual);
+         assertFalse(context.ungetService(sref));
+         assertEquals("ungetService() not called", 0, factory.ungetCount);
 
          assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);
 
-         sreg = context.registerService(OBJCLASSES, new SimpleServiceFactory(context), null);
+         factory = new SimpleServiceFactory(context);
+         sreg = context.registerService(OBJCLASSES, factory, null);
          sref = sreg.getReference();
          actual = context.getService(sref);
-         assertNull("" + actual, actual);
+         assertNull("Service null", actual);
+         assertFalse(context.ungetService(sref));
+         assertEquals("ungetService() not called", 0, factory.ungetCount);
 
          assertFrameworkEvent(FrameworkEvent.ERROR, bundle, ServiceException.class);
       }

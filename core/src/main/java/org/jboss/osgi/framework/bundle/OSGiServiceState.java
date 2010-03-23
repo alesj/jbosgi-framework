@@ -377,7 +377,6 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
          if (service == null)
          {
             ServiceFactory serviceFactory = (ServiceFactory)serviceOrFactory;
-            boolean gotService = false;
             
             // If the service object returned by the ServiceFactory object is not an instanceof all the classes named when 
             // the service was registered or the ServiceFactory object throws an exception, null is returned and a Framework 
@@ -385,22 +384,26 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
             try
             {
                service = serviceFactory.getService(bundleState.getBundle(), getRegistration());
-               gotService = true;
-               
+            }
+            catch (Throwable t)
+            {
+               String msg = "Cannot get service from: " + serviceFactory;
+               ServiceException serviceException = new ServiceException(msg, ServiceException.FACTORY_EXCEPTION, t);
+               log.error("Exception in ServiceFactory.getService()", serviceException);
+               FrameworkEventsPlugin plugin = bundleState.getBundleManager().getPlugin(FrameworkEventsPlugin.class);
+               plugin.fireFrameworkEvent(bundleState, FrameworkEvent.ERROR, serviceException);
+               return null;
+            }
+            try
+            {
                service = checkObjClass(service);
                serviceCache.put(bundleState, service);
             }
             catch (Throwable t)
             {
-               Throwable cause = t;
-               String message = "Cannot get service from: " + serviceFactory;
-               if (gotService == true)
-               {
-                  message += "." + t.getMessage();
-                  cause = null;
-               }
-               ServiceException serviceException = new ServiceException(message, cause);
-               log.error("Cannot getService from ServiceFactory", serviceException);
+               String msg = "Cannot get service from: " + serviceFactory;
+               ServiceException serviceException = new ServiceException(msg, ServiceException.FACTORY_ERROR);
+               log.error("Invalid type from ServiceFactory.getService()", serviceException);
                FrameworkEventsPlugin plugin = bundleState.getBundleManager().getPlugin(FrameworkEventsPlugin.class);
                plugin.fireFrameworkEvent(bundleState, FrameworkEvent.ERROR, serviceException);
                return null;
