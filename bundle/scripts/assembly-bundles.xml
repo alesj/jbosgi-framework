@@ -15,17 +15,6 @@
       <outputDirectory>bundles</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
       <includes>
-        <include>*:org.osgi.compendium:jar</include>
-        <include>*:org.osgi.core:jar</include>
-      </includes>
-      <useStrictFiltering>true</useStrictFiltering>
-      <scope>compile</scope>
-      <unpack>false</unpack>
-    </dependencySet>
-    <dependencySet>
-      <outputDirectory>bundles</outputDirectory>
-      <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-      <includes>
         <include>*:jboss-osgi-apache-xerces:jar</include>
         <include>*:jboss-osgi-common:jar</include>
         <include>*:jboss-osgi-common-core:jar</include>

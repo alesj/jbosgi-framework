@@ -65,6 +65,8 @@
     <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
     <version.jboss.osgi.deployers>1.0.5-SNAPSHOT</version.jboss.osgi.deployers>
     <version.jboss.osgi.deployment>1.0.2-SNAPSHOT</version.jboss.osgi.deployment>
+    <version.jboss.osgi.equinox>3.5.2-SNAPSHOT</version.jboss.osgi.equinox>
+    <version.jboss.osgi.felix>2.0.4-SNAPSHOT</version.jboss.osgi.felix>
     <version.jboss.osgi.husky>1.0.4-SNAPSHOT</version.jboss.osgi.husky>
     <version.jboss.osgi.jaxb>2.1.10.SP3</version.jboss.osgi.jaxb>
     <version.jboss.osgi.jmx>1.0.4-SNAPSHOT</version.jboss.osgi.jmx>
@@ -147,6 +149,16 @@
         <groupId>org.jboss.osgi.deployment</groupId>
         <artifactId>jboss-osgi-deployment</artifactId>
         <version>${version.jboss.osgi.deployment}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.osgi.equinox</groupId>
+        <artifactId>jboss-osgi-equinox</artifactId>
+        <version>${version.jboss.osgi.equinox}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.osgi.felix</groupId>
+        <artifactId>jboss-osgi-felix</artifactId>
+        <version>${version.jboss.osgi.felix}</version>
       </dependency>
 
       <!-- OSGi Dependencies -->

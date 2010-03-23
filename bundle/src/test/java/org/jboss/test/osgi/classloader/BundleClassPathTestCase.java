@@ -22,13 +22,15 @@
 package org.jboss.test.osgi.classloader;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+import java.net.URL;
 
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.test.osgi.classloader.support.a.A;
+import org.jboss.test.osgi.classloader.support.b.B;
+import org.jboss.test.osgi.classloader.support.c.CA;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 
 /**
  * BundleClassPathTest.
@@ -41,14 +43,15 @@ public class BundleClassPathTestCase extends OSGiFrameworkTest
    @Test
    public void testBundleClassPath() throws Exception
    {
-      BundleContext sysContext = framework.getBundleContext();
-      Bundle bundle = sysContext.installBundle(getTestArchivePath("bundle-classpath.war"));
+      URL bundleURL = getTestArchiveURL("bundle-classpath.war");
+      Bundle bundle = context.installBundle(bundleURL.toExternalForm());
 
       bundle.start();
       assertEquals("Bundle state", Bundle.ACTIVE, bundle.getState());
 
-      Class<?> clazz = bundle.loadClass(A.class.getName());
-      assertNotNull("Loaded class", clazz);
+      assertLoadClass(bundle, A.class.getName(), bundle);
+      assertLoadClass(bundle, B.class.getName(), bundle);
+      assertLoadClass(bundle, CA.class.getName(), bundle);
 
       bundle.uninstall();
       assertEquals("Bundle state", Bundle.UNINSTALLED, bundle.getState());

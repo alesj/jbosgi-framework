@@ -32,15 +32,17 @@
     <version>1.0.0.Alpha4-SNAPSHOT</version>
   </parent>
 
+  <!-- Properties -->
+  <properties>
+    <surefire.jpda.args></surefire.jpda.args>
+    <surefire.system.args>-Xmx512m ${surefire.jpda.args}</surefire.system.args>
+  </properties>
+
+  <!-- Dependencies -->  
   <dependencies>
     <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework-core</artifactId>
-      <version>${version}</version>
     </dependency>
     
     <!-- Test bundles dependencies -->
@@ -167,12 +169,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework-vfs30</artifactId>
-      <version>${version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging-log4j</artifactId>
       <scope>test</scope>
@@ -237,7 +233,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>-Xmx512m</argLine>
+          <argLine>${surefire.system.args}</argLine>
           <systemProperties>
             <property>
               <name>log4j.output.dir</name>
@@ -266,6 +262,7 @@
   </build>
   
   <profiles>
+  
     <!-- 
       Name: all 
       Desc: Build the aggregated framework jar
@@ -298,5 +295,179 @@
         </plugins>
       </build>
     </profile>
+
+    <!--
+      Name: framework-equinox
+      Descr: Setup for Equinox framework integration testing
+    -->
+    <profile>
+      <id>framework-equinox</id>
+      <activation>
+        <property>
+          <name>fmwk</name>
+          <value>equinox</value>
+        </property>
+      </activation>
+      <properties>
+        <jboss.osgi.framework.properties>jboss-osgi-equinox.properties</jboss.osgi.framework.properties>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.equinox</groupId>
+          <artifactId>jboss-osgi-equinox</artifactId>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.osgi.vfs</groupId>
+          <artifactId>jboss-osgi-vfs30</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>compendium</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>directory-single</goal>
+                </goals>
+                <configuration>
+                  <finalName>test-libs</finalName>
+                  <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <descriptors>
+                    <descriptor>scripts/assembly-compendium-equinox.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!--
+      Name: framework-felix 
+      Descr: Setup for Felix framework integration testing
+    -->
+    <profile>
+      <id>framework-felix</id>
+      <activation>
+        <property>
+          <name>fmwk</name>
+          <value>felix</value>
+        </property>
+      </activation>
+      <properties>
+        <jboss.osgi.framework.properties>jboss-osgi-felix.properties</jboss.osgi.framework.properties>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.felix</groupId>
+          <artifactId>jboss-osgi-felix</artifactId>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.osgi.vfs</groupId>
+          <artifactId>jboss-osgi-vfs30</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>compendium</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>directory-single</goal>
+                </goals>
+                <configuration>
+                  <finalName>test-libs</finalName>
+                  <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <descriptors>
+                    <descriptor>scripts/assembly-compendium.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!--
+      Name: framework-native
+      Descr: Setup for Native Framework integration testing
+    -->
+    <profile>
+      <id>framework-jbossmc-default</id>
+      <activation>
+        <property>
+          <name>!fmwk</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-core</artifactId>
+          <version>${version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.osgi.framework</groupId>
+          <artifactId>jboss-osgi-framework-vfs30</artifactId>
+          <version>${version}</version>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>compendium</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>directory-single</goal>
+                </goals>
+                <configuration>
+                  <finalName>test-libs</finalName>
+                  <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <descriptors>
+                    <descriptor>scripts/assembly-compendium.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    
+    <!--
+      Name: jpda
+      Descr: Enable JPDA remote debuging
+    -->
+    <profile>
+      <id>jpda</id>
+      <activation>
+        <property>
+          <name>jpda</name>
+        </property>
+      </activation>
+      <properties>
+        <surefire.jpda.args>-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y</surefire.jpda.args>
+      </properties>
+    </profile>
+
   </profiles>
 </project>

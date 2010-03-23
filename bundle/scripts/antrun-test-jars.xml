@@ -43,14 +43,30 @@
     <!-- Please add alphabetically -->
 
     <!-- bundle-classpath -->
+    <jar destfile="${tests.output.dir}/test-libs/bundle-classpath-b.jar">
+      <fileset dir="${tests.classes.dir}">
+        <include name="**/classloader/support/b/B.class"/>
+      </fileset>
+    </jar> 
+    <jar destfile="${tests.output.dir}/test-libs/bundle-classpath-c.jar">
+      <fileset dir="${tests.classes.dir}">
+        <include name="**/classloader/support/c/CA.class"/>
+      </fileset>
+    </jar> 
     <war destfile="${tests.output.dir}/test-libs/bundle-classpath.war"
       manifest="${tests.resources.dir}/bundles/classloader/bundleclasspath/MANIFEST.MF"
       webxml="${tests.resources.dir}/bundles/classloader/bundleclasspath/web.xml">
       <classes dir="${tests.classes.dir}">
         <include name="**/classloader/support/a/A.class"/>
       </classes>
+      <lib dir="${tests.output.dir}/test-libs">
+        <include name="bundle-classpath-b.jar"/>
+      </lib>
       <fileset dir="${tests.resources.dir}/bundles/classloader/bundleclasspath">
         <include name="message.txt"/>
+      </fileset>
+      <fileset dir="${tests.output.dir}/test-libs">
+        <include name="bundle-classpath-c.jar"/>
       </fileset>
     </war> 
     

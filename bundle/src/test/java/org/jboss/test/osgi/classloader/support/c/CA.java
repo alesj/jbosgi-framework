@@ -26,7 +26,7 @@ import org.jboss.test.osgi.classloader.support.a.A;
 /**
  * CA.
  * 
- * @authorthomas.diesler@jboss.com
+ * @author thomas.diesler@jboss.com
  * @version $Revision$
  */
 public class CA
