@@ -27,17 +27,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
-import org.jboss.osgi.spi.util.ServiceLoader;
-import org.jboss.osgi.testing.OSGiRuntimeTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.launch.Framework;
-import org.osgi.framework.launch.FrameworkFactory;
 
 /**
  * A test that deployes a bundle and verifies its state
@@ -45,7 +40,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  * @author thomas.diesler@jboss.com
  * @since 18-Aug-2009
  */
-public class SimpleLogServiceTestCase extends OSGiRuntimeTest
+public class SimpleLogServiceTestCase extends OSGiFrameworkTest
 {
    @Before
    public void setUp()
@@ -56,13 +51,7 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
    @Test
    public void testNoLogService() throws Exception
    {
-      FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
-      Framework framework = factory.newFramework(null);
-      framework.start();
-
-      BundleContext sysContext = framework.getBundleContext();
-      Bundle bundle = sysContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
-
+      Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
       try
       {
          bundle.start();
@@ -72,89 +61,111 @@ public class SimpleLogServiceTestCase extends OSGiRuntimeTest
       {
          // expected
       }
-
-      framework.stop();
+      finally
+      {
+         bundle.uninstall();
+      }
    }
 
    @Test
    public void testLogServiceFromThirdParty() throws Exception
    {
-      FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
-      Framework framework = factory.newFramework(null);
-      framework.start();
-
-      BundleContext sysContext = framework.getBundleContext();
-      sysContext.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar")).start();
-
-      Bundle bundle = sysContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+      Bundle logBundle = context.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar"));
       try
       {
-         bundle.start();
+         logBundle.start();
+
+         Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+         try
+         {
+            try
+            {
+               bundle.start();
+               fail("Expected UNRESOLVED OSGiPackageRequirement{org.osgi.util.tracker [0.0.0,?)}");
+            }
+            catch (BundleException ex)
+            {
+               // expected
+            }
+         }
+         finally
+         {
+            bundle.uninstall();
+         }
       }
-      catch (BundleException ex)
+      finally
       {
-         // Expected UNRESOLVED OSGiPackageRequirement{org.osgi.util.tracker [0.0.0,?)} with MC Framework
+         logBundle.uninstall();
       }
-
-      assumeTrue(bundle.getState() == Bundle.ACTIVE);
-
-      // The bundle activator is expected to set this property
-      String result = System.getProperty(bundle.getSymbolicName());
-      assertNotNull("Result property not null", result);
-
-      assertTrue("BundleActivator start", result.indexOf("startBundleActivator") > 0);
-      assertFalse("getService", result.indexOf("getService") > 0);
-      assertFalse("addingService", result.indexOf("addingService") > 0);
-
-      framework.stop();
    }
 
    @Test
    public void testLogServiceFromCompendium() throws Exception
    {
-      FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
-      Framework framework = factory.newFramework(null);
-      framework.start();
+      Bundle cmpnBundle = context.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
+      try
+      {
+         Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+         try
+         {
+            bundle.start();
 
-      BundleContext sysContext = framework.getBundleContext();
-      sysContext.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
+            // The bundle activator is expected to set this property
+            String result = System.getProperty(bundle.getSymbolicName());
+            assertNotNull("Result property not null", result);
 
-      Bundle bundle = sysContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
-      bundle.start();
-
-      // The bundle activator is expected to set this property
-      String result = System.getProperty(bundle.getSymbolicName());
-      assertNotNull("Result property not null", result);
-
-      assertTrue("BundleActivator start", result.indexOf("startBundleActivator") > 0);
-      assertFalse("getService", result.indexOf("getService") > 0);
-      assertFalse("addingService", result.indexOf("addingService") > 0);
-
-      framework.stop();
+            assertTrue("BundleActivator start", result.indexOf("startBundleActivator") > 0);
+            assertFalse("getService", result.indexOf("getService") > 0);
+            assertFalse("addingService", result.indexOf("addingService") > 0);
+         }
+         finally
+         {
+            bundle.uninstall();
+         }
+      }
+      finally
+      {
+         cmpnBundle.uninstall();
+      }
    }
 
    @Test
    public void testLogServiceFromTwoExporters() throws Exception
    {
-      FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
-      Framework framework = factory.newFramework(null);
-      framework.start();
+      Bundle cmpnBundle = context.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
+      try
+      {
+         Bundle logBundle = context.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar"));
+         try
+         {
+            logBundle.start();
 
-      BundleContext sysContext = framework.getBundleContext();
-      sysContext.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar")).start();
-      sysContext.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar")).start();
+            Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+            try
+            {
+               bundle.start();
 
-      Bundle bundle = sysContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
-      bundle.start();
+               // The bundle activator is expected to set this property
+               String result = System.getProperty(bundle.getSymbolicName());
+               assertNotNull("Result property not null", result);
 
-      // The bundle activator is expected to set this property
-      String result = System.getProperty(bundle.getSymbolicName());
-      assertNotNull("Result property not null", result);
-
-      assertTrue("BundleActivator start", result.indexOf("startBundleActivator") > 0);
-      assertTrue("getService", result.indexOf("getService") > 0);
-      assertTrue("addingService", result.indexOf("addingService") > 0);
-
-      framework.stop();
+               assertTrue("BundleActivator start", result.indexOf("startBundleActivator") > 0);
+               assertTrue("getService", result.indexOf("getService") > 0);
+               assertTrue("addingService", result.indexOf("addingService") > 0);
+            }
+            finally
+            {
+               bundle.uninstall();
+            }
+         }
+         finally
+         {
+            logBundle.uninstall();
+         }
+      }
+      finally
+      {
+         cmpnBundle.uninstall();
+      }
    }
 }

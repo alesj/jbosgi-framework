@@ -61,7 +61,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          assertEquals(1, resolver.getBundles().size());
@@ -116,7 +116,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -149,7 +149,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       // Bundle-SymbolicName: singleton;singleton:=true
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/singleton", A.class);
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -171,7 +171,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -198,7 +198,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport;resolution:=optional
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundleoptional");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -225,7 +225,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport;bundle-version="[0.0.0,1.0.0]"
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundleversion");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -252,7 +252,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       //Bundle-SymbolicName: packageexportattribute
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -264,7 +264,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          //Bundle-SymbolicName: simpleimport
          //Import-Package: org.jboss.test.osgi.classloader.support.a
          VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleimport");
-         Bundle bundleB = framework.installBundle(fileB);
+         Bundle bundleB = installBundle(fileB);
          try
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
@@ -279,7 +279,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          //Bundle-SymbolicName: packageimportattribute
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=x
          fileB = assembleArchive("bundleB", "/bundles/resolver/packageimportattribute");
-         bundleB = framework.installBundle(fileB);
+         bundleB = installBundle(fileB);
          try
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
@@ -310,7 +310,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       //Bundle-SymbolicName: packageexportattribute
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -322,7 +322,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          //Bundle-SymbolicName: packageimportattributefails
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=y
          VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageimportattributefails");
-         Bundle bundleB = framework.installBundle(fileB);
+         Bundle bundleB = installBundle(fileB);
          try
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
@@ -353,7 +353,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       //Bundle-SymbolicName: packageexportattributemandatory
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x;mandatory:=test
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -367,7 +367,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          //Bundle-SymbolicName: packageimportattribute
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=x
          VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageimportattribute");
-         Bundle bundleB = framework.installBundle(fileB);
+         Bundle bundleB = installBundle(fileB);
          try
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
@@ -398,7 +398,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
       //Bundle-SymbolicName: packageexportattributemandatory
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x;mandatory:=test
       VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory");
-      Bundle bundleA = framework.installBundle(fileA);
+      Bundle bundleA = installBundle(fileA);
       try
       {
          ResolverBundle resBundleA = resolver.getBundle(bundleA);
@@ -412,7 +412,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          //Bundle-SymbolicName: simpleimport
          //Import-Package: org.jboss.test.osgi.classloader.support.a
          VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleimport");
-         Bundle bundleB = framework.installBundle(fileB);
+         Bundle bundleB = installBundle(fileB);
          try
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);
@@ -427,7 +427,7 @@ public class ResolverMetadataTestCase extends AbstractResolverTest
          //Bundle-SymbolicName: packageimportattributefails
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=y
          fileB = assembleArchive("bundleB", "/bundles/resolver/packageimportattributefails");
-         bundleB = framework.installBundle(fileB);
+         bundleB = installBundle(fileB);
          try
          {
             ResolverBundle resBundleB = resolver.getBundle(bundleB);

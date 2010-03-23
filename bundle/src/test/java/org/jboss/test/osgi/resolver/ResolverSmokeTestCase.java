@@ -30,16 +30,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.launch.OSGiFramework;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
 import org.jboss.osgi.framework.resolver.ResolverBundle;
-import org.jboss.osgi.spi.framework.OSGiBootstrap;
-import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiRuntimeTest;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 /**
@@ -48,62 +44,50 @@ import org.osgi.framework.BundleException;
  * @author thomas.diesler@jboss.com
  * @since 27-Jul-2009
  */
-public class ResolverSmokeTestCase extends OSGiRuntimeTest
+public class ResolverSmokeTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testRandomBundleResolution() throws BundleException
    {
-      OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
-      OSGiFramework framework = (OSGiFramework)bootProvider.getFramework();
-      framework.start();
+      List<String> bundlePaths = new ArrayList<String>();
+      bundlePaths.add("bundles/jboss-osgi-apache-xerces.jar");
+      bundlePaths.add("bundles/jboss-osgi-common.jar");
+      bundlePaths.add("bundles/jboss-osgi-common-core.jar");
+      bundlePaths.add("bundles/jboss-osgi-husky.jar");
+      bundlePaths.add("bundles/jboss-osgi-jaxb.jar");
+      bundlePaths.add("bundles/jboss-osgi-jmx.jar");
+      bundlePaths.add("bundles/jboss-osgi-jndi.jar");
+      bundlePaths.add("bundles/jboss-osgi-reflect.jar");
+      bundlePaths.add("bundles/jboss-osgi-xml-binding.jar");
+      bundlePaths.add("bundles/org.apache.felix.configadmin.jar");
+      bundlePaths.add("bundles/org.apache.felix.log.jar");
+      bundlePaths.add("bundles/org.apache.felix.metatype.jar");
+      bundlePaths.add("bundles/org.osgi.compendium.jar");
+      bundlePaths.add("bundles/pax-web-jetty-bundle.jar");
 
-      try
+      Collections.shuffle(bundlePaths);
+
+      List<Bundle> unresolved = new ArrayList<Bundle>();
+      for (String path : bundlePaths)
       {
-         List<String> bundlePaths = new ArrayList<String>();
-         bundlePaths.add("bundles/jboss-osgi-apache-xerces.jar");
-         bundlePaths.add("bundles/jboss-osgi-common.jar");
-         bundlePaths.add("bundles/jboss-osgi-common-core.jar");
-         bundlePaths.add("bundles/jboss-osgi-husky.jar");
-         bundlePaths.add("bundles/jboss-osgi-jaxb.jar");
-         bundlePaths.add("bundles/jboss-osgi-jmx.jar");
-         bundlePaths.add("bundles/jboss-osgi-jndi.jar");
-         bundlePaths.add("bundles/jboss-osgi-reflect.jar");
-         bundlePaths.add("bundles/jboss-osgi-xml-binding.jar");
-         bundlePaths.add("bundles/org.apache.felix.configadmin.jar");
-         bundlePaths.add("bundles/org.apache.felix.log.jar");
-         bundlePaths.add("bundles/org.apache.felix.metatype.jar");
-         bundlePaths.add("bundles/org.osgi.compendium.jar");
-         bundlePaths.add("bundles/pax-web-jetty-bundle.jar");
-
-         Collections.shuffle(bundlePaths);
-
-         List<Bundle> unresolved = new ArrayList<Bundle>();
-         BundleContext sysContext = framework.getBundleContext();
-         for (String path : bundlePaths)
-         {
-            Bundle bundle = sysContext.installBundle(getTestArchivePath(path));
-            unresolved.add(bundle);
-         }
-
-         OSGiBundleManager bundleManager = framework.getBundleManager();
-         Resolver resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-         if (resolver != null)
-         {
-            List<ResolverBundle> installedBundles = resolver.getBundles();
-            assertEquals("All bundles installed", bundlePaths.size(), installedBundles.size());
-
-            List<ResolverBundle> resolved = resolver.resolve(unresolved);
-            assertEquals("All bundles resolved", unresolved.size(), resolved.size());
-         }
-
-         System.out.println("FIXME [JBKERNEL-54] Cannot resolve circular dependencies");
-         //PackageAdminPlugin packageAdmin = bundleManager.getPlugin(PackageAdminPlugin.class);
-         //boolean allResolved = packageAdmin.resolveBundles(null);
-         //assertTrue("All bundles resolved", allResolved);
+         Bundle bundle = context.installBundle(getTestArchivePath(path));
+         unresolved.add(bundle);
       }
-      finally
+
+      OSGiBundleManager bundleManager = getBundleManager();
+      Resolver resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (resolver != null)
       {
-         framework.stop();
+         List<ResolverBundle> installedBundles = resolver.getBundles();
+         assertEquals("All bundles installed", bundlePaths.size(), installedBundles.size());
+
+         List<ResolverBundle> resolved = resolver.resolve(unresolved);
+         assertEquals("All bundles resolved", unresolved.size(), resolved.size());
       }
+
+      System.out.println("FIXME [JBKERNEL-54] Cannot resolve circular dependencies");
+      //PackageAdminPlugin packageAdmin = bundleManager.getPlugin(PackageAdminPlugin.class);
+      //boolean allResolved = packageAdmin.resolveBundles(null);
+      //assertTrue("All bundles resolved", allResolved);
    }
 }

@@ -27,20 +27,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.launch.OSGiFramework;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.Plugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
-import org.jboss.osgi.spi.framework.OSGiBootstrap;
-import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiRuntimeTest;
-import org.junit.AfterClass;
+import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
@@ -49,28 +42,8 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.diesler@jboss.com
  * @since 09-Nov-2009
  */
-public abstract class AbstractResolverTest extends OSGiRuntimeTest
+public abstract class AbstractResolverTest extends AbstractFrameworkTest
 {
-   protected static OSGiFramework framework;
-
-   @BeforeClass
-   public static void beforeClass() throws BundleException
-   {
-      OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
-      framework = (OSGiFramework)bootProvider.getFramework();
-      framework.start();
-   }
-
-   @AfterClass
-   public static void afterClass() throws BundleException
-   {
-      if (framework != null)
-      {
-         framework.stop();
-         framework = null;
-      }
-   }
-
    @Before
    public void setUp() throws Exception
    {
@@ -78,7 +51,7 @@ public abstract class AbstractResolverTest extends OSGiRuntimeTest
       Resolver testResolver = getTestResolver();
       if (installedResolver != testResolver)
       {
-         OSGiBundleManager bundleManager = framework.getBundleManager();
+         OSGiBundleManager bundleManager = getBundleManager();
          if (installedResolver != null)
             bundleManager.removePlugin((Plugin)installedResolver);
          if (testResolver != null)
@@ -94,20 +67,14 @@ public abstract class AbstractResolverTest extends OSGiRuntimeTest
 
    protected Resolver getInstalledResolver()
    {
-      OSGiBundleManager bundleManager = framework.getBundleManager();
+      OSGiBundleManager bundleManager = getBundleManager();
       return bundleManager.getOptionalPlugin(ResolverPlugin.class);
    }
 
    protected PackageAdmin getPackageAdmin()
    {
-      OSGiBundleManager bundleManager = framework.getBundleManager();
+      OSGiBundleManager bundleManager = getBundleManager();
       return bundleManager.getPlugin(PackageAdminPlugin.class);
-   }
-
-   protected BundleContext getSystemContext()
-   {
-      BundleContext sysContext = framework.getBundleContext();
-      return sysContext;
    }
 
    protected void assertLoaderBundle(Bundle expLoader, Bundle srcLoader, Class<?> clazz) throws ClassNotFoundException

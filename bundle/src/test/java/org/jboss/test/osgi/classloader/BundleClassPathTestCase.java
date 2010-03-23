@@ -24,14 +24,11 @@ package org.jboss.test.osgi.classloader;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.jboss.osgi.spi.framework.OSGiBootstrap;
-import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiRuntimeTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.launch.Framework;
 
 /**
  * BundleClassPathTest.
@@ -39,15 +36,11 @@ import org.osgi.framework.launch.Framework;
  * @author thomas.diesler@jboss.com
  * @since 07-Oct-2009
  */
-public class BundleClassPathTestCase extends OSGiRuntimeTest
+public class BundleClassPathTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testBundleClassPath() throws Exception
    {
-      OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
-      Framework framework = bootProvider.getFramework();
-      framework.start();
-
       BundleContext sysContext = framework.getBundleContext();
       Bundle bundle = sysContext.installBundle(getTestArchivePath("bundle-classpath.war"));
 
@@ -59,7 +52,5 @@ public class BundleClassPathTestCase extends OSGiRuntimeTest
 
       bundle.uninstall();
       assertEquals("Bundle state", Bundle.UNINSTALLED, bundle.getState());
-
-      framework.stop();
    }
 }

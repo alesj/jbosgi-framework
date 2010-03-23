@@ -23,15 +23,10 @@ package org.jboss.test.osgi.nativecode;
 
 //$Id: FragmentTestCase.java 99648 2010-01-20 09:27:43Z thomas.diesler@jboss.com $
 
-import org.jboss.osgi.spi.framework.OSGiBootstrap;
-import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.osgi.testing.OSGiRuntimeTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.launch.Framework;
 
 /**
  * Test NativeCode-Library functionality
@@ -39,28 +34,8 @@ import org.osgi.framework.launch.Framework;
  * @author thomas.diesler@jboss.com
  * @since 21-Jan-2010
  */
-public class NativeCodeTestCase extends OSGiRuntimeTest
+public class NativeCodeTestCase extends OSGiFrameworkTest
 {
-   private static Framework framework;
-
-   @BeforeClass
-   public static void beforeClass() throws Exception
-   {
-      OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
-      framework = bootProvider.getFramework();
-      framework.start();
-   }
-
-   @AfterClass
-   public static void afterClass() throws Exception
-   {
-      if (framework != null)
-      {
-         framework.stop();
-         framework = null;
-      }
-   }
-
    @Test
    public void testNativeCode() throws Exception
    {

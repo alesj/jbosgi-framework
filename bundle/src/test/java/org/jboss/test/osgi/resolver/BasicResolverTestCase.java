@@ -42,7 +42,7 @@ public class BasicResolverTestCase extends AbstractImportExportTest
       Resolver resolver = getInstalledResolver();
       if (resolver == null || resolver.getClass() != BasicResolverImpl.class)
       {
-         OSGiBundleManager bundleManager = framework.getBundleManager();
+         OSGiBundleManager bundleManager = getBundleManager();
          resolver = new BasicResolverImpl(bundleManager);
          resolver.addBundle(bundleManager.getSystemBundle());
       }
