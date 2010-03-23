@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.osgi.integration.simple;
+package org.jboss.test.osgi.simple;
 
 //$Id$
 
@@ -30,7 +30,7 @@ import org.jboss.osgi.spi.util.ServiceLoader;
 import org.jboss.osgi.testing.OSGiBundle;
 import org.jboss.osgi.testing.OSGiRuntime;
 import org.jboss.osgi.testing.OSGiRuntimeHelper;
-import org.jboss.test.osgi.integration.simple.bundleA.SimpleService;
+import org.jboss.test.osgi.simple.bundleA.SimpleService;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

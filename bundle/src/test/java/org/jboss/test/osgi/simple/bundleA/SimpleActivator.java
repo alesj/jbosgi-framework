@@ -19,26 +19,29 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.osgi.integration.simple.bundleA;
+package org.jboss.test.osgi.simple.bundleA;
 
 //$Id$
 
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * A SimpleService
+ * A Service Activator
  * 
  * @author thomas.diesler@jboss.com
  * @since 24-Apr-2009
  */
-public class SimpleService
+public class SimpleActivator implements BundleActivator
 {
-   public SimpleService(BundleContext context)
+   public void start(BundleContext context)
    {
+      // Register a service
+      SimpleService service = new SimpleService(context);
+      context.registerService(SimpleService.class.getName(), service, null);
    }
 
-   public String echo(String msg)
+   public void stop(BundleContext context)
    {
-      return msg;
    }
 }
