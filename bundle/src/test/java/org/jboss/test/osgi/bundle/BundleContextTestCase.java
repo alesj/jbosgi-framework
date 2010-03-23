@@ -211,7 +211,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
    public void testInstallBundle() throws Exception
    {
       URL url = getTestArchiveURL("bundles/jboss-osgi-common.jar");
-      Bundle bundle = context.installBundle(url.toExternalForm());
+      Bundle bundle = systemContext.installBundle(url.toExternalForm());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -225,7 +225,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
 
       // Test file location
       String location = getTestArchivePath("bundles/jboss-osgi-common.jar");
-      bundle = context.installBundle(location);
+      bundle = systemContext.installBundle(location);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
@@ -238,7 +238,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       }
 
       // Test symbolic location
-      bundle = context.installBundle("/symbolic/location", url.openStream());
+      bundle = systemContext.installBundle("/symbolic/location", url.openStream());
       try
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());

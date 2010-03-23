@@ -70,7 +70,7 @@ public class ResolverSmokeTestCase extends AbstractFrameworkTest
       List<Bundle> unresolved = new ArrayList<Bundle>();
       for (String path : bundlePaths)
       {
-         Bundle bundle = context.installBundle(getTestArchivePath(path));
+         Bundle bundle = systemContext.installBundle(getTestArchivePath(path));
          unresolved.add(bundle);
       }
 

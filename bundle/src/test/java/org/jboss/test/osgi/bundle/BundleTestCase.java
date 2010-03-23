@@ -172,7 +172,7 @@ public class BundleTestCase extends AbstractFrameworkTest
       Bundle bundle = installBundle(assemble1);
       try
       {
-         int beforeCount = context.getBundles().length;
+         int beforeCount = systemContext.getBundles().length;
 
          bundle.start();
          assertBundleState(Bundle.ACTIVE, bundle.getState());
@@ -182,7 +182,7 @@ public class BundleTestCase extends AbstractFrameworkTest
          assertBundleState(Bundle.ACTIVE, bundle.getState());
          assertEquals("Bundle-Version", "1.0.1", bundle.getHeaders().get(Constants.BUNDLE_VERSION));
 
-         int afterCount = context.getBundles().length;
+         int afterCount = systemContext.getBundles().length;
          assertEquals("Bundle count", beforeCount, afterCount);
       }
       finally

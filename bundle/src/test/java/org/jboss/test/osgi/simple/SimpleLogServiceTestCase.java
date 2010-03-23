@@ -51,7 +51,7 @@ public class SimpleLogServiceTestCase extends OSGiFrameworkTest
    @Test
    public void testNoLogService() throws Exception
    {
-      Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+      Bundle bundle = systemContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
       try
       {
          bundle.start();
@@ -70,12 +70,12 @@ public class SimpleLogServiceTestCase extends OSGiFrameworkTest
    @Test
    public void testLogServiceFromThirdParty() throws Exception
    {
-      Bundle logBundle = context.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar"));
+      Bundle logBundle = systemContext.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar"));
       try
       {
          logBundle.start();
 
-         Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+         Bundle bundle = systemContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
          try
          {
             try
@@ -102,10 +102,10 @@ public class SimpleLogServiceTestCase extends OSGiFrameworkTest
    @Test
    public void testLogServiceFromCompendium() throws Exception
    {
-      Bundle cmpnBundle = context.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
+      Bundle cmpnBundle = systemContext.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
       try
       {
-         Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+         Bundle bundle = systemContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
          try
          {
             bundle.start();
@@ -132,15 +132,15 @@ public class SimpleLogServiceTestCase extends OSGiFrameworkTest
    @Test
    public void testLogServiceFromTwoExporters() throws Exception
    {
-      Bundle cmpnBundle = context.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
+      Bundle cmpnBundle = systemContext.installBundle(getTestArchivePath("bundles/org.osgi.compendium.jar"));
       try
       {
-         Bundle logBundle = context.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar"));
+         Bundle logBundle = systemContext.installBundle(getTestArchivePath("bundles/org.apache.felix.log.jar"));
          try
          {
             logBundle.start();
 
-            Bundle bundle = context.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
+            Bundle bundle = systemContext.installBundle(getTestArchivePath("simple-logservice-bundle.jar"));
             try
             {
                bundle.start();

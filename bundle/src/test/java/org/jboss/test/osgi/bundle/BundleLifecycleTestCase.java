@@ -83,7 +83,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
          // BundleA not started - service not available  
-         ServiceReference sref = context.getServiceReference(LifecycleService.class.getName());
+         ServiceReference sref = systemContext.getServiceReference(LifecycleService.class.getName());
          assertNull("Service not available", sref);
 
          VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
@@ -207,8 +207,8 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          assertBundleState(Bundle.INSTALLED, bundleB.getState());
 
          // Get the PackageAdmin service
-         ServiceReference sref = context.getServiceReference(PackageAdmin.class.getName());
-         PackageAdmin packageAdmin = (PackageAdmin)context.getService(sref);
+         ServiceReference sref = systemContext.getServiceReference(PackageAdmin.class.getName());
+         PackageAdmin packageAdmin = (PackageAdmin)systemContext.getService(sref);
 
          // Attempt to explicitly resolve a bundle with missing dependency 
          boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleB });

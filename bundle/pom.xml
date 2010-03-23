@@ -305,7 +305,7 @@
       <id>framework-equinox</id>
       <activation>
         <property>
-          <name>fmwk</name>
+          <name>frwk</name>
           <value>equinox</value>
         </property>
       </activation>
@@ -358,7 +358,7 @@
       <id>framework-felix</id>
       <activation>
         <property>
-          <name>fmwk</name>
+          <name>frwk</name>
           <value>felix</value>
         </property>
       </activation>
@@ -411,7 +411,7 @@
       <id>framework-jbossmc-default</id>
       <activation>
         <property>
-          <name>!fmwk</name>
+          <name>!frwk</name>
         </property>
       </activation>
       <dependencies>
