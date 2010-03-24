@@ -245,18 +245,14 @@
               <value>bootstrap/jboss-osgi-bootstrap.xml</value>
             </property>
             <property>
-              <name>org.jboss.osgi.husky.Invoker</name>
-              <value>org.jboss.osgi.husky.internal.AbstractInvoker</value>
+              <name>jboss.osgi.framework.properties</name>
+              <value>${jboss.osgi.framework.properties}</value>
             </property>
             <property>
               <name>test.archive.directory</name>
               <value>${project.build.directory}/test-libs</value>
             </property>
           </systemProperties>
-          <excludes>
-            <!-- excludes listed here need to have a jira issue associated -->
-            <exclude>org/jboss/test/osgi/service/ServiceMixUnitTestCase.class</exclude> 
-          </excludes>
         </configuration>
       </plugin>
     </plugins>

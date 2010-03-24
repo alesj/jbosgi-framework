@@ -32,7 +32,7 @@
   <!-- Limit categories -->
   <!-- ================ -->
 
-  <!-- Show jboss deployer traces  
+  <!-- Show jboss deployer traces - ->
   <category name="org.jboss.deployer">
     <priority value="TRACE" />
   </category>

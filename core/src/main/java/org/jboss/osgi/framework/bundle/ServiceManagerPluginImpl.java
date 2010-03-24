@@ -24,10 +24,12 @@ package org.jboss.osgi.framework.bundle;
 //$Id$
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -58,6 +60,7 @@ import org.jboss.osgi.framework.util.NoFilter;
 import org.jboss.osgi.framework.util.RemoveOnlyCollection;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -132,7 +135,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       Set<ServiceReference> result = new HashSet<ServiceReference>();
       for (ControllerContext context : contexts)
       {
-         ServiceReference ref = getServiceReferenceForContext(context);
+         ServiceReference ref = getServiceReferenceForContext(context, true);
          if (ref != null)
             result.add(ref);
       }
@@ -152,7 +155,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       List<ServiceReference> references = new ArrayList<ServiceReference>();
       for (ControllerContext context : contexts)
       {
-         ServiceReference ref = getServiceReferenceForContext(context);
+         ServiceReference ref = getServiceReferenceForContext(context, true);
          if (ref != null)
             references.add(ref);
       }
@@ -460,32 +463,13 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       return mdrFactory;
    }
 
-   private List<ServiceReference> getServiceReferencesInternal(AbstractBundleState bundle, String clazz, Filter filter, boolean checkAssignable)
+   private List<ServiceReference> getServiceReferencesInternal(AbstractBundleState targetBundle, String className, Filter filter, boolean checkAssignable)
    {
-      Set<ControllerContext> contexts = null;
+      ControllerContextPlugin plugin = getBundleManager().getPlugin(ControllerContextPlugin.class);
+
+      // Get all installed contexts
       KernelController controller = kernel.getController();
-
-      // Don't check assignabilty for the system bundle
-      boolean isSystemBundle = (bundle.getBundleId() == 0);
-      if (isSystemBundle)
-         checkAssignable = false;
-
-      // Load the service class from the given bundle
-      if (clazz != null && isSystemBundle == false)
-      {
-         // Use all contexts the are of the given service type
-         Class<?> type = getBundleManager().loadClassFailsafe(bundle, clazz);
-         if (type != null)
-            contexts = controller.getContexts(type, ControllerState.INSTALLED);
-
-         // No services found
-         if (contexts == null || contexts.isEmpty())
-            return Collections.emptyList();
-      }
-
-      // Use all installed contexts
-      if (contexts == null)
-         contexts = controller.getContextsByState(ControllerState.INSTALLED);
+      List<ControllerContext> contexts = new ArrayList<ControllerContext>(controller.getContextsByState(ControllerState.INSTALLED));
 
       // No services found
       if (contexts == null || contexts.isEmpty())
@@ -494,43 +478,76 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       if (filter == null)
          filter = NoFilter.INSTANCE;
 
+      // Don't check assignabilty for the system bundle
+      if (targetBundle.getBundleId() == 0)
+         checkAssignable = false;
+      
+      Iterator<ControllerContext> iterator = contexts.iterator();
+      while (iterator.hasNext())
+      {
+         ControllerContext context = iterator.next();
+
+         // Match the contxt against the Filter
+         // [TODO] filter directly as part of the controller query
+         ServiceReference sref = getServiceReferenceForContext(context, true);
+         if (sref == null || hasPermission(context) == false || filter.match(sref) == false)
+         {
+            iterator.remove();
+            continue;
+         }
+
+         // Remove the contexts that do not implemented the given class name
+         String[] classNames = (String[])sref.getProperty(Constants.OBJECTCLASS);
+         if (className != null && Arrays.asList(classNames).contains(className) == false)
+         {
+            iterator.remove();
+            continue;
+         }
+
+         // Check assignability
+         AbstractBundleState sourceBundle = plugin.getBundleForContext(context);
+         if (checkAssignable == true && MDRUtils.isAssignableTo(context, sourceBundle, targetBundle, classNames) == false)
+         {
+            iterator.remove();
+            continue;
+         }
+      }
+
       // Sort by the spec, should bubble up
       List<ControllerContext> sorted = new ArrayList<ControllerContext>(contexts);
       Collections.sort(sorted, ContextComparator.getInstance());
-      
+
+      // Get the resulting references for the remaining contexts 
       List<ServiceReference> result = new ArrayList<ServiceReference>();
       for (ControllerContext context : sorted)
       {
-         ServiceReference sref = getServiceReferenceForContext(context);
-         if (filter.match(sref) && hasPermission(context))
-         {
-            // True if the context contains the given class name
-            if (clazz == null || MDRUtils.matchClass(context, clazz))
-            {
-               // Check the assignability
-               if (checkAssignable == false || MDRUtils.isAssignableTo(context, bundle))
-                  result.add(sref);
-            }
-         }
+         ServiceReference sref = getServiceReferenceForContext(context, true);
+         result.add(sref);
       }
-      //Collections.sort(result, ServiceReferenceComparator.getInstance());
       return result;
    }
 
    /**
-    * Get service reference for context.
+    * Get ServiceReference for a given context.
+    * 
+    * 
     *
     * @param context the context
+    * @param strict true for strict OSGi behaviour
     * @return service reference
     */
-   private ServiceReference getServiceReferenceForContext(ControllerContext context)
+   private ServiceReference getServiceReferenceForContext(ControllerContext context, boolean strict)
    {
       if (context instanceof OSGiServiceState)
       {
          OSGiServiceState service = (OSGiServiceState)context;
          return service.hasPermission() ? service.getReferenceInternal() : null;
       }
+      
+      if (strict == true)
+         return null;
 
+      // For non strict behaviour we can generically wrap the context
       OSGiBundleManager manager = getBundleManager();
       ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
       AbstractBundleState bundleState = plugin.getBundleForContext(context);

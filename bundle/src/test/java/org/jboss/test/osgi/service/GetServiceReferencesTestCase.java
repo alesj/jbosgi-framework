@@ -27,11 +27,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.jboss.osgi.testing.OSGiFrameworkTest;
+import org.jboss.osgi.testing.OSGiManifestBuilder;
 import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archives;
+import org.jboss.shrinkwrap.api.Asset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.service.support.a.A;
 import org.jboss.test.osgi.service.support.b.B;
 import org.junit.Test;
@@ -55,6 +60,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
    @Test
    public void testGetServiceReferences() throws Exception
    {
+      
       VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
       try
@@ -162,10 +168,23 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
    }
 
    @Test
-   public void testGetServiceReferencesMultiple() throws Exception
+   public void testGetServiceReferencesNoWire() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
-      Bundle bundleA = installBundle(assemblyA);
+      JavaArchive archiveA = Archives.create("bundleA", JavaArchive.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName("bundleA");
+            builder.addExportPackages("org.jboss.test.osgi.service.support.a");
+            return builder.openStream();
+         }
+      });
+      archiveA.addClass(A.class);
+      
+      Bundle bundleA = installBundle(archiveA);
       try
       {
          bundleA.start();
@@ -173,50 +192,67 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
          assertNotNull(contextA);
 
          Class<?> clazz = bundleA.loadClass(A.class.getName());
-         Object service1 = clazz.newInstance();
-         ServiceRegistration sreg1 = contextA.registerService(A.class.getName(), service1, null);
+         Object service = clazz.newInstance();
+         ServiceRegistration sreg1 = contextA.registerService(A.class.getName(), service, null);
          assertNotNull(sreg1);
          ServiceReference sref1 = sreg1.getReference();
          assertNotNull(sref1);
+         
+         ServiceReference sref = systemContext.getServiceReference(A.class.getName());
+         assertNotNull("Reference not null", sref);
+         assertEquals(sref1, sref);
+         ServiceReference[] srefs = systemContext.getServiceReferences(A.class.getName(), null);
+         assertEquals(1, srefs.length);
+         assertEquals(sref1, srefs[0]);
+         srefs = systemContext.getAllServiceReferences(A.class.getName(), null);
+         assertEquals(1, srefs.length);
+         assertEquals(sref1, srefs[0]);
 
-         VirtualFile assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
-         Bundle bundleB = installBundle(assemblyB);
+         sref = contextA.getServiceReference(A.class.getName());
+         assertNotNull("Reference not null", sref);
+         assertEquals(sref1, sref);
+         srefs = contextA.getServiceReferences(A.class.getName(), null);
+         assertNotNull("References not null", srefs);
+         assertEquals(1, srefs.length);
+         assertEquals(sref1, srefs[0]);
+         srefs = contextA.getAllServiceReferences(A.class.getName(), null);
+         assertNotNull("References not null", srefs);
+         assertEquals(1, srefs.length);
+         assertEquals(sref1, srefs[0]);
+         
+         JavaArchive archiveB = Archives.create("bundleB", JavaArchive.class);
+         archiveB.setManifest(new Asset()
+         {
+            public InputStream openStream()
+            {
+               OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+               builder.addBundleManifestVersion(2);
+               builder.addBundleSymbolicName("bundleB");
+               return builder.openStream();
+            }
+         });
+         Bundle bundleB = installBundle(archiveB);
          try
          {
             bundleB.start();
             BundleContext contextB = bundleB.getBundleContext();
             assertNotNull(contextB);
 
-            clazz = bundleB.loadClass(A.class.getName());
-            Object service2 = clazz.newInstance();
-            ServiceRegistration sreg2 = contextB.registerService(A.class.getName(), service2, null);
-            assertNotNull(sreg2);
-            ServiceReference sref2 = sreg2.getReference();
-            assertNotNull(sref2);
+            assertLoadClassFail(bundleB, A.class.getName());
             
-            ServiceReference[] srefs = systemContext.getServiceReferences(A.class.getName(), null);
-            assertEquals(2, srefs.length);
-            //assertEquals(sref2, srefs[0]);
-            //assertEquals(sref1, srefs[1]);
-            
-            srefs = systemContext.getAllServiceReferences(A.class.getName(), null);
-            assertEquals(2, srefs.length);
-            //assertEquals(sref2, srefs[0]);
-            //assertEquals(sref1, srefs[1]);
-            
-            srefs = contextA.getServiceReferences(A.class.getName(), null);
+            // Verify that bundle B can see the service registered by bundle A
+            // This is so because B does not have a wire to the service package 
+            // and can therefore not be constraint on this package. 
+            sref = contextB.getServiceReference(A.class.getName());
+            assertNotNull("Reference not null", sref);
+            srefs = contextB.getServiceReferences(A.class.getName(), null);
+            assertNotNull("References not null", srefs);
             assertEquals(1, srefs.length);
             assertEquals(sref1, srefs[0]);
-            
-            srefs = contextA.getAllServiceReferences(A.class.getName(), null);
-            //assertEquals(2, srefs.length);
-            
-            srefs = contextB.getServiceReferences(A.class.getName(), null);
-            assertEquals(1, srefs.length);
-            assertEquals(sref2, srefs[0]);
-            
             srefs = contextB.getAllServiceReferences(A.class.getName(), null);
-            //assertEquals(2, srefs.length);
+            assertNotNull("References not null", srefs);
+            assertEquals(1, srefs.length);
+            assertEquals(sref1, srefs[0]);
          }
          finally
          {

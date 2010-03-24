@@ -244,6 +244,42 @@ public class MDRUtils
    }
 
    /**
+    * Tests if the bundle that registered the ControllerContext (source bundle) and the specified user of the ControllerContext (target bundle)
+    * use the same source for the packages of all the specified class names.
+    * 
+    * @param context the context
+    * @param sourceBundle the source bundle state
+    * @param targetBundle the target bundle state
+    * @param classNames the array of class names
+    * @return true if the source bundle and the target bundle use the same source for the package of the specified class names; otherwise false.
+    */
+   public static boolean isAssignableTo(ControllerContext context, AbstractBundleState sourceBundle, AbstractBundleState targetBundle, String[] classNames)
+   {
+      if (context == null)
+         throw new IllegalArgumentException("Null context");
+      if (sourceBundle == null)
+         throw new IllegalArgumentException("Null source bundle");
+      if (targetBundle == null)
+         throw new IllegalArgumentException("Null target bundle");
+      if (classNames == null)
+         throw new IllegalArgumentException("Null class names");
+      
+      if (sourceBundle == targetBundle)
+         return true;
+
+      if (KernelUtils.isUnregistered(context))
+         return false;
+
+      for (String className : classNames)
+      {
+         if (isAssignableTo(sourceBundle, targetBundle, className) == false)
+            return false;
+      }
+      
+      return true;
+   }
+
+   /**
     * Is assignable.
     *
     * @param sourceBundle the source bundle
@@ -267,7 +303,7 @@ public class MDRUtils
       if (target == null)
       {
          log.debug("Cannot load '" + className + "' from: " + targetBundle);
-         return false;
+         return true;
       }
 
       boolean equals = source.equals(target);
