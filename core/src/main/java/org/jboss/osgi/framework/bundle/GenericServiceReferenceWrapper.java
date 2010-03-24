@@ -110,7 +110,8 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
 
    public boolean isAssignableTo(Bundle bundle, String className)
    {
-      return MDRUtils.isAssignableTo(context, bundleState, bundle, className); 
+      AbstractBundleState targetBundle = AbstractBundleState.assertBundleState(bundle);
+      return MDRUtils.isAssignableTo(context, bundleState, targetBundle, className); 
    }
 
    public int compareTo(Object obj)

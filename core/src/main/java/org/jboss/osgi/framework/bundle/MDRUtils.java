@@ -133,60 +133,6 @@ public class MDRUtils
    }
 
    /**
-    * Is assignable to bundle.
-    *
-    * @param context the context
-    * @param bundleState the bundle state
-    * @param otherBundle the other bundle
-    * @param className the class name
-    * @return true if assignable, false otherwise
-    */
-   private static boolean isAssignableTo(ControllerContext context, AbstractBundleState bundleState, AbstractBundleState otherBundle, String className)
-   {
-      if (bundleState == otherBundle)
-         return true;
-
-      if (KernelUtils.isUnregistered(context))
-         return false;
-
-      return isAssignableTo(bundleState, otherBundle, className);
-   }
-
-   /**
-    * Is assignable.
-    *
-    * @param bundleState the bundle state
-    * @param other the other bundle
-    * @param className the class name
-    * @return true if assignable, false otherwise
-    */
-   private static boolean isAssignableTo(AbstractBundleState bundleState, AbstractBundleState other, String className)
-   {
-      Object source = getSource(bundleState, className);
-      if (source == null)
-         throw new IllegalStateException("Cannot load '" + className + "' from: " + bundleState);
-
-      Object otherSource = getSource(other, className);
-      if (otherSource == null)
-      {
-         log.debug("Cannot load '" + className + "' from: " + other);
-         return false;
-      }
-
-      boolean equals = source.equals(otherSource);
-      if (equals == false)
-      {
-         ClassLoader otherLoader = getClassLoader(otherSource);
-         ClassLoader sourceLoader = getClassLoader(source);
-         StringBuffer buffer = new StringBuffer("Cannot assign '" + className + "' comming from different exporters");
-         buffer.append("\n  service: ").append(sourceLoader);
-         buffer.append("\n  request: ").append(otherLoader);
-         log.warn(buffer.toString());
-      }
-      return equals;
-   }
-
-   /**
     * Get the source of a class for ServiceReference.isAssignable()
     * 
     * @param className the class name
@@ -260,25 +206,122 @@ public class MDRUtils
    }
 
    /**
-    * Is context assignable to bundle.
+    * Tests if the bundle that registered the ControllerContext (source bundle) and the specified user of the ControllerContext (target bundle)
+    * use the same source for the package of the specified class name.
+    * 
+    * This method performs the following checks:
+    * 
+    *    1. Get the package name from the specified class name.
+    *    2. For the bundle that registered the ControllerContext (source bundle); find the source for the package.
+    *       If no source is found then return true if the source bundle is equal to the target bundle; otherwise return false.
+    *    3. If the package source of the source bundle is equal to the package source of the target bundle then return true; 
+    *       otherwise return false.
     *
     * @param context the context
-    * @param bundleState the bundle state
-    * @return true if assignable, false otherwise
+    * @param sourceBundle the source bundle state
+    * @param targetBundle the target bundle state
+    * @param className the class name
+    * @return true if the source bundle and the target bundle use the same source for the package of the specified class name; otherwise false.
     */
-   public static boolean isAssignableTo(ControllerContext context, AbstractBundleState bundleState)
+   public static boolean isAssignableTo(ControllerContext context, AbstractBundleState sourceBundle, AbstractBundleState targetBundle, String className)
    {
       if (context == null)
          throw new IllegalArgumentException("Null context");
-      if (bundleState == null)
+      if (sourceBundle == null)
+         throw new IllegalArgumentException("Null source bundle");
+      if (targetBundle == null)
+         throw new IllegalArgumentException("Null target bundle");
+      if (className == null)
+         throw new IllegalArgumentException("Null class name");
+      
+      if (sourceBundle == targetBundle)
+         return true;
+
+      if (KernelUtils.isUnregistered(context))
+         return false;
+
+      return isAssignableTo(sourceBundle, targetBundle, className);
+   }
+
+   /**
+    * Is assignable.
+    *
+    * @param sourceBundle the source bundle
+    * @param targetBundle the target bundle
+    * @param className the class name
+    * @return true if assignable, false otherwise
+    */
+   private static boolean isAssignableTo(AbstractBundleState sourceBundle, AbstractBundleState targetBundle, String className)
+   {
+      if (sourceBundle == null)
+         throw new IllegalArgumentException("Null source bundle");
+      if (className == null)
+         throw new IllegalArgumentException("Null class name");
+      
+      // If no source is found return true if the source bundle is equal to the target bundle; otherwise return false
+      Object source = getSource(sourceBundle, className);
+      if (source == null)
+         return sourceBundle.equals(targetBundle);
+
+      Object target = getSource(targetBundle, className);
+      if (target == null)
+      {
+         log.debug("Cannot load '" + className + "' from: " + targetBundle);
+         return false;
+      }
+
+      boolean equals = source.equals(target);
+      if (equals == false)
+      {
+         ClassLoader targetLoader = getClassLoader(target);
+         ClassLoader sourceLoader = getClassLoader(source);
+         StringBuffer buffer = new StringBuffer("Cannot assign '" + className + "' comming from different exporters");
+         buffer.append("\n  source: ").append(sourceLoader);
+         buffer.append("\n  target: ").append(targetLoader);
+         log.warn(buffer.toString());
+      }
+      return equals;
+   }
+
+   /**
+    * Is assignable to bundle.
+    *
+    * @param context the context
+    * @param sourceBundle the bundle state
+    * @param className the class name
+    * @return true if assignable, false otherwise
+    */
+   public static boolean isAssignableTo(ControllerContext context, AbstractBundleState sourceBundle, String className)
+   {
+      if (sourceBundle == null)
+         throw new IllegalArgumentException("Null bundle state");
+      
+      OSGiBundleManager manager = sourceBundle.getBundleManager();
+      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      AbstractBundleState targetBundle = plugin.getBundleForContext(context);
+      return isAssignableTo(context, sourceBundle, targetBundle, className);
+   }
+
+   /**
+    * Is context assignable to bundle.
+    *
+    * @param context the context
+    * @param sourceBundle the bundle state
+    * @return true if assignable, false otherwise
+    */
+   public static boolean isAssignableTo(ControllerContext context, AbstractBundleState sourceBundle)
+   {
+      if (context == null)
+         throw new IllegalArgumentException("Null context");
+      if (sourceBundle == null)
          throw new IllegalArgumentException("Null bundle state");
 
-      OSGiBundleManager manager = bundleState.getBundleManager();
+      OSGiBundleManager manager = sourceBundle.getBundleManager();
       ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
       
       // context's bundle
-      AbstractBundleState other = plugin.getBundleForContext(context);
-      if (bundleState == other)
+      AbstractBundleState targetBundle = plugin.getBundleForContext(context);
+      if (sourceBundle == targetBundle)
          return true;
       if (KernelUtils.isUnregistered(context))
          return false;
@@ -289,64 +332,10 @@ public class MDRUtils
 
       for (String className : classes)
       {
-         if (isAssignableTo(bundleState, other, className) == false)
+         if (isAssignableTo(sourceBundle, targetBundle, className) == false)
             return false;
       }
       return true;
-   }
-
-   /**
-    * Is assignable to bundle.
-    *
-    * @param context the context
-    * @param bundleState the bundle state
-    * @param className the class name
-    * @return true if assignable, false otherwise
-    */
-   public static boolean isAssignableTo(ControllerContext context, AbstractBundleState bundleState, String className)
-   {
-      if (context == null)
-         throw new IllegalArgumentException("Null context");
-      if (bundleState == null)
-         throw new IllegalArgumentException("Null bundle state");
-      if (className == null)
-         throw new IllegalArgumentException("Null class name");
-
-      OSGiBundleManager manager = bundleState.getBundleManager();
-      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-      AbstractBundleState other = plugin.getBundleForContext(context);
-      return isAssignableTo(context, bundleState, other, className);
-   }
-
-   /**
-    * Is assignable to bundle.
-    *
-    * @param context the context
-    * @param bundleState the bundle state
-    * @param bundle the other bundle
-    * @param className the class name
-    * @return true if assignable, false otherwise
-    */
-   public static boolean isAssignableTo(ControllerContext context, AbstractBundleState bundleState, Bundle bundle, String className)
-   {
-      if (context == null)
-         throw new IllegalArgumentException("Null context");
-      if (bundleState == null)
-         throw new IllegalArgumentException("Null bundle state");
-      if (bundle == null)
-         throw new IllegalArgumentException("Null bundle");
-      if (className == null)
-         throw new IllegalArgumentException("Null class name");
-
-      AbstractBundleState otherBundle;
-      if (bundle instanceof AbstractBundleState)
-         otherBundle = (AbstractBundleState)bundle;
-      else if (bundle instanceof OSGiBundleWrapper)
-         otherBundle = ((OSGiBundleWrapper)bundle).getBundleState();
-      else
-         throw new IllegalArgumentException("Illegal bundle type: " + bundle);
-
-      return isAssignableTo(context, bundleState, otherBundle, className);
    }
 
    /**

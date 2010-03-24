@@ -555,7 +555,8 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
    @Override
    public boolean isAssignableTo(Bundle bundle, String className)
    {
-      return MDRUtils.isAssignableTo(this, bundleState, bundle, className);
+      AbstractBundleState targetBundle = AbstractBundleState.assertBundleState(bundle);
+      return MDRUtils.isAssignableTo(this, bundleState, targetBundle, className);
    }
 
    @Override
