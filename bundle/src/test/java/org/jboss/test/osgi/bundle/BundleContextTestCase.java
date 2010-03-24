@@ -26,6 +26,7 @@ package org.jboss.test.osgi.bundle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -216,6 +217,9 @@ public class BundleContextTestCase extends AbstractFrameworkTest
       {
          assertBundleState(Bundle.INSTALLED, bundle.getState());
          assertEquals(url.toExternalForm(), bundle.getLocation());
+         
+         Bundle duplicate = systemContext.installBundle(url.toExternalForm());
+         assertSame("Duplicate bundle", bundle, duplicate);
       }
       finally
       {

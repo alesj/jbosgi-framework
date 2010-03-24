@@ -528,6 +528,15 @@ public class OSGiBundleManager
     */
    public AbstractBundleState installBundle(Deployment dep) throws BundleException
    {
+      if (dep == null)
+         throw new IllegalArgumentException("Null deployment");
+      
+      // If a bundle containing the same location identifier is already installed, 
+      // the Bundle object for that bundle is returned. 
+      AbstractBundleState bundleState = getBundleByLocation(dep.getLocation());
+      if (bundleState != null)
+         return bundleState;
+      
       // Create the deployment and deploy it
       try
       {
@@ -536,7 +545,7 @@ public class OSGiBundleManager
          att.addAttachment(Deployment.class, dep);
 
          // In case of update the OSGiBundleState is attached
-         AbstractBundleState bundleState = dep.getAttachment(AbstractBundleState.class);
+         bundleState = dep.getAttachment(AbstractBundleState.class);
          if (bundleState != null)
             att.addAttachment(AbstractBundleState.class, bundleState);
 
