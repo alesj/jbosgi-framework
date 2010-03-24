@@ -60,9 +60,10 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  * @author thomas.diesler@jboss.com
  */
+@Ignore
 public class ServiceMixTestCase extends AbstractServiceMixTest
 {
-   @Ignore
+   @Test
    public void testGetServiceReferenceFromMC() throws Throwable
    {
       Deployment bean = deployBeans("beanA", A.class);
@@ -353,7 +354,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    @SuppressWarnings("rawtypes")
    public void testServiceFactoryMix() throws Throwable
    {
@@ -431,7 +432,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testFiltering() throws Throwable
    {
       Deployment bean = deployBeans("beanA", A.class);
@@ -495,7 +496,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testBeansMix() throws Throwable
    {
       VirtualFile assembly = assembleArchive("beans1", "/bundles/service/service-beans1", A.class);

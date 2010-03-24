@@ -48,6 +48,8 @@ import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
 import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleReference;
 
 /**
  * The ClassLoaderPolicy for OSGi bundles.
@@ -55,7 +57,7 @@ import org.jboss.virtual.VirtualFile;
  * @author thomas.diesler@jboss.com
  * @since 11-Sep-2009
  */
-public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
+public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy implements BundleReference
 {
    /** The associated bundle state */
    private AbstractBundleState bundleState;
@@ -95,6 +97,11 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy
       }
    }
 
+   @Override
+   public Bundle getBundle()
+   {
+      return bundleState.getBundle();
+   }
    
    @Override
    public String getName()

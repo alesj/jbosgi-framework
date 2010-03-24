@@ -25,6 +25,8 @@ package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleReference;
 
 /**
  * An OSGi bundle class loader.
@@ -32,16 +34,23 @@ import org.jboss.classloader.spi.base.BaseClassLoader;
  * @author thomas.diesler@jboss.com
  * @since 19-Dec-2009
  */
-public class OSGiBundleClassLoader extends BaseClassLoader
+public class OSGiBundleClassLoader extends BaseClassLoader implements BundleReference
 {
-   @SuppressWarnings("unused")
    private OSGiClassLoaderPolicy osgiPolicy;
 
    public OSGiBundleClassLoader(ClassLoaderPolicy policy)
    {
       super(policy);
 
-      if (policy instanceof OSGiClassLoaderPolicy)
-         osgiPolicy = (OSGiClassLoaderPolicy)policy;
+      if (policy instanceof OSGiClassLoaderPolicy == false)
+         throw new IllegalArgumentException("Invalid policy: " + policy);
+      
+      osgiPolicy = (OSGiClassLoaderPolicy)policy;
+   }
+
+   @Override
+   public Bundle getBundle()
+   {
+      return osgiPolicy.getBundle();
    }
 }

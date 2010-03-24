@@ -39,8 +39,8 @@ import org.jboss.classloader.spi.filter.ClassFilter;
 import org.jboss.classloader.spi.filter.ClassFilterUtils;
 import org.jboss.classloader.spi.filter.PackageClassFilter;
 import org.jboss.classloader.spi.filter.RecursivePackageClassFilter;
-import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
@@ -124,7 +124,8 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
       }
 
       // Create and register the ClassLoaderPolicy
-      ClassLoaderPolicy systemPolicy = new VFSClassLoaderPolicy("OSGiSystemPolicy", roots);
+      OSGiSystemState systemBundle = bundleManager.getSystemBundle();
+      ClassLoaderPolicy systemPolicy = new OSGiClassLoaderPolicy(systemBundle, roots);
       classLoaderSystem.registerClassLoaderPolicy(getName(), systemPolicy);
    }
 
