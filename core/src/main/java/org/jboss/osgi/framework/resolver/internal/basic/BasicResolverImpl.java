@@ -452,7 +452,7 @@ public class BasicResolverImpl extends AbstractResolver
                   Object version = otherPackage.getVersion();
                   VersionRange versionRange = new VersionRange(version, true, version, true);
 
-                  OSGiPackageRequirement newPackageRequirement = new OSGiPackageRequirement(bundle, packageName, versionRange, null);
+                  OSGiPackageRequirement newPackageRequirement = new OSGiPackageRequirement(bundle, packageName, versionRange, null, false);
                   BundleRequirement newBundleRequirement = new BundleRequirement(bundle, newPackageRequirement);
                   newBundleRequirement.wireCapability(otherCapability);
                   bundleRequirements.add(newBundleRequirement);

@@ -44,7 +44,7 @@ public class BundleClassPathTestCase extends OSGiFrameworkTest
    public void testBundleClassPath() throws Exception
    {
       URL bundleURL = getTestArchiveURL("bundle-classpath.war");
-      Bundle bundle = systemContext.installBundle(bundleURL.toExternalForm());
+      Bundle bundle = installBundle(bundleURL.toExternalForm());
 
       bundle.start();
       assertEquals("Bundle state", Bundle.ACTIVE, bundle.getState());

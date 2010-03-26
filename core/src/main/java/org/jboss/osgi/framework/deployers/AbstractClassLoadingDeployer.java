@@ -52,12 +52,12 @@ import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
  * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
-public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer<OSGiMetaData>
+public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSGiMetaData>
 {
    private ClassLoaderDomain domain;
    private ClassLoaderFactory factory;
 
-   public AbstractOSGiClassLoadingDeployer()
+   public AbstractClassLoadingDeployer()
    {
       super(OSGiMetaData.class);
       addInput(AbstractBundleState.class);
@@ -110,38 +110,55 @@ public class AbstractOSGiClassLoadingDeployer extends AbstractSimpleRealDeployer
          }
       }
 
-      // Export Packages
-      List<PackageAttribute> exported = osgiMetaData.getExportPackages();
-      if (exported != null && exported.isEmpty() == false)
+      // Export-Package
+      List<PackageAttribute> exports = osgiMetaData.getExportPackages();
+      if (exports != null && exports.isEmpty() == false)
       {
-         for (PackageAttribute packageAttribute : exported)
+         for (PackageAttribute packageAttribute : exports)
          {
             OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, packageAttribute);
             capabilities.addCapability(packageCapability);
          }
       }
 
-      // Import Packages
-      List<PackageAttribute> imported = osgiMetaData.getImportPackages();
-      if (imported != null && imported.isEmpty() == false)
+      // Import-Package
+      List<PackageAttribute> imports = osgiMetaData.getImportPackages();
+      if (imports != null && imports.isEmpty() == false)
       {
          SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
-         for (PackageAttribute packageAttribute : imported)
+         for (PackageAttribute packageAttribute : imports)
          {
             String packageName = packageAttribute.getAttribute();
 
             // [TODO] Should system packages be added as capabilities?
-            boolean isSystemPackage = syspackPlugin.isSystemPackage(packageName);
-            if (isSystemPackage == false)
-            {
-               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute);
-               requirements.addRequirement(requirement);
-            }
+            if (syspackPlugin.isSystemPackage(packageName) == true)
+               continue;
+            
+            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, false);
+            requirements.addRequirement(requirement);
+         }
+      }
+
+      // DynamicImport-Package
+      List<PackageAttribute> dynamicImports = osgiMetaData.getDynamicImports();
+      if (dynamicImports != null && dynamicImports.isEmpty() == false)
+      {
+         SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
+         for (PackageAttribute packageAttribute : dynamicImports)
+         {
+            String packageName = packageAttribute.getAttribute();
+
+            // [TODO] Should system packages be added as capabilities?
+            if (syspackPlugin.isSystemPackage(packageName) == true)
+               continue;
+            
+            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
+            requirements.addRequirement(requirement);
          }
       }
 
       unit.addAttachment(ClassLoadingMetaData.class, classLoadingMetaData);
-      
+
       // AnnotationMetaDataDeployer.ANNOTATION_META_DATA_COMPLETE
       unit.addAttachment("org.jboss.deployment.annotation.metadata.complete", Boolean.TRUE);
 

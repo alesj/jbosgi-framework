@@ -42,7 +42,7 @@ import org.osgi.framework.Version;
  * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
-public class OSGiFragmentClassLoadingDeployer extends AbstractOSGiClassLoadingDeployer
+public class OSGiFragmentClassLoadingDeployer extends AbstractClassLoadingDeployer
 {
    @Override
    public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException

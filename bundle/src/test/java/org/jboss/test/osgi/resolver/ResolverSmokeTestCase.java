@@ -36,7 +36,6 @@ import org.jboss.osgi.framework.resolver.ResolverBundle;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 /**
  * Smoketest for the {@link Resolver}
@@ -47,7 +46,7 @@ import org.osgi.framework.BundleException;
 public class ResolverSmokeTestCase extends AbstractFrameworkTest
 {
    @Test
-   public void testRandomBundleResolution() throws BundleException
+   public void testRandomBundleResolution() throws Exception
    {
       List<String> bundlePaths = new ArrayList<String>();
       bundlePaths.add("bundles/jboss-osgi-apache-xerces.jar");
@@ -70,7 +69,7 @@ public class ResolverSmokeTestCase extends AbstractFrameworkTest
       List<Bundle> unresolved = new ArrayList<Bundle>();
       for (String path : bundlePaths)
       {
-         Bundle bundle = systemContext.installBundle(getTestArchivePath(path));
+         Bundle bundle = installBundle(getTestArchivePath(path));
          unresolved.add(bundle);
       }
 

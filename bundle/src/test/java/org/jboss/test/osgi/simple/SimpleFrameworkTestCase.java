@@ -47,7 +47,7 @@ public class SimpleFrameworkTestCase extends OSGiFrameworkTest
    public void testBundleInstall() throws Exception
    {
       URL bundleURL = getTestArchiveURL("simple-bundle.jar");
-      Bundle bundle = systemContext.installBundle(bundleURL.toExternalForm());
+      Bundle bundle = installBundle(bundleURL.toExternalForm());
 
       assertEquals("simple-bundle", bundle.getSymbolicName());
 

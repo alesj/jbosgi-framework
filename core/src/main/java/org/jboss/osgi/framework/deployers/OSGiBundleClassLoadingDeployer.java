@@ -36,7 +36,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiBundleClassLoadingDeployer extends AbstractOSGiClassLoadingDeployer
+public class OSGiBundleClassLoadingDeployer extends AbstractClassLoadingDeployer
 {
    @Override
    public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
