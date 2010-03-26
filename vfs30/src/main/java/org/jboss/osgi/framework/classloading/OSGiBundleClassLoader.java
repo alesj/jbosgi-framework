@@ -25,7 +25,6 @@ package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
-import org.jboss.logging.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 
@@ -37,23 +36,16 @@ import org.osgi.framework.BundleReference;
  */
 public class OSGiBundleClassLoader extends BaseClassLoader implements BundleReference
 {
-   // Provide logging
-   private static final Logger log = Logger.getLogger(OSGiBundleClassLoader.class);
-   
    private OSGiClassLoaderPolicy osgiPolicy;
 
    public OSGiBundleClassLoader(ClassLoaderPolicy policy)
    {
       super(policy);
 
-      if (policy instanceof OSGiClassLoaderPolicy)
-         osgiPolicy = (OSGiClassLoaderPolicy)policy;
-      
-      if (osgiPolicy == null)
-      {
-         log.warn("Invalid policy: " + policy, new IllegalStateException());
-         System.out.println("FIXME [JBOSGI-306] Invalid policy: " + policy);
-      }
+      if (policy instanceof OSGiClassLoaderPolicy == false)
+         throw new IllegalArgumentException("Invalid policy: " + policy);
+
+      osgiPolicy = (OSGiClassLoaderPolicy)policy;
    }
 
    @Override

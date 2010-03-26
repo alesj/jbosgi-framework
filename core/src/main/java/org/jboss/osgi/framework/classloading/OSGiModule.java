@@ -21,6 +21,7 @@
 */
 package org.jboss.osgi.framework.classloading;
 
+import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
@@ -40,5 +41,11 @@ public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
    public OSGiModule(DeploymentUnit unit, ClassLoadingMetaData metaData)
    {
       super(unit);
+   }
+
+   @Override
+   public ClassLoaderPolicy createClassLoaderPolicy()
+   {
+      throw new IllegalStateException("OSGiClassLoaderFactory is expected to create the policy");
    }
 }
