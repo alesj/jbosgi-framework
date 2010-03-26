@@ -33,7 +33,10 @@
   <!-- ================ -->
 
   <!-- Show jboss deployer traces - ->
-  <category name="org.jboss.deployer">
+  <category name="org.jboss.classloading">
+    <priority value="TRACE" />
+  </category>
+  <category name="org.jboss.classloader">
     <priority value="TRACE" />
   </category>
   -->

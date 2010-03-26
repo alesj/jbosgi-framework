@@ -52,7 +52,6 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          {
             bundle.start();
             assertBundleState(Bundle.ACTIVE, bundle.getState());
-            
             assertLoadClass(bundle, LogService.class.getName());
          }
          finally
@@ -75,7 +74,6 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       {
          bundle.start();
          assertBundleState(Bundle.ACTIVE, bundle.getState());
-         
          assertLoadClassFail(bundle, LogService.class.getName());
          
          Bundle cmpd = installBundle("bundles/org.osgi.compendium.jar");
@@ -97,14 +95,14 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 
    private JavaArchive getBundleArchive()
    {
-      JavaArchive archive = Archives.create("dynamic-log-service", JavaArchive.class);
+      final JavaArchive archive = Archives.create("dynamic-log-service", JavaArchive.class);
       archive.setManifest(new Asset()
       {
          public InputStream openStream()
          {
             OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
             builder.addBundleManifestVersion(2);
-            builder.addBundleSymbolicName("dynamic-log-service");
+            builder.addBundleSymbolicName(archive.getName());
             builder.addDynamicImportPackages("org.osgi.service.log");
             return builder.openStream();
          }
