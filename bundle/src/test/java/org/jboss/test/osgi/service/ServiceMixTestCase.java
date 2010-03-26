@@ -41,7 +41,7 @@ import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.osgi.framework.deployers.AbstractDeployment;
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.service.support.LazyBundle;
 import org.jboss.test.osgi.service.support.a.A;
 import org.jboss.test.osgi.service.support.c.C;
@@ -69,7 +69,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean = deployBeans("beanA", A.class);
       try
       {
-         VirtualFile assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
+         Archive<?> assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
          Bundle bundle1 = installBundle(assembly1);
          try
          {
@@ -122,7 +122,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
-         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
+         Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
          Bundle bundle1 = installBundle(assembly1);
          try
          {
@@ -181,7 +181,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
-         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
+         Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
          Bundle bundle1 = installBundle(assembly1);
          try
          {
@@ -241,7 +241,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean = addBeans("beanA", bmd, C.class, A.class);
       try
       {
-         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
+         Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
          Bundle bundle1 = installBundle(assembly1);
          try
          {
@@ -296,7 +296,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
          Deployment bean2 = addBeans("beanA2", bmd, E.class);
          try
          {
-            VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle4");
+            Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle4");
             Bundle bundle1 = installBundle(assembly1);
             try
             {
@@ -364,7 +364,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean1 = addBeans("beanA1", bmd, C.class, A.class, ServiceMixFactory.class);
       try
       {
-         VirtualFile assembly = assembleArchive("service-bundle4", "/bundles/service/service-bundle4");
+         Archive<?> assembly = assembleArchive("service-bundle4", "/bundles/service/service-bundle4");
          Bundle bundle = installBundle(assembly);
          try
          {
@@ -438,7 +438,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean = deployBeans("beanA", A.class);
       try
       {
-         VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle1");
+         Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle1");
          Bundle bundle1 = installBundle(assembly1);
          try
          {
@@ -499,8 +499,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    @Test
    public void testBeansMix() throws Throwable
    {
-      VirtualFile assembly = assembleArchive("beans1", "/bundles/service/service-beans1", A.class);
-      Deployment deployment = addDeployment(AbstractDeployment.createDeployment(assembly));
+      Archive<?> assembly = assembleArchive("beans1", "/bundles/service/service-beans1", A.class);
+      Deployment deployment = addDeployment(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
       try
       {
          checkComplete();
@@ -531,7 +531,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    @Test
    public void testServiceInjection() throws Throwable
    {
-      VirtualFile assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle2", A.class);
+      Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle2", A.class);
       Bundle bundle = installBundle(assembly1);
       try
       {
@@ -546,8 +546,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
          ServiceRegistration reg1 = bundleContext1.registerService(A.class.getName(), a, table);
          assertNotNull(reg1);
 
-         VirtualFile assembly = assembleArchive("beans1", "/bundles/service/service-beans2", C.class);
-         Deployment deployment = addDeployment(AbstractDeployment.createDeployment(assembly));
+         Archive<?> assembly = assembleArchive("beans1", "/bundles/service/service-beans2", C.class);
+         Deployment deployment = addDeployment(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
          try
          {
             checkComplete();

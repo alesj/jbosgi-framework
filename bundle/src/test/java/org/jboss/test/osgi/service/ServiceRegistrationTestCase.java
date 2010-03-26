@@ -30,7 +30,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
    @Test
    public void testGetReference() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -115,7 +115,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
    @Test
    public void testSetProperties() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -224,7 +224,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
    @Test
    public void testSetPropertiesAfterStop() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -257,7 +257,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
    @Test
    public void testUnregister() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
       try
       {
@@ -282,7 +282,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
          inUse = bundle1.getServicesInUse();
          assertArrayEquals(new ServiceReference[] { reference }, inUse);
 
-         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
+         Archive<?> assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
          {
@@ -340,7 +340,7 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
    @Test
    public void testUnregisterAfterStop() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {

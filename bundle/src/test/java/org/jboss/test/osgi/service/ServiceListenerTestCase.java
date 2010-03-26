@@ -27,7 +27,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Hashtable;
 
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -49,7 +49,7 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
    @Test
    public void testServiceListener() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -77,7 +77,7 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
    @Test
    public void testObjectClassFilter() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -115,7 +115,7 @@ public class ServiceListenerTestCase extends AbstractFrameworkTest
    @Test
    public void testModifyServiceProperties() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {

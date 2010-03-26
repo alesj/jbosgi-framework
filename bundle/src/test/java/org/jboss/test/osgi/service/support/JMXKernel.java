@@ -1,6 +1,7 @@
 package org.jboss.test.osgi.service.support;
 
 import java.util.Properties;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;

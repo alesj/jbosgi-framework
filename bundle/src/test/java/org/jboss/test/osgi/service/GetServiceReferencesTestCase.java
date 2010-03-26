@@ -33,7 +33,7 @@ import java.util.Hashtable;
 
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.osgi.testing.OSGiManifestBuilder;
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.Archives;
 import org.jboss.shrinkwrap.api.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -61,7 +61,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
    public void testGetServiceReferences() throws Exception
    {
       
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -279,7 +279,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
 
    private void assertGetServiceReferencesNotAssignable(String className) throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Archive<?> assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -297,7 +297,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
          ServiceReference sref1 = sreg1.getReference();
          assertNotNull(sref1);
 
-         VirtualFile assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
+         Archive<?> assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -384,7 +384,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
       // Bundle-ManifestVersion: 2
       // Bundle-SymbolicName: org.jboss.test.osgi.service2
       // Export-Package: org.jboss.test.osgi.service.support.a
-      VirtualFile assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
+      Archive<?> assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -405,7 +405,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
          // Bundle-ManifestVersion: 2
          // Bundle-SymbolicName: org.jboss.test.osgi.service1
          // Import-Package: org.jboss.test.osgi.service.support.a
-         VirtualFile assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
+         Archive<?> assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -483,7 +483,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
       // Bundle-ManifestVersion: 2
       // Bundle-SymbolicName: org.jboss.test.osgi.service2
       // Export-Package: org.jboss.test.osgi.service.support.a
-      VirtualFile assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
+      Archive<?> assemblyA = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -507,7 +507,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
          // Bundle-ManifestVersion: 2
          // Bundle-SymbolicName: org.jboss.test.osgi.service1
          // Import-Package: org.jboss.test.osgi.service.support.a
-         VirtualFile assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
+         Archive<?> assemblyB = assembleArchive("service1", "/bundles/service/service-bundle1");
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -597,7 +597,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
       String className = A.class.getName();
       String wrongClassName = B.class.getName();
 
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
       try
       {

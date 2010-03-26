@@ -36,7 +36,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import org.jboss.osgi.vfs.VFSUtils;
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -58,7 +58,7 @@ public class BundleTestCase extends AbstractFrameworkTest
    public void testBundleId() throws Exception
    {
       long id1 = -1;
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -87,7 +87,7 @@ public class BundleTestCase extends AbstractFrameworkTest
    @Test
    public void testSymbolicName() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -103,7 +103,7 @@ public class BundleTestCase extends AbstractFrameworkTest
    @Test
    public void testState() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -125,7 +125,7 @@ public class BundleTestCase extends AbstractFrameworkTest
    @Test
    public void testGetBundleContext() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -161,15 +161,15 @@ public class BundleTestCase extends AbstractFrameworkTest
    @Test
    public void testUpdate() throws Exception
    {
-      VirtualFile assemble1 = assembleArchive("bundle1", "/bundles/update/update-bundle1");
-      VirtualFile assemble2 = assembleArchive("bundle2", "/bundles/update/update-bundle2");
+      Archive<?> assembly1 = assembleArchive("bundle1", "/bundles/update/update-bundle1");
+      Archive<?> assembly2 = assembleArchive("bundle2", "/bundles/update/update-bundle2");
 
-      Manifest manifest = VFSUtils.getManifest(assemble2);
+      Manifest manifest = VFSUtils.getManifest(toVirtualFile(assembly2));
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       new JarOutputStream(baos, manifest).close();
       ByteArrayInputStream updateStream = new ByteArrayInputStream(baos.toByteArray());
 
-      Bundle bundle = installBundle(assemble1);
+      Bundle bundle = installBundle(assembly1);
       try
       {
          int beforeCount = systemContext.getBundles().length;
@@ -200,11 +200,11 @@ public class BundleTestCase extends AbstractFrameworkTest
    @Test
    public void testSingleton() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("bundle10", "/bundles/singleton/singleton1");
+      Archive<?> assemblyA = assembleArchive("bundle10", "/bundles/singleton/singleton1");
       Bundle bundleA = installBundle(assemblyA);
       try
       {
-         VirtualFile assemblyB = assembleArchive("bundle20", "/bundles/singleton/singleton2");
+         Archive<?> assemblyB = assembleArchive("bundle20", "/bundles/singleton/singleton2");
          Bundle bundleB = installBundle(assemblyB);
          bundleB.uninstall();
          fail("Should not be here!");
@@ -222,11 +222,11 @@ public class BundleTestCase extends AbstractFrameworkTest
    @Test
    public void testNotSingleton() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("bundle1", "/bundles/singleton/singleton1");
+      Archive<?> assemblyA = assembleArchive("bundle1", "/bundles/singleton/singleton1");
       Bundle bundleA = installBundle(assemblyA);
       try
       {
-         VirtualFile assemblyB = assembleArchive("not-singleton", "/bundles/singleton/not-singleton");
+         Archive<?> assemblyB = assembleArchive("not-singleton", "/bundles/singleton/not-singleton");
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -247,7 +247,7 @@ public class BundleTestCase extends AbstractFrameworkTest
    @SuppressWarnings({ "rawtypes", "unchecked" })
    public void testGetHeaders() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {

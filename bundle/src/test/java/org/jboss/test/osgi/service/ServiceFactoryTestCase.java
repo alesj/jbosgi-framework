@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleWrapper;
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
 import org.jboss.test.osgi.service.support.a.A;
@@ -57,7 +57,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
    @Test
    public void testRegisterServiceFactory() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Archive<?> assemblyA = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -82,7 +82,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
          assertEquals(bundleA.getSymbolicName(), serviceFactory.getBundle.getSymbolicName());
          assertEquals(1, serviceFactory.getCount);
 
-         VirtualFile assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
+         Archive<?> assemblyB = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -112,7 +112,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
    @Test
    public void testGetServiceFactory() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -148,7 +148,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
    {
       String OBJCLASS = BundleContext.class.getName();
 
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -185,7 +185,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
       String[] OBJCLASS = { String.class.getName() };
       String[] OBJCLASSES = { String.class.getName(), BundleContext.class.getName() };
 
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {

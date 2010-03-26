@@ -23,7 +23,8 @@ package org.jboss.test.osgi.bundle;
 
 // $Id: $
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 import java.util.Hashtable;

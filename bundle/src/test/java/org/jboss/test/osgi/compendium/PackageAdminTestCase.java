@@ -26,7 +26,7 @@ package org.jboss.test.osgi.compendium;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.compendium.support.a.PA;
 import org.jboss.test.osgi.compendium.support.b.Other;
@@ -45,7 +45,7 @@ public class PackageAdminTestCase extends AbstractFrameworkTest
    @Test
    public void testGetBudleFromClass() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
+      Archive<?> assemblyA = assembleArchive("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -60,7 +60,7 @@ public class PackageAdminTestCase extends AbstractFrameworkTest
          Bundle notFound = pa.getBundle(getClass());
          assertNull(notFound);
 
-         VirtualFile assemblyB = assembleArchive("simple", "/bundles/simple/simple-bundle1", Other.class);
+         Archive<?> assemblyB = assembleArchive("simple", "/bundles/simple/simple-bundle1", Other.class);
          Bundle bundleB = installBundle(assemblyB);
          try
          {

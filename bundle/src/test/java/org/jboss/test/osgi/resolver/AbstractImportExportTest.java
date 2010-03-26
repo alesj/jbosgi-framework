@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -46,14 +46,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -85,8 +85,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles
@@ -111,14 +111,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleimport");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Only resolve BundleB
@@ -154,8 +154,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
       // Bundle-SymbolicName: selfimport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/selfimport", A.class);
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/selfimport", A.class);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles
@@ -180,14 +180,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageimportversion
       //Import-Package: org.jboss.test.osgi.classloader.support.a;version="[0.0.0,1.0.0]"
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageimportversion");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageimportversion");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: packageexportversion100
          //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion100", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion100", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -219,14 +219,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageimportversionfails
       //Import-Package: org.jboss.test.osgi.classloader.support.a;version="[3.0,4.0)"
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageimportversionfails");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageimportversionfails");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: packageexportversion100
          //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion100", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion100", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -258,8 +258,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageimportoptional
       //Import-Package: org.jboss.test.osgi.classloader.support.a;resolution:=optional
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageimportoptional");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageimportoptional");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles
@@ -284,14 +284,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageimportoptional
       //Import-Package: org.jboss.test.osgi.classloader.support.a;resolution:=optional
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageimportoptional");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageimportoptional");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -323,8 +323,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageimportoptional
       //Import-Package: org.jboss.test.osgi.classloader.support.a;resolution:=optional
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageimportoptional");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageimportoptional");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles
@@ -334,8 +334,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
 
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -367,14 +367,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: bundlenameimport
       //Import-Package: org.jboss.test.osgi.classloader.support.a;bundle-symbolic-name=simpleexport
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/bundlenameimport");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/bundlenameimport");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: simpleexport
          //Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -406,14 +406,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: bundlenameimport
       //Import-Package: org.jboss.test.osgi.classloader.support.a;bundle-symbolic-name=simpleexport
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/bundlenameimport");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/bundlenameimport");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: sigleton;singleton:=true
          //Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/singleton", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/singleton", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -445,14 +445,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: bundleversionimport
       //Import-Package: org.jboss.test.osgi.classloader.support.a;bundle-version="[0.0.0,1.0.0)"
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/bundleversionimport");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/bundleversionimport");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -484,14 +484,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: bundleversionimportfails
       //Import-Package: org.jboss.test.osgi.classloader.support.a;bundle-version="[1.0.0,2.0.0)"
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/bundleversionimportfails");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/bundleversionimportfails");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -525,14 +525,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
 
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -564,8 +564,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles
@@ -590,8 +590,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: requirebundleoptional
       //Require-Bundle: simpleexport;resolution:=optional
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundleoptional");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/requirebundleoptional");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles
@@ -613,14 +613,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: requirebundleversion
       //Require-Bundle: simpleexport;bundle-version="[0.0.0,1.0.0]"
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundleversion");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/requirebundleversion");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -652,14 +652,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: versionrequirebundlefails
       //Require-Bundle: simpleexport;bundle-version="[1.0.0,2.0.0)"
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/requirebundleversionfails");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/requirebundleversionfails");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -691,17 +691,17 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
 
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
+      Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
 
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
+      Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
 
-      Bundle bundleA = installBundle(fileA);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles
@@ -712,10 +712,10 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
          // Verify bundle states
          assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
 
-         Bundle bundleB = installBundle(fileB);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
-            Bundle bundleC = installBundle(fileC);
+            Bundle bundleC = installBundle(assemblyC);
             try
             {
                allResolved = packageAdmin.resolveBundles(null);
@@ -751,17 +751,17 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
 
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
+      Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
 
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
+      Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
 
-      Bundle bundleB = installBundle(fileB);
+      Bundle bundleB = installBundle(assemblyB);
       try
       {
          // Resolve the installed bundles
@@ -772,10 +772,10 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
          // Verify bundle states
          assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
 
-         Bundle bundleA = installBundle(fileA);
+         Bundle bundleA = installBundle(assemblyA);
          try
          {
-            Bundle bundleC = installBundle(fileC);
+            Bundle bundleC = installBundle(assemblyC);
             try
             {
                allResolved = packageAdmin.resolveBundles(null);
@@ -811,23 +811,23 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageexportversion100
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportversion100", A.class);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportversion100", A.class);
 
       //Bundle-SymbolicName: packageexportversion200
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=2.0.0
-      VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion200", A.class);
+      Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion200", A.class);
 
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
+      Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
 
-      Bundle bundleA = installBundle(fileA);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
-         Bundle bundleB = installBundle(fileB);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
-            Bundle bundleC = installBundle(fileC);
+            Bundle bundleC = installBundle(assemblyC);
             try
             {
                // Resolve the installed bundles
@@ -866,23 +866,23 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageexportversion200
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=2.0.0
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportversion200", A.class);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportversion200", A.class);
 
       //Bundle-SymbolicName: packageexportversion100
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0
-      VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion100", A.class);
+      Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion100", A.class);
 
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
+      Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
 
-      Bundle bundleA = installBundle(fileA);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
-         Bundle bundleB = installBundle(fileB);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
-            Bundle bundleC = installBundle(fileC);
+            Bundle bundleC = installBundle(assemblyC);
             try
             {
                // Resolve the installed bundles
@@ -921,20 +921,20 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
 
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
+      Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
 
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
+      Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
 
-      Bundle bundleA = installBundle(fileA);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
-         Bundle bundleB = installBundle(fileB);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -946,7 +946,7 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
             assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
             assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
 
-            Bundle bundleC = installBundle(fileC);
+            Bundle bundleC = installBundle(assemblyC);
             try
             {
                allResolved = packageAdmin.resolveBundles(null);
@@ -981,20 +981,20 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/simpleexportother", A.class);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexportother", A.class);
 
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
+      Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
 
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
-      VirtualFile fileC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
+      Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
 
-      Bundle bundleA = installBundle(fileA);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
-         Bundle bundleB = installBundle(fileB);
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -1006,7 +1006,7 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
             assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
             assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
 
-            Bundle bundleC = installBundle(fileC);
+            Bundle bundleC = installBundle(assemblyC);
             try
             {
                allResolved = packageAdmin.resolveBundles(null);
@@ -1041,14 +1041,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageexportattribute
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute", A.class);
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute", A.class);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: simpleimport
          //Import-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleimport");
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleimport");
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -1071,8 +1071,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
 
          //Bundle-SymbolicName: packageimportattribute
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=x
-         fileB = assembleArchive("bundleB", "/bundles/resolver/packageimportattribute");
-         bundleB = installBundle(fileB);
+         assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageimportattribute");
+         bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -1104,14 +1104,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageexportattribute
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute", A.class);
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportattribute", A.class);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: packageimportattributefails
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=y
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageimportattributefails");
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageimportattributefails");
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -1143,14 +1143,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageexportattributemandatory
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x;mandatory:=test
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory", A.class);
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory", A.class);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: packageimportattribute
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=x
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/packageimportattribute");
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageimportattribute");
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -1182,14 +1182,14 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: packageexportattributemandatory
       //Export-Package: org.jboss.test.osgi.classloader.support.a;test=x;mandatory:=test
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory", A.class);
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportattributemandatory", A.class);
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          //Bundle-SymbolicName: simpleimport
          //Import-Package: org.jboss.test.osgi.classloader.support.a
-         VirtualFile fileB = assembleArchive("bundleB", "/bundles/resolver/simpleimport");
-         Bundle bundleB = installBundle(fileB);
+         Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleimport");
+         Bundle bundleB = installBundle(assemblyB);
          try
          {
             // Resolve the installed bundles
@@ -1221,8 +1221,8 @@ public abstract class AbstractImportExportTest extends AbstractResolverTest
    {
       //Bundle-SymbolicName: systempackageimport
       //Import-Package: org.osgi.framework;version=1.4
-      VirtualFile fileA = assembleArchive("bundleA", "/bundles/resolver/systempackageimport");
-      Bundle bundleA = installBundle(fileA);
+      Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/systempackageimport");
+      Bundle bundleA = installBundle(assemblyA);
       try
       {
          // Resolve the installed bundles

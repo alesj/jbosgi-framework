@@ -21,12 +21,16 @@
 */
 package org.jboss.test.osgi.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -55,7 +59,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
       String OBJCLASS = BundleContext.class.getName();
       String[] OBJCLASSES = new String[] { OBJCLASS };
 
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -190,7 +194,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
       Dictionary<String, Object> properties = new Hashtable<String, Object>();
       properties.put(Constants.OBJECTCLASS, new String[] { "rubbish" });
 
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -221,7 +225,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
    @Test
    public void testRegisterService() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -248,7 +252,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
    @Test
    public void testBundleUninstall() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
       try
       {
@@ -261,7 +265,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2");
+         Archive<?> assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
          {
@@ -289,7 +293,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
    @Test
    public void testRegisteredServices() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly1 = assembleArchive("simple-bundle1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
       try
       {
@@ -302,7 +306,7 @@ public class RegisterServiceTestCase extends AbstractFrameworkTest
          Object actual = bundleContext.getService(reference);
          assertEquals(bundleContext, actual);
 
-         VirtualFile assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2");
+         Archive<?> assembly2 = assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
          {

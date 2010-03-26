@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.a.A;
 import org.junit.Test;
@@ -63,7 +63,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
       String[] clazzes = new String[] { BundleContext.class.getName() };
       Object serviceID = null;
 
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -162,7 +162,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    {
       ServiceReference sref = null;
 
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -222,7 +222,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testGetBundle() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -253,7 +253,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testGetBundleAfterStop() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -284,7 +284,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testUsingBundles() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
       try
       {
@@ -300,7 +300,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          assertUsingBundles(sref);
 
-         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
+         Archive<?> assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
          {
@@ -343,7 +343,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testUsingBundlesAfterStop() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
+      Archive<?> assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1");
       Bundle bundle1 = installBundle(assembly1);
       try
       {
@@ -359,7 +359,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
          assertUsingBundles(sref);
 
-         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
+         Archive<?> assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2");
          Bundle bundle2 = installBundle(assembly2);
          try
          {
@@ -388,7 +388,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testIsAssignableToErrors() throws Exception
    {
-      VirtualFile assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Archive<?> assembly = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle = installBundle(assembly);
       try
       {
@@ -431,7 +431,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testNotAssignableTo() throws Exception
    {
-      VirtualFile assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
+      Archive<?> assembly1 = assembleArchive("simple1", "/bundles/simple/simple-bundle1", A.class);
       Bundle bundle1 = installBundle(assembly1);
       try
       {
@@ -445,7 +445,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          ServiceReference sref = sreg.getReference();
          assertNotNull(sref);
 
-         VirtualFile assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
+         Archive<?> assembly2 = assembleArchive("simple2", "/bundles/simple/simple-bundle2", A.class);
          Bundle bundle2 = installBundle(assembly2);
          try
          {
@@ -473,7 +473,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
       //Bundle-Name: Service2
       //Bundle-SymbolicName: org.jboss.test.osgi.service2
       //Export-Package: org.jboss.test.osgi.service.support.a
-      VirtualFile assembly2 = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
+      Archive<?> assembly2 = assembleArchive("service2", "/bundles/service/service-bundle2", A.class);
       Bundle bundle2 = installBundle(assembly2);
 
       try
@@ -485,7 +485,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          //Bundle-Name: Service1
          //Bundle-SymbolicName: org.jboss.test.osgi.service1
          //Import-Package: org.jboss.test.osgi.service.support.a
-         VirtualFile assembly1 = assembleArchive("service1", "/bundles/service/service-bundle1");
+         Archive<?> assembly1 = assembleArchive("service1", "/bundles/service/service-bundle1");
          Bundle bundle1 = installBundle(assembly1);
 
          try

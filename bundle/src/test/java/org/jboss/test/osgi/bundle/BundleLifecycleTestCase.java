@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
 import org.jboss.test.osgi.bundle.support.b.LifecycleService;
@@ -51,7 +51,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    @Test
    public void testSimpleStart() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Archive<?> assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -76,7 +76,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    @Test
    public void testDependencyNotAvailable() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Archive<?> assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -86,7 +86,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          ServiceReference sref = systemContext.getServiceReference(LifecycleService.class.getName());
          assertNull("Service not available", sref);
 
-         VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Archive<?> assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -118,14 +118,14 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    @Test
    public void testDependencyAvailable() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Archive<?> assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
          assertBundleState(Bundle.ACTIVE, bundleA.getState());
 
-         VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Archive<?> assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -151,13 +151,13 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    @Test
    public void testStartRetry() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
+      Archive<?> assemblyA = assembleArchive("lifecycle-service", "/bundles/lifecycle/simple-service", LifecycleService.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
-         VirtualFile assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+         Archive<?> assemblyB = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
          Bundle bundleB = installBundle(assemblyB);
          try
          {
@@ -200,7 +200,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
    @Test
    public void testFailToResolve() throws Exception
    {
-      VirtualFile assemblyA = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
+      Archive<?> assemblyA = assembleArchive("lifecycle-failstart", "/bundles/lifecycle/fail-on-start", FailOnStartActivator.class);
       Bundle bundleB = installBundle(assemblyA);
       try
       {

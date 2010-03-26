@@ -41,7 +41,7 @@ import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.kernel.spi.deployment.KernelDeployment;
 import org.jboss.osgi.framework.deployers.AbstractDeployment;
-import org.jboss.osgi.vfs.VirtualFile;
+import org.jboss.shrinkwrap.api.Archive;
 
 /**
  * Parent for deployment tests.  
@@ -146,7 +146,7 @@ public abstract class AbstractDeploymentTest extends AbstractFrameworkTest
 
    protected Deployment addBeans(String name, BeanMetaData bmd, Class<?>... packages) throws Exception
    {
-      VirtualFile assembly = assembleArchive(name, new String[0], packages);
+      Archive<?> assembly = assembleArchive(name, new String[0], packages);
 
       if (bmd == null)
       {
@@ -155,7 +155,7 @@ public abstract class AbstractDeploymentTest extends AbstractFrameworkTest
          bmd = builder.getBeanMetaData();
       }
 
-      Deployment deployment = AbstractDeployment.createDeployment(assembly);
+      Deployment deployment = AbstractDeployment.createDeployment(toVirtualFile(assembly));
       MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
       att.addAttachment(BeanMetaData.class, bmd);
 

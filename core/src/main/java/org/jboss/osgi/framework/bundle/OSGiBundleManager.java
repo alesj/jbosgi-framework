@@ -95,7 +95,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  */
 public class OSGiBundleManager
 {
-   /** The log */
+   // Provide logging
    private static final Logger log = Logger.getLogger(OSGiBundleManager.class);
 
    /** The bundle manager's bean name: OSGiBundleManager */
