@@ -29,12 +29,12 @@
   <parent>
     <groupId>org.jboss.osgi.framework</groupId>
     <artifactId>jboss-osgi-framework-parent</artifactId>
-    <version>1.0.0.Alpha4-SNAPSHOT</version>
+    <version>1.0.0.Alpha4</version>
   </parent>
 
   <!-- Properties -->
   <properties>
-    <surefire.jpda.args></surefire.jpda.args>
+    <surefire.jpda.args />
     <surefire.system.args>-Xmx512m ${surefire.jpda.args}</surefire.system.args>
   </properties>
 
