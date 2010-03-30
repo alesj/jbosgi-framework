@@ -29,6 +29,7 @@ import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloading.spi.metadata.CapabilitiesMetaData;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.classloading.spi.metadata.RequirementsMetaData;
+import org.jboss.deployers.plugins.classloading.DeploymentMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
@@ -61,7 +62,10 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
    {
       super(OSGiMetaData.class);
       addInput(AbstractBundleState.class);
-      setOutput(ClassLoadingMetaData.class);
+      addInput(ClassLoadingMetaData.class);
+      addInput(DeploymentMetaData.class);
+      addOutput(ClassLoadingMetaData.class);
+      addOutput(DeploymentMetaData.class);
       setStage(DeploymentStages.POST_PARSE);
       setTopLevelOnly(true);
    }
@@ -79,6 +83,13 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
    @Override
    public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
    {
+      if (unit.isAttachmentPresent(DeploymentMetaData.class) == false)
+      {
+         DeploymentMetaData deploymentMetaData = new DeploymentMetaData();
+         deploymentMetaData.setLazyResolve(true);
+         unit.addAttachment(DeploymentMetaData.class, deploymentMetaData);
+      }
+      
       if (unit.isAttachmentPresent(ClassLoadingMetaData.class))
          return;
 
