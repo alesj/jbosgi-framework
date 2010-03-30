@@ -79,8 +79,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          Bundle cmpd = installBundle("bundles/org.osgi.compendium.jar");
          try
          {
-            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
-            //assertLoadClass(bundle, LogService.class.getName());
+            assertLoadClass(bundle, LogService.class.getName());
          }
          finally
          {
