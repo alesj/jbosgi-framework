@@ -28,6 +28,10 @@ import org.jboss.osgi.testing.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archives;
 import org.jboss.shrinkwrap.api.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.test.osgi.classloader.support.a.A;
+import org.jboss.test.osgi.classloader.support.b.B;
+import org.jboss.test.osgi.classloader.support.c.C;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
@@ -40,23 +44,113 @@ import org.osgi.service.log.LogService;
  */
 public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 {
+   private static JavaArchive archiveA, archiveB, archiveC;
+
+   @BeforeClass
+   public static void beforeTestCase()
+   {
+      // Bundle-SymbolicName: dynamic-wildcard-a
+      // Export-Package: org.jboss.test.osgi.classloader.support.a 
+      // Import-Package: org.jboss.test.osgi.classloader.support.b
+      // DynamicImport-Package: *
+      archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addExportPackages(A.class.getPackage().getName());
+            builder.addImportPackages(B.class.getPackage().getName());
+            builder.addDynamicImportPackages("*");
+            return builder.openStream();
+         }
+      });
+
+      // Bundle-SymbolicName: dynamic-wildcard-bc
+      // Export-Package: org.jboss.test.osgi.classloader.support.b, org.jboss.test.osgi.classloader.support.c
+      archiveB = Archives.create("dynamic-wildcard-bc", JavaArchive.class);
+      archiveB.addClasses(B.class, C.class);
+      archiveB.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveB.getName());
+            builder.addExportPackages(B.class.getPackage().getName());
+            builder.addExportPackages(C.class.getPackage().getName());
+            return builder.openStream();
+         }
+      });
+
+      // Bundle-SymbolicName: dynamic-log-service
+      // DynamicImport-Package: org.osgi.service.log
+      archiveC = Archives.create("dynamic-log-service", JavaArchive.class);
+      archiveC.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveC.getName());
+            builder.addDynamicImportPackages("org.osgi.service.log");
+            return builder.openStream();
+         }
+      });
+   }
+
+   @Test
+   public void testDynamicImportWithWildcard() throws Exception
+   {
+      Bundle bundleA = installBundle(archiveA);
+      assertBundleState(Bundle.INSTALLED, bundleA.getState());
+      try
+      {
+         Bundle bundleB = installBundle(archiveB);
+         assertBundleState(Bundle.INSTALLED, bundleB.getState());
+         try
+         {
+            assertLoadClass(bundleA, A.class.getName(), bundleA);
+            assertLoadClass(bundleA, B.class.getName(), bundleB);
+            
+            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            //assertLoadClass(bundleA, C.class.getName(), bundleB);
+            
+            assertBundleState(Bundle.RESOLVED, bundleA.getState());
+            assertBundleState(Bundle.RESOLVED, bundleB.getState());
+         }
+         finally
+         {
+            bundleB.uninstall();
+         }
+      }
+      finally
+      {
+         bundleA.uninstall();
+      }
+   }
+
    @Test
    public void testLogServiceAvailableOnInstall() throws Exception
    {
       Bundle cmpd = installBundle("bundles/org.osgi.compendium.jar");
+      assertBundleState(Bundle.INSTALLED, cmpd.getState());
       try
       {
-         Bundle bundle = installBundle(getBundleArchive());
-         assertBundleState(Bundle.INSTALLED, bundle.getState());
+         Bundle bundleC = installBundle(archiveC);
+         assertBundleState(Bundle.INSTALLED, bundleC.getState());
          try
          {
-            bundle.start();
-            assertBundleState(Bundle.ACTIVE, bundle.getState());
-            assertLoadClass(bundle, LogService.class.getName());
+            bundleC.start();
+            assertBundleState(Bundle.ACTIVE, bundleC.getState());
+            assertLoadClass(bundleC, LogService.class.getName());
          }
          finally
          {
-            bundle.uninstall();
+            bundleC.uninstall();
          }
       }
       finally
@@ -68,18 +162,18 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
    @Test
    public void testLogServiceNotAvailableOnInstall() throws Exception
    {
-      Bundle bundle = installBundle(getBundleArchive());
-      assertBundleState(Bundle.INSTALLED, bundle.getState());
+      Bundle bundleC = installBundle(archiveC);
+      assertBundleState(Bundle.INSTALLED, bundleC.getState());
       try
       {
-         bundle.start();
-         assertBundleState(Bundle.ACTIVE, bundle.getState());
-         assertLoadClassFail(bundle, LogService.class.getName());
-         
+         bundleC.start();
+         assertBundleState(Bundle.ACTIVE, bundleC.getState());
+         assertLoadClassFail(bundleC, LogService.class.getName());
+
          Bundle cmpd = installBundle("bundles/org.osgi.compendium.jar");
          try
          {
-            assertLoadClass(bundle, LogService.class.getName());
+            assertLoadClass(bundleC, LogService.class.getName());
          }
          finally
          {
@@ -88,24 +182,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       }
       finally
       {
-         bundle.uninstall();
+         bundleC.uninstall();
       }
-   }
-
-   private JavaArchive getBundleArchive()
-   {
-      final JavaArchive archive = Archives.create("dynamic-log-service", JavaArchive.class);
-      archive.setManifest(new Asset()
-      {
-         public InputStream openStream()
-         {
-            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
-            builder.addBundleManifestVersion(2);
-            builder.addBundleSymbolicName(archive.getName());
-            builder.addDynamicImportPackages("org.osgi.service.log");
-            return builder.openStream();
-         }
-      });
-      return archive;
    }
 }
