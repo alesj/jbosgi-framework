@@ -135,7 +135,30 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
    public ExportedPackage[] getExportedPackages(Bundle bundle)
    {
       List<ExportedPackage> exported = new ArrayList<ExportedPackage>();
+      if (bundle != null)
+      {
+         exported = getExportedPackagesInternal(bundle);
+      }
+      else
+      {
+         for (Bundle aux : getBundleManager().getBundles())
+         {
+            exported.addAll(getExportedPackagesInternal(aux));
+         }
+      }
 
+      if (exported.size() == 0)
+         return null;
+
+      ExportedPackage[] result = new ExportedPackage[exported.size()];
+      exported.toArray(result);
+
+      return result;
+   }
+
+   private List<ExportedPackage> getExportedPackagesInternal(Bundle bundle)
+   {
+      List<ExportedPackage> exported = new ArrayList<ExportedPackage>();
       AbstractBundleState absBundleState = AbstractBundleState.assertBundleState(bundle);
       if (absBundleState instanceof OSGiSystemState)
       {
@@ -164,14 +187,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
             }
          }
       }
-
-      if (exported.size() == 0)
-         return null;
-
-      ExportedPackage[] result = new ExportedPackage[exported.size()];
-      exported.toArray(result);
-
-      return result;
+      return exported;
    }
 
    public ExportedPackage[] getExportedPackages(String name)
