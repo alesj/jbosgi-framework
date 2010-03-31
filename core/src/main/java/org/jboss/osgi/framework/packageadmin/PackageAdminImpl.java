@@ -36,6 +36,7 @@ import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.DeployerClient;
+import org.jboss.deployers.client.spi.IncompleteDeploymentException;
 import org.jboss.deployers.plugins.classloading.AbstractDeploymentClassLoaderPolicyModule;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStage;
@@ -337,15 +338,9 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       boolean allResolved = resolvableBundles.containsAll(unresolvedBundles);
 
       // Advance the bundles to stage CLASSLOADER and check at the end
-      advanceBundlesToClassloader(resolvableBundles);
-      try
+      if (advanceBundlesToClassloader(resolvableBundles) == false)
       {
-         DeployerClient deployerClient = getBundleManager().getDeployerClient();
-         deployerClient.checkComplete();
-      }
-      catch (DeploymentException ex)
-      {
-         log.error("Error resolving bundles: " + resolvableBundles, ex);
+         resetBundleDeploymentStates(resolvableBundles);
          allResolved = false;
          
          // Reset the required state for bundles that didn't get resolved
@@ -364,25 +359,24 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       return allResolved;
    }
 
-   private void advanceBundlesToClassloader(List<OSGiBundleState> resolvableBundles) 
+   private boolean advanceBundlesToClassloader(List<OSGiBundleState> resolvableBundles) 
    {
+      DeployerClient deployerClient = getBundleManager().getDeployerClient();
+
+      // Remember the state of every deployment unit
       for (OSGiBundleState bundleState: resolvableBundles)
       {
-         // If the bundle is in any other state but INSTALLED there is nothing to do
-         if (bundleState.getState() != Bundle.INSTALLED)
-            continue;
-
          DeploymentUnit unit = bundleState.getDeploymentUnit();
-         String unitName = unit.getName();
+         unit.addAttachment(StateTuple.class, new StateTuple(unit));
+      }
 
-         ControllerContext context = unit.getAttachment(ControllerContext.class);
-         ControllerState requiredState = context.getRequiredState();
-         DeploymentStage requiredStage = unit.getRequiredStage();
-
+      // Change to DeploymentStage CLASSLOADER 
+      for (OSGiBundleState bundleState: resolvableBundles)
+      {
          try
          {
-            DeployerClient deployerClient = getBundleManager().getDeployerClient();
-            deployerClient.change(unitName, DeploymentStages.CLASSLOADER);
+            DeploymentUnit unit = bundleState.getDeploymentUnit();
+            deployerClient.change(unit.getName(), DeploymentStages.CLASSLOADER);
 
             // Advance the attached fragments to CLASSLOADER 
             for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
@@ -393,11 +387,37 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          }
          catch (DeploymentException ex)
          {
-            unit.setRequiredStage(requiredStage);
-            context.setRequiredState(requiredState);
-            unit.addAttachment(DeploymentException.class, ex);
-            ex.printStackTrace();
             log.error("Error resolving bundle: " + bundleState, ex);
+         }
+      }
+      
+      // Check that every deployment could reach the desired stage
+      try
+      {
+         deployerClient.checkComplete();
+         return true;
+      }
+      catch (DeploymentException ex)
+      {
+         log.error("Error resolving bundles: " + resolvableBundles, ex);
+         if (ex instanceof IncompleteDeploymentException)
+         {
+            // TODO relay better error message to caller
+            // IncompleteDeploymentException idex = (IncompleteDeploymentException)ex;
+         }
+         return false;
+      }
+   }
+
+   private void resetBundleDeploymentStates(List<OSGiBundleState> resolvableBundles) 
+   {
+      for (OSGiBundleState bundleState: resolvableBundles)
+      {
+         DeploymentUnit unit = bundleState.getDeploymentUnit();
+         StateTuple stateTuple = unit.removeAttachment(StateTuple.class);
+         if (stateTuple != null)
+         {
+            stateTuple.reset(unit);
          }
       }
    }
@@ -432,4 +452,24 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       
       return foundExecEnv;
    }
+   
+   static class StateTuple
+   {
+      ControllerState requiredState;
+      DeploymentStage requiredStage;
+      
+      StateTuple(DeploymentUnit unit)
+      {
+         ControllerContext context = unit.getAttachment(ControllerContext.class);
+         requiredState = context.getRequiredState();
+         requiredStage = unit.getRequiredStage();
+      }
+      
+      void reset(DeploymentUnit unit)
+      {
+         ControllerContext context = unit.getAttachment(ControllerContext.class);
+         context.setRequiredState(requiredState);
+         unit.setRequiredStage(requiredStage);
+      }
+   };
 }
