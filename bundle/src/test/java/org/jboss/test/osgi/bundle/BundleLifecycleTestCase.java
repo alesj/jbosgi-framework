@@ -28,8 +28,13 @@ import static org.junit.Assert.fail;
 
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
+import org.jboss.test.osgi.bundle.support.a.ActivatorA;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
+import org.jboss.test.osgi.bundle.support.a.ServiceA;
+import org.jboss.test.osgi.bundle.support.b.ActivatorB;
 import org.jboss.test.osgi.bundle.support.b.LifecycleService;
+import org.jboss.test.osgi.bundle.support.b.ServiceB;
+import org.jboss.test.osgi.bundle.support.x.X;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -37,17 +42,19 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
- * BundleLifecycleTestCase.
+ * Bundle lifecycle TestCase.
  *
+ * Bundle A depends on B and X
+ * Bundle B depends on X
+ * 
+ * [JBOSGI-38] Investigate bundle install/start behaviour with random deployment order
+ * https://jira.jboss.org/jira/browse/JBOSGI-38
+ * 
  * @author thomas.diesler@jboss.com
  * @since 15-Dec-2009
  */
 public class BundleLifecycleTestCase extends AbstractFrameworkTest
 {
-
-   /**
-    * Verifies that the service bundle can get started
-    */
    @Test
    public void testSimpleStart() throws Exception
    {
@@ -248,6 +255,227 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
       catch (BundleException ex)
       {
          // expected
+      }
+   }
+
+   @Test
+   public void testInstallStartX() throws Exception
+   {
+      Bundle bundleX = installBundle(assembleArchive("lifecycle-bundleX", "/bundles/lifecycle/bundleX", X.class));
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleX.getState());
+
+         bundleX.start();
+         assertBundleState(Bundle.ACTIVE, bundleX.getState());
+      }
+      finally
+      {
+         bundleX.uninstall();
+         assertBundleState(Bundle.UNINSTALLED, bundleX.getState());
+      }
+   }
+
+   @Test
+   public void testInstallXBeforeB() throws Exception
+   {
+      // Install X, B
+
+      Bundle bundleX = installBundle(assembleArchive("lifecycle-bundleX", "/bundles/lifecycle/bundleX", X.class));
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleX.getState());
+
+         Bundle bundleB = installBundle(assembleArchive("lifecycle-bundleB", "/bundles/lifecycle/bundleB", ActivatorB.class, ServiceB.class));
+         try
+         {
+            assertBundleState(Bundle.INSTALLED, bundleB.getState());
+
+            bundleB.start();
+            assertBundleState(Bundle.RESOLVED, bundleX.getState());
+            assertBundleState(Bundle.ACTIVE, bundleB.getState());
+         }
+         finally
+         {
+            bundleB.uninstall();
+         }
+      }
+      finally
+      {
+         bundleX.uninstall();
+      }
+   }
+
+   @Test
+   public void testInstallBBeforeA() throws Exception
+   {
+      // Install X, B, A
+
+      Bundle bundleX = installBundle(assembleArchive("lifecycle-bundleX", "/bundles/lifecycle/bundleX", X.class));
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleX.getState());
+
+         Bundle bundleB = installBundle(assembleArchive("lifecycle-bundleB", "/bundles/lifecycle/bundleB", ActivatorB.class, ServiceB.class));
+         try
+         {
+            assertBundleState(Bundle.INSTALLED, bundleB.getState());
+
+            Bundle bundleA = installBundle(assembleArchive("lifecycle-bundleA", "/bundles/lifecycle/bundleA", ActivatorA.class, ServiceA.class));
+            try
+            {
+               assertBundleState(Bundle.INSTALLED, bundleA.getState());
+
+               bundleA.start();
+               assertBundleState(Bundle.RESOLVED, bundleX.getState());
+               assertBundleState(Bundle.RESOLVED, bundleB.getState());
+               assertBundleState(Bundle.ACTIVE, bundleA.getState());
+            }
+            finally
+            {
+               bundleA.uninstall();
+            }
+         }
+         finally
+         {
+            bundleB.uninstall();
+         }
+      }
+      finally
+      {
+         bundleX.uninstall();
+      }
+   }
+
+   @Test
+   public void testInstallBBeforeX() throws Exception
+   {
+      // Install B, X
+
+      Bundle bundleB = installBundle(assembleArchive("lifecycle-bundleB", "/bundles/lifecycle/bundleB", ActivatorB.class, ServiceB.class));
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleB.getState());
+
+         try
+         {
+            bundleB.start();
+            fail("Unresolved constraint expected");
+         }
+         catch (BundleException ex)
+         {
+            // expected
+         }
+
+         Bundle bundleX = installBundle(assembleArchive("lifecycle-bundleX", "/bundles/lifecycle/bundleX", X.class));
+         try
+         {
+            System.out.println("FIXME [JBDEPLOY-245] Unexpected dependee state changes");
+            //assertBundleState(Bundle.INSTALLED, bundleX.getState());
+
+            bundleB.start();
+            assertBundleState(Bundle.RESOLVED, bundleX.getState());
+            assertBundleState(Bundle.ACTIVE, bundleB.getState());
+         }
+         finally
+         {
+            bundleX.uninstall();
+         }
+      }
+      finally
+      {
+         bundleB.uninstall();
+      }
+   }
+
+   @Test
+   public void testInstallABeforeB() throws Exception
+   {
+      // Install A, B, X
+
+      Bundle bundleA = installBundle(assembleArchive("lifecycle-bundleA", "/bundles/lifecycle/bundleA", ActivatorA.class, ServiceA.class));
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleA.getState());
+
+         Bundle bundleB = installBundle(assembleArchive("lifecycle-bundleB", "/bundles/lifecycle/bundleB", ActivatorB.class, ServiceB.class));
+         try
+         {
+            assertBundleState(Bundle.INSTALLED, bundleB.getState());
+
+            try
+            {
+               bundleB.start();
+               fail("Unresolved constraint expected");
+            }
+            catch (BundleException ex)
+            {
+               // expected
+            }
+
+            Bundle bundleX = installBundle(assembleArchive("lifecycle-bundleX", "/bundles/lifecycle/bundleX", X.class));
+            try
+            {
+               System.out.println("FIXME [JBDEPLOY-245] Unexpected dependee state changes");
+               //assertBundleState(Bundle.INSTALLED, bundleX.getState());
+
+               bundleB.start();
+               assertBundleState(Bundle.RESOLVED, bundleX.getState());
+               assertBundleState(Bundle.ACTIVE, bundleB.getState());
+
+               bundleA.start();
+               assertBundleState(Bundle.ACTIVE, bundleA.getState());
+            }
+            finally
+            {
+               bundleX.uninstall();
+            }
+         }
+         finally
+         {
+            bundleB.uninstall();
+         }
+      }
+      finally
+      {
+         bundleA.uninstall();
+      }
+   }
+
+   @Test
+   public void testUninstallX() throws Exception
+   {
+      // Uninstall X, B stays active
+
+      Bundle bundleX = installBundle(assembleArchive("lifecycle-bundleX", "/bundles/lifecycle/bundleX", X.class));
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, bundleX.getState());
+
+         Bundle bundleB = installBundle(assembleArchive("lifecycle-bundleB", "/bundles/lifecycle/bundleB", ActivatorB.class, ServiceB.class));
+         try
+         {
+            assertBundleState(Bundle.INSTALLED, bundleB.getState());
+
+            bundleB.start();
+            assertBundleState(Bundle.RESOLVED, bundleX.getState());
+            assertBundleState(Bundle.ACTIVE, bundleB.getState());
+
+            bundleX.uninstall();
+            assertBundleState(Bundle.UNINSTALLED, bundleX.getState());
+            
+            System.out.println("FIXME [JBDEPLOY-245] Unexpected dependee state changes");
+            //assertBundleState(Bundle.ACTIVE, bundleB.getState());
+         }
+         finally
+         {
+            bundleB.uninstall();
+         }
+      }
+      finally
+      {
+         if (Bundle.UNINSTALLED != bundleX.getState())
+            bundleX.uninstall();
       }
    }
 }
