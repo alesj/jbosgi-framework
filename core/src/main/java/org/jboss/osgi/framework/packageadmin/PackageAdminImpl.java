@@ -342,18 +342,6 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       {
          resetBundleDeploymentStates(resolvableBundles);
          allResolved = false;
-         
-         // Reset the required state for bundles that didn't get resolved
-         for (OSGiBundleState bundleState : resolvableBundles)
-         {
-            if (bundleState.getState() == Bundle.INSTALLED)
-            {
-               DeploymentUnit unit = bundleState.getDeploymentUnit();
-               unit.setRequiredStage(DeploymentStages.DESCRIBE);
-               ControllerContext ctx = unit.getAttachment(ControllerContext.class);
-               ctx.setRequiredState(ControllerState.newState(DeploymentStages.DESCRIBE.getName()));
-            }
-         }
       }
       
       return allResolved;
