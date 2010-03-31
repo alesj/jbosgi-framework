@@ -63,7 +63,7 @@
     <version.jboss.osgi.apache.xerces>2.9.1.SP3</version.jboss.osgi.apache.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
     <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
-    <version.jboss.osgi.deployers>1.0.5</version.jboss.osgi.deployers>
+    <version.jboss.osgi.deployers>1.0.6-SNAPSHOT</version.jboss.osgi.deployers>
     <version.jboss.osgi.deployment>1.0.2</version.jboss.osgi.deployment>
     <version.jboss.osgi.equinox>3.5.2</version.jboss.osgi.equinox>
     <version.jboss.osgi.felix>2.0.4</version.jboss.osgi.felix>
