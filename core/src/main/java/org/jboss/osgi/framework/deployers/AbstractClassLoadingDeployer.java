@@ -26,6 +26,7 @@ package org.jboss.osgi.framework.deployers;
 import java.util.List;
 
 import org.jboss.classloader.spi.ClassLoaderDomain;
+import org.jboss.classloader.spi.ShutdownPolicy;
 import org.jboss.classloading.spi.metadata.CapabilitiesMetaData;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.classloading.spi.metadata.RequirementsMetaData;
@@ -103,6 +104,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       classLoadingMetaData.setName(bundleState.getSymbolicName());
       classLoadingMetaData.setVersion(bundleState.getVersion());
       classLoadingMetaData.setDomain(domain != null ? domain.getName() : null);
+      classLoadingMetaData.setShutdownPolicy(ShutdownPolicy.GARBAGE_COLLECTION);
 
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
