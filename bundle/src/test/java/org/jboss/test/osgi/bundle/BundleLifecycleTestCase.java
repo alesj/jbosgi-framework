@@ -370,8 +370,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          Bundle bundleX = installBundle(assembleArchive("lifecycle-bundleX", "/bundles/lifecycle/bundleX", X.class));
          try
          {
-            System.out.println("FIXME [JBDEPLOY-245] Unexpected dependee state changes");
-            //assertBundleState(Bundle.INSTALLED, bundleX.getState());
+            assertBundleState(Bundle.INSTALLED, bundleX.getState());
 
             bundleB.start();
             assertBundleState(Bundle.RESOLVED, bundleX.getState());
