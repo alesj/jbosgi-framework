@@ -92,6 +92,8 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
    private boolean synchronous;
    /** The set of bundle events that are delivered to an (asynchronous) BundleListener */
    private Set<Integer> asyncBundleEvents = new HashSet<Integer>();
+   /** The set of events that are logged at INFO level */
+   private Set<String> infoEvents = new HashSet<String>();
 
    public FrameworkEventsPluginImpl(OSGiBundleManager bundleManager)
    {
@@ -104,6 +106,11 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       asyncBundleEvents.add(new Integer(BundleEvent.UPDATED));
       asyncBundleEvents.add(new Integer(BundleEvent.UNRESOLVED));
       asyncBundleEvents.add(new Integer(BundleEvent.UNINSTALLED));
+      infoEvents.add(ConstantsHelper.frameworkEvent(FrameworkEvent.PACKAGES_REFRESHED));
+      infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.INSTALLED));
+      infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.STARTED));
+      infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.STOPPED));
+      infoEvents.add(ConstantsHelper.bundleEvent(BundleEvent.UNINSTALLED));
    }
 
    public void setSynchronous(boolean synchronous)
@@ -394,7 +401,7 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       final BundleEvent event = new OSGiBundleEvent(type, assertBundle(bundle));
       final String typeName = ConstantsHelper.bundleEvent(event.getType());
 
-      if (asyncBundleEvents.contains(event.getType()))
+      if (infoEvents.contains(ConstantsHelper.bundleEvent(event.getType())))
          log.info("Bundle " + typeName + ": " + bundle);
       else
          log.debug("Bundle " + typeName + ": " + bundle);
@@ -481,7 +488,10 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
             FrameworkEvent event = new OSGiFrameworkEvent(type, assertBundle(bundle), throwable);
             String typeName = ConstantsHelper.frameworkEvent(event.getType());
 
-            log.info("Framwork " + typeName);
+            if (infoEvents.contains(ConstantsHelper.frameworkEvent(event.getType())))
+               log.info("Framwork " + typeName);
+            else
+               log.debug("Framwork " + typeName);
 
             // Nobody is interested
             if (frameworkListeners.isEmpty())
@@ -544,7 +554,10 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       ServiceEvent event = new OSGiServiceEvent(type, service.getReferenceInternal());
       String typeName = ConstantsHelper.serviceEvent(event.getType());
 
-      log.info("Service " + typeName + ": " + service);
+      if (infoEvents.contains(ConstantsHelper.serviceEvent(event.getType())))
+         log.info("Service " + typeName + ": " + service);
+      else
+         log.debug("Service " + typeName + ": " + service);
 
       // Do nothing if the Framework is not active
       if (getBundleManager().isFrameworkActive() == false)
