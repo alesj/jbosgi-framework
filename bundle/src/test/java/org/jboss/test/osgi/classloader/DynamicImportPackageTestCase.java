@@ -31,6 +31,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.jboss.test.osgi.classloader.support.b.B;
 import org.jboss.test.osgi.classloader.support.c.C;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -44,16 +45,43 @@ import org.osgi.service.log.LogService;
  */
 public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 {
-   private static JavaArchive archiveA, archiveB, archiveC;
+   private static JavaArchive archiveC;
 
    @BeforeClass
    public static void beforeTestCase()
+   {
+      // Bundle-SymbolicName: dynamic-log-service
+      // DynamicImport-Package: org.osgi.service.log
+      archiveC = Archives.create("dynamic-log-service", JavaArchive.class);
+      archiveC.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveC.getName());
+            builder.addDynamicImportPackages("org.osgi.service.log");
+            return builder.openStream();
+         }
+      });
+   }
+
+   @Before
+   @Override
+   public void setUp() throws Exception
+   {
+      super.setUp();
+      getPackageAdmin().refreshPackages(null);
+   }
+
+   @Test
+   public void testAllPackagesWildcard() throws Exception
    {
       // Bundle-SymbolicName: dynamic-wildcard-a
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // Import-Package: org.jboss.test.osgi.classloader.support.b
       // DynamicImport-Package: *
-      archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
@@ -71,7 +99,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 
       // Bundle-SymbolicName: dynamic-wildcard-bc
       // Export-Package: org.jboss.test.osgi.classloader.support.b, org.jboss.test.osgi.classloader.support.c
-      archiveB = Archives.create("dynamic-wildcard-bc", JavaArchive.class);
+      final JavaArchive archiveB = Archives.create("dynamic-wildcard-bc", JavaArchive.class);
       archiveB.addClasses(B.class, C.class);
       archiveB.setManifest(new Asset()
       {
@@ -86,25 +114,6 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          }
       });
 
-      // Bundle-SymbolicName: dynamic-log-service
-      // DynamicImport-Package: org.osgi.service.log
-      archiveC = Archives.create("dynamic-log-service", JavaArchive.class);
-      archiveC.setManifest(new Asset()
-      {
-         public InputStream openStream()
-         {
-            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
-            builder.addBundleManifestVersion(2);
-            builder.addBundleSymbolicName(archiveC.getName());
-            builder.addDynamicImportPackages("org.osgi.service.log");
-            return builder.openStream();
-         }
-      });
-   }
-
-   @Test
-   public void testDynamicImportWithWildcard() throws Exception
-   {
       Bundle bundleA = installBundle(archiveA);
       assertBundleState(Bundle.INSTALLED, bundleA.getState());
       try
@@ -115,10 +124,178 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          {
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleA, B.class.getName(), bundleB);
-            
+
             System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
             //assertLoadClass(bundleA, C.class.getName(), bundleB);
-            
+
+            assertBundleState(Bundle.RESOLVED, bundleA.getState());
+            assertBundleState(Bundle.RESOLVED, bundleB.getState());
+         }
+         finally
+         {
+            bundleB.uninstall();
+         }
+      }
+      finally
+      {
+         bundleA.uninstall();
+      }
+   }
+
+   @Test
+   public void testAllPackagesWildcardNotWired() throws Exception
+   {
+      // Bundle-SymbolicName: dynamic-wildcard-a
+      // Export-Package: org.jboss.test.osgi.classloader.support.a 
+      // DynamicImport-Package: *
+      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addExportPackages(A.class.getPackage().getName());
+            builder.addDynamicImportPackages("*");
+            return builder.openStream();
+         }
+      });
+
+      // Bundle-SymbolicName: dynamic-wildcard-c
+      // Export-Package: org.jboss.test.osgi.classloader.support.c
+      final JavaArchive archiveC = Archives.create("dynamic-wildcard-c", JavaArchive.class);
+      archiveC.addClasses(C.class);
+      archiveC.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveC.getName());
+            builder.addExportPackages(C.class.getPackage().getName());
+            return builder.openStream();
+         }
+      });
+
+      Bundle bundleA = installBundle(archiveA);
+      assertBundleState(Bundle.INSTALLED, bundleA.getState());
+      try
+      {
+         Bundle bundleC = installBundle(archiveC);
+         assertBundleState(Bundle.INSTALLED, bundleC.getState());
+         try
+         {
+            assertLoadClass(bundleA, A.class.getName(), bundleA);
+
+            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            //assertLoadClass(bundleA, C.class.getName(), bundleC);
+
+            assertBundleState(Bundle.RESOLVED, bundleA.getState());
+            //assertBundleState(Bundle.RESOLVED, bundleC.getState());
+         }
+         finally
+         {
+            bundleC.uninstall();
+         }
+      }
+      finally
+      {
+         bundleA.uninstall();
+      }
+   }
+
+   @Test
+   public void testAllPackagesWildcardNotThere() throws Exception
+   {
+      // Bundle-SymbolicName: dynamic-wildcard-a
+      // Export-Package: org.jboss.test.osgi.classloader.support.a 
+      // DynamicImport-Package: *
+      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addExportPackages(A.class.getPackage().getName());
+            builder.addDynamicImportPackages("*");
+            return builder.openStream();
+         }
+      });
+
+      Bundle bundleA = installBundle(archiveA);
+      assertBundleState(Bundle.INSTALLED, bundleA.getState());
+      try
+      {
+         assertLoadClass(bundleA, A.class.getName(), bundleA);
+
+         assertLoadClassFail(bundleA, C.class.getName());
+
+         assertBundleState(Bundle.RESOLVED, bundleA.getState());
+      }
+      finally
+      {
+         bundleA.uninstall();
+      }
+   }
+
+   @Test
+   public void testPackagesWildcardNotThere() throws Exception
+   {
+      // Bundle-SymbolicName: dynamic-wildcard-a
+      // Export-Package: org.jboss.test.osgi.classloader.support.a 
+      // Import-Package: org.jboss.test.osgi.classloader.support.b
+      // DynamicImport-Package: foo.*
+      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addExportPackages(A.class.getPackage().getName());
+            builder.addImportPackages(B.class.getPackage().getName());
+            builder.addDynamicImportPackages("foo.*");
+            return builder.openStream();
+         }
+      });
+
+      // Bundle-SymbolicName: dynamic-wildcard-bc
+      // Export-Package: org.jboss.test.osgi.classloader.support.b, org.jboss.test.osgi.classloader.support.c
+      final JavaArchive archiveB = Archives.create("dynamic-wildcard-bc", JavaArchive.class);
+      archiveB.addClasses(B.class, C.class);
+      archiveB.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveB.getName());
+            builder.addExportPackages(B.class.getPackage().getName());
+            builder.addExportPackages(C.class.getPackage().getName());
+            return builder.openStream();
+         }
+      });
+
+      Bundle bundleA = installBundle(archiveA);
+      assertBundleState(Bundle.INSTALLED, bundleA.getState());
+      try
+      {
+         Bundle bundleB = installBundle(archiveB);
+         assertBundleState(Bundle.INSTALLED, bundleB.getState());
+         try
+         {
+            assertLoadClass(bundleA, A.class.getName(), bundleA);
+            assertLoadClass(bundleA, B.class.getName(), bundleB);
+
+            assertLoadClassFail(bundleA, C.class.getName());
+
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
             assertBundleState(Bundle.RESOLVED, bundleB.getState());
          }
