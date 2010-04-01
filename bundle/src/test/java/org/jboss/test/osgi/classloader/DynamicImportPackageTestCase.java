@@ -45,10 +45,15 @@ import org.osgi.service.log.LogService;
  */
 public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 {
-   private static JavaArchive archiveC;
+   @Before
+   public void setUp() throws Exception
+   {
+      super.setUp();
+      getPackageAdmin().refreshPackages(null);
+   }
 
-   @BeforeClass
-   public static void beforeTestCase()
+   @Test
+   public void testAllPackagesWildcardWired() throws Exception
    {
       // Bundle-SymbolicName: dynamic-log-service
       // DynamicImport-Package: org.osgi.service.log
@@ -64,14 +69,6 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
             return builder.openStream();
          }
       });
-   }
-
-   @Before
-   @Override
-   public void setUp() throws Exception
-   {
-      super.setUp();
-      getPackageAdmin().refreshPackages(null);
    }
 
    @Test
@@ -244,12 +241,12 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
    }
 
    @Test
-   public void testPackagesWildcardNotThere() throws Exception
+   public void testPackageWildcardWired() throws Exception
    {
       // Bundle-SymbolicName: dynamic-wildcard-a
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // Import-Package: org.jboss.test.osgi.classloader.support.b
-      // DynamicImport-Package: foo.*
+      // DynamicImport-Package: org.jboss.test.osgi.classloader.*
       final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
@@ -261,7 +258,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
             builder.addBundleSymbolicName(archiveA.getName());
             builder.addExportPackages(A.class.getPackage().getName());
             builder.addImportPackages(B.class.getPackage().getName());
-            builder.addDynamicImportPackages("foo.*");
+            builder.addDynamicImportPackages("org.jboss.test.osgi.classloader.*");
             return builder.openStream();
          }
       });
@@ -294,7 +291,8 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleA, B.class.getName(), bundleB);
 
-            assertLoadClassFail(bundleA, C.class.getName());
+            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            //assertLoadClass(bundleA, C.class.getName(), bundleB);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
             assertBundleState(Bundle.RESOLVED, bundleB.getState());
@@ -303,6 +301,107 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          {
             bundleB.uninstall();
          }
+      }
+      finally
+      {
+         bundleA.uninstall();
+      }
+   }
+
+   @Test
+   public void testPackageWildcardNotWired() throws Exception
+   {
+      // Bundle-SymbolicName: dynamic-wildcard-a
+      // Export-Package: org.jboss.test.osgi.classloader.support.a 
+      // DynamicImport-Package: org.jboss.test.osgi.classloader.*
+      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addExportPackages(A.class.getPackage().getName());
+            builder.addDynamicImportPackages("org.jboss.test.osgi.classloader.*");
+            return builder.openStream();
+         }
+      });
+
+      // Bundle-SymbolicName: dynamic-wildcard-c
+      // Export-Package: org.jboss.test.osgi.classloader.support.c
+      final JavaArchive archiveC = Archives.create("dynamic-wildcard-c", JavaArchive.class);
+      archiveC.addClasses(C.class);
+      archiveC.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveC.getName());
+            builder.addExportPackages(C.class.getPackage().getName());
+            return builder.openStream();
+         }
+      });
+
+      Bundle bundleA = installBundle(archiveA);
+      assertBundleState(Bundle.INSTALLED, bundleA.getState());
+      try
+      {
+         Bundle bundleC = installBundle(archiveC);
+         assertBundleState(Bundle.INSTALLED, bundleC.getState());
+         try
+         {
+            assertLoadClass(bundleA, A.class.getName(), bundleA);
+
+            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            //assertLoadClass(bundleA, C.class.getName(), bundleC);
+
+            assertBundleState(Bundle.RESOLVED, bundleA.getState());
+            //assertBundleState(Bundle.RESOLVED, bundleC.getState());
+         }
+         finally
+         {
+            bundleC.uninstall();
+         }
+      }
+      finally
+      {
+         bundleA.uninstall();
+      }
+   }
+
+   @Test
+   public void testPackageWildcardNotThere() throws Exception
+   {
+      // Bundle-SymbolicName: dynamic-wildcard-a
+      // Export-Package: org.jboss.test.osgi.classloader.support.a 
+      // DynamicImport-Package: org.jboss.test.osgi.classloader.*
+      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addExportPackages(A.class.getPackage().getName());
+            builder.addDynamicImportPackages("*");
+            return builder.openStream();
+         }
+      });
+
+      Bundle bundleA = installBundle(archiveA);
+      assertBundleState(Bundle.INSTALLED, bundleA.getState());
+      try
+      {
+         assertLoadClass(bundleA, A.class.getName(), bundleA);
+
+         assertLoadClassFail(bundleA, C.class.getName());
+
+         assertBundleState(Bundle.RESOLVED, bundleA.getState());
       }
       finally
       {
@@ -362,4 +461,25 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          bundleC.uninstall();
       }
    }
+
+   @BeforeClass
+   public static void beforeTestCase()
+   {
+      // Bundle-SymbolicName: dynamic-log-service
+      // DynamicImport-Package: org.osgi.service.log
+      archiveC = Archives.create("dynamic-log-service", JavaArchive.class);
+      archiveC.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveC.getName());
+            builder.addDynamicImportPackages("org.osgi.service.log");
+            return builder.openStream();
+         }
+      });
+   }
+   
+   private static JavaArchive archiveC;
 }
