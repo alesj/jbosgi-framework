@@ -34,6 +34,7 @@ import org.jboss.test.osgi.classloader.support.c.C;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
 
@@ -43,6 +44,7 @@ import org.osgi.service.log.LogService;
  * @author thomas.diesler@jboss.com
  * @since 26-Mar-2010
  */
+@Ignore
 public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 {
    @Before

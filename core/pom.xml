@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.jboss.osgi.framework</groupId>
     <artifactId>jboss-osgi-framework-parent</artifactId>
-    <version>1.0.0.Alpha5-SNAPSHOT</version>
+    <version>1.0.0.Alpha4</version>
   </parent>
 
   <dependencies>

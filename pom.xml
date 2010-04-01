@@ -26,7 +26,7 @@
   <artifactId>jboss-osgi-framework-parent</artifactId>
   <packaging>pom</packaging>
 
-  <version>1.0.0.Alpha5-SNAPSHOT</version>
+  <version>1.0.0.Alpha4</version>
 
   <parent>
     <groupId>org.jboss.osgi</groupId>
@@ -36,9 +36,9 @@
 
   <!-- Subversion -->
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/jboss-osgi/projects/runtime/framework/trunk</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/jboss-osgi/projects/runtime/framework/trunk</developerConnection>
-    <url>http://fisheye.jboss.com/qsearch/JBossOSGi</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/jboss-osgi/projects/runtime/framework/tags/jboss-osgi-framework-1.0.0.Alpha4</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/jboss-osgi/projects/runtime/framework/tags/jboss-osgi-framework-1.0.0.Alpha4</developerConnection>
+    <url>http://fisheye.jboss.com/qsearch/JBossOSGi/tags/jboss-osgi-framework-1.0.0.Alpha4</url>
   </scm>
 
   <!-- Modules -->
@@ -63,7 +63,7 @@
     <version.jboss.osgi.apache.xerces>2.9.1.SP3</version.jboss.osgi.apache.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
     <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
-    <version.jboss.osgi.deployers>1.0.6-SNAPSHOT</version.jboss.osgi.deployers>
+    <version.jboss.osgi.deployers>1.0.6</version.jboss.osgi.deployers>
     <version.jboss.osgi.deployment>1.0.2</version.jboss.osgi.deployment>
     <version.jboss.osgi.equinox>3.5.2</version.jboss.osgi.equinox>
     <version.jboss.osgi.felix>2.0.4</version.jboss.osgi.felix>

@@ -154,11 +154,16 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
             // [TODO] Should system packages be added as capabilities?
             if (syspackPlugin.isSystemPackage(packageName) == true)
                continue;
-            
-            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
-            requirements.addRequirement(requirement);
+             
+            // Wildcards not yet supported
+            if (packageName.endsWith("*") == false)
+            {
+               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
+               requirements.addRequirement(requirement);
+            }      
          }
       }
+      
 
       unit.addAttachment(ClassLoadingMetaData.class, classLoadingMetaData);
 
