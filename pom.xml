@@ -60,7 +60,7 @@
     <version.jboss.kernel>2.2.0.Alpha9</version.jboss.kernel>
     <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
     <version.jboss.mdr>2.2.0.Alpha2</version.jboss.mdr>
-    <version.jboss.osgi.apache.xerces>2.9.1.SP4-SNAPSHOT</version.jboss.osgi.apache.xerces>
+    <version.jboss.osgi.apache.xerces>2.9.1.SP5-SNAPSHOT</version.jboss.osgi.apache.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
     <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
     <version.jboss.osgi.deployers>1.0.6-SNAPSHOT</version.jboss.osgi.deployers>
