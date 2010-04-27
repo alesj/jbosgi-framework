@@ -44,6 +44,7 @@ import org.jboss.osgi.framework.deployers.AbstractDeployment;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.service.support.LazyBundle;
 import org.jboss.test.osgi.service.support.a.A;
+import org.jboss.test.osgi.service.support.a.AMBean;
 import org.jboss.test.osgi.service.support.c.C;
 import org.jboss.test.osgi.service.support.d.ServiceMixFactory;
 import org.jboss.test.osgi.service.support.e.E;
@@ -566,6 +567,42 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       finally
       {
          bundle.uninstall();
+      }
+   }
+
+   @Test
+   public void testExposedClasses() throws Throwable
+   {
+      Archive<?> assembly = assembleArchive("beans3", "/bundles/service/service-beans3", A.class);
+      Deployment deployment = addDeployment(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
+      try
+      {
+         checkComplete();
+
+         Bundle bundle = getBundle(getDeploymentUnit(deployment));
+         bundle.start();
+
+         Archive<?> assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
+         Bundle bundle1 = installBundle(assembly1);
+         try
+         {
+            bundle1.start();
+            BundleContext bundleContext = bundle1.getBundleContext();
+            assertNotNull(bundleContext);         
+
+            ServiceReference[] refs = bundleContext.getServiceReferences(A.class.getName(), null);
+            assertNull(refs);
+            refs = bundleContext.getServiceReferences(AMBean.class.getName(), null);
+            assertNotNull(refs);
+         }
+         finally
+         {
+            bundle1.uninstall();
+         }
+      }
+      finally
+      {
+         undeploy(deployment);
       }
    }
 }

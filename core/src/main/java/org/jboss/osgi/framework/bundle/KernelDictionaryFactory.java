@@ -21,51 +21,29 @@
 */
 package org.jboss.osgi.framework.bundle;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.jboss.beans.info.spi.BeanInfo;
+import org.jboss.beans.metadata.spi.BeanMetaData;
+import org.jboss.beans.metadata.spi.RelatedClassMetaData;
+import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.kernel.spi.config.KernelConfigurator;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.reflect.spi.ClassInfo;
-import org.jboss.util.collection.Iterators;
 import org.osgi.framework.Constants;
+
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Kernel dictionary factory.
  *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
-public class KernelDictionaryFactory implements DictionaryFactory<KernelControllerContext>
+public class KernelDictionaryFactory extends AbstractDictionaryFactory<KernelControllerContext>
 {
-   private static final String NAME = "bean.name";
-   private static final String[] EMPTY = new String[0];
-   private KernelConfigurator configurator;
-   private final ClassInfo OBJECT;
-
    public KernelDictionaryFactory(KernelConfigurator configurator)
    {
-      if (configurator == null)
-         throw new IllegalArgumentException("Null configurator");
-
-      this.configurator = configurator;
-      OBJECT = getClassInfo(Object.class);
-   }
-
-   private ClassInfo getClassInfo(Class<?> clazz)
-   {
-      try
-      {
-         return configurator.getClassInfo(clazz);
-      }
-      catch (Throwable t)
-      {
-         throw new RuntimeException(t);
-      }
+      super(configurator);
    }
 
    public Class<KernelControllerContext> getContextType()
@@ -78,100 +56,48 @@ public class KernelDictionaryFactory implements DictionaryFactory<KernelControll
       return new KernelDictionary(context);
    }
 
-   private class KernelDictionary extends Dictionary<String, Object>
+   private class KernelDictionary extends GenericDictionary
    {
-      private Map<Object, Object> map;
-      private KernelControllerContext context;
-
       private KernelDictionary(KernelControllerContext context)
       {
-         this.context = context;
-         this.map = new ConcurrentHashMap<Object, Object>(2);
-         map.put(NAME, context.getName());
-         map.put(Constants.OBJECTCLASS, EMPTY);
+         super(context);
       }
 
-      public int size()
+      @Override
+      protected String[] getClasses(ControllerContext context)
       {
-         return map.size();
-      }
-
-      public boolean isEmpty()
-      {
-         return size() == 0;
-      }
-
-      @SuppressWarnings({"unchecked"})
-      public Enumeration<String> keys()
-      {
-         return Iterators.toEnumeration(map.keySet().iterator());
-      }
-
-      @SuppressWarnings({"unchecked"})
-      public Enumeration<Object> elements()
-      {
-         return Iterators.toEnumeration(map.values().iterator());
-      }
-
-      public Object get(Object key)
-      {
-         Object value = map.get(key);
-         if (value != EMPTY)
-            return value;
-
-         ClassInfo clazz = null;
-         Object target = context.getTarget();
-         BeanInfo info = context.getBeanInfo();
-         if (target != null)
+         KernelControllerContext kcc = KernelControllerContext.class.cast(context);
+         BeanMetaData bmd = kcc.getBeanMetaData();
+         if (bmd != null)
          {
-            clazz = getClassInfo(target.getClass());
-         }
-         else if (info != null)
-         {
-            clazz = info.getClassInfo();
-         }
-
-         String[] classes = EMPTY;
-         if (clazz != null)
-         {
-            Set<String> clazzes = new HashSet<String>();
-            traverseClass(clazz, clazzes);
-            classes = clazzes.toArray(new String[clazzes.size()]);
-            map.put(Constants.OBJECTCLASS, classes);
-         }
-         return classes;
-      }
-
-      public Object put(String key, Object value)
-      {
-         return map.put(key, value);
-      }
-
-      public Object remove(Object key)
-      {
-         return map.remove(key);
-      }
-
-      protected void traverseClass(ClassInfo clazz, Set<String> classes)
-      {
-         if (clazz == null || clazz == OBJECT)
-         {
-            return;
-         }
-
-         classes.add(clazz.getName());
-
-         // traverse superclass
-         traverseClass(clazz.getSuperclass(), classes);
-         ClassInfo[] interfaces = clazz.getInterfaces();
-         if (interfaces != null)
-         {
-            // traverse interfaces
-            for(ClassInfo intface : interfaces)
+            Set<RelatedClassMetaData> rcmds = bmd.getRelated();
+            if (rcmds != null && rcmds.isEmpty() == false)
             {
-               traverseClass(intface, classes);
+               Set<String> classes = new HashSet<String>();
+               for (RelatedClassMetaData rcmd : rcmds)
+               {
+                  if ("OSGi".equalsIgnoreCase(rcmd.getEnabled(String.class)))
+                  {
+                     classes.add(rcmd.getClassName());
+                  }
+               }
+               if (classes.isEmpty() == false)
+               {
+                  String[] result = classes.toArray(new String[classes.size()]);
+                  put(Constants.OBJECTCLASS, result);
+                  return result;
+               }
             }
          }
+         return super.getClasses(context);
+      }
+
+      @Override
+      protected ClassInfo getFromNullTarget(ControllerContext context)
+      {
+         KernelControllerContext kcc = KernelControllerContext.class.cast(context);
+         BeanInfo beanInfo = kcc.getBeanInfo();
+         return beanInfo != null ? beanInfo.getClassInfo() : null;
       }
    }
 }
