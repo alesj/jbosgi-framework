@@ -51,24 +51,6 @@ public class MDRUtils
    private static final Dictionary<String, Object> EMPTY = new EmptyDictonary<String, Object>();
 
    /**
-    * Get metadata.
-    *
-    * @param context the context
-    * @param level the scope level
-    * @return metadata
-    */
-   private static MetaData getMetaData(ControllerContext context, ScopeLevel level)
-   {
-      if (context == null)
-         throw new IllegalArgumentException("Null context");
-
-      MetaData metaData = context.getScopeInfo().getMetaData();
-      if (level != null && metaData != null)
-         metaData = metaData.getScopeMetaData(level);
-      return metaData;
-   }
-
-   /**
     * Get context's properties.
     *
     * @param context the context
@@ -372,6 +354,17 @@ public class MDRUtils
             return false;
       }
       return true;
+   }
+
+   private static MetaData getMetaData(ControllerContext context, ScopeLevel level)
+   {
+      if (context == null)
+         throw new IllegalArgumentException("Null context");
+
+      MetaData metaData = context.getScopeInfo().getMetaData();
+      if (level != null && metaData != null)
+         metaData = metaData.getScopeMetaData(level);
+      return metaData;
    }
 
    /**

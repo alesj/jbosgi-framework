@@ -28,8 +28,10 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.Hashtable;
 
+import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
@@ -50,6 +52,9 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ServiceRegistrationTestCase extends AbstractFrameworkTest
 {
+   // Provide logging
+   private static final Logger log = Logger.getLogger(ServiceRegistrationTestCase.class);
+   
    @Test
    public void testGetReference() throws Exception
    {
@@ -367,5 +372,20 @@ public class ServiceRegistrationTestCase extends AbstractFrameworkTest
       {
          bundle.uninstall();
       }
+   }
+
+   protected void assertAllReferences(BundleContext bundleContext, String clazz, ServiceReference... expected) throws Exception
+   {
+      assertAllReferences(bundleContext, clazz, null, expected);
+   }
+
+   protected void assertAllReferences(BundleContext bundleContext, String clazz, String filter, ServiceReference... expected) throws Exception
+   {
+      ServiceReference[] actual = bundleContext.getAllServiceReferences(clazz, filter);
+      if (actual != null)
+         log.debug(bundleContext + " got " + Arrays.asList(actual) + " for clazz=" + clazz + " filter=" + filter);
+      else
+         log.debug(bundleContext + " got nothing for clazz=" + clazz + " filter=" + filter);
+      assertArrayEquals(bundleContext + " with clazz=" + clazz + " filter=" + filter, expected, actual);
    }
 }

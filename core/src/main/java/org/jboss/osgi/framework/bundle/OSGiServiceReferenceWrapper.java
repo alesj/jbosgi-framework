@@ -25,6 +25,7 @@ package org.jboss.osgi.framework.bundle;
 
 import org.jboss.dependency.spi.ControllerContext;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 
 /**
  * OSGiServiceReferenceWrapper.
@@ -34,7 +35,7 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-class OSGiServiceReferenceWrapper extends ControllerContextHandle
+class OSGiServiceReferenceWrapper extends ControllerContextHandle implements ServiceReference
 {
    /** The service state */
    private OSGiServiceState serviceState;

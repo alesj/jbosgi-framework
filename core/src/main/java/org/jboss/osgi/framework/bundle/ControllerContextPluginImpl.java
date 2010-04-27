@@ -99,12 +99,7 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
          throw new IllegalArgumentException("Unknown tracker type: " + user);
    }
 
-   /**
-    * Get bundle for context.
-    *
-    * @param context the context
-    * @return bundle state
-    */
+   @Override
    public AbstractBundleState getBundleForContext(ControllerContext context)
    {
       if (context instanceof OSGiServiceState)

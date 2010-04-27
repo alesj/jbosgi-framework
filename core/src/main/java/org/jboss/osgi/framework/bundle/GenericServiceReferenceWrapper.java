@@ -26,24 +26,31 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.tracker.ContextTracker;
 import org.jboss.dependency.spi.tracker.ContextTracking;
+import org.jboss.kernel.plugins.dependency.AbstractKernelControllerContext;
 import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.util.KernelUtils;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 
 /**
- * GenericServiceReferenceWrapper.
+ * A ServiceReference implementation that is backed by a non OSGi 
+ * {@link ControllerContext}. This can be an arbitrary MC bean.
  *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author thomas.diesler@jboss.com
  */
-class GenericServiceReferenceWrapper extends ControllerContextHandle
+class GenericServiceReferenceWrapper extends ControllerContextHandle implements ServiceReference
 {
-   private ControllerContext context;
+   private AbstractKernelControllerContext context;
    private AbstractBundleState bundleState;
+   private Long serviceId;
 
-   public GenericServiceReferenceWrapper(ControllerContext context, AbstractBundleState bundleState)
+   public GenericServiceReferenceWrapper(AbstractKernelControllerContext context, AbstractBundleState bundleState)
    {
       if (context == null)
          throw new IllegalArgumentException("Null context");
@@ -52,6 +59,16 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
 
       this.context = context;
       this.bundleState = bundleState;
+
+      // The Framework adds the following service properties to the service properties
+      // * A property named Constants.SERVICE_ID identifying the registration number of the service
+      // * A property named Constants.OBJECTCLASS containing all the specified classes.
+      
+      // [TODO ServiceMix] Revisit generic service.id. The service.id influences the 
+      // service order and should not be generated lazily
+      serviceId = MDRUtils.getId(context);
+      if (serviceId == null)
+         serviceId = OSGiServiceState.getNextServiceId();
    }
 
    ControllerContext getContext()
@@ -61,7 +78,35 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
 
    public Object getProperty(String key)
    {
-      return MDRUtils.getProperty(context, key, Object.class);
+      if (key == null)
+         throw new IllegalArgumentException("Null property key");
+
+      Object value;
+      
+      // [TODO ServiceMix] getProperty(Constants.SERVICE_ID)
+      if (Constants.SERVICE_ID.equals(key))
+      {
+         value = serviceId;
+      }
+
+      // [TODO ServiceMix] getProperty(Constants.OBJECTCLASS)
+      if (Constants.OBJECTCLASS.equals(key))
+      {
+         value = MDRUtils.getClasses(context);
+         
+         if (value == null)
+         {
+            BeanMetaData bmd = context.getBeanMetaData();
+            String objectClass = bmd.getBean();
+            value = new String[] { objectClass };
+         }
+      }
+      else
+      {
+         value = MDRUtils.getProperty(context, key, Object.class);
+      }
+
+      return value;
    }
 
    public String[] getPropertyKeys()
@@ -79,7 +124,7 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
    {
       if (KernelUtils.isUnregistered(context))
          return null;
-      
+
       return bundleState.getBundleInternal();
    }
 
@@ -94,7 +139,7 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
 
          OSGiBundleManager manager = bundleState.getBundleManager();
          ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-         
+
          Set<Object> users = ct.getUsers(context);
          Set<Bundle> bundles = new HashSet<Bundle>();
          for (Object user : users)
@@ -111,7 +156,7 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle
    public boolean isAssignableTo(Bundle bundle, String className)
    {
       AbstractBundleState targetBundle = AbstractBundleState.assertBundleState(bundle);
-      return MDRUtils.isAssignableTo(context, bundleState, targetBundle, className); 
+      return MDRUtils.isAssignableTo(context, bundleState, targetBundle, className);
    }
 
    public int compareTo(Object obj)

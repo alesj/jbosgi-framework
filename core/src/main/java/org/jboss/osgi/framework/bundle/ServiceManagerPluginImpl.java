@@ -41,6 +41,7 @@ import org.jboss.dependency.spi.tracker.ContextTracking;
 import org.jboss.deployers.structure.spi.DeploymentRegistry;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.kernel.Kernel;
+import org.jboss.kernel.plugins.dependency.AbstractKernelControllerContext;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.qualifier.QualifierMatchers;
 import org.jboss.logging.Logger;
@@ -135,7 +136,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       Set<ServiceReference> result = new HashSet<ServiceReference>();
       for (ControllerContext context : contexts)
       {
-         ServiceReference ref = getServiceReferenceForContext(context, true);
+         ServiceReference ref = getServiceReferenceForContext(context);
          if (ref != null)
             result.add(ref);
       }
@@ -155,7 +156,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       List<ServiceReference> references = new ArrayList<ServiceReference>();
       for (ControllerContext context : contexts)
       {
-         ServiceReference ref = getServiceReferenceForContext(context, true);
+         ServiceReference ref = getServiceReferenceForContext(context);
          if (ref != null)
             references.add(ref);
       }
@@ -489,7 +490,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
          // Match the contxt against the Filter
          // [TODO] filter directly as part of the controller query
-         ServiceReference sref = getServiceReferenceForContext(context, true);
+         ServiceReference sref = getServiceReferenceForContext(context);
          if (sref == null || hasPermission(context) == false || filter.match(sref) == false)
          {
             iterator.remove();
@@ -521,7 +522,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       List<ServiceReference> result = new ArrayList<ServiceReference>();
       for (ControllerContext context : sorted)
       {
-         ServiceReference sref = getServiceReferenceForContext(context, true);
+         ServiceReference sref = getServiceReferenceForContext(context);
          result.add(sref);
       }
       return result;
@@ -533,10 +534,9 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
     * 
     *
     * @param context the context
-    * @param strict true for strict OSGi behaviour
     * @return service reference
     */
-   private ServiceReference getServiceReferenceForContext(ControllerContext context, boolean strict)
+   private ServiceReference getServiceReferenceForContext(ControllerContext context)
    {
       if (context instanceof OSGiServiceState)
       {
@@ -544,14 +544,16 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          return service.hasPermission() ? service.getReferenceInternal() : null;
       }
       
-      if (strict == true)
-         return null;
-
-      // For non strict behaviour we can generically wrap the context
-      OSGiBundleManager manager = getBundleManager();
-      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-      AbstractBundleState bundleState = plugin.getBundleForContext(context);
-      return new GenericServiceReferenceWrapper(context, bundleState);
+      if (context instanceof AbstractKernelControllerContext)
+      {
+         // For ServiceMix behaviour we can generically wrap the context
+         OSGiBundleManager manager = getBundleManager();
+         ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+         AbstractBundleState bundleState = plugin.getBundleForContext(context);
+         return new GenericServiceReferenceWrapper((AbstractKernelControllerContext)context, bundleState);
+      }
+      
+      return null;
    }
 
    /**

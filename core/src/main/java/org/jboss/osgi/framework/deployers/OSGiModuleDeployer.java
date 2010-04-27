@@ -23,8 +23,10 @@ package org.jboss.osgi.framework.deployers;
 
 import org.jboss.classloading.spi.dependency.policy.ClassLoaderPolicyModule;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
+import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSClassLoaderDescribeDeployer;
+import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiModule;
 
 /**
@@ -59,8 +61,14 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
    */
 
    @Override
-   protected ClassLoaderPolicyModule createModule(DeploymentUnit unit, ClassLoadingMetaData metaData) 
+   protected ClassLoaderPolicyModule createModule(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
    {
-      return new OSGiModule(unit, metaData);
+      ClassLoaderPolicyModule module;
+      if (metaData instanceof OSGiClassLoadingMetaData)
+         module = new OSGiModule(unit, metaData);
+      else
+         module = super.createModule(unit, metaData);
+      
+      return module;
    }
 }

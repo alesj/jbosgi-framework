@@ -22,6 +22,16 @@
 
 package org.jboss.osgi.framework.metadata.internal;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 import org.jboss.beans.metadata.plugins.AbstractBeanMetaData;
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
@@ -29,11 +39,6 @@ import org.jboss.dependency.spi.ControllerState;
 import org.jboss.managed.api.annotation.ManagementObject;
 import org.jboss.managed.api.annotation.ManagementProperties;
 import org.jboss.xb.annotations.JBossXmlSchema;
-
-import javax.xml.bind.annotation.*;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Simplify pojo 2 osgi metadata.
@@ -46,6 +51,8 @@ import java.util.Set;
 @XmlType(name="osgiType", propOrder={"exposedTypes", "aliasMetaData", "related", "annotations", "classLoader", "constructor", "properties", "create", "start", "stop", "destroy", "depends", "demands", "supplies", "installs", "uninstalls", "installCallbacks", "uninstallCallbacks"})
 public class OSGiPojoMetaData extends AbstractBeanMetaData
 {
+   private static final long serialVersionUID = 1L;
+   
    private Set<String> exposedTypes;
    private String mdrService = "MDRService";
    private volatile boolean initialized;

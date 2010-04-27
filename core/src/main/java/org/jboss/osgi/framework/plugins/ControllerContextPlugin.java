@@ -42,10 +42,17 @@ public interface ControllerContextPlugin extends Plugin
    AbstractBundleState getBundleForUser(Object user);
    
    /**
-    * Get bundle for context.
-    *
-    * @param context the context
-    * @return bundle state
+    * Get the bundle that provides the given controller context.
+    * 
+    * [TODO ServiceMix] describe the intension, not the implementation
+    * 
+    * If context corresponds to an OSGi service, return the bundle that 
+    * registered the service.
+    * 
+    * If the context was provided by a non OSGi deployment, dynamically create an OSGi bundle
+    * and register it with the {@link OSGiBundleManager}
+    * 
+    * If the context was not provided by a deployment, return the system bundle.
     */
    AbstractBundleState getBundleForContext(ControllerContext context);
    

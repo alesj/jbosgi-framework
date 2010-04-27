@@ -88,7 +88,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
    private OSGiServiceRegistrationWrapper serviceRegistration;
 
    /** The service id */
-   private long serviceId = serviceIDGenerator.incrementAndGet();
+   private long serviceId = getNextServiceId();
 
    /** The service interfaces */
    private String[] clazzes;
@@ -156,6 +156,11 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
       initOSGiScopeInfo();
    }
 
+   public static Long getNextServiceId()
+   {
+      return serviceIDGenerator.incrementAndGet();
+   }
+   
    /**
     * Get the serviceId.
     * 

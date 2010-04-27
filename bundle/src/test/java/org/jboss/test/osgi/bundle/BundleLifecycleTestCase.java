@@ -26,8 +26,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
-import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.bundle.support.a.ActivatorA;

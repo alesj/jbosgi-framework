@@ -22,14 +22,13 @@
 package org.jboss.osgi.framework.bundle;
 
 import org.jboss.dependency.spi.ControllerContext;
-import org.osgi.framework.ServiceReference;
 
 /**
  * ControllerContext handle.
  *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
-abstract class ControllerContextHandle implements ServiceReference
+abstract class ControllerContextHandle
 {
    /**
     * Get a hold of underlying controller context.

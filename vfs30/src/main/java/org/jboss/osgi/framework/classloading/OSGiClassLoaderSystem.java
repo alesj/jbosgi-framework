@@ -68,6 +68,12 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
    @Override
    protected BaseClassLoader createClassLoader(ClassLoaderPolicy policy)
    {
-      return new OSGiBundleClassLoader(policy);
+      BaseClassLoader classLoader;
+      if (policy instanceof OSGiClassLoaderPolicy)
+         classLoader = new OSGiBundleClassLoader(policy);
+      else 
+         classLoader = super.createClassLoader(policy);
+      
+      return classLoader;
    }
 }
