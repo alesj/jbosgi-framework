@@ -68,6 +68,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean = deployBeans("beanA", A.class);
       try
       {
+         // Bundle-SymbolicName: org.jboss.test.osgi.service1
+         // Import-Package: org.jboss.test.osgi.service.support.a
          Archive<?> assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
          Bundle bundle1 = installBundle(assembly1);
          try
@@ -121,6 +123,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
+         // Bundle-SymbolicName: org.jboss.test.osgi.service3
+         // Import-Package: org.jboss.test.osgi.service.support.a,org.jboss.test.osgi.service.support.c
          Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
          Bundle bundle1 = installBundle(assembly1);
          try
@@ -180,6 +184,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       {
          KernelControllerContext kcc = getControllerContext("C", null);
 
+         // Bundle-SymbolicName: org.jboss.test.osgi.service3
+         // Import-Package: org.jboss.test.osgi.service.support.a,org.jboss.test.osgi.service.support.c
          Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
          Bundle bundle1 = installBundle(assembly1);
          try
@@ -240,6 +246,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean = addBeans("beanA", bmd, C.class, A.class);
       try
       {
+         // Bundle-SymbolicName: org.jboss.test.osgi.service3
+         // Import-Package: org.jboss.test.osgi.service.support.a,org.jboss.test.osgi.service.support.c
          Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle3");
          Bundle bundle1 = installBundle(assembly1);
          try
@@ -295,6 +303,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
          Deployment bean2 = addBeans("beanA2", bmd, E.class);
          try
          {
+            // Bundle-SymbolicName: org.jboss.test.osgi.service4
+            // Import-Package: org.jboss.test.osgi.service.support.a,org.jboss.test.osgi.service.support.c,org.jboss.test.osgi.service.support.d,org.osgi.framework
             Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle4");
             Bundle bundle1 = installBundle(assembly1);
             try
@@ -363,6 +373,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean1 = addBeans("beanA1", bmd, C.class, A.class, ServiceMixFactory.class);
       try
       {
+         // Bundle-SymbolicName: org.jboss.test.osgi.service4
+         // Import-Package: org.jboss.test.osgi.service.support.a,org.jboss.test.osgi.service.support.c,org.jboss.test.osgi.service.support.d,org.osgi.framework
          Archive<?> assembly = assembleArchive("service-bundle4", "/bundles/service/service-bundle4");
          Bundle bundle = installBundle(assembly);
          try
@@ -437,6 +449,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       Deployment bean = deployBeans("beanA", A.class);
       try
       {
+         // Bundle-SymbolicName: org.jboss.test.osgi.service1
+         // Import-Package: org.jboss.test.osgi.service.support.a
          Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle1");
          Bundle bundle1 = installBundle(assembly1);
          try
@@ -580,6 +594,8 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
          Bundle bundle = getBundle(getDeploymentUnit(deployment));
          bundle.start();
 
+         // Bundle-SymbolicName: org.jboss.test.osgi.service1
+         // Import-Package: org.jboss.test.osgi.service.support.a
          Archive<?> assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
          Bundle bundle1 = installBundle(assembly1);
          try
