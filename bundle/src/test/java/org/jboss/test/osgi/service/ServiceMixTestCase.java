@@ -48,7 +48,6 @@ import org.jboss.test.osgi.service.support.a.AMBean;
 import org.jboss.test.osgi.service.support.c.C;
 import org.jboss.test.osgi.service.support.d.ServiceMixFactory;
 import org.jboss.test.osgi.service.support.e.E;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -111,7 +110,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testInjectionToMC() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
@@ -170,7 +169,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testInjectionToMCNamedService() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
@@ -231,7 +230,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testInvokeDispatch() throws Throwable
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
@@ -280,7 +279,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    @SuppressWarnings("rawtypes")
    public void testServiceFactoryInjection() throws Throwable
    {
@@ -354,7 +353,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    @SuppressWarnings("rawtypes")
    public void testServiceFactoryMix() throws Throwable
    {
@@ -432,7 +431,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testFiltering() throws Throwable
    {
       Deployment bean = deployBeans("beanA", A.class);
@@ -496,7 +495,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testBeansMix() throws Throwable
    {
       Archive<?> assembly = assembleArchive("beans1", "/bundles/service/service-beans1", A.class);
@@ -528,7 +527,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testServiceInjection() throws Throwable
    {
       Archive<?> assembly1 = assembleArchive("simple2", "/bundles/service/service-bundle2", A.class);
@@ -569,7 +568,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
    }
 
-   @Ignore
+   @Test
    public void testExposedClasses() throws Throwable
    {
       Archive<?> assembly = assembleArchive("beans3", "/bundles/service/service-beans3", A.class);
