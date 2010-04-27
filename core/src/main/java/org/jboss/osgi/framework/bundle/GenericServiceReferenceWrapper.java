@@ -88,9 +88,8 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle implements 
       {
          value = serviceId;
       }
-
       // [TODO ServiceMix] getProperty(Constants.OBJECTCLASS)
-      if (Constants.OBJECTCLASS.equals(key))
+      else if (Constants.OBJECTCLASS.equals(key))
       {
          value = MDRUtils.getClasses(context);
          
