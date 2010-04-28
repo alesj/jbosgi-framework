@@ -85,6 +85,8 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          allPackages.add("javax.net");
          allPackages.add("javax.net.ssl");
          
+         allPackages.add("javax.security.cert");
+         
          allPackages.add("javax.xml.datatype");
          allPackages.add("javax.xml.namespace");
          allPackages.add("javax.xml.parsers");
