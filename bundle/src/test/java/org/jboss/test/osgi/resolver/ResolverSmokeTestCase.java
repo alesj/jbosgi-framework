@@ -49,20 +49,20 @@ public class ResolverSmokeTestCase extends AbstractFrameworkTest
    public void testRandomBundleResolution() throws Exception
    {
       List<String> bundlePaths = new ArrayList<String>();
-      bundlePaths.add("bundles/jboss-osgi-apache-xerces.jar");
       bundlePaths.add("bundles/jboss-osgi-common.jar");
       bundlePaths.add("bundles/jboss-osgi-common-core.jar");
+      bundlePaths.add("bundles/jboss-osgi-http.jar");
       bundlePaths.add("bundles/jboss-osgi-husky.jar");
       bundlePaths.add("bundles/jboss-osgi-jaxb.jar");
       bundlePaths.add("bundles/jboss-osgi-jmx.jar");
       bundlePaths.add("bundles/jboss-osgi-jndi.jar");
       bundlePaths.add("bundles/jboss-osgi-reflect.jar");
+      bundlePaths.add("bundles/jboss-osgi-xerces.jar");
       bundlePaths.add("bundles/jboss-osgi-xml-binding.jar");
       bundlePaths.add("bundles/org.apache.felix.configadmin.jar");
       bundlePaths.add("bundles/org.apache.felix.log.jar");
       bundlePaths.add("bundles/org.apache.felix.metatype.jar");
       bundlePaths.add("bundles/org.osgi.compendium.jar");
-      bundlePaths.add("bundles/pax-web-jetty-bundle.jar");
 
       Collections.shuffle(bundlePaths);
 

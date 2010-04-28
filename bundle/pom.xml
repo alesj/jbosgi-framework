@@ -21,7 +21,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <name>JBossOSGi Framework - Bundle</name>
+  <name>JBossOSGi Framework Bundle</name>
   <groupId>org.jboss.osgi.framework</groupId>
   <artifactId>jboss-osgi-framework</artifactId>
   <packaging>jar</packaging>
@@ -109,11 +109,6 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.osgi.bundles</groupId>
-      <artifactId>jboss-osgi-apache-xerces</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.bundles</groupId>
       <artifactId>jboss-osgi-common</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -129,6 +124,16 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.osgi.bundles</groupId>
+      <artifactId>jboss-osgi-reflect</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.osgi.http</groupId>
+      <artifactId>jboss-osgi-http</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.osgi.jaxb</groupId>
       <artifactId>jboss-osgi-jaxb</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -143,18 +148,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.bundles</groupId>
-      <artifactId>jboss-osgi-reflect</artifactId>
+      <groupId>org.jboss.osgi.xerces</groupId>
+      <artifactId>jboss-osgi-xerces</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.bundles</groupId>
+      <groupId>org.jboss.osgi.xb</groupId>
       <artifactId>jboss-osgi-xml-binding</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web</groupId>
-      <artifactId>pax-web-jetty-bundle</artifactId>
       <scope>provided</scope>
     </dependency>
 
