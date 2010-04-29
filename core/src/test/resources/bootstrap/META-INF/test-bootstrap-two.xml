@@ -1,0 +1,12 @@
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+  <bean name="OSGiBundleManager" class="org.jboss.osgi.framework.bundle.OSGiBundleManager">
+    <constructor>
+      <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
+      <parameter><inject bean="MainDeployer" /></parameter>
+    </constructor>
+  </bean>
+
+  <bean name="MainDeployer" class="org.jboss.deployers.plugins.main.MainDeployerImpl"/>
+
+</deployment>

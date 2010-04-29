@@ -176,6 +176,7 @@
     </dependency>
   </dependencies>
 
+  <!-- Build -->
   <build>
     <resources>
       <resource>
@@ -239,10 +240,6 @@
             <property>
               <name>log4j.output.dir</name>
               <value>${project.build.directory}</value>
-            </property>
-            <property>
-              <name>org.jboss.osgi.framework.launch.bootstrapPath</name>
-              <value>bootstrap/jboss-osgi-bootstrap.xml</value>
             </property>
             <property>
               <name>jboss.osgi.framework.properties</name>

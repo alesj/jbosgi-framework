@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import org.jboss.kernel.plugins.bootstrap.AbstractBootstrap;
 import org.jboss.kernel.plugins.bootstrap.basic.BasicBootstrap;
 import org.jboss.kernel.plugins.deployment.xml.BasicXMLDeployer;
 import org.jboss.kernel.spi.dependency.KernelController;
+import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
@@ -57,12 +59,15 @@ import org.osgi.framework.launch.FrameworkFactory;
  */
 public class OSGiFrameworkFactory implements FrameworkFactory
 {
+   // Provide logging
+   final Logger log = Logger.getLogger(OSGiFrameworkFactory.class);
+   
    /** The system property used to get a bootstrap url */
-   public static final String BOOTSTRAP_URL = "org.jboss.osgi.framework.launch.bootstrapURL";
+   public static final String BOOTSTRAP_URL = "org.jboss.osgi.framework.bootstrap.url";
 
    /** The system property used to get a bootstrap path loaded from a classloader */
-   public static final String BOOTSTRAP_PATH = "org.jboss.osgi.framework.launch.bootstrapPath";
-   
+   public static final String BOOTSTRAP_PATH = "org.jboss.osgi.framework.bootstrap.path";
+
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public Framework newFramework(Map configuration)
    {
@@ -75,15 +80,15 @@ public class OSGiFrameworkFactory implements FrameworkFactory
 
       BasicXMLDeployer deployer = new BasicXMLDeployer(kernel, ControllerMode.AUTOMATIC);
 
-      URL url = null;
+      List<URL> urls = null;
 
-      // Specified urls
+      // Specified URL property
       String bootstrapURL = getProperty(BOOTSTRAP_URL);
       if (bootstrapURL != null)
       {
          try
          {
-            url = new URL(bootstrapURL);
+            urls = Collections.singletonList(new URL(bootstrapURL));
          }
          catch (MalformedURLException e)
          {
@@ -91,32 +96,45 @@ public class OSGiFrameworkFactory implements FrameworkFactory
          }
       }
 
-      // Default bootstrap paths
-      List<String> bootstraps = Arrays.asList("jboss-osgi-bootstrap.xml", "bootstrap/jboss-osgi-bootstrap.xml", "META-INF/jboss-osgi-bootstrap.xml", "META-INF/jboss-osgi-default-bootstrap.xml");
-
-      // Specified bootstrap path
+      // Specified resource path
       String bootstrapPath = getProperty(BOOTSTRAP_PATH);
-      if (bootstrapPath != null)
-         bootstraps = Collections.singletonList(bootstrapPath);
-
-      ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-      for (String xml : bootstraps)
+      if (urls == null && bootstrapPath != null)
       {
-         if (contextLoader != null)
-            url = contextLoader.getResource(xml);
-         
+         URL url = getResourceURL(bootstrapPath);
          if (url == null)
-            url = getClass().getResource(xml);
+            throw new IllegalStateException("Cannot find bootstrap: " + bootstrapPath);
 
-         if (url != null)
-            break;
+         urls = Collections.singletonList(url);
       }
-      if (url == null)
-         throw new IllegalStateException("Cannot find any bootstrap: " + Arrays.asList(bootstraps));
+
+      // Discover the URL if not given explicitly
+      if (urls == null)
+      {
+         // Default bootstrap paths
+         List<String> bootstraps = new ArrayList<String>();
+         bootstraps.add("META-INF/jboss-osgi-bootstrap.xml");
+         bootstraps.add("META-INF/jboss-osgi-system-bootstrap.xml");
+         bootstraps.add("META-INF/jboss-osgi-custom-bootstrap.xml");
+
+         urls = new ArrayList<URL>();
+         for (String path : bootstraps)
+         {
+            URL url = getResourceURL(path);
+            if (url != null)
+               urls.add(url);
+         }
+         
+         if (urls.size() == 0)
+            throw new IllegalStateException("Cannot find any bootstrap: " + Arrays.asList(bootstraps));
+      }
 
       try
       {
-         deployer.deploy(url);
+         for (URL url : urls)
+         {
+            log.debug("Deploy framework bootstrap: " + url);
+            deployer.deploy(url);
+         }
          deployer.validate();
       }
       catch (Throwable ex)
@@ -132,8 +150,22 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       OSGiBundleManager manager = (OSGiBundleManager)managerContext.getTarget();
       if (configuration != null)
          manager.setProperties(configuration);
-      
+
       return new OSGiFramework(manager);
+   }
+
+   private URL getResourceURL(String resourceName)
+   {
+      URL url = null;
+
+      ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+      if (contextLoader != null)
+         url = contextLoader.getResource(resourceName);
+
+      if (url == null)
+         url = getClass().getResource(resourceName);
+
+      return url;
    }
 
    private KernelController preinstallKernelBeans(Kernel kernel)
@@ -163,7 +195,7 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       SecurityManager sm = System.getSecurityManager();
       if (sm == null)
          return System.getProperty(propertyName);
-      
+
       return AccessController.doPrivileged(new PrivilegedAction<String>()
       {
          public String run()

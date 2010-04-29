@@ -9,9 +9,12 @@
 <!--                                                                        -->
 <!-- ====================================================================== -->
 
-<!-- $Id$ -->
-
-<!-- Set these VM properties in your IDE debugger -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework/target} -Dlog4j.configuration=log4j-console.xml -->
+<!-- 
+    Set these VM properties in your IDE debugger 
+    
+    -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework-core/target} 
+    -Dlog4j.configuration=log4j-console.xml 
+-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -61,6 +64,40 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
+    
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>org.jboss.test</groupId>
+      <artifactId>jboss-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-common-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jboss.logging</groupId>
+          <artifactId>jboss-logging-spi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
+  
+  <!-- Build -->
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemProperties>
+            <property>
+              <name>log4j.output.dir</name>
+              <value>${project.build.directory}</value>
+            </property>
+          </systemProperties>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
