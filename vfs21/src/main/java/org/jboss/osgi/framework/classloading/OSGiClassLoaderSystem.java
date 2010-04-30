@@ -44,9 +44,6 @@ import org.jboss.osgi.framework.bundle.OSGiBundleState;
  */
 public class OSGiClassLoaderSystem extends ClassLoaderSystem
 {
-   /**
-    * Create a new OSGiClassLoaderSystem.
-    */
    public OSGiClassLoaderSystem()
    {
       ClassLoaderDomain domain = getDefaultDomain();
@@ -62,12 +59,18 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
    @Override
    protected ClassLoaderDomain createDomain(String name)
    {
-      return new OSGiClassLoaderDomain(name);
+      return new ClassLoaderDomain(name);
    }
 
    @Override
    protected BaseClassLoader createClassLoader(ClassLoaderPolicy policy)
    {
-      return new OSGiBundleClassLoader(policy);
+      BaseClassLoader classLoader;
+      if (policy instanceof OSGiClassLoaderPolicy)
+         classLoader = new OSGiBundleClassLoader(policy);
+      else 
+         classLoader = super.createClassLoader(policy);
+      
+      return classLoader;
    }
 }

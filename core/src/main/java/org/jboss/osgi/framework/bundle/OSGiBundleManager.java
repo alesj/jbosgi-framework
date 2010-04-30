@@ -1296,7 +1296,7 @@ public class OSGiBundleManager
       eventsPlugin.setActive(true);
 
       // Have registered any framework services.
-      for (Plugin plugin : plugins.values())
+      for (Plugin plugin : new ArrayList<Plugin>(plugins.values()))
       {
          if (plugin instanceof ServicePlugin)
          {

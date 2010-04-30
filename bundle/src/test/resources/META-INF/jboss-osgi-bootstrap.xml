@@ -41,7 +41,7 @@
         </value></entry>
       </map>
     </property>
-    <incallback method="addPlugin" />
+    <incallback method="addPlugin" state="Instantiated"/>
     <uncallback method="removePlugin" />
   </bean>
   

@@ -57,14 +57,9 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    private OSGiBundleManager bundleManager;
    private List<URL> classPath = new ArrayList<URL>();
 
-   /**
-    * Create a new OSGiClassLoaderDomain.
-    * @param domainName the domain name
-    * @throws IllegalArgumentException for a null bundle manager
-    */
-   public OSGiClassLoaderDomain(String domainName)
+   public OSGiClassLoaderDomain()
    {
-      super(domainName);
+      super("OSGiClassLoaderDomain");
    }
 
    public void setClassLoaderSystem(ClassLoaderSystem classLoaderSystem)

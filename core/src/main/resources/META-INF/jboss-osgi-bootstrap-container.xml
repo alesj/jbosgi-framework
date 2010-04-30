@@ -1,0 +1,73 @@
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+  
+  <!--
+  ********************************
+  *                              *  
+  *  Deployment                  *
+  *                              *
+  ********************************
+  -->
+  
+  <!-- The MainDeployer -->
+  <bean name="MainDeployer" class="org.jboss.deployers.plugins.main.MainDeployerImpl">
+    <property name="structuralDeployers"><inject bean="StructuralDeployers" /></property>
+    <property name="deployers"><inject bean="Deployers" /></property>
+  </bean>
+
+  <!-- The holder for deployers that determine structure -->
+  <bean name="StructuralDeployers" class="org.jboss.deployers.vfs.plugins.structure.VFSStructuralDeployersImpl">
+    <property name="structureBuilder">
+      <!-- The consolidator of the structure information -->
+      <bean name="StructureBuilder" class="org.jboss.deployers.vfs.plugins.structure.VFSStructureBuilder" />
+    </property>
+    <!-- Accept any implementor of structure deployer -->
+    <incallback method="addDeployer" />
+    <uncallback method="removeDeployer" />
+  </bean>
+
+  <!-- The holder for deployers that do real deployment -->
+  <bean name="Deployers" class="org.jboss.deployers.plugins.deployers.DeployersImpl">
+    <constructor><parameter><inject bean="jboss.kernel:service=KernelController" /></parameter></constructor>
+    <!-- Accept any implementor of deployer -->
+    <incallback method="addDeployer" />
+    <uncallback method="removeDeployer" />
+  </bean>
+
+  <!-- JAR & File Structure -->
+  <bean name="JARStructure" class="org.jboss.deployers.vfs.plugins.structure.jar.JARStructure" />
+  <bean name="FileStructure" class="org.jboss.deployers.vfs.plugins.structure.file.FileStructure" />
+
+  <!-- POJO Deployment -->
+  <bean name="BeanDeployer" class="org.jboss.deployers.vfs.deployer.kernel.BeanDeployer" />
+  <bean name="KernelDeploymentDeployer" class="org.jboss.deployers.vfs.deployer.kernel.KernelDeploymentDeployer" />
+  <bean name="BeanMetaDataDeployer" class="org.jboss.deployers.vfs.deployer.kernel.BeanMetaDataDeployer">
+    <constructor>
+      <parameter class="org.jboss.dependency.spi.Controller"><inject bean="jboss.kernel:service=KernelController" /></parameter>
+    </constructor>
+    <property name="deploymentRegistry"><inject bean="OSGiDeploymentRegistry"/></property>
+  </bean>
+
+  <!--
+  ********************************
+  *                              *  
+  *  Classloading                *
+  *                              *
+  ********************************
+  -->
+  
+  <bean name="ClassLoading" class="org.jboss.classloading.spi.dependency.ClassLoading">
+    <incallback method="addModule" state="Configured" />
+    <uncallback method="removeModule" state="Configured" />
+  </bean>
+  <bean name="ClassLoadingDefaultDeployer" class="org.jboss.deployers.plugins.classloading.ClassLoadingDefaultDeployer">
+    <property name="defaultMetaData">
+      <classloading xmlns="urn:jboss:classloading:1.0" export-all="NON_EMPTY" import-all="true" />
+    </property>
+  </bean>
+  <bean name="ClassLoaderClassPathDeployer" class="org.jboss.deployers.vfs.plugins.classloader.VFSClassLoaderClassPathDeployer" />
+  <bean name="ClassLoaderDeployer" class="org.jboss.deployers.plugins.classloading.AbstractLevelClassLoaderSystemDeployer">
+    <property name="classLoading"><inject bean="ClassLoading" /></property>
+    <property name="system"><inject bean="OSGiClassLoaderSystem" /></property>
+  </bean>
+
+</deployment>

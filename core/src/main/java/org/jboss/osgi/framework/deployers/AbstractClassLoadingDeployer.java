@@ -93,7 +93,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       OSGiClassLoadingMetaData classLoadingMetaData = new OSGiClassLoadingMetaData();
       classLoadingMetaData.setName(bundleState.getSymbolicName());
       classLoadingMetaData.setVersion(bundleState.getVersion());
-      classLoadingMetaData.setDomain(domain != null ? domain.getName() : null);
+      classLoadingMetaData.setDomain(domain.getName());
       classLoadingMetaData.setShutdownPolicy(ShutdownPolicy.GARBAGE_COLLECTION);
 
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
@@ -155,8 +155,12 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
             if (syspackPlugin.isSystemPackage(packageName) == true)
                continue;
             
-            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
-            requirements.addRequirement(requirement);
+            // [JBOSGI-319] LinkageError for the type javax/servlet/Servlet
+            if ("true".equals(bundleManager.getProperty("jbosgi319.workaround")) == false)
+            {
+               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
+               requirements.addRequirement(requirement);
+            }
          }
       }
 

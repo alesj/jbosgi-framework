@@ -86,6 +86,7 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       String bootstrapURL = getProperty(BOOTSTRAP_URL);
       if (bootstrapURL != null)
       {
+         log.debug("System defined bootstrap url: " + bootstrapURL);
          try
          {
             urls = Collections.singletonList(new URL(bootstrapURL));
@@ -100,6 +101,8 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       String bootstrapPath = getProperty(BOOTSTRAP_PATH);
       if (urls == null && bootstrapPath != null)
       {
+         log.debug("System defined bootstrap path: " + bootstrapPath);
+         
          URL url = getResourceURL(bootstrapPath);
          if (url == null)
             throw new IllegalStateException("Cannot find bootstrap: " + bootstrapPath);
@@ -112,9 +115,10 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       {
          // Default bootstrap paths
          List<String> bootstraps = new ArrayList<String>();
+         bootstraps.add("jboss-osgi-bootstrap.xml");
          bootstraps.add("META-INF/jboss-osgi-bootstrap.xml");
-         bootstraps.add("META-INF/jboss-osgi-system-bootstrap.xml");
-         bootstraps.add("META-INF/jboss-osgi-custom-bootstrap.xml");
+         bootstraps.add("META-INF/jboss-osgi-bootstrap-container.xml");
+         bootstraps.add("META-INF/jboss-osgi-bootstrap-system.xml");
 
          urls = new ArrayList<URL>();
          for (String path : bootstraps)

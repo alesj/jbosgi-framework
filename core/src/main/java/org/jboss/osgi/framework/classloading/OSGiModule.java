@@ -21,11 +21,17 @@
 */
 package org.jboss.osgi.framework.classloading;
 
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.classloader.spi.ClassLoaderPolicy;
+import org.jboss.classloader.spi.DelegateLoader;
 import org.jboss.classloading.spi.dependency.Module;
+import org.jboss.classloading.spi.dependency.RequirementDependencyItem;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
+import org.jboss.logging.Logger;
 
 /**
  * The {@link Module} that represents and OSGi bundle deployment.
@@ -35,17 +41,42 @@ import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolic
  */
 public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
 {
-   /** The serialVersionUID */
+   // Provide logging
+   private static final Logger log = Logger.getLogger(OSGiModule.class);
+
    private static final long serialVersionUID = 1L;
 
    public OSGiModule(DeploymentUnit unit, ClassLoadingMetaData metaData)
    {
       super(unit);
+      
+      if (log.isTraceEnabled())
+         log.trace("new OSGiModule\n  " + unit + "\n  " + metaData);
    }
 
    @Override
    public ClassLoaderPolicy createClassLoaderPolicy()
    {
       throw new IllegalStateException("OSGiClassLoaderFactory is expected to create the policy");
+   }
+
+   @Override
+   protected void addDelegates(Module module, List<DelegateLoader> delegates, List<DelegateLoader> dynamic, Set<Module> visited, boolean reExport)
+   {
+      super.addDelegates(module, delegates, dynamic, visited, reExport);
+      
+      if (log.isTraceEnabled())
+         log.trace("Add delegates for module: " + this + "\n  delegates: " + delegates + "\n  dynamic: " + dynamic);
+   }
+
+   @Override
+   protected Module resolveModule(RequirementDependencyItem dependency, boolean resolveSpace)
+   {
+      Module module = super.resolveModule(dependency, resolveSpace);
+      
+      if (log.isTraceEnabled())
+         log.trace("Resolve dependency for module: " + module + "\n  dependency: " + dependency + "\n  module: " + module);
+      
+      return module;
    }
 }

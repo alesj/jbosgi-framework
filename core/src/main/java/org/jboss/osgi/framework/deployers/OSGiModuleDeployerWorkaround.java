@@ -23,24 +23,23 @@ package org.jboss.osgi.framework.deployers;
 
 import org.jboss.classloading.spi.dependency.ClassLoading;
 import org.jboss.classloading.spi.dependency.Module;
-import org.jboss.classloading.spi.dependency.policy.ClassLoaderPolicyModule;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.deployers.vfs.plugins.classloader.VFSClassLoaderDescribeDeployer;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
-import org.jboss.osgi.framework.classloading.OSGiModule;
 
 /**
  * [TODO] Remove this deployer when the VFSClassLoaderDescribeDeployer 
  * suports an already attached Module.
  * 
+ * [JBOSGI-317] Context is already registered in domain DefaultDomain
+ * https://jira.jboss.org/jira/browse/JBOSGI-317
+ * 
  * @author thomas.diesler@jboss.com
- * @version $Revision: 100143 $
  */
-public class OSGiModuleDeployerTempWorkaround extends VFSClassLoaderDescribeDeployer
+public class OSGiModuleDeployerWorkaround extends OSGiModuleDeployer
 {
-   public OSGiModuleDeployerTempWorkaround()
+   public OSGiModuleDeployerWorkaround()
    {
       // Make sure we come after the ClassLoaderDescribeDeployer
       setInput(Module.class);
@@ -49,22 +48,19 @@ public class OSGiModuleDeployerTempWorkaround extends VFSClassLoaderDescribeDepl
    @Override
    public void deploy(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
    {
+      // Do nothing if the workaround is not enabled
+      if ("true".equals(bundleManager.getProperty("jbosgi317.workaround")) == false)
+         return;
+      
       // If there is already a module attached and this is an OSGi deployment
       // remove the old module and create a new OSGiModule
-      if (metaData instanceof OSGiClassLoadingMetaData)
+      if (metaData instanceof OSGiClassLoadingMetaData && unit.isAttachmentPresent(Module.class))
       {
          Module module = unit.removeAttachment(Module.class);
          ClassLoading classLoading = getClassLoading();
          classLoading.removeModule(module);
          unit.removeAttachment(Module.class);
-         super.deploy(unit, metaData);
+         deployInternal(unit, metaData);
       }
-   }
-
-   @Override
-   protected ClassLoaderPolicyModule createModule(DeploymentUnit unit, ClassLoadingMetaData metaData) 
-   {
-      OSGiModule module = new OSGiModule(unit, metaData);
-      return module;
    }
 }
