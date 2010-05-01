@@ -26,8 +26,8 @@ package org.jboss.test.osgi.compendium;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.compendium.support.a.PA;
 import org.jboss.test.osgi.compendium.support.b.Other;
 import org.junit.Test;

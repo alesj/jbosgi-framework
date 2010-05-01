@@ -29,7 +29,7 @@ import static org.junit.Assert.fail;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.jboss.test.osgi.AbstractFrameworkTest;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;

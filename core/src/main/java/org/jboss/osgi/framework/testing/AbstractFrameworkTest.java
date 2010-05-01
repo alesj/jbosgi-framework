@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.test.osgi;
+package org.jboss.osgi.framework.testing;
 
 // $Id: $
 
@@ -27,6 +27,8 @@ import java.net.URL;
 
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
+import org.jboss.classloader.spi.ClassLoaderDomain;
+import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.DeployerClient;
@@ -40,18 +42,26 @@ import org.jboss.kernel.plugins.deployment.xml.BasicXMLDeployer;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.kernel.spi.deployment.KernelDeployment;
+import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.deployers.AbstractDeployment;
+import org.jboss.osgi.framework.launch.OSGiFramework;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 
 /**
- * Parent for deployment tests.  
+ * Parent for native framework tests.  
  * 
  * @author Thomas.Diesler@jboss.com
  * @since 10-Mar-2010
  */
-public abstract class AbstractDeploymentTest extends AbstractFrameworkTest
+public abstract class AbstractFrameworkTest extends OSGiFrameworkTest
 {
    protected BasicXMLDeployer deployer;
+
+   protected OSGiBundleManager getBundleManager()
+   {
+      return ((OSGiFramework)framework).getBundleManager();
+   }
 
    protected Kernel getKernel()
    {
@@ -147,18 +157,18 @@ public abstract class AbstractDeploymentTest extends AbstractFrameworkTest
    protected Deployment addBeans(String name, BeanMetaData bmd, Class<?>... packages) throws Exception
    {
       Archive<?> assembly = assembleArchive(name, new String[0], packages);
-
+   
       if (bmd == null)
       {
          Class<?> beanClass = packages[0];
          BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder(beanClass.getSimpleName(), beanClass.getName());
          bmd = builder.getBeanMetaData();
       }
-
+   
       Deployment deployment = AbstractDeployment.createDeployment(toVirtualFile(assembly));
       MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
       att.addAttachment(BeanMetaData.class, bmd);
-
+   
       return addDeployment(deployment);
    }
 
@@ -167,5 +177,15 @@ public abstract class AbstractDeploymentTest extends AbstractFrameworkTest
       getDeployerClient().addDeployment(deployment);
       getDeployerClient().process();
       return deployment;
+   }
+
+   protected ClassLoaderSystem getClassLoaderSystem()
+   {
+      return (ClassLoaderSystem)getBean("OSGiClassLoaderSystem");
+   }
+
+   protected ClassLoaderDomain getClassLoaderDomain()
+   {
+      return (ClassLoaderDomain)getBean("OSGiClassLoaderDomain");
    }
 }

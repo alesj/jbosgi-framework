@@ -29,9 +29,9 @@ import static org.junit.Assert.fail;
 
 import java.net.URL;
 
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.osgi.spi.framework.OSGiBootstrap;
 import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
-import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;

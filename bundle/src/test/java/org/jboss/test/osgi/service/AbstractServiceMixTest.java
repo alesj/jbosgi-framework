@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.test.osgi.AbstractDeploymentTest;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.osgi.framework.Bundle;
 
 /**
@@ -36,7 +36,7 @@ import org.osgi.framework.Bundle;
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public abstract class AbstractServiceMixTest extends AbstractDeploymentTest
+public abstract class AbstractServiceMixTest extends AbstractFrameworkTest
 {
    protected static Object getter(Object target, String getter, String name) throws Throwable
    {

@@ -29,8 +29,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleWrapper;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
 import org.jboss.test.osgi.service.support.a.A;
 import org.junit.Test;

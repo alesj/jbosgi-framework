@@ -28,8 +28,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.BrokenServiceFactory;
 import org.junit.Test;
 import org.osgi.framework.Bundle;

@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.jboss.test.osgi.AbstractFrameworkTest;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

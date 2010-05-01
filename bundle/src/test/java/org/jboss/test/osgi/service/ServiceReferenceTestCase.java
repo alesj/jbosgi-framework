@@ -36,8 +36,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.a.A;
 import org.junit.Test;
 import org.osgi.framework.Bundle;

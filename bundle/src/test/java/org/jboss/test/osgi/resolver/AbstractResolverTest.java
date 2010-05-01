@@ -31,7 +31,7 @@ import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.Plugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
-import org.jboss.test.osgi.AbstractFrameworkTest;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.junit.Before;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;

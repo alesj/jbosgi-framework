@@ -33,7 +33,7 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
 import org.jboss.osgi.framework.resolver.ResolverBundle;
-import org.jboss.test.osgi.AbstractFrameworkTest;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 

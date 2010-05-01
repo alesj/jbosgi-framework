@@ -150,6 +150,7 @@
   
   <bean name="OSGiClassLoaderSystem" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderSystem" />
   <bean name="OSGiClassLoaderDomain" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderDomain" >
+    <property name="parent"><inject bean="OSGiClassLoaderSystem" property="defaultDomain"/></property>
     <property name="classLoaderSystem"><inject bean="OSGiClassLoaderSystem"/></property>
     <property name="bundleManager"><inject bean="OSGiBundleManager" /></property>
   </bean>

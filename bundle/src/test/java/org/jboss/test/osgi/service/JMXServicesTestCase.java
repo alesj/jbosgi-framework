@@ -30,7 +30,7 @@ import java.net.URL;
 
 import javax.management.ObjectName;
 
-import org.jboss.test.osgi.AbstractDeploymentTest;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.test.osgi.service.support.MockInvokerMBean;
 import org.junit.Test;
 
@@ -40,7 +40,7 @@ import org.junit.Test;
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  * @author thomas.diesler@jboss.com
  */
-public class JMXServicesTestCase extends AbstractDeploymentTest
+public class JMXServicesTestCase extends AbstractFrameworkTest
 {
    @Test
    public void testAtJmx() throws Throwable

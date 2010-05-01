@@ -32,10 +32,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>biz.aQute</groupId>
-      <artifactId>bnd</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.osgi.framework</groupId>
       <artifactId>jboss-osgi-framework-metadata</artifactId>
       <version>${version}</version>
@@ -65,22 +61,7 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     
-    <!-- Test Dependencies -->
-    <dependency>
-      <groupId>org.jboss.test</groupId>
-      <artifactId>jboss-test</artifactId>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jboss</groupId>
-          <artifactId>jboss-common-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.jboss.logging</groupId>
-          <artifactId>jboss-logging-spi</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+    <!-- Provided Dependencies -->
   </dependencies>
   
   <!-- Build -->

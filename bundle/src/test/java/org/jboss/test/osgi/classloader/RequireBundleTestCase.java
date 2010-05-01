@@ -25,8 +25,8 @@ package org.jboss.test.osgi.classloader;
 
 import static org.junit.Assert.fail;
 
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.test.osgi.AbstractFrameworkTest;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.jboss.test.osgi.classloader.support.b.B;
 import org.junit.Test;

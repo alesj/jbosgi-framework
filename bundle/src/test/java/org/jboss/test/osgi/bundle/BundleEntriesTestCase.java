@@ -35,7 +35,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jboss.test.osgi.AbstractFrameworkTest;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
