@@ -95,6 +95,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       classLoadingMetaData.setVersion(bundleState.getVersion());
       classLoadingMetaData.setDomain(domain.getName());
       classLoadingMetaData.setShutdownPolicy(ShutdownPolicy.GARBAGE_COLLECTION);
+      classLoadingMetaData.setJ2seClassLoadingCompliance(false);
 
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
