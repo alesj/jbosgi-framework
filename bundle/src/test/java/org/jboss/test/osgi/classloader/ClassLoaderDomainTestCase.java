@@ -21,7 +21,9 @@
  */
 package org.jboss.test.osgi.classloader;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import javax.servlet.Servlet;
 import javax.swing.SwingUtilities;
@@ -33,7 +35,7 @@ import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.service.startlevel.StartLevel;
 
 /**
  * Test OSGi classloader domain
@@ -63,8 +65,8 @@ public class ClassLoaderDomainTestCase extends AbstractFrameworkTest
    public void testSystemBundleLoad() throws Exception
    {
       // Load a class that is included in the system classpath by default
-      Class<?> loadedClass = framework.loadClass(ServiceTracker.class.getName());
-      assertNotNull("Class loaded: " + ServiceTracker.class.getName(), loadedClass);
+      Class<?> loadedClass = framework.loadClass(StartLevel.class.getName());
+      assertNotNull("Class loaded: " + StartLevel.class.getName(), loadedClass);
       
       // Load a class that is included in the system classpath explicitly
       loadedClass = framework.loadClass(ConstantsHelper.class.getName());
@@ -87,8 +89,8 @@ public class ClassLoaderDomainTestCase extends AbstractFrameworkTest
       assertNotNull("Default domain not null", defaultDomain);
       
       // Load a class that is included in the system classpath by default
-      Class<?> loadedClass = defaultDomain.loadClass(ServiceTracker.class.getName());
-      assertNotNull("Class loaded: " + ServiceTracker.class.getName(), loadedClass);
+      Class<?> loadedClass = defaultDomain.loadClass(StartLevel.class.getName());
+      assertNotNull("Class loaded: " + StartLevel.class.getName(), loadedClass);
       
       // Load a class that is included in the system classpath explicitly
       loadedClass = defaultDomain.loadClass(ConstantsHelper.class.getName());
