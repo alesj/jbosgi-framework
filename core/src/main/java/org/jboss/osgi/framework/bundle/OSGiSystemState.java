@@ -29,6 +29,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
 
+import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.osgi.framework.BundleException;
@@ -83,8 +84,8 @@ public class OSGiSystemState extends AbstractBundleState
 
    public Class<?> loadClass(String name) throws ClassNotFoundException
    {
-      // [JBOSGI-138] Proper system BundleContext implementation
-      return getClass().getClassLoader().loadClass(name);
+      ClassLoaderDomain domain = getBundleManager().getClassLoaderDomain();
+      return domain.loadClass(name);
    }
    
    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse)

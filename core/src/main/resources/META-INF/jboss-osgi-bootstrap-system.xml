@@ -148,11 +148,12 @@
   ********************************
   -->
   
-  <bean name="OSGiClassLoaderSystem" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderSystem" />
+  <bean name="OSGiClassLoaderSystem" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderSystem">
+    <property name="bundleManager"><inject bean="OSGiBundleManager" /></property>
+  </bean>
   <bean name="OSGiClassLoaderDomain" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderDomain" >
     <property name="parent"><inject bean="OSGiClassLoaderSystem" property="defaultDomain"/></property>
     <property name="classLoaderSystem"><inject bean="OSGiClassLoaderSystem"/></property>
-    <property name="bundleManager"><inject bean="OSGiBundleManager" /></property>
   </bean>
   <bean name="OSGiClassLoaderFactory" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderFactory" >
     <property name="system"><inject bean="OSGiClassLoaderSystem"/></property>

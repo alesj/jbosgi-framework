@@ -23,12 +23,17 @@ package org.jboss.test.osgi.classloader;
 
 import static org.junit.Assert.*;
 
+import javax.servlet.Servlet;
+import javax.swing.SwingUtilities;
+
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.classloader.spi.Loader;
 import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Test OSGi classloader domain
@@ -52,5 +57,49 @@ public class ClassLoaderDomainTestCase extends AbstractFrameworkTest
       
       Loader parentDomain = classLoaderDomain.getParent();
       assertSame(defaultDomain, parentDomain);
+   }
+
+   @Test
+   public void testSystemBundleLoad() throws Exception
+   {
+      // Load a class that is included in the system classpath by default
+      Class<?> loadedClass = framework.loadClass(ServiceTracker.class.getName());
+      assertNotNull("Class loaded: " + ServiceTracker.class.getName(), loadedClass);
+      
+      // Load a class that is included in the system classpath explicitly
+      loadedClass = framework.loadClass(ConstantsHelper.class.getName());
+      assertNotNull("Class loaded: " + ConstantsHelper.class.getName(), loadedClass);
+      
+      // Attempt to load a class that is not part of the JDK  
+      loadedClass = framework.loadClass(Servlet.class.getName());
+      assertNull("Cannot load class: " + Servlet.class.getName(), loadedClass);
+      
+      // Attempt to load a class that is part of the JDK  
+      loadedClass = framework.loadClass(SwingUtilities.class.getName());
+      assertNull("Cannot load class: " + SwingUtilities.class.getName(), loadedClass);
+   }
+   
+   @Test
+   public void testDefaultDomainClassLoad() throws BundleException
+   {
+      ClassLoaderSystem classLoaderSystem = getClassLoaderSystem();
+      ClassLoaderDomain defaultDomain = classLoaderSystem.getDefaultDomain();
+      assertNotNull("Default domain not null", defaultDomain);
+      
+      // Load a class that is included in the system classpath by default
+      Class<?> loadedClass = defaultDomain.loadClass(ServiceTracker.class.getName());
+      assertNotNull("Class loaded: " + ServiceTracker.class.getName(), loadedClass);
+      
+      // Load a class that is included in the system classpath explicitly
+      loadedClass = defaultDomain.loadClass(ConstantsHelper.class.getName());
+      assertNotNull("Class loaded: " + ConstantsHelper.class.getName(), loadedClass);
+      
+      // Attempt to load a class that is not part of the JDK  
+      loadedClass = defaultDomain.loadClass(Servlet.class.getName());
+      assertNull("Cannot load class: " + Servlet.class.getName(), loadedClass);
+      
+      // Attempt to load a class that is part of the JDK  
+      loadedClass = defaultDomain.loadClass(SwingUtilities.class.getName());
+      assertNull("Cannot load class: " + SwingUtilities.class.getName(), loadedClass);
    }
 }

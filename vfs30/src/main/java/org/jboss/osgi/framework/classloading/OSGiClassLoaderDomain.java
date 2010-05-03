@@ -24,19 +24,10 @@ package org.jboss.osgi.framework.classloading;
 // $Id: $
 
 import java.io.IOException;
-import java.util.List;
 
-import org.jboss.classloader.plugins.filter.CombiningClassFilter;
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderSystem;
-import org.jboss.classloader.spi.ParentPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
-import org.jboss.classloader.spi.filter.ClassFilter;
-import org.jboss.classloader.spi.filter.ClassFilterUtils;
-import org.jboss.classloader.spi.filter.PackageClassFilter;
-import org.jboss.classloader.spi.filter.RecursivePackageClassFilter;
-import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 
 /**
  * OSGiClassLoaderDomain.<p>
@@ -47,7 +38,6 @@ import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 public class OSGiClassLoaderDomain extends ClassLoaderDomain
 {
    private ClassLoaderSystem classLoaderSystem;
-   private OSGiBundleManager bundleManager;
 
    public OSGiClassLoaderDomain()
    {
@@ -57,11 +47,6 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    public void setClassLoaderSystem(ClassLoaderSystem classLoaderSystem)
    {
       this.classLoaderSystem = classLoaderSystem;
-   }
-
-   public void setBundleManager(OSGiBundleManager bundleManager)
-   {
-      this.bundleManager = bundleManager;
    }
 
    @Override
@@ -74,29 +59,8 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    {
       if (classLoaderSystem == null)
          throw new IllegalArgumentException("Null classLoaderSystem");
-      if (bundleManager == null)
-         throw new IllegalArgumentException("Null bundleManager");
 
       // Register the domain with the ClassLoaderSystem
       classLoaderSystem.registerDomain(this);
-
-      // Initialize the configured system packages
-      ClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(getSystemPackagesAsString());
-      ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
-      ClassFilter filter = CombiningClassFilter.create(javaFilter, OSGiCoreClassFilter.INSTANCE, systemFilter);
-
-      // Setup the domain's parent policy
-      setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));
-   }
-
-   private String getSystemPackagesAsString()
-   {
-      SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
-      List<String> sysPackages = syspackPlugin.getSystemPackages(false);
-      StringBuffer sysPackageString = new StringBuffer();
-      for (String name : sysPackages)
-         sysPackageString.append(name + ",");
-      
-      return sysPackageString.toString();
    }
 }

@@ -45,6 +45,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.client.spi.DeployerClient;
 import org.jboss.deployers.client.spi.IncompleteDeploymentException;
@@ -124,6 +125,8 @@ public class OSGiBundleManager
    private Executor executor;
    /** The system bundle */
    private OSGiSystemState systemBundle;
+   /** The framework's class loader domain */
+   private ClassLoaderDomain classLoaderDomain;
    /** The registered manager plugins */
    private Map<Class<?>, Plugin> plugins = Collections.synchronizedMap(new LinkedHashMap<Class<?>, Plugin>());
    /** The frame work properties */
@@ -159,11 +162,6 @@ public class OSGiBundleManager
 
    /**
     * Create a new OSGiBundleManager.
-    * 
-    * @param kernel the kernel
-    * @param deployerClient the deployer client
-    * @param registry the deployment registry
-    * @throws IllegalArgumentException for a null parameter
     */
    public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient)
    {
@@ -172,12 +170,6 @@ public class OSGiBundleManager
 
    /**
     * Create a new OSGiBundleManager.
-    * 
-    * @param kernel the kernel
-    * @param deployerClient the deployer client
-    * @param registry the deployment registry
-    * @param executor the executor
-    * @throws IllegalArgumentException for a null parameter
     */
    public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, Executor executor)
    {
@@ -210,24 +202,26 @@ public class OSGiBundleManager
       // nothing to do
    }
 
-   /**
-    * Get the kernel
-    *
-    * @return the kernel
-    */
    public Kernel getKernel()
    {
       return kernel;
    }
 
-   /**
-    * Get the deployerClient.
-    *
-    * @return the deployerClient.
-    */
    public DeployerClient getDeployerClient()
    {
       return deployerClient;
+   }
+
+   public ClassLoaderDomain getClassLoaderDomain()
+   {
+      if (classLoaderDomain == null)
+         throw new IllegalStateException("ClassLoaderDomain not available");
+      return classLoaderDomain;
+   }
+
+   public void setClassLoaderDomain(ClassLoaderDomain domain)
+   {
+      this.classLoaderDomain = domain;
    }
 
    /**
@@ -530,13 +524,13 @@ public class OSGiBundleManager
    {
       if (dep == null)
          throw new IllegalArgumentException("Null deployment");
-      
+
       // If a bundle containing the same location identifier is already installed, 
       // the Bundle object for that bundle is returned. 
       AbstractBundleState bundleState = getBundleByLocation(dep.getLocation());
       if (bundleState != null)
          return bundleState;
-      
+
       // Create the deployment and deploy it
       try
       {

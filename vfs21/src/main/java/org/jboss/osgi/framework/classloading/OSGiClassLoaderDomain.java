@@ -24,25 +24,10 @@ package org.jboss.osgi.framework.classloading;
 // $Id: $
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.jboss.classloader.plugins.filter.CombiningClassFilter;
 import org.jboss.classloader.spi.ClassLoaderDomain;
-import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
-import org.jboss.classloader.spi.ParentPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
-import org.jboss.classloader.spi.filter.ClassFilter;
-import org.jboss.classloader.spi.filter.ClassFilterUtils;
-import org.jboss.classloader.spi.filter.PackageClassFilter;
-import org.jboss.classloader.spi.filter.RecursivePackageClassFilter;
-import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiSystemState;
-import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
 
 /**
  * OSGiClassLoaderDomain.<p>
@@ -53,8 +38,6 @@ import org.jboss.virtual.VirtualFile;
 public class OSGiClassLoaderDomain extends ClassLoaderDomain
 {
    private ClassLoaderSystem classLoaderSystem;
-   private OSGiBundleManager bundleManager;
-   private List<URL> classPath = new ArrayList<URL>();
 
    public OSGiClassLoaderDomain()
    {
@@ -64,16 +47,6 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    public void setClassLoaderSystem(ClassLoaderSystem classLoaderSystem)
    {
       this.classLoaderSystem = classLoaderSystem;
-   }
-
-   public void setBundleManager(OSGiBundleManager bundleManager)
-   {
-      this.bundleManager = bundleManager;
-   }
-
-   public void setClassPath(List<URL> classPath)
-   {
-      this.classPath = classPath;
    }
 
    @Override
@@ -86,41 +59,8 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    {
       if (classLoaderSystem == null)
          throw new IllegalArgumentException("Null classLoaderSystem");
-      if (bundleManager == null)
-         throw new IllegalArgumentException("Null bundleManager");
-      if (classPath == null)
-         throw new IllegalArgumentException("Null classPath");
 
       // Register the domain with the ClassLoaderSystem
       classLoaderSystem.registerDomain(this);
-
-      // Initialize the configured system packages
-      ClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(getSystemPackagesAsString());
-      ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
-      ClassFilter filter = CombiningClassFilter.create(javaFilter, OSGiCoreClassFilter.INSTANCE, systemFilter);
-
-      // Setup the domain's parent policy
-      setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));
-
-      // Initialize the configured policy roots
-      VirtualFile[] roots = new VirtualFile[classPath.size()];
-      for (int i = 0; i < classPath.size(); i++)
-         roots[i] = VFS.createNewRoot(classPath.get(i));
-
-      // Create and register the ClassLoaderPolicy
-      OSGiSystemState systemBundle = bundleManager.getSystemBundle();
-      ClassLoaderPolicy systemPolicy = new OSGiClassLoaderPolicy(systemBundle, roots);
-      classLoaderSystem.registerClassLoaderPolicy(getName(), systemPolicy);
-   }
-
-   private String getSystemPackagesAsString()
-   {
-      SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
-      List<String> sysPackages = syspackPlugin.getSystemPackages(false);
-      StringBuffer sysPackageString = new StringBuffer();
-      for (String name : sysPackages)
-         sysPackageString.append(name + ",");
-      
-      return sysPackageString.toString();
    }
 }

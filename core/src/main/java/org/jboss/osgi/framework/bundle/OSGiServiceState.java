@@ -648,6 +648,9 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
          try
          {
             Class<?> clazz = getBundleState().loadClass(className);
+            if (clazz == null)
+               throw new IllegalArgumentException("Cannot load '" + className + "' through: " + getBundleState());
+            
             // [TODO] show classloader information all interfaces for debugging purposes
             if (clazz.isInstance(object) == false)
                throw new IllegalArgumentException(object.getClass().getName() + " does not implement " + className);

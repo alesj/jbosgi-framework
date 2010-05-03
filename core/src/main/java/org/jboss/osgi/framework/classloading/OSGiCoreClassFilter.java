@@ -55,8 +55,8 @@ public final class OSGiCoreClassFilter extends PackageClassFilter
          "org.osgi.service.packageadmin",
          "org.osgi.service.permissionadmin",
          "org.osgi.service.startlevel",
-         "org.osgi.service.tracker",
-         "org.osgi.service.url"
+         "org.osgi.service.url",
+         "org.osgi.util.tracker"
       };
    }
 
