@@ -291,17 +291,11 @@
     </profile>
 
     <!--
-      Name: framework-equinox
+      Name: equinox
       Descr: Setup for Equinox framework integration testing
     -->
     <profile>
-      <id>framework-equinox</id>
-      <activation>
-        <property>
-          <name>frwk</name>
-          <value>equinox</value>
-        </property>
-      </activation>
+      <id>equinox</id>
       <properties>
         <jboss.osgi.framework.properties>jboss-osgi-equinox.properties</jboss.osgi.framework.properties>
       </properties>
@@ -344,17 +338,11 @@
     </profile>
 
     <!--
-      Name: framework-felix 
+      Name: felix 
       Descr: Setup for Felix framework integration testing
     -->
     <profile>
-      <id>framework-felix</id>
-      <activation>
-        <property>
-          <name>frwk</name>
-          <value>felix</value>
-        </property>
-      </activation>
+      <id>felix</id>
       <properties>
         <jboss.osgi.framework.properties>jboss-osgi-felix.properties</jboss.osgi.framework.properties>
       </properties>
@@ -401,11 +389,9 @@
       Descr: Setup for Native Framework integration testing
     -->
     <profile>
-      <id>framework-jbossmc-default</id>
+      <id>jbossmc</id>
       <activation>
-        <property>
-          <name>!frwk</name>
-        </property>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <dependencies>
         <dependency>
