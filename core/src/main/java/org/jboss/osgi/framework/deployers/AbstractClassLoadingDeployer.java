@@ -26,7 +26,6 @@ package org.jboss.osgi.framework.deployers;
 import java.util.List;
 
 import org.jboss.classloader.spi.ClassLoaderDomain;
-import org.jboss.classloader.spi.ClassLoaderSystem;
 import org.jboss.classloader.spi.ShutdownPolicy;
 import org.jboss.classloading.spi.metadata.CapabilitiesMetaData;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;

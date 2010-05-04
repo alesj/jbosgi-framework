@@ -1,20 +1,11 @@
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
 
-  <!-- 
-  ********************************
-  *                              *  
-  *  OSGi Framework              *
-  *                              *
-  ********************************
-  -->
-  
-  <bean name="OSGiBundleManager" class="org.jboss.osgi.framework.bundle.OSGiBundleManager">
+  <bean name="OSGiFrameworkProperties" class="org.jboss.osgi.framework.plugins.FrameworkProperties">
     <constructor>
-      <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
-      <parameter><inject bean="MainDeployer" /></parameter>
+      <parameter>
+        <map keyClass="java.lang.String" valueClass="java.lang.String"/>
+      </parameter>
     </constructor>
-    <incallback method="addPlugin" />
-    <uncallback method="removePlugin" />
   </bean>
   
 </deployment>

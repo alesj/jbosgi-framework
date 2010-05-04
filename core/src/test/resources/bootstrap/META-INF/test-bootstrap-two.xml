@@ -4,9 +4,18 @@
     <constructor>
       <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
       <parameter><inject bean="MainDeployer" /></parameter>
+      <parameter><inject bean="OSGiFrameworkProperties" /></parameter>
     </constructor>
   </bean>
 
+  <bean name="OSGiFrameworkProperties" class="org.jboss.osgi.framework.plugins.FrameworkProperties">
+    <constructor>
+      <parameter>
+        <map keyClass="java.lang.String" valueClass="java.lang.String"/>
+      </parameter>
+    </constructor>
+  </bean>
+  
   <bean name="MainDeployer" class="org.jboss.deployers.plugins.main.MainDeployerImpl"/>
 
 </deployment>
