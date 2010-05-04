@@ -29,17 +29,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -67,6 +63,7 @@ import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.AutoInstallPlugin;
 import org.jboss.osgi.framework.plugins.BundleStoragePlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
+import org.jboss.osgi.framework.plugins.FrameworkProperties;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.Plugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
@@ -76,7 +73,6 @@ import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.osgi.vfs.VFSUtils;
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.util.platform.Java;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -101,20 +97,6 @@ public class OSGiBundleManager
 
    /** The bundle manager's bean name: OSGiBundleManager */
    public static final String BEAN_BUNDLE_MANAGER = "OSGiBundleManager";
-   /** The framework execution environment */
-   private static String OSGi_FRAMEWORK_EXECUTIONENVIRONMENT;
-   /** The framework language */
-   private static String OSGi_FRAMEWORK_LANGUAGE = Locale.getDefault().getISO3Language(); // REVIEW correct?
-   /** The os name */
-   private static String OSGi_FRAMEWORK_OS_NAME;
-   /** The os version */
-   private static String OSGi_FRAMEWORK_OS_VERSION;
-   /** The os version */
-   private static String OSGi_FRAMEWORK_PROCESSOR;
-   /** The framework vendor */
-   private static String OSGi_FRAMEWORK_VENDOR = "jboss.org";
-   /** The framework version. This is the version of the org.osgi.framework package in r4v42 */
-   private static String OSGi_FRAMEWORK_VERSION = "1.5";
    /** The bundles by id */
    private List<AbstractBundleState> allBundles = new CopyOnWriteArrayList<AbstractBundleState>();
    /** The kernel */
@@ -129,59 +111,36 @@ public class OSGiBundleManager
    private ClassLoaderDomain classLoaderDomain;
    /** The registered manager plugins */
    private Map<Class<?>, Plugin> plugins = Collections.synchronizedMap(new LinkedHashMap<Class<?>, Plugin>());
-   /** The frame work properties */
-   private Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+   /** The framework properties */
+   private FrameworkProperties properties;
    /** The framework stop monitor*/
    private AtomicInteger stopMonitor = new AtomicInteger(0);
 
-   static
+   /**
+    * Create a new OSGiBundleManager.
+    */
+   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, FrameworkProperties properties)
    {
-      AccessController.doPrivileged(new PrivilegedAction<Object>()
-      {
-         public Object run()
-         {
-            List<String> execEnvironments = new ArrayList<String>();
-            if (Java.isCompatible(Java.VERSION_1_5))
-               execEnvironments.add("J2SE-1.5");
-            if (Java.isCompatible(Java.VERSION_1_6))
-               execEnvironments.add("JavaSE-1.6");
-
-            String envlist = execEnvironments.toString();
-            envlist = envlist.substring(1, envlist.length() - 1);
-            OSGi_FRAMEWORK_EXECUTIONENVIRONMENT = envlist;
-
-            OSGi_FRAMEWORK_OS_NAME = System.getProperty("os.name");
-            OSGi_FRAMEWORK_OS_VERSION = System.getProperty("os.version");
-            OSGi_FRAMEWORK_PROCESSOR = System.getProperty("os.arch");
-
-            System.setProperty("org.osgi.vendor.framework", "org.jboss.osgi.plugins.framework");
-            return null;
-         }
-      });
+      this(kernel, deployerClient, properties, null);
    }
 
    /**
     * Create a new OSGiBundleManager.
     */
-   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient)
-   {
-      this(kernel, deployerClient, null);
-   }
-
-   /**
-    * Create a new OSGiBundleManager.
-    */
-   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, Executor executor)
+   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, FrameworkProperties properties, Executor executor)
    {
       if (kernel == null)
          throw new IllegalArgumentException("Null kernel");
       if (deployerClient == null)
          throw new IllegalArgumentException("Null deployerClient");
+      if (properties == null)
+         throw new IllegalArgumentException("Null properties");
       if (deployerClient instanceof MainDeployerStructure == false)
          throw new IllegalArgumentException("Deployer client does not implement " + MainDeployerStructure.class.getName());
 
       this.kernel = kernel;
       this.deployerClient = deployerClient;
+      this.properties = properties;
 
       // TODO thread factory
       if (executor == null)
@@ -225,59 +184,27 @@ public class OSGiBundleManager
    }
 
    /**
-    * Set the framework properties
-    *
-    * @param properties the properties
+    * Set the framework properties. 
     */
    public void setProperties(Map<String, Object> props)
    {
-      properties.putAll(props);
-
-      // Init default framework properties
-      if (getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT) == null)
-         setProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, OSGi_FRAMEWORK_EXECUTIONENVIRONMENT);
-      if (getProperty(Constants.FRAMEWORK_LANGUAGE) == null)
-         setProperty(Constants.FRAMEWORK_LANGUAGE, OSGi_FRAMEWORK_LANGUAGE);
-      if (getProperty(Constants.FRAMEWORK_OS_NAME) == null)
-         setProperty(Constants.FRAMEWORK_OS_NAME, OSGi_FRAMEWORK_OS_NAME);
-      if (getProperty(Constants.FRAMEWORK_OS_VERSION) == null)
-         setProperty(Constants.FRAMEWORK_OS_VERSION, OSGi_FRAMEWORK_OS_VERSION);
-      if (getProperty(Constants.FRAMEWORK_PROCESSOR) == null)
-         setProperty(Constants.FRAMEWORK_PROCESSOR, OSGi_FRAMEWORK_PROCESSOR);
-      if (getProperty(Constants.FRAMEWORK_VENDOR) == null)
-         setProperty(Constants.FRAMEWORK_VENDOR, OSGi_FRAMEWORK_VENDOR);
-      if (getProperty(Constants.FRAMEWORK_VERSION) == null)
-         setProperty(Constants.FRAMEWORK_VERSION, OSGi_FRAMEWORK_VERSION);
+      properties.setProperties(props);
    }
-
+   
    /**
     * Get a property
-    *
-    * @param key the property key
-    * @return the property
-    * @throws SecurityException if the caller doesn't have the relevant property permission
     */
    public String getProperty(String key)
    {
-      Object value = properties.get(key);
-      if (value == null)
-         value = System.getProperty(key);
-
-      if (value instanceof String == false)
-         return null;
-
-      return (String)value;
+      return properties.getProperty(key);
    }
 
    /**
-    * Set a property. This is used at the frame work init state.
-    * 
-    * @param key the prperty key
-    * @param value the property value
+    * Set a property. 
     */
    public void setProperty(String key, String value)
    {
-      properties.put(key, value);
+      properties.setProperty(key, value);
    }
 
    /**
@@ -1300,7 +1227,7 @@ public class OSGiBundleManager
       }
 
       // Cleanup the storage area
-      String storageClean = getProperty(Constants.FRAMEWORK_STORAGE_CLEAN);
+      String storageClean = properties.getProperty(Constants.FRAMEWORK_STORAGE_CLEAN);
       BundleStoragePlugin storagePlugin = getOptionalPlugin(BundleStoragePlugin.class);
       if (storagePlugin != null)
          storagePlugin.cleanStorage(storageClean);

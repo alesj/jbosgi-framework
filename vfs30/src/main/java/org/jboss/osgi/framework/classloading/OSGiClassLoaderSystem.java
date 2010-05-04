@@ -21,7 +21,6 @@
 */
 package org.jboss.osgi.framework.classloading;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.jboss.classloader.plugins.filter.CombiningClassFilter;
@@ -51,28 +50,16 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
 {
    private OSGiBundleManager bundleManager;
    
-   public OSGiClassLoaderSystem()
-   {
-      AbstractJDKChecker.getExcluded().add(AbstractBundleState.class);
-      AbstractJDKChecker.getExcluded().add(OSGiBundleState.class);
-      
-      ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
-      ClassFilter filter = CombiningClassFilter.create(javaFilter, OSGiCoreClassFilter.INSTANCE);
-      
-      ClassLoaderDomain defaultDomain = getDefaultDomain();
-      defaultDomain.setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));
-   }
-
-   public void setBundleManager(OSGiBundleManager bundleManager)
-   {
-      this.bundleManager = bundleManager;
-   }
-   
-   public void start() throws IOException
+   public OSGiClassLoaderSystem(OSGiBundleManager bundleManager)
    {
       if (bundleManager == null)
          throw new IllegalArgumentException("Null bundleManager");
+      
+      this.bundleManager = bundleManager;
 
+      AbstractJDKChecker.getExcluded().add(AbstractBundleState.class);
+      AbstractJDKChecker.getExcluded().add(OSGiBundleState.class);
+      
       // Initialize the configured system packages
       ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
       ClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(getSystemPackagesAsString());

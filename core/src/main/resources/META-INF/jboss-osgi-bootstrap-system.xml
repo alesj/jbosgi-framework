@@ -1,5 +1,23 @@
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
   
+  <!-- 
+  ********************************
+  *                              *  
+  *  OSGi Framework              *
+  *                              *
+  ********************************
+  -->
+  
+  <bean name="OSGiBundleManager" class="org.jboss.osgi.framework.bundle.OSGiBundleManager">
+    <constructor>
+      <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
+      <parameter><inject bean="MainDeployer" /></parameter>
+      <parameter><inject bean="OSGiFrameworkProperties" /></parameter>
+    </constructor>
+    <incallback method="addPlugin" state="Instantiated"/>
+    <uncallback method="removePlugin" />
+  </bean>
+  
   <!--
   ********************************
   *                              *
@@ -149,7 +167,7 @@
   -->
   
   <bean name="OSGiClassLoaderSystem" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderSystem">
-    <property name="bundleManager"><inject bean="OSGiBundleManager" /></property>
+    <constructor><parameter><inject bean="OSGiBundleManager" state="Instantiated"/></parameter></constructor>
   </bean>
   <bean name="OSGiClassLoaderDomain" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderDomain" >
     <property name="parent"><inject bean="OSGiClassLoaderSystem" property="defaultDomain"/></property>
