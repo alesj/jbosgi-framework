@@ -26,6 +26,7 @@ import static junit.framework.Assert.assertEquals;
 import org.jboss.deployers.plugins.main.MainDeployerImpl;
 import org.jboss.kernel.Kernel;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.plugins.FrameworkProperties;
 import org.junit.Test;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -39,7 +40,7 @@ public class StartLevelImplTest
    @Test
    public void testInitialStartLevel() {
       // david TODO use mock object for the OSGiBundleManager
-      OSGiBundleManager bm = new OSGiBundleManager(new Kernel(), new MainDeployerImpl());
+      OSGiBundleManager bm = new OSGiBundleManager(new Kernel(), new MainDeployerImpl(), new FrameworkProperties(null));
       StartLevel sl = new StartLevelImpl(bm);
       assertEquals(1, sl.getInitialBundleStartLevel());
       

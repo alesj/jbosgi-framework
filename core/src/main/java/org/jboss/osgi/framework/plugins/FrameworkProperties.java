@@ -93,7 +93,8 @@ public class FrameworkProperties
 
    public void setProperties(Map<String, Object> props)
    {
-      properties.putAll(props);
+      if (props != null)
+         properties.putAll(props);
 
       // Init default framework properties
       if (getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT) == null)
@@ -111,7 +112,7 @@ public class FrameworkProperties
       if (getProperty(Constants.FRAMEWORK_VERSION) == null)
          setProperty(Constants.FRAMEWORK_VERSION, OSGi_FRAMEWORK_VERSION);
    }
-   
+
    /**
     * Get a property
     */
