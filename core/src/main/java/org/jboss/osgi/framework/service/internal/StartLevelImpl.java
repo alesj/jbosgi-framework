@@ -37,6 +37,7 @@ import org.osgi.service.startlevel.StartLevel;
  * [TODO] [JBOSGI-150] Fully implement StartLevel 
  * 
  * @author thomas.diesler@jboss.com
+ * @author <a href="david@redhat.com">David Bosschaert</a>
  * @since 31-Aug-2009
  */
 public class StartLevelImpl extends AbstractServicePlugin implements StartLevelPlugin
@@ -44,6 +45,7 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    /** The log */
    private static final Logger log = Logger.getLogger(StartLevelImpl.class);
 
+   private int initialStartLevel = 1;
    private ServiceRegistration registration;
 
    public StartLevelImpl(OSGiBundleManager bundleManager)
@@ -72,7 +74,7 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
 
    public int getInitialBundleStartLevel()
    {
-      return 1;
+      return initialStartLevel;
    }
 
    public int getStartLevel()
@@ -97,7 +99,7 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
 
    public void setInitialBundleStartLevel(int startlevel)
    {
-      log.info("Ignore setInitialBundleStartLevel(" + startlevel + ")");
+      initialStartLevel  = startlevel;
    }
 
    public void setStartLevel(int startlevel)
