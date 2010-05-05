@@ -49,7 +49,7 @@ public class AutoInstallPluginImpl extends AbstractPlugin implements AutoInstall
    private List<URL> autoInstall = Collections.emptyList();
    private List<URL> autoStart = Collections.emptyList();
    
-   private Map<URL, Bundle> autoBundles = new ConcurrentHashMap<URL, Bundle>();
+   Map<URL, Bundle> autoBundles = new ConcurrentHashMap<URL, Bundle>();
    
    public AutoInstallPluginImpl(OSGiBundleManager bundleManager)
    {

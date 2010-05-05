@@ -36,13 +36,13 @@ import org.osgi.service.startlevel.StartLevel;
 public class StartLevelImplTest
 {
    @Test
-   public void testInitialStartLevel() {      
+   public void testInitialStartLevel()
+   {
       OSGiBundleManager bm = mock(OSGiBundleManager.class);
       StartLevel sl = new StartLevelImpl(bm);
       assertEquals(1, sl.getInitialBundleStartLevel());
-      
+
       sl.setInitialBundleStartLevel(42);
       assertEquals(42, sl.getInitialBundleStartLevel());
    }
-
 }
