@@ -77,6 +77,7 @@
     <version.jboss.osgi.vfs>1.0.0</version.jboss.osgi.vfs>
     <version.jboss.osgi.xml.binding>2.0.2.Beta4.SP2-SNAPSHOT</version.jboss.osgi.xml.binding>
     <version.jboss.test>1.1.4.GA</version.jboss.test>
+    <version.mockito>1.8.4</version.mockito>
     <version.osgi>4.2.0</version.osgi>
   </properties>
 
@@ -255,6 +256,11 @@
         <groupId>org.jboss.osgi.vfs</groupId>
         <artifactId>jboss-osgi-vfs30</artifactId>
         <version>${version.jboss.osgi.vfs}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${version.mockito}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
