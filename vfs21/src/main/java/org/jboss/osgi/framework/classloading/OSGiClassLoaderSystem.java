@@ -21,14 +21,17 @@
 */
 package org.jboss.osgi.framework.classloading;
 
-
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.List;
 
 import org.jboss.classloader.plugins.filter.CombiningClassFilter;
 import org.jboss.classloader.plugins.jdk.AbstractJDKChecker;
+import org.jboss.classloader.plugins.loader.ClassLoaderToLoaderAdapter;
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
+import org.jboss.classloader.spi.Loader;
 import org.jboss.classloader.spi.ParentPolicy;
 import org.jboss.classloader.spi.base.BaseClassLoader;
 import org.jboss.classloader.spi.filter.ClassFilter;
@@ -54,20 +57,35 @@ public class OSGiClassLoaderSystem extends ClassLoaderSystem
    {
       if (systemPackages == null)
          throw new IllegalArgumentException("Null systemPackages");
-
       this.systemPackages = systemPackages;
 
       AbstractJDKChecker.getExcluded().add(AbstractBundleState.class);
       AbstractJDKChecker.getExcluded().add(OSGiBundleState.class);
+   }
+
+   @Override
+   protected ClassLoaderDomain createDefaultDomain()
+   {
+      ClassLoaderDomain defaultDomain = super.createDefaultDomain();
 
       // Initialize the configured system packages
       ClassFilter javaFilter = RecursivePackageClassFilter.createRecursivePackageClassFilter("java");
       ClassFilter systemFilter = PackageClassFilter.createPackageClassFilterFromString(getSystemPackagesAsString());
       ClassFilter filter = CombiningClassFilter.create(javaFilter, OSGiCoreClassFilter.INSTANCE, systemFilter);
 
-      // Setup the domain's parent policy
-      ClassLoaderDomain defaultDomain = getDefaultDomain();
+      // Setup the parent policy
       defaultDomain.setParentPolicy(new ParentPolicy(filter, ClassFilterUtils.NOTHING));
+      
+      // Setup the parent domain
+      Loader parent = AccessController.doPrivileged(new PrivilegedAction<Loader>()
+      {
+         public Loader run()
+         {
+            return new ClassLoaderToLoaderAdapter(getClass().getClassLoader());
+         }
+      });
+      defaultDomain.setParent(parent);
+      return defaultDomain;
    }
 
    @Override
