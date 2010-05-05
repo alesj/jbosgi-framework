@@ -119,15 +119,15 @@ public class OSGiBundleManager
    /**
     * Create a new OSGiBundleManager.
     */
-   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, FrameworkProperties properties)
+   public OSGiBundleManager(Kernel kernel, FrameworkProperties properties, DeployerClient deployerClient)
    {
-      this(kernel, deployerClient, properties, null);
+      this(kernel, properties, deployerClient, null);
    }
 
    /**
     * Create a new OSGiBundleManager.
     */
-   public OSGiBundleManager(Kernel kernel, DeployerClient deployerClient, FrameworkProperties properties, Executor executor)
+   public OSGiBundleManager(Kernel kernel, FrameworkProperties properties, DeployerClient deployerClient, Executor executor)
    {
       if (kernel == null)
          throw new IllegalArgumentException("Null kernel");

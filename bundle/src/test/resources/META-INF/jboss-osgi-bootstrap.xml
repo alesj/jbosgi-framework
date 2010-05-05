@@ -1,6 +1,6 @@
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
 
-  <bean name="OSGiFrameworkProperties" class="org.jboss.osgi.framework.plugins.FrameworkProperties">
+  <bean name="OSGiFrameworkProperties" class="org.jboss.osgi.framework.plugins.internal.FrameworkPropertiesImpl">
     <constructor>
       <parameter>
         <map keyClass="java.lang.String" valueClass="java.lang.String">
