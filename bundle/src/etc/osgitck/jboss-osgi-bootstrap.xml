@@ -1,28 +1,24 @@
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
 
-  <bean name="OSGiBundleManager" class="org.jboss.osgi.framework.bundle.OSGiBundleManager">
+  <bean name="OSGiFrameworkProperties" class="org.jboss.osgi.framework.plugins.internal.FrameworkPropertiesImpl">
     <constructor>
-      <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
-      <parameter><inject bean="MainDeployer" /></parameter>
-    </constructor>
-    <property name="properties">
-      <map keyClass="java.lang.String" valueClass="java.lang.String">
-        <entry><key>org.osgi.framework.storage</key><value>./generated/osgi-store</value></entry>
-        <entry><key>org.osgi.framework.storage.clean</key><value>onFirstInit</value></entry>
-        <entry><key>org.osgi.framework.system.packages.extra</key><value>
-        
-          <!-- tck -->
-          junit.framework;version=3.8.2,
-          org.osgi.util.tracker;version=1.4,
+      <parameter>
+        <map keyClass="java.lang.String" valueClass="java.lang.String">
+          <entry><key>org.osgi.framework.storage</key><value>./generated/osgi-store</value></entry>
+          <entry><key>org.osgi.framework.storage.clean</key><value>onFirstInit</value></entry>
+          <entry><key>org.osgi.framework.system.packages.extra</key><value>
           
-          <!-- logging -->
-          org.apache.log4j;version=1.2,
-          org.jboss.logging;version=2.1,
-        </value></entry>
-      </map>
-    </property>
-    <incallback method="addPlugin" />
-    <uncallback method="removePlugin" />
+            <!-- tck -->
+            junit.framework;version=3.8.2,
+            org.osgi.util.tracker;version=1.4,
+            
+            <!-- logging -->
+            org.apache.log4j;version=1.2,
+            org.jboss.logging;version=2.1,
+          </value></entry>
+        </map>
+      </parameter>
+    </constructor>
   </bean>
   
 </deployment>

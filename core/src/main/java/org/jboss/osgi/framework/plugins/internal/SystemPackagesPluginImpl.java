@@ -35,7 +35,7 @@ import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.osgi.framework.Constants;
 
 /**
- * A plugin that installs/starts bundles on framework startup.
+ * A plugin manages the Framework's system packages.
  * 
  * @author thomas.diesler@jboss.com
  * @since 18-Aug-2009
@@ -53,11 +53,13 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
    public SystemPackagesPluginImpl(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
+      
+      String systemPackages = getBundleManager().getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
+      initSystemPackages(systemPackages);
    }
    
-   public void start()
+   public void initSystemPackages(String systemPackages)
    {
-      String systemPackages = getBundleManager().getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
       if (systemPackages != null)
       {
          allPackages.addAll(packagesAsList(systemPackages));

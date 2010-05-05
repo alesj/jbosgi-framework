@@ -3,12 +3,12 @@
   <bean name="OSGiBundleManager" class="org.jboss.osgi.framework.bundle.OSGiBundleManager">
     <constructor>
       <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
-      <parameter><inject bean="MainDeployer" /></parameter>
       <parameter><inject bean="OSGiFrameworkProperties" /></parameter>
+      <parameter><inject bean="MainDeployer" /></parameter>
     </constructor>
   </bean>
 
-  <bean name="OSGiFrameworkProperties" class="org.jboss.osgi.framework.plugins.FrameworkProperties">
+  <bean name="OSGiFrameworkProperties" class="org.jboss.osgi.framework.plugins.internal.FrameworkPropertiesImpl">
     <constructor>
       <parameter>
         <map keyClass="java.lang.String" valueClass="java.lang.String"/>

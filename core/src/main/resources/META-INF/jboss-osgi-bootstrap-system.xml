@@ -11,9 +11,10 @@
   <bean name="OSGiBundleManager" class="org.jboss.osgi.framework.bundle.OSGiBundleManager">
     <constructor>
       <parameter><inject bean="jboss.kernel:service=Kernel" /></parameter>
-      <parameter><inject bean="MainDeployer" /></parameter>
       <parameter><inject bean="OSGiFrameworkProperties" /></parameter>
+      <parameter><inject bean="MainDeployer" /></parameter>
     </constructor>
+    <property name="classLoaderDomain"><inject bean="OSGiClassLoaderSystem" property="defaultDomain"/></property>
     <incallback method="addPlugin" state="Instantiated"/>
     <uncallback method="removePlugin" />
   </bean>
@@ -52,26 +53,26 @@
   ********************************
   -->
   
+  <bean name="OSGiSystemPackages" class="org.jboss.osgi.framework.plugins.internal.SystemPackagesPluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" state="Instantiated"/></parameter></constructor>
+  </bean>
+  <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
   <bean name="OSGiControllerContextPlugin" class="org.jboss.osgi.framework.bundle.ControllerContextPluginImpl">
     <constructor>
       <parameter><inject bean="OSGiBundleManager" /></parameter>
       <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
     </constructor>
   </bean>
-  <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-  </bean>
   <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
     <constructor>
       <parameter><inject bean="OSGiBundleManager" /></parameter>
       <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
     </constructor>
-  </bean>
-  <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-  </bean>
-  <bean name="OSGiSystemPackages" class="org.jboss.osgi.framework.plugins.internal.SystemPackagesPluginImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   
   <!-- 
@@ -167,7 +168,7 @@
   -->
   
   <bean name="OSGiClassLoaderSystem" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderSystem">
-    <constructor><parameter><inject bean="OSGiBundleManager" state="Instantiated"/></parameter></constructor>
+    <constructor><parameter><inject bean="OSGiSystemPackages" /></parameter></constructor>
   </bean>
   <bean name="OSGiClassLoaderDomain" class="org.jboss.osgi.framework.classloading.OSGiClassLoaderDomain" >
     <property name="parent"><inject bean="OSGiClassLoaderSystem" property="defaultDomain"/></property>
