@@ -37,6 +37,7 @@ import org.jboss.test.osgi.bundle.support.b.ServiceB;
 import org.jboss.test.osgi.bundle.support.x.X;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -90,6 +91,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          assertBundleState(Bundle.INSTALLED, bundleA.getState());
 
          // BundleA not started - service not available  
+         BundleContext systemContext = getFramework().getBundleContext();
          ServiceReference sref = systemContext.getServiceReference(LifecycleService.class.getName());
          assertNull("Service not available", sref);
 
@@ -214,6 +216,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          assertBundleState(Bundle.INSTALLED, bundleB.getState());
 
          // Get the PackageAdmin service
+         BundleContext systemContext = getFramework().getBundleContext();
          ServiceReference sref = systemContext.getServiceReference(PackageAdmin.class.getName());
          PackageAdmin packageAdmin = (PackageAdmin)systemContext.getService(sref);
 

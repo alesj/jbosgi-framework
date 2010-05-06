@@ -62,6 +62,7 @@ public class SimpleFrameworkTestCase extends OSGiFrameworkTest
       assertNotNull("ServiceReference not null", sref);
 
       // getServiceReference from system context
+      BundleContext systemContext = getFramework().getBundleContext();
       sref = systemContext.getServiceReference(SimpleService.class.getName());
       assertNotNull("ServiceReference not null", sref);
 

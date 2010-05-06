@@ -73,7 +73,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
 
          Bundle[] bundles = context1.getBundles();
          Set<Bundle> actual = new HashSet<Bundle>(Arrays.asList(bundles));
-         Set<Bundle> expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
+         Set<Bundle> expected = new HashSet<Bundle>(Arrays.asList(getFramework(), bundle1));
          assertEquals(expected, actual);
 
          Bundle bundle2 = installBundle(assembleArchive("simple-bundle2", "/bundles/simple/simple-bundle2"));
@@ -86,7 +86,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
 
             bundles = context1.getBundles();
             actual = new HashSet<Bundle>(Arrays.asList(bundles));
-            expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1, bundle2));
+            expected = new HashSet<Bundle>(Arrays.asList(getFramework(), bundle1, bundle2));
             assertEquals(expected, actual);
 
             assertEquals(bundle1, context2.getBundle(bundle1.getBundleId()));
@@ -102,7 +102,7 @@ public class BundleContextTestCase extends AbstractFrameworkTest
 
          bundles = context1.getBundles();
          actual = new HashSet<Bundle>(Arrays.asList(bundles));
-         expected = new HashSet<Bundle>(Arrays.asList(framework, bundle1));
+         expected = new HashSet<Bundle>(Arrays.asList(getFramework(), bundle1));
          assertEquals(expected, actual);
 
          try

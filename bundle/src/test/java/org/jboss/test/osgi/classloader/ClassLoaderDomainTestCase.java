@@ -65,19 +65,19 @@ public class ClassLoaderDomainTestCase extends AbstractFrameworkTest
    public void testSystemBundleLoad() throws Exception
    {
       // Load a class that is included in the system classpath by default
-      Class<?> loadedClass = framework.loadClass(StartLevel.class.getName());
+      Class<?> loadedClass = getFramework().loadClass(StartLevel.class.getName());
       assertNotNull("Class loaded: " + StartLevel.class.getName(), loadedClass);
       
       // Load a class that is included in the system classpath explicitly
-      loadedClass = framework.loadClass(ConstantsHelper.class.getName());
+      loadedClass = getFramework().loadClass(ConstantsHelper.class.getName());
       assertNotNull("Class loaded: " + ConstantsHelper.class.getName(), loadedClass);
       
       // Attempt to load a class that is not part of the JDK  
-      loadedClass = framework.loadClass(Servlet.class.getName());
+      loadedClass = getFramework().loadClass(Servlet.class.getName());
       assertNull("Cannot load class: " + Servlet.class.getName(), loadedClass);
       
       // Attempt to load a class that is part of the JDK  
-      loadedClass = framework.loadClass(SwingUtilities.class.getName());
+      loadedClass = getFramework().loadClass(SwingUtilities.class.getName());
       assertNull("Cannot load class: " + SwingUtilities.class.getName(), loadedClass);
    }
    

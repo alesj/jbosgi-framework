@@ -172,6 +172,7 @@ public class BundleTestCase extends AbstractFrameworkTest
       Bundle bundle = installBundle(assembly1);
       try
       {
+         BundleContext systemContext = getFramework().getBundleContext();
          int beforeCount = systemContext.getBundles().length;
 
          bundle.start();

@@ -49,7 +49,7 @@ public class ServiceFindHookTestCase extends AbstractFrameworkTest
    @Test
    public void testFindHook() throws Exception
    {
-      final BundleContext context = framework.getBundleContext();
+      final BundleContext context = getFramework().getBundleContext();
       
       final boolean[] allServices = new boolean[4];
       final boolean[] allGood = new boolean[4];

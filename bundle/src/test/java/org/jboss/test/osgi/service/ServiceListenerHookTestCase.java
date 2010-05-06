@@ -88,7 +88,7 @@ public class ServiceListenerHookTestCase extends AbstractFrameworkTest
          }
       };
 
-      BundleContext context = framework.getBundleContext();
+      BundleContext context = getFramework().getBundleContext();
       context.addServiceListener(listener, "(foo=bar)");
 
       Hashtable<String, String> props = new Hashtable<String, String>();

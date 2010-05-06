@@ -51,7 +51,7 @@ public class ServiceEventHookTestCase extends AbstractFrameworkTest
    @Test
    public void testEventHook() throws Exception
    {
-      final BundleContext context = framework.getBundleContext();
+      final BundleContext context = getFramework().getBundleContext();
       
       final List<String> events = new ArrayList<String>();
       final boolean[] allGood = new boolean[1];

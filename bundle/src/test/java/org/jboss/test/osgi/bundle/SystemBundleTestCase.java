@@ -48,19 +48,19 @@ public class SystemBundleTestCase extends AbstractFrameworkTest
    @Test
    public void testBundleId() throws Exception
    {
-      assertEquals(0, framework.getBundleId());
+      assertEquals(0, getFramework().getBundleId());
    }
 
    @Test
    public void testSymbolicName() throws Exception
    {
-      assertEquals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, framework.getSymbolicName());
+      assertEquals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, getFramework().getSymbolicName());
    }
 
    @Test
    public void testState() throws Exception
    {
-      assertEquals(Bundle.ACTIVE, framework.getState());
+      assertEquals(Bundle.ACTIVE, getFramework().getState());
    }
 
    @Test
@@ -80,7 +80,7 @@ public class SystemBundleTestCase extends AbstractFrameworkTest
    {
       try
       {
-         framework.uninstall();
+         getFramework().uninstall();
          fail("Should not be here!");
       }
       catch (BundleException t)
@@ -99,14 +99,14 @@ public class SystemBundleTestCase extends AbstractFrameworkTest
       // todo expected.put(Attributes.Name.IMPLEMENTATION_VENDOR.toString(), "jboss.org");
       // todo expected.put(Attributes.Name.IMPLEMENTATION_VERSION.toString(), "r4v41");
 
-      Dictionary dictionary = framework.getHeaders();
+      Dictionary dictionary = getFramework().getHeaders();
       assertEquals(expected, dictionary);
    }
 
    @Test
    public void testLocation() throws Exception
    {
-      assertEquals(Constants.SYSTEM_BUNDLE_LOCATION, framework.getLocation());
+      assertEquals(Constants.SYSTEM_BUNDLE_LOCATION, getFramework().getLocation());
    }
 
    @Test

@@ -198,6 +198,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
          ServiceReference sref1 = sreg1.getReference();
          assertNotNull(sref1);
          
+         BundleContext systemContext = getFramework().getBundleContext();
          ServiceReference sref = systemContext.getServiceReference(A.class.getName());
          assertNotNull("Reference not null", sref);
          assertEquals(sref1, sref);

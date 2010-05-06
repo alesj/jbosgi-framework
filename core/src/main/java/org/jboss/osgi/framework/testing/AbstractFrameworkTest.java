@@ -47,6 +47,8 @@ import org.jboss.osgi.framework.deployers.AbstractDeployment;
 import org.jboss.osgi.framework.launch.OSGiFramework;
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.launch.Framework;
 
 /**
  * Parent for native framework tests.  
@@ -60,6 +62,15 @@ public abstract class AbstractFrameworkTest extends OSGiFrameworkTest
 
    protected OSGiBundleManager getBundleManager()
    {
+      Framework framework;
+      try
+      {
+         framework = getFramework();
+      }
+      catch (BundleException ex)
+      {
+         throw new IllegalStateException("Cannot get the framework", ex);
+      }
       return ((OSGiFramework)framework).getBundleManager();
    }
 

@@ -255,7 +255,7 @@ public class ServiceFactoryTestCase extends AbstractFrameworkTest
             allGood[1] = true;
          }
       };
-      BundleContext context = framework.getBundleContext();
+      BundleContext context = getFramework().getBundleContext();
       ServiceRegistration sreg = context.registerService(Runnable.class.getName(), factory, null);
       ServiceReference sref = sreg.getReference();
 

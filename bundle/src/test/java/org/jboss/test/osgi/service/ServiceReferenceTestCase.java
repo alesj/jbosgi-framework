@@ -522,16 +522,16 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
    @Test
    public void testCompareTo() throws Exception
    {
-      BundleContext bundleContext = framework.getBundleContext();
-      assertNotNull(bundleContext);
+      BundleContext context = getFramework().getBundleContext();
+      assertNotNull(context);
 
-      ServiceRegistration sreg1 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+      ServiceRegistration sreg1 = context.registerService(BundleContext.class.getName(), context, null);
       assertNotNull(sreg1);
 
       ServiceReference sref1 = sreg1.getReference();
       assertNotNull(sref1);
 
-      ServiceRegistration sreg2 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, null);
+      ServiceRegistration sreg2 = context.registerService(BundleContext.class.getName(), context, null);
       assertNotNull(sreg2);
 
       ServiceReference sref2 = sreg2.getReference();
@@ -539,7 +539,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
       Dictionary<String, Object> properties = new Hashtable<String, Object>();
       properties.put(Constants.SERVICE_RANKING, 10);
-      ServiceRegistration sreg3 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
+      ServiceRegistration sreg3 = context.registerService(BundleContext.class.getName(), context, properties);
       assertNotNull(sreg3);
 
       ServiceReference sref3 = sreg3.getReference();
@@ -547,7 +547,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
       properties = new Hashtable<String, Object>();
       properties.put(Constants.SERVICE_RANKING, -10);
-      ServiceRegistration sreg4 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
+      ServiceRegistration sreg4 = context.registerService(BundleContext.class.getName(), context, properties);
       assertNotNull(sreg4);
 
       ServiceReference sref4 = sreg4.getReference();
@@ -582,7 +582,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
 
       properties = new Hashtable<String, Object>();
       properties.put(Constants.SERVICE_RANKING, "NotANumber");
-      ServiceRegistration sreg5 = bundleContext.registerService(BundleContext.class.getName(), bundleContext, properties);
+      ServiceRegistration sreg5 = context.registerService(BundleContext.class.getName(), context, properties);
       assertNotNull(sreg5);
 
       ServiceReference sref5 = sreg5.getReference();
@@ -627,7 +627,7 @@ public class ServiceReferenceTestCase extends AbstractFrameworkTest
          }
       };
       
-      BundleContext context = framework.getBundleContext();
+      BundleContext context = getFramework().getBundleContext();
       Hashtable<String, Object> props = new Hashtable<String, Object>();
       props.put(Constants.SERVICE_DESCRIPTION, "min value");
       props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
