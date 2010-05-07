@@ -137,7 +137,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
             // [TODO] Should system packages be added as capabilities?
             if (syspackPlugin.isSystemPackage(packageName) == true)
                continue;
-            
+
             OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, false);
             requirements.addRequirement(requirement);
          }
@@ -155,13 +155,9 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
             // [TODO] Should system packages be added as capabilities?
             if (syspackPlugin.isSystemPackage(packageName) == true)
                continue;
-            
-            // [JBOSGI-319] LinkageError for the type javax/servlet/Servlet
-            if ("true".equals(bundleManager.getProperty("jbosgi319.workaround")) == false)
-            {
-               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
-               requirements.addRequirement(requirement);
-            }
+
+            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
+            requirements.addRequirement(requirement);
          }
       }
 
