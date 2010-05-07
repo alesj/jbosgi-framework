@@ -48,9 +48,8 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle implements 
 {
    private AbstractKernelControllerContext context;
    private AbstractBundleState bundleState;
-   private Long serviceId;
 
-   public GenericServiceReferenceWrapper(AbstractKernelControllerContext context, AbstractBundleState bundleState)
+   public GenericServiceReferenceWrapper(AbstractBundleState bundleState, AbstractKernelControllerContext context)
    {
       if (context == null)
          throw new IllegalArgumentException("Null context");
@@ -64,11 +63,26 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle implements 
       // * A property named Constants.SERVICE_ID identifying the registration number of the service
       // * A property named Constants.OBJECTCLASS containing all the specified classes.
       
-      // [TODO ServiceMix] Revisit generic service.id. The service.id influences the 
-      // service order and should not be generated lazily
-      serviceId = MDRUtils.getId(context);
-      if (serviceId == null)
-         serviceId = OSGiServiceState.getNextServiceId();
+      Dictionary<String, Object> properties = MDRUtils.getProperties(context);
+      if (properties.get(Constants.SERVICE_ID) == null)
+      {
+         Long serviceId = OSGiServiceState.getNextServiceId();
+         properties.put(Constants.SERVICE_ID, serviceId);
+      }
+      if (properties.get(Constants.OBJECTCLASS) == null)
+      {
+         String[] objectClass = MDRUtils.getClasses(context);
+         if (objectClass == null)
+         {
+            BeanMetaData bmd = context.getBeanMetaData();
+            objectClass = new String[] { bmd.getBean() };
+         }
+         properties.put(Constants.OBJECTCLASS, objectClass);
+      }
+
+      // By default assign the lowest possible ranking
+      if (properties.get(Constants.SERVICE_RANKING) == null)
+         properties.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
    }
 
    ControllerContext getContext()
@@ -81,30 +95,7 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle implements 
       if (key == null)
          throw new IllegalArgumentException("Null property key");
 
-      Object value;
-      
-      // [TODO ServiceMix] getProperty(Constants.SERVICE_ID)
-      if (Constants.SERVICE_ID.equals(key))
-      {
-         value = serviceId;
-      }
-      // [TODO ServiceMix] getProperty(Constants.OBJECTCLASS)
-      else if (Constants.OBJECTCLASS.equals(key))
-      {
-         value = MDRUtils.getClasses(context);
-         
-         if (value == null)
-         {
-            BeanMetaData bmd = context.getBeanMetaData();
-            String objectClass = bmd.getBean();
-            value = new String[] { objectClass };
-         }
-      }
-      else
-      {
-         value = MDRUtils.getProperty(context, key, Object.class);
-      }
-
+      Object value = MDRUtils.getProperty(context, key, Object.class);
       return value;
    }
 

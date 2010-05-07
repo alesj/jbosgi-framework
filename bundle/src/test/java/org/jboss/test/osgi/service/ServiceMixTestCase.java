@@ -477,14 +477,9 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
                assertEquals(1, refs.length);
                ServiceReference mcRef = refs[0];
 
-               // OSGi service should bubble on top
+               // OSGi service should bubble to top
                assertEquals("OSGi service has not bubbled on top", osgiRef, bundleContext1.getServiceReference(A.class.getName()));
-
-               // compare
-               assertTrue(0 < mcRef.compareTo(osgiRef));
-               
-               System.out.println("FIXME: document, explain and verify ServiceMix ordering");
-               // assertTrue(osgiRef.compareTo(mcRef) < 0);
+               assertTrue(osgiRef.compareTo(mcRef) > 0);
 
                // lowest ranking first
                refs = bundleContext1.getServiceReferences(A.class.getName(), null);

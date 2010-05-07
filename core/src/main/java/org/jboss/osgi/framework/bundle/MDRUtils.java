@@ -22,9 +22,11 @@
 package org.jboss.osgi.framework.bundle;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.logging.Logger;
@@ -33,7 +35,6 @@ import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.ScopeLevel;
 import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.util.KernelUtils;
-import org.jboss.util.collection.Iterators;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
@@ -44,11 +45,12 @@ import org.osgi.framework.Constants;
  */
 public class MDRUtils
 {
-   /** The log */
+   // Provide logging
    private static final Logger log = Logger.getLogger(MDRUtils.class);
 
-   /** The empty dictionary */
-   private static final Dictionary<String, Object> EMPTY = new EmptyDictonary<String, Object>();
+   // Maps controller context to properties.
+   // [TODO] Can this be moved to the MC metadata layer?
+   private static Map<ControllerContext, Dictionary<String, Object>> propertiesCache = new WeakHashMap<ControllerContext, Dictionary<String, Object>>();
 
    /**
     * Get context's properties.
@@ -56,17 +58,22 @@ public class MDRUtils
     * @param context the context
     * @return the properties
     */
-   @SuppressWarnings({"unchecked"})
+   @SuppressWarnings({ "unchecked" })
    static Dictionary<String, Object> getProperties(ControllerContext context)
    {
       MetaData metaData = getMetaData(context, CommonLevels.INSTANCE);
-      if (metaData != null)
+      Dictionary<String, Object> properties = metaData.getMetaData(Dictionary.class);
+      if (properties != null)
+         return properties;
+      
+      properties = propertiesCache.get(context);
+      if (properties == null)
       {
-         Dictionary<String, Object> properties = metaData.getMetaData(Dictionary.class);
-         if (properties != null)
-            return properties;
+         properties = new Hashtable<String, Object>();
+         propertiesCache.put(context, properties);
       }
-      return EMPTY;
+      
+      return properties;
    }
 
    /**
@@ -124,7 +131,7 @@ public class MDRUtils
    {
       if (bundleState.getState() == Bundle.UNINSTALLED)
          return null;
-      
+
       // [TODO] some more efficient way than using the class?
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       return bundleManager.loadClassFailsafe(bundleState, className);
@@ -184,7 +191,7 @@ public class MDRUtils
     */
    public static String[] getClasses(ControllerContext context)
    {
-      return getProperty(context, Constants.OBJECTCLASS, String[].class);  
+      return getProperty(context, Constants.OBJECTCLASS, String[].class);
    }
 
    /**
@@ -215,7 +222,7 @@ public class MDRUtils
          throw new IllegalArgumentException("Null target bundle");
       if (className == null)
          throw new IllegalArgumentException("Null class name");
-      
+
       if (sourceBundle == targetBundle)
          return true;
 
@@ -245,7 +252,7 @@ public class MDRUtils
          throw new IllegalArgumentException("Null target bundle");
       if (classNames == null)
          throw new IllegalArgumentException("Null class names");
-      
+
       if (sourceBundle == targetBundle)
          return true;
 
@@ -257,7 +264,7 @@ public class MDRUtils
          if (isAssignableTo(sourceBundle, targetBundle, className) == false)
             return false;
       }
-      
+
       return true;
    }
 
@@ -275,7 +282,7 @@ public class MDRUtils
          throw new IllegalArgumentException("Null source bundle");
       if (className == null)
          throw new IllegalArgumentException("Null class name");
-      
+
       // If no source is found return true if the source bundle is equal to the target bundle; otherwise return false
       Object source = getSource(sourceBundle, className);
       if (source == null)
@@ -313,7 +320,7 @@ public class MDRUtils
    {
       if (sourceBundle == null)
          throw new IllegalArgumentException("Null bundle state");
-      
+
       OSGiBundleManager manager = sourceBundle.getBundleManager();
       ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
       AbstractBundleState targetBundle = plugin.getBundleForContext(context);
@@ -336,7 +343,7 @@ public class MDRUtils
 
       OSGiBundleManager manager = sourceBundle.getBundleManager();
       ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-      
+
       // context's bundle
       AbstractBundleState targetBundle = plugin.getBundleForContext(context);
       if (sourceBundle == targetBundle)
@@ -364,6 +371,10 @@ public class MDRUtils
       MetaData metaData = context.getScopeInfo().getMetaData();
       if (level != null && metaData != null)
          metaData = metaData.getScopeMetaData(level);
+
+      if (metaData == null)
+         throw new IllegalStateException("Cannot obtain " + level + " meta data for: " + context);
+
       return metaData;
    }
 
@@ -389,62 +400,7 @@ public class MDRUtils
       else
          throw new IllegalArgumentException(reference + " is not a service reference");
 
-      Long thisServiceId = getId(context);
-      Long otherServiceId = getId(other);
-      if (thisServiceId == null && otherServiceId == null)
-         return 0;
-      if (otherServiceId == null)
-         return -1; // TODO?
-      if (thisServiceId == null)
-         return 1; // TODO?
-      if (thisServiceId - otherServiceId == 0)
-         return 0;
-
-      int thisRanking = getRanking(context);
-      int otherRanking = getRanking(other);
-      int ranking = thisRanking - otherRanking;
-      if (ranking != 0)
-         return ranking;
-
-      return (thisServiceId > otherServiceId) ? -1 : 1;
-   }
-
-   @SuppressWarnings({"unchecked"})
-   private static class EmptyDictonary<K, V> extends Dictionary<K, V>
-   {
-      public int size()
-      {
-         return 0;
-      }
-
-      public boolean isEmpty()
-      {
-         return true;
-      }
-
-      public Enumeration<K> keys()
-      {
-         return Iterators.toEnumeration(Collections.emptySet().iterator());
-      }
-
-      public Enumeration<V> elements()
-      {
-         return Iterators.toEnumeration(Collections.emptySet().iterator());
-      }
-
-      public V get(Object key)
-      {
-         return null;
-      }
-
-      public V put(K key, V value)
-      {
-         return null;
-      }
-
-      public V remove(Object key)
-      {
-         return null;
-      }
+      Comparator<ControllerContext> comparator = ContextComparator.getInstance();
+      return comparator.compare(context, other);
    }
 }

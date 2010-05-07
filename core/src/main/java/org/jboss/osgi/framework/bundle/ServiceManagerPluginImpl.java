@@ -31,7 +31,9 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.jboss.dependency.spi.Controller;
 import org.jboss.dependency.spi.ControllerContext;
@@ -88,12 +90,14 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    // Provide logging
    final Logger log = Logger.getLogger(ServiceManagerPluginImpl.class);
 
-   /** The kernel */
+   // The kernel 
    private Kernel kernel;
-   /** The previous context tracker */
+   // The previous context tracker 
    private ContextTracker previousTracker;
-   /** The deployment registry */
+   // The deployment registry 
    private DeploymentRegistry registry;
+   // Maps the ControllerContext to its associated ServiceReference
+   private Map<ControllerContext, ServiceReference> srefCache = new WeakHashMap<ControllerContext, ServiceReference>();
 
    /** Enable MDR usage */
    private boolean enableMDRUsage = true;
@@ -104,7 +108,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
       if (registry == null)
          throw new IllegalArgumentException("Null deployment registry");
-
       this.registry = registry;
    }
 
@@ -546,11 +549,17 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       
       if (context instanceof AbstractKernelControllerContext)
       {
-         // For ServiceMix behaviour we can generically wrap the context
-         OSGiBundleManager manager = getBundleManager();
-         ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-         AbstractBundleState bundleState = plugin.getBundleForContext(context);
-         return new GenericServiceReferenceWrapper((AbstractKernelControllerContext)context, bundleState);
+         ServiceReference sref = srefCache.get(context);
+         if (sref == null)
+         {
+            // For ServiceMix behaviour we can generically wrap the context
+            OSGiBundleManager manager = getBundleManager();
+            ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+            AbstractBundleState bundleState = plugin.getBundleForContext(context);
+            sref = new GenericServiceReferenceWrapper(bundleState, (AbstractKernelControllerContext)context);
+            srefCache.put(context, sref);
+         }
+         return sref;
       }
       
       return null;
