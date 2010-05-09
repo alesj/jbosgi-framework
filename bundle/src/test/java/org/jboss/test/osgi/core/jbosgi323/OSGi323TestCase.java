@@ -33,7 +33,6 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.jboss.test.osgi.classloader.support.b.B;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
