@@ -30,9 +30,12 @@ import org.jboss.osgi.testing.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archives;
 import org.jboss.shrinkwrap.api.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.test.osgi.classloader.support.a.A;
+import org.jboss.test.osgi.classloader.support.b.B;
+import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.service.log.LogService;
 
 /**
  * DynamicImport-Package takes presendence over embedded classes
@@ -42,15 +45,72 @@ import org.osgi.service.log.LogService;
  * @author thomas.diesler@jboss.com
  * @since 04-May-2010
  */
+@Ignore
 public class OSGi323TestCase extends OSGiFrameworkTest
 {
+   @After
+   public void tearDown() throws Exception
+   {
+      shutdownFramework();
+      super.tearDown();
+   }
+   
    @Test
-   public void testLoderPreferences() throws Exception
+   public void testDynamicImportWithPackage() throws Exception
+   {
+      // Bundle-SymbolicName: jbosgi323-bundleA
+      // DynamicImport-Package: org.jboss.test.osgi.classloader.support.a
+      final JavaArchive archiveA = Archives.create("jbosgi323-bundleA", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addDynamicImportPackages("org.jboss.test.osgi.classloader.support.a");
+            return builder.openStream();
+         }
+      });
+
+      // Bundle-SymbolicName: jbosgi323-bundleB
+      // Export-Package: org.osgi.service.log
+      final JavaArchive archiveB = Archives.create("jbosgi323-bundleB", JavaArchive.class);
+      archiveB.addClasses(A.class, B.class);
+      archiveB.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveB.getName());
+            builder.addExportPackages("org.jboss.test.osgi.classloader.support.a");
+            builder.addExportPackages("org.jboss.test.osgi.classloader.support.b");
+            return builder.openStream();
+         }
+      });
+
+      Bundle bundleA = installBundle(archiveA);
+      Bundle bundleB = installBundle(archiveB);
+
+      assertLoadClass(bundleA, A.class.getName(), bundleA);
+      assertLoadClassFail(bundleA, B.class.getName());
+
+      assertLoadClass(bundleB, A.class.getName(), bundleB);
+      assertLoadClass(bundleB, B.class.getName(), bundleB);
+
+      assertBundleState(Bundle.RESOLVED, bundleA.getState());
+      assertBundleState(Bundle.RESOLVED, bundleB.getState());
+   }
+   
+   @Test
+   public void testDynamicImportWithWildcard() throws Exception
    {
       // Bundle-SymbolicName: jbosgi323-bundleA
       // DynamicImport-Package: *
       final JavaArchive archiveA = Archives.create("jbosgi323-bundleA", JavaArchive.class);
-      archiveA.addClass(LogService.class);
+      archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
          public InputStream openStream()
@@ -66,7 +126,7 @@ public class OSGi323TestCase extends OSGiFrameworkTest
       // Bundle-SymbolicName: jbosgi323-bundleB
       // Export-Package: org.osgi.service.log
       final JavaArchive archiveB = Archives.create("jbosgi323-bundleB", JavaArchive.class);
-      archiveB.addClasses(LogService.class);
+      archiveB.addClasses(A.class, B.class);
       archiveB.setManifest(new Asset()
       {
          public InputStream openStream()
@@ -74,15 +134,22 @@ public class OSGi323TestCase extends OSGiFrameworkTest
             OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
             builder.addBundleManifestVersion(2);
             builder.addBundleSymbolicName(archiveB.getName());
-            builder.addExportPackages("org.osgi.service.log");
+            builder.addExportPackages("org.jboss.test.osgi.classloader.support.a");
+            builder.addExportPackages("org.jboss.test.osgi.classloader.support.b");
             return builder.openStream();
          }
       });
-      
-      Bundle bundleB = installBundle(archiveB);
+
       Bundle bundleA = installBundle(archiveA);
-      
-      assertLoadClass(bundleA, LogService.class.getName(), bundleA);
-      assertLoadClass(bundleB, LogService.class.getName(), bundleB);
+      Bundle bundleB = installBundle(archiveB);
+
+      assertLoadClass(bundleA, A.class.getName(), bundleA);
+      assertLoadClass(bundleA, B.class.getName(), bundleB);
+
+      assertLoadClass(bundleB, A.class.getName(), bundleB);
+      assertLoadClass(bundleB, B.class.getName(), bundleB);
+
+      assertBundleState(Bundle.RESOLVED, bundleA.getState());
+      assertBundleState(Bundle.RESOLVED, bundleB.getState());
    }
 }

@@ -47,6 +47,8 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
    @Before
    public void setUp() throws Exception
    {
+      super.setUp();
+      
       Resolver installedResolver = getInstalledResolver();
       Resolver testResolver = getTestResolver();
       if (installedResolver != testResolver)

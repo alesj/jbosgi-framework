@@ -43,8 +43,9 @@ import org.osgi.framework.BundleException;
 public class SimpleLogServiceTestCase extends OSGiFrameworkTest
 {
    @Before
-   public void setUp()
+   public void setUp() throws Exception
    {
+      super.setUp();
       System.clearProperty("simple-logservice-bundle");
    }
 

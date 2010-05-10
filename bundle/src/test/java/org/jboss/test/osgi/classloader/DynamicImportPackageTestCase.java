@@ -31,6 +31,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.jboss.test.osgi.classloader.support.b.B;
 import org.jboss.test.osgi.classloader.support.c.C;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,15 +46,10 @@ import org.osgi.service.log.LogService;
  */
 public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 {
-   @Before
-   public void setUp() throws Exception
-   {
-      super.setUp();
-      getPackageAdmin().refreshPackages(null);
-   }
-
-   @Test
-   public void testAllPackagesWildcardWired() throws Exception
+   private static JavaArchive archiveC;
+   
+   @BeforeClass
+   public static void beforeTestCase()
    {
       // Bundle-SymbolicName: dynamic-log-service
       // DynamicImport-Package: org.osgi.service.log
@@ -69,6 +65,20 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
             return builder.openStream();
          }
       });
+   }
+   
+   @Before
+   public void setUp() throws Exception
+   {
+      super.setUp();
+      createFramework().start();
+   }
+   
+   @After
+   public void tearDown() throws Exception
+   {
+      shutdownFramework();
+      super.tearDown();
    }
 
    @Test
@@ -122,7 +132,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleA, B.class.getName(), bundleB);
 
-            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            System.out.println("FIXME [JBCL-131] DynamicImport-Package: * not supported");
             //assertLoadClass(bundleA, C.class.getName(), bundleB);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
@@ -186,7 +196,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          {
             assertLoadClass(bundleA, A.class.getName(), bundleA);
 
-            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            System.out.println("FIXME [JBCL-131] DynamicImport-Package: * not supported");
             //assertLoadClass(bundleA, C.class.getName(), bundleC);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
@@ -291,7 +301,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleA, B.class.getName(), bundleB);
 
-            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            System.out.println("FIXME [JBCL-131] DynamicImport-Package: org.jboss.test.osgi.classloader.* not supported");
             //assertLoadClass(bundleA, C.class.getName(), bundleB);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
@@ -355,7 +365,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          {
             assertLoadClass(bundleA, A.class.getName(), bundleA);
 
-            System.out.println("FIXME [JBCL-131] Add a notion of on demand resolution");
+            System.out.println("FIXME [JBCL-131] DynamicImport-Package: org.jboss.test.osgi.classloader.* not supported");
             //assertLoadClass(bundleA, C.class.getName(), bundleC);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
@@ -461,25 +471,4 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          bundleC.uninstall();
       }
    }
-
-   @BeforeClass
-   public static void beforeTestCase()
-   {
-      // Bundle-SymbolicName: dynamic-log-service
-      // DynamicImport-Package: org.osgi.service.log
-      archiveC = Archives.create("dynamic-log-service", JavaArchive.class);
-      archiveC.setManifest(new Asset()
-      {
-         public InputStream openStream()
-         {
-            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
-            builder.addBundleManifestVersion(2);
-            builder.addBundleSymbolicName(archiveC.getName());
-            builder.addDynamicImportPackages("org.osgi.service.log");
-            return builder.openStream();
-         }
-      });
-   }
-   
-   private static JavaArchive archiveC;
 }
