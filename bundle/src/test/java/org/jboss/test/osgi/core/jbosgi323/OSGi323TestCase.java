@@ -74,7 +74,7 @@ public class OSGi323TestCase extends OSGiFrameworkTest
       });
 
       // Bundle-SymbolicName: jbosgi323-bundleB
-      // Export-Package: org.osgi.service.log
+      // Export-Package: org.jboss.test.osgi.classloader.support.a, org.jboss.test.osgi.classloader.support.b
       final JavaArchive archiveB = Archives.create("jbosgi323-bundleB", JavaArchive.class);
       archiveB.addClasses(A.class, B.class);
       archiveB.setManifest(new Asset()
@@ -123,7 +123,7 @@ public class OSGi323TestCase extends OSGiFrameworkTest
       });
 
       // Bundle-SymbolicName: jbosgi323-bundleB
-      // Export-Package: org.osgi.service.log
+      // Export-Package: org.jboss.test.osgi.classloader.support.a, org.jboss.test.osgi.classloader.support.b
       final JavaArchive archiveB = Archives.create("jbosgi323-bundleB", JavaArchive.class);
       archiveB.addClasses(A.class, B.class);
       archiveB.setManifest(new Asset()

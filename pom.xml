@@ -85,6 +85,11 @@
     <dependencies>
       <dependency>
         <groupId>org.jboss.cl</groupId>
+        <artifactId>jboss-classloader</artifactId>
+        <version>${version.jboss.classloading}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.cl</groupId>
         <artifactId>jboss-classloading</artifactId>
         <version>${version.jboss.classloading}</version>
       </dependency>

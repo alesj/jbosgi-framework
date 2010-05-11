@@ -37,6 +37,18 @@
       <version>${version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jboss.cl</groupId>
+      <artifactId>jboss-classloader</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.cl</groupId>
+      <artifactId>jboss-classloading</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.cl</groupId>
+      <artifactId>jboss-classloading-vfs</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-mdr</artifactId>
     </dependency>
