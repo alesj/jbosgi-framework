@@ -32,12 +32,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jboss.classloader.spi.ClassNotFoundEvent;
+import org.jboss.classloader.spi.ClassNotFoundHandler;
+import org.jboss.classloader.spi.DelegateLoader;
+import org.jboss.classloader.spi.ImportType;
 import org.jboss.classloader.spi.NativeLibraryProvider;
+import org.jboss.classloader.spi.filter.ClassFilter;
+import org.jboss.classloader.spi.filter.FilteredDelegateLoader;
+import org.jboss.classloading.plugins.metadata.PackageRequirement;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
+import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.classloading.spi.vfs.policy.VFSClassLoaderPolicy;
 import org.jboss.classloading.spi.vfs.policy.VirtualFileInfo;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
@@ -59,6 +68,9 @@ import org.osgi.framework.BundleReference;
  */
 public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy implements BundleReference
 {
+   // Provide logging
+   private static final Logger log = Logger.getLogger(OSGiClassLoaderPolicy.class);
+   
    /** The associated bundle state */
    private AbstractBundleState bundleState;
    /** The fragment roots */
@@ -94,7 +106,83 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy implements Bundl
 
          // Bundle-NativeCode handling
          processNativeLibraryMetaData(depBundleState);
+         
+         // Add a {@link ClassNotFoundHandler} that can handle wildcard dynamic imports
+         addWildcardClassNotFoundHandler(osgiModule);
       }
+   }
+
+   private void addWildcardClassNotFoundHandler(final OSGiModule osgiModule)
+   {
+      ClassNotFoundHandler handler = new ClassNotFoundHandler()
+      {
+         @SuppressWarnings("unchecked")
+         @Override
+         public boolean classNotFound(ClassNotFoundEvent event)
+         {
+            log.info(event);
+            
+            String className = event.getClassName();
+            String packageName = className.substring(0 , className.lastIndexOf('.'));
+            String resourceName = className.replace('.', '/') + ".class";
+            
+            PackageRequirement matchingReq = null;
+            
+            // Iterate over the package requirements and check if
+            // the requested class matches any of the filters
+            for (Requirement req : osgiModule.getRequirements())
+            {
+               if (req instanceof PackageRequirement)
+               {
+                  PackageRequirement preq = (PackageRequirement)req;
+                  if (preq.isDynamic() && preq.isWildcard())
+                  {
+                     ClassFilter filter = preq.toClassFilter();
+                     if (filter.matchesPackageName(packageName))
+                     {
+                        matchingReq = preq;
+                        break;
+                     }
+                  }
+               }
+            }
+            
+            if (matchingReq == null)
+               return false;
+
+            OSGiBundleManager bundleManager = bundleState.getBundleManager();
+            for (AbstractBundleState aux : bundleManager.getBundles(Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE))
+            {
+               if (aux == bundleState || aux instanceof AbstractDeployedBundleState == false)
+                  continue;
+               
+               AbstractDeployedBundleState depBundle = (AbstractDeployedBundleState)aux;
+               if (aux.getState() == Bundle.INSTALLED && depBundle.resolveBundle() == false)
+                  continue;
+               
+               DeploymentUnit unit = depBundle.getDeploymentUnit();
+               OSGiModule module = (OSGiModule)unit.getAttachment(Module.class);
+               OSGiClassLoaderPolicy policy = (OSGiClassLoaderPolicy)module.getPolicy();
+               FilteredDelegateLoader delegate = new FilteredDelegateLoader(policy, matchingReq.toClassFilter());
+               delegate.setImportType(ImportType.AFTER);
+               
+               if (delegate.getResource(resourceName) != null)
+               {
+                  List<DelegateLoader> delegates = (List<DelegateLoader>)getDelegates();
+                  if (delegates == null)
+                  {
+                     delegates = new CopyOnWriteArrayList<DelegateLoader>();
+                     setDelegates(delegates);
+                  }
+                  delegates.add(delegate);
+                  return true;
+               }
+            }
+            
+            return false;
+         }
+      };
+      addClassNotFoundHandler(handler);
    }
 
    @Override

@@ -242,7 +242,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
     * Try to resolve the bundle
     * @return true when resolved
     */
-   protected boolean resolveBundle()
+   public boolean resolveBundle()
    {
       PackageAdminPlugin packageAdmin = getBundleManager().getPlugin(PackageAdminPlugin.class);
       return packageAdmin.resolveBundles(new Bundle[] { this });

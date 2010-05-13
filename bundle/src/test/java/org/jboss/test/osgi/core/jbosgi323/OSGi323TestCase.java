@@ -44,14 +44,64 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @since 04-May-2010
  */
-@Ignore
 public class OSGi323TestCase extends OSGiFrameworkTest
 {
    @After
    public void tearDown() throws Exception
    {
+      // Make sure we have a new framework for every test
       shutdownFramework();
+      
       super.tearDown();
+   }
+   
+   @Test
+   public void testStaticImport() throws Exception
+   {
+      // Bundle-SymbolicName: jbosgi323-bundleA
+      // DynamicImport-Package: org.jboss.test.osgi.classloader.support.a
+      final JavaArchive archiveA = Archives.create("jbosgi323-bundleA", JavaArchive.class);
+      archiveA.addClass(A.class);
+      archiveA.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveA.getName());
+            builder.addImportPackages("org.jboss.test.osgi.classloader.support.a");
+            return builder.openStream();
+         }
+      });
+
+      // Bundle-SymbolicName: jbosgi323-bundleB
+      // Export-Package: org.jboss.test.osgi.classloader.support.a, org.jboss.test.osgi.classloader.support.b
+      final JavaArchive archiveB = Archives.create("jbosgi323-bundleB", JavaArchive.class);
+      archiveB.addClasses(A.class, B.class);
+      archiveB.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archiveB.getName());
+            builder.addExportPackages("org.jboss.test.osgi.classloader.support.a");
+            builder.addExportPackages("org.jboss.test.osgi.classloader.support.b");
+            return builder.openStream();
+         }
+      });
+
+      Bundle bundleA = installBundle(archiveA);
+      Bundle bundleB = installBundle(archiveB);
+
+      assertLoadClass(bundleA, A.class.getName(), bundleB);
+      assertLoadClassFail(bundleA, B.class.getName());
+
+      assertLoadClass(bundleB, A.class.getName(), bundleB);
+      assertLoadClass(bundleB, B.class.getName(), bundleB);
+
+      assertBundleState(Bundle.RESOLVED, bundleA.getState());
+      assertBundleState(Bundle.RESOLVED, bundleB.getState());
    }
    
    @Test

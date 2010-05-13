@@ -1005,15 +1005,15 @@ public class OSGiBundleManager
    /**
     * Get the bundles with the given state
     * 
-    * @param state the bundle state
+    * @param states the OR combined bundle states
     * @return the bundles
     */
-   public Collection<AbstractBundleState> getBundles(int state)
+   public Collection<AbstractBundleState> getBundles(int states)
    {
       List<AbstractBundleState> bundles = new ArrayList<AbstractBundleState>();
       for (AbstractBundleState aux : allBundles)
       {
-         if (aux.getState() == state)
+         if ((aux.getState() & states) > 0)
             bundles.add(aux);
       }
       return Collections.unmodifiableList(bundles);
