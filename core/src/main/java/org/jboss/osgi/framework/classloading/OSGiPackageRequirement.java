@@ -23,8 +23,10 @@ package org.jboss.osgi.framework.classloading;
 
 import java.util.Map;
 
+import org.jboss.classloader.spi.ImportType;
 import org.jboss.classloading.plugins.metadata.PackageRequirement;
 import org.jboss.classloading.spi.dependency.Module;
+import org.jboss.classloading.spi.metadata.RequirementWithImportType;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
@@ -42,7 +44,7 @@ import org.osgi.framework.Constants;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiPackageRequirement extends PackageRequirement
+public class OSGiPackageRequirement extends PackageRequirement implements RequirementWithImportType
 {
    /** The serialVersionUID */
    private static final long serialVersionUID = 5109907232396093061L;
@@ -135,6 +137,14 @@ public class OSGiPackageRequirement extends PackageRequirement
    public PackageAttribute getPackageMetaData()
    {
       return packageAttribute;
+   }
+
+   @Override
+   public ImportType getImportType()
+   {
+      // In OSGi package imports declared in DynamicImport-Package should be looked at 
+      // AFTER the packages embedded into the bundle
+      return (isDynamic() ? ImportType.AFTER : ImportType.BEFORE);
    }
 
    /**
