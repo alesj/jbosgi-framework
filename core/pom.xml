@@ -50,6 +50,18 @@
       <groupId>org.jboss.osgi.deployment</groupId>
       <artifactId>jboss-osgi-deployment</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jboss.osgi.deployers</groupId>
+      <artifactId>jboss-osgi-deployers-vfs30</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.osgi.vfs</groupId>
+      <artifactId>jboss-osgi-vfs30</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-vfs</artifactId>
+    </dependency>
 
     <!-- OSGi Dependencies -->
     <dependency>

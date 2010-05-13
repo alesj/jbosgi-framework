@@ -45,8 +45,6 @@
   <modules>
     <module>core</module>
     <module>metadata</module>
-    <module>vfs21</module>
-    <module>vfs30</module>
     <module>bundle</module>
   </modules>
   
@@ -77,6 +75,7 @@
     <version.jboss.osgi.vfs>1.0.0</version.jboss.osgi.vfs>
     <version.jboss.osgi.xml.binding>2.0.2.Beta4.SP2-SNAPSHOT</version.jboss.osgi.xml.binding>
     <version.jboss.test>1.1.4.GA</version.jboss.test>
+    <version.jboss.vfs>3.0.0.CR5</version.jboss.vfs>
     <version.mockito>1.8.4</version.mockito>
     <version.osgi>4.2.0</version.osgi>
   </properties>
@@ -123,6 +122,11 @@
         <groupId>org.jboss.kernel</groupId>
         <artifactId>jboss-jmx-mc-int</artifactId>
         <version>${version.jboss.kernel}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-vfs</artifactId>
+        <version>${version.jboss.vfs}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss</groupId>
