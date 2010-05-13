@@ -131,9 +131,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          {
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleA, B.class.getName(), bundleB);
-
-            System.out.println("FIXME [JBCL-131] DynamicImport-Package: * not supported");
-            //assertLoadClass(bundleA, C.class.getName(), bundleB);
+            assertLoadClass(bundleA, C.class.getName(), bundleB);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
             assertBundleState(Bundle.RESOLVED, bundleB.getState());
@@ -195,12 +193,10 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          try
          {
             assertLoadClass(bundleA, A.class.getName(), bundleA);
-
-            System.out.println("FIXME [JBCL-131] DynamicImport-Package: * not supported");
-            //assertLoadClass(bundleA, C.class.getName(), bundleC);
+            assertLoadClass(bundleA, C.class.getName(), bundleC);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
-            //assertBundleState(Bundle.RESOLVED, bundleC.getState());
+            assertBundleState(Bundle.RESOLVED, bundleC.getState());
          }
          finally
          {
@@ -300,9 +296,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          {
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleA, B.class.getName(), bundleB);
-
-            System.out.println("FIXME [JBCL-131] DynamicImport-Package: org.jboss.test.osgi.classloader.* not supported");
-            //assertLoadClass(bundleA, C.class.getName(), bundleB);
+            assertLoadClass(bundleA, C.class.getName(), bundleB);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
             assertBundleState(Bundle.RESOLVED, bundleB.getState());
@@ -364,12 +358,10 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          try
          {
             assertLoadClass(bundleA, A.class.getName(), bundleA);
-
-            System.out.println("FIXME [JBCL-131] DynamicImport-Package: org.jboss.test.osgi.classloader.* not supported");
-            //assertLoadClass(bundleA, C.class.getName(), bundleC);
+            assertLoadClass(bundleA, C.class.getName(), bundleC);
 
             assertBundleState(Bundle.RESOLVED, bundleA.getState());
-            //assertBundleState(Bundle.RESOLVED, bundleC.getState());
+            assertBundleState(Bundle.RESOLVED, bundleC.getState());
          }
          finally
          {
