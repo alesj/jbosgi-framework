@@ -26,7 +26,10 @@ package org.jboss.osgi.framework.classloading;
 import java.io.IOException;
 
 import org.jboss.classloader.spi.ClassLoaderDomain;
+import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
+import org.jboss.classloader.spi.DelegateLoader;
+import org.jboss.classloader.spi.Loader;
 import org.jboss.classloader.spi.base.BaseClassLoader;
 
 /**
@@ -47,12 +50,6 @@ public class OSGiClassLoaderDomain extends ClassLoaderDomain
    public void setClassLoaderSystem(ClassLoaderSystem classLoaderSystem)
    {
       this.classLoaderSystem = classLoaderSystem;
-   }
-
-   @Override
-   protected Class<?> loadClass(BaseClassLoader classLoader, String name, boolean allExports) throws ClassNotFoundException
-   {
-      return super.loadClass(classLoader, name, allExports);
    }
 
    public void start() throws IOException

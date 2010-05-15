@@ -135,10 +135,16 @@ public class OSGiBundleState extends AbstractDeployedBundleState
 
       // If this bundle's state is INSTALLED, this method must attempt to resolve this bundle 
       // [TODO] If this bundle cannot be resolved, a Framework event of type FrameworkEvent.ERROR is fired containing a BundleException with details of the reason this bundle could not be resolved. 
-      // This method must then throw a ClassNotFoundException. 
-      if (resolveBundle() == false)
+      // This method must then throw a ClassNotFoundException.
+      if (getState() == Bundle.INSTALLED)
       {
-         throw new ClassNotFoundException("Cannot load class: " + name);
+         // Attempt to resolve all installed bundles
+         // This should make packages visible to dynamic imports
+         // [TODO] Review this approach for getResource and other usages of resolveBundle 
+         getBundleManager().resolveBundle(null);
+         
+         if (getState() == Bundle.INSTALLED)
+            throw new ClassNotFoundException("Cannot load class: " + name);
       }
       
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();
@@ -153,7 +159,9 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
 
-      if (resolveBundle() == false)
+      // If this bundle's state is INSTALLED, this method must attempt to resolve 
+      // this bundle before attempting to get the specified resource.
+      if (getBundleManager().resolveBundle(this) == false)
          return getDeploymentUnit().getResourceLoader().getResource(name);
 
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();
@@ -167,7 +175,9 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
 
-      if (resolveBundle() == false)
+      // If this bundle's state is INSTALLED, this method must attempt to resolve 
+      // this bundle before attempting to get the specified resource.
+      if (getBundleManager().resolveBundle(this) == false)
          return getDeploymentUnit().getResourceLoader().getResources(name);
 
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();

@@ -1147,6 +1147,17 @@ public class OSGiBundleManager
    }
 
    /**
+    * Try to resolve a given bundle
+    * @return true when resolved
+    */
+   public boolean resolveBundle(AbstractBundleState bundle)
+   {
+      PackageAdminPlugin packageAdmin = getPlugin(PackageAdminPlugin.class);
+      Bundle[] bundles = (bundle != null ? new Bundle[] { bundle } : null);
+      return packageAdmin.resolveBundles(bundles);
+   }
+   
+   /**
     * Load class from a bundle.
     * If it cannot be loaded, return null.
     *

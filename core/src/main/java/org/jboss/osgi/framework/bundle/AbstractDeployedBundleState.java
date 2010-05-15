@@ -37,7 +37,6 @@ import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.deployers.AbstractDeployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.vfs.VirtualFile;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -226,7 +225,9 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       if (noAdminPermission(AdminPermission.RESOURCE))
          return null;
 
-      resolveBundle();
+      // If this bundle's state is INSTALLED, this method must attempt to resolve 
+      // this bundle before attempting to get the specified resource.
+      getBundleManager().resolveBundle(this);
 
       try
       {
@@ -236,15 +237,5 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
       {
          throw new RuntimeException("Error finding entries for " + rootFile + " path=" + path + " pattern=" + pattern + " recurse=" + recurse);
       }
-   }
-
-   /**
-    * Try to resolve the bundle
-    * @return true when resolved
-    */
-   public boolean resolveBundle()
-   {
-      PackageAdminPlugin packageAdmin = getBundleManager().getPlugin(PackageAdminPlugin.class);
-      return packageAdmin.resolveBundles(new Bundle[] { this });
    }
 }
