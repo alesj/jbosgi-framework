@@ -51,7 +51,6 @@ public class OSGi323TestCase extends OSGiFrameworkTest
    {
       // Make sure we have a new framework for every test
       shutdownFramework();
-      
       super.tearDown();
    }
    

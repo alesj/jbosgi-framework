@@ -185,16 +185,6 @@ public class OSGiPackageCapability extends PackageCapability
    @SuppressWarnings("deprecation")
    public boolean matchPackageAttributes(OSGiPackageRequirement packageRequirement)
    {
-      String capPackageName = getName();
-      String reqPackageName = packageRequirement.getName();
-      if (capPackageName.equals(reqPackageName) == false)
-         return false;
-
-      VersionRange reqVersionRange = packageRequirement.getVersionRange();
-      Object capVersion = getVersion();
-      if (reqVersionRange.isInRange(capVersion) == false)
-         return false;
-
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       PackageAttribute capParameters = exportPackage;
       PackageAttribute reqParameters = packageRequirement.getPackageMetaData();
