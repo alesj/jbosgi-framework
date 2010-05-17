@@ -56,12 +56,11 @@
     <version.jboss.classloading>2.2.0-SNAPSHOT</version.jboss.classloading>
     <version.jboss.deployers>2.2.0.Alpha4</version.jboss.deployers>
     <version.jboss.kernel>2.2.0.Alpha9</version.jboss.kernel>
-    <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
     <version.jboss.mdr>2.2.0.Alpha2</version.jboss.mdr>
     <version.jboss.osgi.xerces>2.9.1.SP5-SNAPSHOT</version.jboss.osgi.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
     <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
-    <version.jboss.osgi.deployers>1.0.6-SNAPSHOT</version.jboss.osgi.deployers>
+    <version.jboss.osgi.deployers>1.0.8-SNAPSHOT</version.jboss.osgi.deployers>
     <version.jboss.osgi.deployment>1.0.2</version.jboss.osgi.deployment>
     <version.jboss.osgi.equinox>3.5.2</version.jboss.osgi.equinox>
     <version.jboss.osgi.felix>2.0.4</version.jboss.osgi.felix>
