@@ -24,6 +24,7 @@ package org.jboss.osgi.framework.classloading;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.jboss.classloader.spi.filter.ClassFilter;
 import org.jboss.classloading.plugins.metadata.PackageCapability;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.Requirement;
@@ -139,7 +140,7 @@ public class OSGiPackageCapability extends PackageCapability
          return true;
 
       OSGiPackageRequirement osgiPackageRequirement = (OSGiPackageRequirement)requirement;
-      if (matchPackageAttributes(osgiPackageRequirement) == false)
+      if (matchAttributes(osgiPackageRequirement) == false)
          return false;
 
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
@@ -181,9 +182,27 @@ public class OSGiPackageCapability extends PackageCapability
       }
       return module;
    }
+   
+   public boolean matchNameAndVersion(OSGiPackageRequirement packageRequirement)
+   {
+      if (packageRequirement.isWildcard())
+      {
+         ClassFilter filter = packageRequirement.toClassFilter();
+         if (filter.matchesPackageName(getName()) == false)
+            return false;
+      }
+      else // for non-wildcard, we intentionaly still use direct string equals
+      {
+         if (getName().equals(packageRequirement.getName()) == false)
+            return false;
+      }
+      
+      boolean inRange = packageRequirement.getVersionRange().isInRange(getVersion());
+      return inRange;
+   }
 
    @SuppressWarnings("deprecation")
-   public boolean matchPackageAttributes(OSGiPackageRequirement packageRequirement)
+   public boolean matchAttributes(OSGiPackageRequirement packageRequirement)
    {
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       PackageAttribute capParameters = exportPackage;

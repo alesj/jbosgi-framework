@@ -45,14 +45,14 @@ class BundleCapability
    private OSGiBundleState bundle;
    private PackageCapability packageCapability;
    private List<BundleRequirement> wires;
-   
+
    BundleCapability(OSGiBundleState bundle, PackageCapability packageCapability)
    {
       if (bundle == null)
          throw new IllegalArgumentException("Null bundle");
       if (packageCapability == null)
          throw new IllegalArgumentException("Null packageCapability");
-      
+
       this.bundle = bundle;
       this.packageCapability = packageCapability;
    }
@@ -68,7 +68,7 @@ class BundleCapability
       DeploymentUnit unit = bundleState.getDeploymentUnit();
       return unit.getAttachment(Module.class);
    }
-   
+
    PackageCapability getPackageCapability()
    {
       return packageCapability;
@@ -78,7 +78,7 @@ class BundleCapability
    {
       if (wires == null)
          return Collections.emptyList();
-      
+
       return Collections.unmodifiableList(wires);
    }
 
@@ -86,23 +86,30 @@ class BundleCapability
    {
       OSGiPackageCapability osgiPackageCapability = (OSGiPackageCapability)packageCapability;
       OSGiPackageRequirement osgiPackageRequirement = (OSGiPackageRequirement)bundleRequirement.getPackageRequirement();
-      return osgiPackageCapability.matchPackageAttributes(osgiPackageRequirement);
+
+      if (osgiPackageCapability.matchNameAndVersion(osgiPackageRequirement) == false)
+         return false;
+
+      if (osgiPackageCapability.matchAttributes(osgiPackageRequirement) == false)
+         return false;
+
+      return true;
    }
 
    void wireRequirement(BundleRequirement bundleRequirement)
    {
       if (wires == null)
          wires = new CopyOnWriteArrayList<BundleRequirement>();
-      
+
       wires.add(bundleRequirement);
    }
-   
+
    void unwireRequirement(BundleRequirement bundleRequirement)
    {
       if (wires != null)
          wires.remove(bundleRequirement);
    }
-   
+
    void unwireRequirements()
    {
       if (wires != null)
@@ -115,7 +122,7 @@ class BundleCapability
          wires = null;
       }
    }
-   
+
    @Override
    public boolean equals(Object obj)
    {

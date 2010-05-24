@@ -27,7 +27,6 @@ import java.util.Set;
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.DelegateLoader;
 import org.jboss.classloading.spi.dependency.Module;
-import org.jboss.classloading.spi.dependency.RequirementDependencyItem;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
@@ -49,7 +48,6 @@ public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
    public OSGiModule(DeploymentUnit unit, ClassLoadingMetaData metaData)
    {
       super(unit);
-      
       if (log.isTraceEnabled())
          log.trace("new OSGiModule\n  " + unit + "\n  " + metaData);
    }
@@ -64,19 +62,7 @@ public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
    protected void addDelegates(Module module, List<DelegateLoader> delegates, List<DelegateLoader> dynamic, Set<Module> visited, boolean reExport)
    {
       super.addDelegates(module, delegates, dynamic, visited, reExport);
-      
       if (log.isTraceEnabled())
          log.trace("Add delegates for module: " + this + "\n  delegates: " + delegates + "\n  dynamic: " + dynamic);
-   }
-
-   @Override
-   protected Module resolveModule(RequirementDependencyItem dependency, boolean resolveSpace)
-   {
-      Module module = super.resolveModule(dependency, resolveSpace);
-      
-      if (log.isTraceEnabled())
-         log.trace("Resolve dependency for module: " + module + "\n  dependency: " + dependency + "\n  module: " + module);
-      
-      return module;
    }
 }
