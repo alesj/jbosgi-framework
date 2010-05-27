@@ -26,11 +26,7 @@ package org.jboss.osgi.framework.classloading;
 import java.io.IOException;
 
 import org.jboss.classloader.spi.ClassLoaderDomain;
-import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloader.spi.ClassLoaderSystem;
-import org.jboss.classloader.spi.DelegateLoader;
-import org.jboss.classloader.spi.Loader;
-import org.jboss.classloader.spi.base.BaseClassLoader;
 
 /**
  * OSGiClassLoaderDomain.<p>
