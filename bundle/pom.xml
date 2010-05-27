@@ -400,12 +400,6 @@
           <version>${version}</version>
           <scope>provided</scope>
         </dependency>
-        <dependency>
-          <groupId>org.jboss.osgi.framework</groupId>
-          <artifactId>jboss-osgi-framework-vfs30</artifactId>
-          <version>${version}</version>
-          <scope>provided</scope>
-        </dependency>
       </dependencies>
       <build>
         <plugins>
