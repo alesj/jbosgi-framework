@@ -122,7 +122,7 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings("unchecked")
    public Enumeration getEntryPaths(String path)
    {
       System.out.println("FIXME [JBOSGI-138] getEntryPaths(" + path + ")");
@@ -135,7 +135,7 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings("unchecked")
    public Enumeration getResources(String name) throws IOException
    {
       System.out.println("FIXME [JBOSGI-138] getResources(" + name + ")");

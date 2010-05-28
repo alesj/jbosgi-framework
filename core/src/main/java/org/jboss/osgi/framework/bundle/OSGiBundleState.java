@@ -39,6 +39,7 @@ import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
+import org.jboss.osgi.framework.plugins.StartLevelPlugin;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -52,6 +53,7 @@ import org.osgi.framework.Version;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author <a href="david@redhat.com">David Bosschaert</a>
  * @version $Revision: 1.1 $
  */
 public class OSGiBundleState extends AbstractDeployedBundleState
@@ -59,12 +61,26 @@ public class OSGiBundleState extends AbstractDeployedBundleState
    // The list of attached fragments
    private List<OSGiFragmentState> attachedFragments = new CopyOnWriteArrayList<OSGiFragmentState>();
 
+   /** Whether the bundle is to be started. Calling start() doesn't always start the bundle immediately
+    * the start level service might start it later.
+    */
+   private boolean persistentlyStarted = false; // TODO needs to be persisted
+
+   /** The bundle start level */
+   private int startLevel = 1; // TODO needs to be persisted
+
    /**
     * Create a new BundleState.
     */
    public OSGiBundleState(OSGiBundleManager bundleManager, DeploymentUnit unit)
    {
       super(bundleManager, unit);
+
+      StartLevelPlugin slp = bundleManager.getOptionalPlugin(StartLevelPlugin.class);
+      if (slp != null)
+      {
+         startLevel = slp.getInitialBundleStartLevel();
+      }
    }
 
    /**
@@ -128,6 +144,26 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return false;
    }
 
+   public boolean isPersistentlyStarted()
+   {
+      return persistentlyStarted;
+   }
+
+   public void setPersistentlyStarted(boolean b)
+   {
+      persistentlyStarted = b;
+   }
+
+   public int getStartLevel()
+   {
+      return startLevel;
+   }
+
+   public void setStartLevel(int sl)
+   {
+      startLevel = sl;
+   }
+
    public Class<?> loadClass(String name) throws ClassNotFoundException
    {
       checkInstalled();
@@ -168,7 +204,7 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return classLoader.getResource(name);
    }
 
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings("unchecked")
    public Enumeration getResources(String name) throws IOException
    {
       checkInstalled();
@@ -208,15 +244,28 @@ public class OSGiBundleState extends AbstractDeployedBundleState
    {
       checkInstalled();
       checkAdminPermission(AdminPermission.EXECUTE);
+      if ((options & Bundle.START_TRANSIENT) == 0)
+      {
+         setPersistentlyStarted(true);
+      }
 
-      getBundleManager().startBundle(this);
+      StartLevelPlugin sls = getBundleManager().getPlugin(StartLevelPlugin.class);
+      if (sls.getStartLevel() >= getStartLevel() && isPersistentlyStarted())
+      {
+         getBundleManager().startBundle(this);
+      }
    }
 
    public void stop(int options) throws BundleException
    {
       checkInstalled();
       checkAdminPermission(AdminPermission.EXECUTE);
+      if ((options & Bundle.STOP_TRANSIENT) == 0)
+      {
+         setPersistentlyStarted(false);
+      }
 
+      // TODO should this one also go to the Start Level Service?
       getBundleManager().stopBundle(this);
    }
 

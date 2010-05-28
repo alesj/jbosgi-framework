@@ -75,6 +75,7 @@ import org.osgi.framework.Version;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author <a href="david@redhat.com">David Bosschaert</a>
  * @version $Revision: 1.1 $
  */
 public abstract class AbstractBundleState extends AbstractContextTracker implements Bundle, BundleContext
@@ -119,10 +120,10 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     */
    public AbstractBundleState(OSGiBundleManager bundleManager)
    {
-      this.bundleManager = bundleManager;
-      
       if (bundleManager == null)
          throw new IllegalArgumentException("Null bundle manager");
+
+      this.bundleManager = bundleManager;
    }
 
    /**
@@ -245,7 +246,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     */
    public abstract OSGiMetaData getOSGiMetaData();
 
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings("unchecked")
    public Dictionary getHeaders()
    {
       // If the specified locale is null then the locale returned 
@@ -509,7 +510,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return plugin.getServiceReferences(this, clazz, filter, true);
    }
 
-   @SuppressWarnings({ "rawtypes" })
+   @SuppressWarnings("unchecked")
    public ServiceRegistration registerService(String clazz, Object service, Dictionary properties)
    {
       if (clazz == null)
@@ -517,7 +518,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return registerService(new String[] { clazz }, service, properties);
    }
 
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings("unchecked")
    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties)
    {
       checkValidBundleContext();

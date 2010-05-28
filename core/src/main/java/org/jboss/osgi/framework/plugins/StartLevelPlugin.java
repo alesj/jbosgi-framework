@@ -21,14 +21,25 @@
  */
 package org.jboss.osgi.framework.plugins;
 
+import org.osgi.framework.BundleException;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
  * The StartLevel service plugin
  * 
  * @author thomas.diesler@jboss.com
+ * @author <a href="david@redhat.com">David Bosschaert</a>
  * @since 07-Sep-2009
  */
 public interface StartLevelPlugin extends ServicePlugin, StartLevel
 {
+
+   /**
+    * Increase the start level to the specified level. 
+    * This method moves to the specified start level in the current thread and
+    * returns when the desired start level has been reached.
+    * @param level the target start level.
+    * @throws BundleException when...
+    */
+   void increaseStartLevel(int level) throws BundleException;
 }

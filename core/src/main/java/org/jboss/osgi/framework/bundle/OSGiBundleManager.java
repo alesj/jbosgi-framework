@@ -68,6 +68,7 @@ import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.Plugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.ServicePlugin;
+import org.jboss.osgi.framework.plugins.StartLevelPlugin;
 import org.jboss.osgi.framework.util.URLHelper;
 import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.osgi.vfs.AbstractVFS;
@@ -1267,6 +1268,10 @@ public class OSGiBundleManager
       ResolverPlugin bundleResolver = getOptionalPlugin(ResolverPlugin.class);
       if (bundleResolver != null)
          bundleResolver.addBundle(systemBundle);
+
+      StartLevelPlugin startLevel = getPlugin(StartLevelPlugin.class);
+      // Call sls.increaseStartLevel() which is synchronous because we need to wait until the start level is reached
+      startLevel.increaseStartLevel(startLevel.getInitialBundleStartLevel());
 
       // This Framework's state is set to ACTIVE
       systemBundle.changeState(Bundle.ACTIVE);
