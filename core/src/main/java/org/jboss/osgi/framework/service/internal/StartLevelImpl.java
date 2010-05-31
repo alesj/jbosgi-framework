@@ -52,22 +52,13 @@ import org.osgi.service.startlevel.StartLevel;
  */
 public class StartLevelImpl extends AbstractServicePlugin implements StartLevelPlugin
 {
-   /** The log */
    private static final Logger log = Logger.getLogger(StartLevelImpl.class);
 
    FrameworkEventsPlugin eventsPlugin;
    Executor executor = Executors.newSingleThreadExecutor();
-   /* Executor executor = new Executor()
-   {
-      public void execute(Runnable command)
-      {
-         command.run();
-      }
-   }; */   
    private int initialStartLevel = 1;
    private ServiceRegistration registration;
    private int startLevel = 0;
-
 
    public StartLevelImpl(OSGiBundleManager bundleManager)
    {
@@ -94,14 +85,12 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    @Override
    public int getBundleStartLevel(Bundle bundle)
    {
-      if (bundle instanceof OSGiSystemState)
+      AbstractBundleState b = AbstractBundleState.assertBundleState(bundle);
+      if (b instanceof OSGiSystemState)
          return 0;
+      else if (b instanceof OSGiBundleState)
+         return ((OSGiBundleState)b).getStartLevel();
 
-      OSGiBundleState obs = OSGiBundleState.assertBundleState(bundle);
-      if (obs != null)
-      {
-         return obs.getStartLevel();
-      }
       return 1;
    }
 
