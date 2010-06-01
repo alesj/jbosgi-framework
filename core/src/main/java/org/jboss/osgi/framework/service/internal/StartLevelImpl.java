@@ -42,9 +42,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
- * An implementation of the {@link StartLevel}.
- * 
- * [TODO] [JBOSGI-150] Fully implement StartLevel 
+ * An implementation of the {@link StartLevel} service.
  * 
  * @author thomas.diesler@jboss.com
  * @author <a href="david@redhat.com">David Bosschaert</a>
@@ -55,10 +53,36 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    private static final Logger log = Logger.getLogger(StartLevelImpl.class);
 
    FrameworkEventsPlugin eventsPlugin;
+
+   /* Different executors expose different TCK behaviour.
+    * You really want to use Executors.newSingleThreadExecutor() as the Start Level Service spec
+    * mandates the serialization of requests, however it causes the 
+    *   StartLevelControl.testSetBundleStartLevel()
+    * and 
+    *   StartLevelControl.testActivatorChangeBundleStartLevel()
+    * tests to fail in the TCK. 
+    */
    Executor executor = Executors.newSingleThreadExecutor();
+   // This executor fixes the StartLevelControl.testActivatorChangeBundleStartLevel()
+   /* Executor executor = new Executor()
+   {
+      public void execute(Runnable command)
+      {
+         new Thread(command).start();
+      }
+   }; */
+   // This one fixes the StartLevelControl.testSetBundleStartLevel()
+   /* Executor executor = new Executor()
+   {
+      public void execute(Runnable command)
+      {
+         command.run();
+      }
+   }; */
+
    private int initialStartLevel = 1;
    private ServiceRegistration registration;
-   private int startLevel = 0;
+   private int startLevel = 0; // Guarded by this
 
    public StartLevelImpl(OSGiBundleManager bundleManager)
    {
@@ -131,11 +155,13 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
 
       if (sl <= getStartLevel())
       {
+         log.info("Start Level Service about to start: " + obs);
          executor.execute(new Runnable()
          {
             @Override
             public void run()
             {
+               log.info("Start Level Service starting: " + obs);
                try
                {
                   int opts = Bundle.START_TRANSIENT;
@@ -153,11 +179,13 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
       }
       else
       {
+         log.info("Start Level Service about to stop: " + obs);
          executor.execute(new Runnable()
          {
             @Override
             public void run()
             {
+               log.info("Start Level Service stopping: " + obs);
                try
                {
                   obs.stop(Bundle.STOP_TRANSIENT);
@@ -180,27 +208,29 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    @Override
    public synchronized void setStartLevel(final int sl)
    {
-      if (sl > startLevel)
+      if (sl > getStartLevel())
       {
-         log.info("Increasing start level from " + startLevel + " to " + sl);
+         log.info("About to increase start level from " + getStartLevel() + " to " + sl);
          executor.execute(new Runnable()
          {            
             @Override
             public void run()
             {
+               log.info("Increasing start level from " + getStartLevel() + " to " + sl);
                increaseStartLevel(sl);
                eventsPlugin.fireFrameworkEvent(getSystemContext().getBundle(), FrameworkEvent.STARTLEVEL_CHANGED, null);
             }
          });
       }
-      else if (sl < startLevel)
+      else if (sl < getStartLevel())
       {
-         log.info("Decreasing start level from " + startLevel + " to " + sl);
+         log.info("About to decrease start level from " + getStartLevel() + " to " + sl);
          executor.execute(new Runnable()
          {            
             @Override
             public void run()
             {
+               log.info("Decreasing start level from " + getStartLevel() + " to " + sl);
                decreaseStartLevel(sl);
                eventsPlugin.fireFrameworkEvent(getSystemContext().getBundle(), FrameworkEvent.STARTLEVEL_CHANGED, null);
             }
