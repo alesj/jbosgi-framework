@@ -118,9 +118,9 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       List<PackageAttribute> exports = osgiMetaData.getExportPackages();
       if (exports != null && exports.isEmpty() == false)
       {
-         for (PackageAttribute packageAttribute : exports)
+         for (PackageAttribute metadata : exports)
          {
-            OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, packageAttribute);
+            OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, metadata);
             capabilities.addCapability(packageCapability);
          }
       }
@@ -130,15 +130,15 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       if (imports != null && imports.isEmpty() == false)
       {
          SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
-         for (PackageAttribute packageAttribute : imports)
+         for (PackageAttribute metadata : imports)
          {
-            String packageName = packageAttribute.getAttribute();
+            String packageName = metadata.getAttribute();
 
             // [TODO] Should system packages be added as capabilities?
             if (syspackPlugin.isSystemPackage(packageName) == true)
                continue;
 
-            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, false);
+            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, metadata, false);
             requirements.addRequirement(requirement);
          }
       }

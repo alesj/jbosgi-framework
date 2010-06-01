@@ -32,7 +32,6 @@ import java.util.List;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
-import org.jboss.osgi.framework.resolver.ResolverBundle;
 import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -77,10 +76,7 @@ public class ResolverSmokeTestCase extends AbstractFrameworkTest
       Resolver resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
       if (resolver != null)
       {
-         List<ResolverBundle> installedBundles = resolver.getBundles();
-         assertEquals("All bundles installed", bundlePaths.size(), installedBundles.size());
-
-         List<ResolverBundle> resolved = resolver.resolve(unresolved);
+         List<Bundle> resolved = resolver.resolve(unresolved);
          assertEquals("All bundles resolved", unresolved.size(), resolved.size());
       }
 

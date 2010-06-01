@@ -21,14 +21,17 @@
 */
 package org.jboss.osgi.framework.deployers;
 
+import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.dependency.policy.ClassLoaderPolicyModule;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSClassLoaderDescribeDeployer;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiModule;
+import org.jboss.osgi.framework.plugins.ResolverPlugin;
 
 /**
  * The OSGiModuleDeployer creates the {@link OSGiModule}.
@@ -49,11 +52,35 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
    public void deploy(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
    {
       // Do nothing if the workaround is enabled
-      // In which case the work is expected to get done in {@link OSGiModuleDeployerJBOSGI317}
+      // In which case the work is expected to get done in {@link OSGiModuleDeployerWorkaround}
       if ("true".equals(bundleManager.getProperty("jbosgi317.workaround")))
          return;
       
       deployInternal(unit, metaData);
+
+      // Add the bundle to the resolver
+      Module module = unit.getAttachment(Module.class);
+      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (bundleResolver != null && module instanceof OSGiModule)
+      {
+         OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+         bundleResolver.addBundle(bundleState);
+      }
+   }
+
+   @Override
+   public void undeploy(DeploymentUnit unit, ClassLoadingMetaData deployment)
+   {
+      // Remove the bundle from the resolver
+      Module module = unit.getAttachment(Module.class);
+      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (bundleResolver != null && module instanceof OSGiModule)
+      {
+         OSGiBundleState bundleState = unit.getAttachment(OSGiBundleState.class);
+         bundleResolver.removeBundle(bundleState);
+      }
+      
+      super.undeploy(unit, deployment);
    }
 
    protected void deployInternal(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
@@ -66,10 +93,13 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
    {
       ClassLoaderPolicyModule module;
       if (metaData instanceof OSGiClassLoadingMetaData)
+      {
          module = new OSGiModule(unit, metaData);
+      }
       else
+      {
          module = super.createModule(unit, metaData);
-      
+      }
       return module;
    }
 }

@@ -52,7 +52,7 @@ import org.osgi.framework.Version;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiPackageCapability extends PackageCapability
+public class OSGiPackageCapability extends PackageCapability implements OSGiCapability
 {
    /** The serialVersionUID */
    private static final long serialVersionUID = 3940667616588052822L;
@@ -61,7 +61,7 @@ public class OSGiPackageCapability extends PackageCapability
    private AbstractBundleState bundleState;
 
    /** The export package */
-   private PackageAttribute exportPackage;
+   private PackageAttribute metadata;
 
    /** The mandatory attributes */
    private String[] mandatoryAttributes;
@@ -70,20 +70,20 @@ public class OSGiPackageCapability extends PackageCapability
     * Create a new OSGiPackageCapability.
     * 
     * @param bundleState the bundle state
-    * @param exportPackage the export package metadata
+    * @param metadata the export package metadata
     * @return the capability
     * @throws IllegalArgumentException for null metadata
     */
    @SuppressWarnings("deprecation")
-   public static OSGiPackageCapability create(AbstractBundleState bundleState, PackageAttribute exportPackage)
+   public static OSGiPackageCapability create(AbstractBundleState bundleState, PackageAttribute metadata)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle");
 
-      String name = exportPackage.getAttribute();
-      String versionString = exportPackage.getAttributeValue(Constants.VERSION_ATTRIBUTE, String.class);
+      String name = metadata.getAttribute();
+      String versionString = metadata.getAttributeValue(Constants.VERSION_ATTRIBUTE, String.class);
 
-      String oldVersionString = exportPackage.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
+      String oldVersionString = metadata.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
       if (oldVersionString != null)
       {
          if (versionString != null && versionString.equals(oldVersionString) == false)
@@ -103,19 +103,19 @@ public class OSGiPackageCapability extends PackageCapability
          version = Version.parseVersion(versionString);
       }
 
-      OSGiPackageCapability capability = new OSGiPackageCapability(bundleState, name, version, exportPackage);
+      OSGiPackageCapability capability = new OSGiPackageCapability(bundleState, name, version, metadata);
       capability.setSplitPackagePolicy(SplitPackagePolicy.First);
 
       return capability;
    }
 
-   private OSGiPackageCapability(AbstractBundleState bundleState, String name, Version version, PackageAttribute exportPackage)
+   private OSGiPackageCapability(AbstractBundleState bundleState, String name, Version version, PackageAttribute metadata)
    {
       super(name, version);
       this.bundleState = bundleState;
-      this.exportPackage = exportPackage;
+      this.metadata = metadata;
 
-      String mandatory = exportPackage.getDirectiveValue(Constants.MANDATORY_DIRECTIVE, String.class);
+      String mandatory = metadata.getDirectiveValue(Constants.MANDATORY_DIRECTIVE, String.class);
       if (mandatory != null)
       {
          StringTokenizer tokens = new StringTokenizer(mandatory, ",");
@@ -125,10 +125,15 @@ public class OSGiPackageCapability extends PackageCapability
             mandatoryAttributes[i++] = tokens.nextToken();
       }
 
-      if (exportPackage.getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null)
+      if (metadata.getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null)
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE + " on an Export-Package");
-      if (exportPackage.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null)
+      if (metadata.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null)
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_VERSION_ATTRIBUTE + " on an Export-Package");
+   }
+
+   public PackageAttribute getMetadata()
+   {
+      return metadata;
    }
 
    @Override
@@ -139,8 +144,8 @@ public class OSGiPackageCapability extends PackageCapability
       if (requirement instanceof OSGiPackageRequirement == false)
          return true;
 
-      OSGiPackageRequirement osgiPackageRequirement = (OSGiPackageRequirement)requirement;
-      if (matchAttributes(osgiPackageRequirement) == false)
+      OSGiPackageRequirement osgireq = (OSGiPackageRequirement)requirement;
+      if (matchAttributes(osgireq) == false)
          return false;
 
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
@@ -156,8 +161,8 @@ public class OSGiPackageCapability extends PackageCapability
          // Get the exporter for this requirement
          if (reqBundle instanceof OSGiBundleState)
          {
-            String packageName = osgiPackageRequirement.getName();
-            return bundleResolver.match(reqBundle, bundleState, packageName);
+            boolean match = bundleResolver.match(reqBundle, bundleState, osgireq);
+            return match;
          }
       }
 
@@ -205,8 +210,8 @@ public class OSGiPackageCapability extends PackageCapability
    public boolean matchAttributes(OSGiPackageRequirement packageRequirement)
    {
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
-      PackageAttribute capParameters = exportPackage;
-      PackageAttribute reqParameters = packageRequirement.getPackageMetaData();
+      PackageAttribute capParameters = metadata;
+      PackageAttribute reqParameters = packageRequirement.getMetadata();
 
       boolean validMatch = true;
 
@@ -284,8 +289,8 @@ public class OSGiPackageCapability extends PackageCapability
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, Parameter> attributes = exportPackage.getAttributes();
-         Map<String, Parameter> directives = exportPackage.getDirectives();
+         Map<String, Parameter> attributes = metadata.getAttributes();
+         Map<String, Parameter> directives = metadata.getDirectives();
          for (Map.Entry<String, Parameter> entry : directives.entrySet())
             buffer.append(";" + entry.getKey() + ":=" + entry.getValue().getValue());
          for (Map.Entry<String, Parameter> entry : attributes.entrySet())

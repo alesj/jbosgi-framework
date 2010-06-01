@@ -51,6 +51,7 @@
   <!-- Properties -->
   <properties>
     <version.apache.felix.configadmin>1.0.10</version.apache.felix.configadmin>
+    <version.apache.felix.framework>2.1.0-SNAPSHOT</version.apache.felix.framework>
     <version.apache.felix.log>1.0.0</version.apache.felix.log>
     <version.apache.felix.metatype>1.0.2</version.apache.felix.metatype>
     <version.jboss.classloading>2.2.0-SNAPSHOT</version.jboss.classloading>
@@ -82,6 +83,21 @@
   <!-- Dependency Management -->
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.framework</artifactId>
+        <version>${version.apache.felix.framework}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
       <dependency>
         <groupId>org.jboss.cl</groupId>
         <artifactId>jboss-classloader</artifactId>

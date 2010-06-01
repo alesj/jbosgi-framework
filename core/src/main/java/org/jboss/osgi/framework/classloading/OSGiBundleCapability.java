@@ -42,7 +42,7 @@ import org.osgi.framework.Version;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiBundleCapability extends ModuleCapability
+public class OSGiBundleCapability extends ModuleCapability implements OSGiCapability
 {
    /** The serialVersionUID */
    private static final long serialVersionUID = 2366716668262831380L;

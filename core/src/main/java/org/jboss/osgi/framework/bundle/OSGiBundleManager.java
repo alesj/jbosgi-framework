@@ -794,12 +794,6 @@ public class OSGiBundleManager
       try
       {
          bundleState.changeState(Bundle.INSTALLED, true);
-
-         // Add the bundle to the resolver
-         // Note, plugins are not registered when the system bundle is added 
-         ResolverPlugin bundleResolver = getOptionalPlugin(ResolverPlugin.class);
-         if (bundleResolver != null)
-            bundleResolver.addBundle(bundleState);
       }
       catch (RuntimeException rte)
       {
@@ -843,11 +837,6 @@ public class OSGiBundleManager
          throw new IllegalArgumentException("Null bundle state");
 
       bundleState.uninstallInternal();
-
-      // Remove the bundle from the resolver
-      ResolverPlugin bundleResolver = getOptionalPlugin(ResolverPlugin.class);
-      if (bundleResolver != null)
-         bundleResolver.removeBundle(bundleState);
 
       allBundles.remove(bundleState);
       log.debug("Removed " + bundleState.getCanonicalName());

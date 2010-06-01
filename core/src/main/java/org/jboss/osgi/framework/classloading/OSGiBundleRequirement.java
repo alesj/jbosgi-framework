@@ -40,7 +40,7 @@ import org.osgi.framework.Constants;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiBundleRequirement extends ModuleRequirement
+public class OSGiBundleRequirement extends ModuleRequirement implements OSGiRequirement
 {
    /** The serialVersionUID */
    private static final long serialVersionUID = 4264597072894634275L;

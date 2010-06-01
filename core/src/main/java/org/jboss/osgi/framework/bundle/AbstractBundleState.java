@@ -246,8 +246,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     */
    public abstract OSGiMetaData getOSGiMetaData();
 
-   @SuppressWarnings("unchecked")
-   public Dictionary getHeaders()
+   public Dictionary<String, String> getHeaders()
    {
       // If the specified locale is null then the locale returned 
       // by java.util.Locale.getDefault is used.
@@ -510,7 +509,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return plugin.getServiceReferences(this, clazz, filter, true);
    }
 
-   @SuppressWarnings("unchecked")
+   @Override
+   @SuppressWarnings("rawtypes")
    public ServiceRegistration registerService(String clazz, Object service, Dictionary properties)
    {
       if (clazz == null)
@@ -518,7 +518,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return registerService(new String[] { clazz }, service, properties);
    }
 
-   @SuppressWarnings("unchecked")
+   @Override
+   @SuppressWarnings("rawtypes")
    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties)
    {
       checkValidBundleContext();

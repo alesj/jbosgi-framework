@@ -19,30 +19,16 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.osgi.resolver;
+package org.jboss.osgi.framework.resolver.internal;
 
-// $Id$
-
-import org.jboss.osgi.framework.resolver.Resolver;
-import org.junit.Test;
+import org.apache.felix.framework.resolver.Resolver;
 
 /**
- * Test resolver functionality without external resolver.
- * 
+ * An extension to the Apache Felix Resolver.
+ *  
  * @author thomas.diesler@jboss.com
- * @since 23-Nov-2009
+ * @since 31-May-2010
  */
-public class NoExternalResolverTestCase extends AbstractImportExportTest
+interface ResolverExtension extends Resolver
 {
-   @Override
-   protected Resolver getTestResolver()
-   {
-      return null;
-   }
-
-   @Test
-   public void testPreferredExporterHigherVersion() throws Exception
-   {
-      System.out.println("FIXME [JBCL-133] Implement resolver preferences");
-   }
 }

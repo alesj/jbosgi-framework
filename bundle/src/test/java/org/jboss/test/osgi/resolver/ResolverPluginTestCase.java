@@ -19,44 +19,24 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver;
+package org.jboss.test.osgi.resolver;
 
-import java.util.Set;
+// $Id$
 
+import org.jboss.osgi.framework.resolver.Resolver;
+import org.jboss.osgi.framework.resolver.internal.ResolverPluginImpl;
 
 /**
- * A common named element
+ * Test Felix resolver integration.
  * 
  * @author thomas.diesler@jboss.com
- * @since 09-Nov-2009
+ * @since 31-May-2010
  */
-public interface NamedElement
+public class ResolverPluginTestCase extends AbstractResolverTest
 {
-   /**
-    * Get the bundle that owns this element
-    * 
-    * @return the owner
-    */
-   ResolverBundle getOwner();
-
-   /**
-    * Get the element name
-    * 
-    * @return the name
-    */
-   String getName();
-
-   /**
-    * Get the associated set of arbitrary attributes.
-    * @return An empty list if their are no attributes.
-    */
-   Set<String> getAttributes();
-
-   /**
-    * Get the attribute value for the given key.
-    * 
-    * @param key the key
-    * @return The attribute value or null.
-    */
-   Object getAttribute(String key);
+   @Override
+   protected Resolver getTestResolver()
+   {
+      return new ResolverPluginImpl(getBundleManager());
+   }
 }

@@ -204,7 +204,8 @@ public class OSGiBundleState extends AbstractDeployedBundleState
       return classLoader.getResource(name);
    }
 
-   @SuppressWarnings("unchecked")
+   @Override
+   @SuppressWarnings({ "rawtypes" })
    public Enumeration getResources(String name) throws IOException
    {
       checkInstalled();

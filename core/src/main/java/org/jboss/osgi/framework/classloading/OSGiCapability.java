@@ -21,36 +21,13 @@
 */
 package org.jboss.osgi.framework.classloading;
 
-import org.jboss.classloader.spi.ClassLoaderPolicy;
-import org.jboss.classloading.spi.dependency.Module;
-import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
-import org.jboss.logging.Logger;
 
 /**
- * The {@link Module} that represents and OSGi bundle deployment.
+ * A marker interface for OSGi capabilities.
  * 
  * @author thomas.diesler@jboss.com
- * @version $Revision$
+ * @since 01-Jun-2010
  */
-public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
+public interface OSGiCapability
 {
-   private static final long serialVersionUID = 1L;
-
-   // Provide logging
-   private static final Logger log = Logger.getLogger(OSGiModule.class);
-   
-   public OSGiModule(DeploymentUnit unit, ClassLoadingMetaData metaData)
-   {
-      super(unit);
-      if (log.isTraceEnabled())
-         log.trace("new OSGiModule\n  " + unit + "\n  " + metaData);
-   }
-
-   @Override
-   public ClassLoaderPolicy createClassLoaderPolicy()
-   {
-      throw new IllegalStateException("OSGiClassLoaderFactory is expected to create the policy");
-   }
 }

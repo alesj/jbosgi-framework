@@ -19,48 +19,41 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver;
+package org.jboss.osgi.framework.resolver.internal;
 
-import org.jboss.osgi.framework.metadata.VersionRange;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.resolver.Module;
+import org.apache.felix.framework.resolver.Resolver;
+import org.apache.felix.framework.resolver.ResolverImpl;
+import org.apache.felix.framework.resolver.Wire;
 
 /**
- * An abstraction of a required bundle.
- * 
+ * An extension to the Apache Felix Resolver.
+ *  
  * @author thomas.diesler@jboss.com
- * @since 09-Nov-2009
+ * @since 31-May-2010
  */
-public interface RequiredBundle extends NamedElement
+class ResolverExtensionImpl implements ResolverExtension
 {
-   /**
-    * Get the bundle's symbolic name.
-    * 
-    * @return the symbolic name
-    */
-   String getSymbolicName();
-   
-   /**
-    * The version range of the required bundle.
-    * 
-    * @return null if this attribute is not set
-    */
-   VersionRange getVersion();
-   
-   /**
-    * True if the resolution directive for the given required bundle is 'optional' 
-    * 
-    * @return null if this attribute is not set
-    */
-   boolean isOptional();
-   
-   /**
-    * Get the provider for this bundle requirement
-    * 
-    * @return the owner
-    */
-   ResolverBundle getProvider();
+   private Resolver delegate;
 
-   /**
-    * Set the provider for this bundle requirement
-    */
-   void setProvider(ResolverBundle provider);
+   public ResolverExtensionImpl(Logger logger)
+   {
+      this.delegate = new ResolverImpl(logger);
+   }
+
+   @Override
+   public Map<Module, List<Wire>> resolve(ResolverState state, Module module)
+   {
+      return delegate.resolve(state, module);
+   }
+
+   @Override
+   public Map<Module, List<Wire>> resolve(ResolverState state, Module module, String pkgName)
+   {
+      return delegate.resolve(state, module, pkgName);
+   }
 }

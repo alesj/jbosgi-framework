@@ -54,7 +54,6 @@ import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
-import org.jboss.osgi.framework.resolver.ResolverBundle;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -303,9 +302,9 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       {
          // Resolve the bundles through the resolver. The return is the list of
          // bundles that the external resolver could actually resolve
-         for (ResolverBundle aux : bundleResolver.resolve(unresolvedBundles))
+         for (Bundle aux : bundleResolver.resolve(unresolvedBundles))
          {
-            OSGiBundleState bundleState = OSGiBundleState.assertBundleState(aux.getBundle());
+            OSGiBundleState bundleState = OSGiBundleState.assertBundleState(aux);
             resolvableBundles.add(bundleState);
          }
       }

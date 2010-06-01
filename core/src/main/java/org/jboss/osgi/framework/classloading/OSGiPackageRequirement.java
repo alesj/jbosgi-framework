@@ -44,7 +44,7 @@ import org.osgi.framework.Constants;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiPackageRequirement extends PackageRequirement implements RequirementWithImportType
+public class OSGiPackageRequirement extends PackageRequirement implements RequirementWithImportType, OSGiRequirement
 {
    /** The serialVersionUID */
    private static final long serialVersionUID = 5109907232396093061L;
@@ -53,44 +53,39 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
    private AbstractBundleState bundleState;
 
    /** The attributes */
-   private PackageAttribute packageAttribute;
+   private PackageAttribute metadata;
 
    /**
     * Create a new OSGiPackageRequirement.
-    * 
-    * @param bundleState the bundle state
-    * @param packageAttribute the require package metadata
-    * @return the requirement
-    * @throws IllegalArgumentException for a null requirePackage
     */
    @SuppressWarnings("deprecation")
-   public static OSGiPackageRequirement create(AbstractBundleState bundleState, PackageAttribute packageAttribute, boolean isDynamic)
+   public static OSGiPackageRequirement create(AbstractBundleState bundleState, PackageAttribute metadata, boolean isDynamic)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle");
-      if (packageAttribute == null)
+      if (metadata == null)
          throw new IllegalArgumentException("Null require package");
 
-      String name = packageAttribute.getAttribute();
+      String name = metadata.getAttribute();
 
       AbstractVersionRange range = null;
-      String versionString = packageAttribute.getAttributeValue(Constants.VERSION_ATTRIBUTE, String.class);
+      String versionString = metadata.getAttributeValue(Constants.VERSION_ATTRIBUTE, String.class);
       if (versionString != null)
       {
          range = (AbstractVersionRange)AbstractVersionRange.valueOf(versionString);
-         String oldVersionString = packageAttribute.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
+         String oldVersionString = metadata.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
          if (oldVersionString != null && oldVersionString.equals(versionString) == false)
             throw new IllegalStateException(Constants.VERSION_ATTRIBUTE + " of " + versionString + " does not match " + Constants.PACKAGE_SPECIFICATION_VERSION
                   + " of " + oldVersionString);
       }
       else
       {
-         versionString = packageAttribute.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
+         versionString = metadata.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
          if (versionString != null)
             range = (AbstractVersionRange)AbstractVersionRange.valueOf(versionString);
       }
 
-      return new OSGiPackageRequirement(bundleState, name, range, packageAttribute, isDynamic);
+      return new OSGiPackageRequirement(bundleState, name, range, metadata, isDynamic);
    }
 
    /**
@@ -107,14 +102,11 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       super(name, versionRange);
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
-      
-      // TODO enable this check when BasicResolver does not abuse
-      // PackageRequirement for RequireBundle any more
-      //if (packageAttribute == null)
-      //   throw new IllegalArgumentException("Null packageAttribute");
+      if (packageAttribute == null)
+         throw new IllegalArgumentException("Null packageAttribute");
 
       this.bundleState = bundleState;
-      this.packageAttribute = packageAttribute;
+      this.metadata = packageAttribute;
 
       if (packageAttribute != null)
       {
@@ -130,13 +122,11 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
    }
 
    /**
-    * Get the requirePackage metadata.
-    * 
-    * @return the requirePackage.
+    * Get the metadata.
     */
-   public PackageAttribute getPackageMetaData()
+   public PackageAttribute getMetadata()
    {
-      return packageAttribute;
+      return metadata;
    }
 
    @Override
@@ -186,8 +176,8 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, Parameter> attributes = packageAttribute.getAttributes();
-         Map<String, Parameter> directives = packageAttribute.getDirectives();
+         Map<String, Parameter> attributes = metadata.getAttributes();
+         Map<String, Parameter> directives = metadata.getDirectives();
          for (Map.Entry<String, Parameter> entry : directives.entrySet())
             buffer.append(";" + entry.getKey() + ":=" + entry.getValue().getValue());
          for (Map.Entry<String, Parameter> entry : attributes.entrySet())

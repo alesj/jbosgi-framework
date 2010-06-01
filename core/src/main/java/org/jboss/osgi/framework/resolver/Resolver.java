@@ -23,8 +23,8 @@ package org.jboss.osgi.framework.resolver;
 
 import java.util.List;
 
+import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Version;
 
 /**
  * Handles the resolve phase of the installed bundles.
@@ -35,35 +35,12 @@ import org.osgi.framework.Version;
 public interface Resolver
 {
    /**
-    * Get the registered resBundle bundles. 
-    * @return The list of registered resBundle bundles.
-    */
-   List<ResolverBundle> getBundles();
-   
-   /**
-    * Get the registered resBundle bundle.
-    * 
-    * @param symbolicName the symbolic name of the bundle
-    * @param version the version of the bundle
-    * @return The registered resBundle bundle.
-    */
-   ResolverBundle getBundle(String symbolicName, Version version);
-   
-   /**
-    * Get the registered resBundle bundle.
-    * 
-    * @param bundle the bundle 
-    * @return The registered resBundle bundle.
-    */
-   ResolverBundle getBundle(Bundle bundle);
-   
-   /**
     * Add a bundle to the resolver.
     * 
     * @param bundle the bundle
     * @return The resBundle associated with the added bundle.
     */
-   ResolverBundle addBundle(Bundle bundle);
+   void addBundle(Bundle bundle);
    
    /**
     * Remove a bundle from the resolver.
@@ -71,7 +48,7 @@ public interface Resolver
     * @param bundle the bundle
     * @return The resBundle associated with the removed bundle.
     */
-   ResolverBundle removeBundle(Bundle bundle);
+   void removeBundle(Bundle bundle);
    
    /**
     * Resolve the given list of bundles.
@@ -79,24 +56,15 @@ public interface Resolver
     * @param bundles the bundles to resolve
     * @return The list of resolved bundles in the resolve order or an empty list
     */
-   List<ResolverBundle> resolve(List<Bundle> bundles);
+   List<Bundle> resolve(List<Bundle> bundles);
 
    /**
-    * Get the exporter for the given import package.
-    * 
-    * @param importer The bundle that imports the package.
-    * @param packageName The import package name
-    * @return The export package that the import is wired to or null if the import is not yet resolved.
-    */
-   ExportPackage getExporter(Bundle importer, String packageName);
-   
-   /**
-    * Return true if the given importer is wired to the given exporter for the given package name.
+    * Return true if the given importer is wired to the given exporter for the given requirement.
     * 
     * @param importer The bundle that imports the package.
     * @param exporter The bundle that exports the package.
-    * @param packageName The import package name
+    * @param requirement The requirement
     * @return True if the importer is wired to the exporter
     */
-   boolean match(Bundle importer, Bundle exporter, String packageName);
+   boolean match(Bundle importer, Bundle exporter, OSGiRequirement requirement);
 }
