@@ -23,20 +23,13 @@ package org.jboss.test.osgi.resolver;
 
 // $Id$
 
-import org.jboss.osgi.framework.resolver.Resolver;
-import org.jboss.osgi.framework.resolver.internal.ResolverPluginImpl;
 
 /**
- * Test Felix resolver integration.
+ * Test the default resolver integration.
  * 
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public class ResolverPluginTestCase extends AbstractResolverTest
+public class DefaultResolverTestCase extends AbstractResolverTest
 {
-   @Override
-   protected Resolver getTestResolver()
-   {
-      return new ResolverPluginImpl(getBundleManager());
-   }
 }

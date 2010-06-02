@@ -24,17 +24,14 @@ package org.jboss.test.osgi.resolver;
 // $Id$
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.plugins.Plugin;
-import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.Resolver;
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.classloader.support.a.A;
-import org.junit.Before;
+import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -45,35 +42,14 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.diesler@jboss.com
  * @since 09-Nov-2009
  */
-public abstract class AbstractResolverTest extends AbstractFrameworkTest
+public abstract class AbstractResolverTest extends OSGiFrameworkTest
 {
-   @Before
-   public void setUp() throws Exception
+   @After
+   public void tearDown() throws Exception
    {
-      super.setUp();
-      
-      Resolver installedResolver = getInstalledResolver();
-      Resolver testResolver = getTestResolver();
-      if (installedResolver != testResolver)
-      {
-         OSGiBundleManager bundleManager = getBundleManager();
-         if (installedResolver != null)
-            bundleManager.removePlugin((Plugin)installedResolver);
-         if (testResolver != null)
-            bundleManager.addPlugin((Plugin)testResolver);
-      }
-   }
-
-   // Overwrite to provide a different resolver
-   protected Resolver getTestResolver()
-   {
-      return getInstalledResolver();
-   }
-
-   private Resolver getInstalledResolver()
-   {
-      OSGiBundleManager bundleManager = getBundleManager();
-      return bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      // Make sure we have a new framework for every test
+      shutdownFramework();
+      super.tearDown();
    }
 
    @Test
@@ -91,18 +67,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -124,16 +95,11 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       Bundle bundleA = installBundle(assemblyA);
       try
       {
-         // Resolve the installed bundles
-         PackageAdmin packageAdmin = getPackageAdmin();
-         boolean allResolved = packageAdmin.resolveBundles(null);
-         assertFalse("Not all resolved", allResolved);
-   
-         // Verify bundle states
-         assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
-   
          // Verify that the class load
          assertLoadClassFail(bundleA, A.class.getName());
+
+         // Verify bundle states
+         assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
       }
       finally
       {
@@ -160,15 +126,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
             PackageAdmin packageAdmin = getPackageAdmin();
             boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleB });
             assertTrue("All resolved", allResolved);
-   
+
             // Verify bundle states
             assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
             assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
+
             // Verify that the class can be loaded
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
-   
+
             // Verify bundle states
             assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
          }
@@ -193,16 +159,11 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       Bundle bundleA = installBundle(assemblyA);
       try
       {
-         // Resolve the installed bundles
-         PackageAdmin packageAdmin = getPackageAdmin();
-         boolean allResolved = packageAdmin.resolveBundles(null);
-         assertTrue("All resolved", allResolved);
-   
-         // Verify bundle states
-         assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-   
          // Verify that the class load
          assertLoadClass(bundleA, A.class.getName(), bundleA);
+
+         // Verify bundle states
+         assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
       }
       finally
       {
@@ -225,18 +186,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -264,18 +220,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertFalse("Not all resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClassFail(bundleA, A.class.getName());
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -297,16 +248,11 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       Bundle bundleA = installBundle(assemblyA);
       try
       {
-         // Resolve the installed bundles
-         PackageAdmin packageAdmin = getPackageAdmin();
-         boolean allResolved = packageAdmin.resolveBundles(null);
-         assertTrue("All resolved", allResolved);
-   
-         // Verify bundle states
-         assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-   
          // Verify that the class load
          assertLoadClassFail(bundleA, A.class.getName());
+
+         // Verify bundle states
+         assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
       }
       finally
       {
@@ -329,18 +275,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -364,27 +305,23 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       {
          // Resolve the installed bundles
          PackageAdmin packageAdmin = getPackageAdmin();
-         boolean allResolved = packageAdmin.resolveBundles(null);
+         boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleA });
          assertTrue("All resolved", allResolved);
-   
+
          // Bundle-SymbolicName: simpleexport
          // Export-Package: org.jboss.test.osgi.classloader.support.a
          Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class cannot be loaded from bundleA
             // because the wire could not be established when bundleA was resolved
             assertLoadClassFail(bundleA, A.class.getName());
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -412,18 +349,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -451,18 +383,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertFalse("Not all resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClassFail(bundleA, A.class.getName());
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -490,18 +417,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -529,18 +451,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertFalse("Not all resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClassFail(bundleA, A.class.getName());
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -557,7 +474,7 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
    public void testRequireBundle() throws Exception
    {
       // [TODO] require bundle visibility
-   
+
       //Bundle-SymbolicName: requirebundle
       //Require-Bundle: simpleexport
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/requirebundle");
@@ -570,18 +487,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -603,16 +515,11 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       Bundle bundleA = installBundle(assemblyA);
       try
       {
-         // Resolve the installed bundles
-         PackageAdmin packageAdmin = getPackageAdmin();
-         boolean allResolved = packageAdmin.resolveBundles(null);
-         assertFalse("Not all resolved", allResolved);
-   
-         // Verify bundle states
-         assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
-   
          // Verify that the class load
          assertLoadClassFail(bundleA, A.class.getName());
+
+         // Verify bundle states
+         assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
       }
       finally
       {
@@ -633,7 +540,7 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          PackageAdmin packageAdmin = getPackageAdmin();
          boolean allResolved = packageAdmin.resolveBundles(null);
          assertTrue("All resolved", allResolved);
-   
+
          // Verify bundle states
          assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
       }
@@ -658,18 +565,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleB);
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -697,18 +599,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertFalse("Not all resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClassFail(bundleA, A.class.getName());
             assertLoadClass(bundleB, A.class.getName(), bundleB);
+
+            // Verify bundle states
+            assertEquals("BundleA INSTALLED", Bundle.INSTALLED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -727,15 +624,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
-   
+
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
-   
+
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
-   
+
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -743,27 +640,24 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          PackageAdmin packageAdmin = getPackageAdmin();
          boolean allResolved = packageAdmin.resolveBundles(null);
          assertTrue("All resolved", allResolved);
-   
+
          // Verify bundle states
          assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-   
+
          Bundle bundleB = installBundle(assemblyB);
          try
          {
             Bundle bundleC = installBundle(assemblyC);
             try
             {
-               allResolved = packageAdmin.resolveBundles(null);
-               assertTrue("All resolved", allResolved);
-   
-               // Verify bundle states
-               assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-               assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
-   
                // Verify that the class load
                assertLoadClass(bundleA, A.class.getName(), bundleA);
                assertLoadClass(bundleB, A.class.getName(), bundleB);
                assertLoadClass(bundleC, A.class.getName(), bundleA);
+
+               // Verify bundle states
+               assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
+               assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
             }
             finally
             {
@@ -787,15 +681,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
-   
+
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
-   
+
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
-   
+
       Bundle bundleB = installBundle(assemblyB);
       try
       {
@@ -803,10 +697,10 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          PackageAdmin packageAdmin = getPackageAdmin();
          boolean allResolved = packageAdmin.resolveBundles(null);
          assertTrue("All resolved", allResolved);
-   
+
          // Verify bundle states
          assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
+
          Bundle bundleA = installBundle(assemblyA);
          try
          {
@@ -815,11 +709,11 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
             {
                allResolved = packageAdmin.resolveBundles(null);
                assertTrue("All resolved", allResolved);
-   
+
                // Verify bundle states
                assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
                assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
-   
+
                // Verify that the class load
                assertLoadClass(bundleA, A.class.getName(), bundleA);
                assertLoadClass(bundleB, A.class.getName(), bundleB);
@@ -847,15 +741,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       //Bundle-SymbolicName: packageexportversion100
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportversion100", A.class);
-   
+
       //Bundle-SymbolicName: packageexportversion200
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=2.0.0
       Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion200", A.class);
-   
+
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
-   
+
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -865,20 +759,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
             Bundle bundleC = installBundle(assemblyC);
             try
             {
-               // Resolve the installed bundles
-               PackageAdmin packageAdmin = getPackageAdmin();
-               boolean allResolved = packageAdmin.resolveBundles(null);
-               assertTrue("All resolved", allResolved);
-   
-               // Verify bundle states
-               assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-               assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-               assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
-   
                // Verify that the class load
                assertLoadClass(bundleA, A.class.getName(), bundleA);
                assertLoadClass(bundleB, A.class.getName(), bundleB);
                assertLoadClass(bundleC, A.class.getName(), bundleB);
+
+               // Verify bundle states
+               assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+               assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
+               assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
             }
             finally
             {
@@ -902,15 +791,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       //Bundle-SymbolicName: packageexportversion200
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=2.0.0
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/packageexportversion200", A.class);
-   
+
       //Bundle-SymbolicName: packageexportversion100
       //Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0
       Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageexportversion100", A.class);
-   
+
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
-   
+
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -920,20 +809,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
             Bundle bundleC = installBundle(assemblyC);
             try
             {
-               // Resolve the installed bundles
-               PackageAdmin packageAdmin = getPackageAdmin();
-               boolean allResolved = packageAdmin.resolveBundles(null);
-               assertTrue("All resolved", allResolved);
-   
-               // Verify bundle states
-               assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-               assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-               assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
-   
                // Verify that the class load
                assertLoadClass(bundleA, A.class.getName(), bundleA);
                assertLoadClass(bundleB, A.class.getName(), bundleB);
                assertLoadClass(bundleC, A.class.getName(), bundleA);
+
+               // Verify bundle states
+               assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+               assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
+               assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
             }
             finally
             {
@@ -957,15 +841,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexport", A.class);
-   
+
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexportother", A.class);
-   
+
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
-   
+
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -976,20 +860,20 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
             PackageAdmin packageAdmin = getPackageAdmin();
             boolean allResolved = packageAdmin.resolveBundles(null);
             assertTrue("All resolved", allResolved);
-   
+
             // Verify bundle states
             assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
             assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
+
             Bundle bundleC = installBundle(assemblyC);
             try
             {
                allResolved = packageAdmin.resolveBundles(null);
                assertTrue("All resolved", allResolved);
-   
+
                // Verify bundle states
                assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
-   
+
                // Verify that the class load
                assertLoadClass(bundleA, A.class.getName(), bundleA);
                assertLoadClass(bundleB, A.class.getName(), bundleB);
@@ -1017,15 +901,15 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
       // Bundle-SymbolicName: simpleexportother
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/simpleexportother", A.class);
-   
+
       // Bundle-SymbolicName: simpleexport
       // Export-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyB = assembleArchive("bundleB", "/bundles/resolver/simpleexport", A.class);
-   
+
       // Bundle-SymbolicName: simpleimport
       // Import-Package: org.jboss.test.osgi.classloader.support.a
       Archive<?> assemblyC = assembleArchive("bundleC", "/bundles/resolver/simpleimport");
-   
+
       Bundle bundleA = installBundle(assemblyA);
       try
       {
@@ -1036,20 +920,20 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
             PackageAdmin packageAdmin = getPackageAdmin();
             boolean allResolved = packageAdmin.resolveBundles(null);
             assertTrue("All resolved", allResolved);
-   
+
             // Verify bundle states
             assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
             assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
+
             Bundle bundleC = installBundle(assemblyC);
             try
             {
                allResolved = packageAdmin.resolveBundles(null);
                assertTrue("All resolved", allResolved);
-   
+
                // Verify bundle states
                assertEquals("BundleC RESOLVED", Bundle.RESOLVED, bundleC.getState());
-   
+
                // Verify that the class load
                assertLoadClass(bundleA, A.class.getName(), bundleA);
                assertLoadClass(bundleB, A.class.getName(), bundleB);
@@ -1086,42 +970,32 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleB, A.class.getName(), bundleA);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
             bundleB.uninstall();
          }
-   
+
          //Bundle-SymbolicName: packageimportattribute
          //Import-Package: org.jboss.test.osgi.classloader.support.a;test=x
          assemblyB = assembleArchive("bundleB", "/bundles/resolver/packageimportattribute");
          bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleB, A.class.getName(), bundleA);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -1149,18 +1023,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertFalse("Not all resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB INSTALLED", Bundle.INSTALLED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClassFail(bundleB, A.class.getName());
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB INSTALLED", Bundle.INSTALLED, bundleB.getState());
          }
          finally
          {
@@ -1188,18 +1057,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertTrue("All resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClass(bundleB, A.class.getName(), bundleA);
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB RESOLVED", Bundle.RESOLVED, bundleB.getState());
          }
          finally
          {
@@ -1227,18 +1091,13 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          Bundle bundleB = installBundle(assemblyB);
          try
          {
-            // Resolve the installed bundles
-            PackageAdmin packageAdmin = getPackageAdmin();
-            boolean allResolved = packageAdmin.resolveBundles(null);
-            assertFalse("Not all resolved", allResolved);
-   
-            // Verify bundle states
-            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
-            assertEquals("BundleB INSTALLED", Bundle.INSTALLED, bundleB.getState());
-   
             // Verify that the class load
             assertLoadClass(bundleA, A.class.getName(), bundleA);
             assertLoadClassFail(bundleB, A.class.getName());
+
+            // Verify bundle states
+            assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
+            assertEquals("BundleB INSTALLED", Bundle.INSTALLED, bundleB.getState());
          }
          finally
          {
@@ -1264,7 +1123,7 @@ public abstract class AbstractResolverTest extends AbstractFrameworkTest
          PackageAdmin packageAdmin = getPackageAdmin();
          boolean allResolved = packageAdmin.resolveBundles(null);
          assertTrue("All resolved", allResolved);
-   
+
          // Verify bundle states
          assertEquals("BundleA RESOLVED", Bundle.RESOLVED, bundleA.getState());
       }

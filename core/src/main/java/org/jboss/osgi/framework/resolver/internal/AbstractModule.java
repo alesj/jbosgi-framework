@@ -61,6 +61,7 @@ public abstract class AbstractModule implements ModuleExtension
    private Map<String, String> headerMap;
    private List<Capability> capabilities;
    private List<Requirement> requirements;
+   private List<Requirement> dynamicreqs;
    private List<Module> fragments;
    private List<Wire> wires;
    private boolean resolved;
@@ -132,8 +133,14 @@ public abstract class AbstractModule implements ModuleExtension
    @Override
    public List<Requirement> getDynamicRequirements()
    {
-      throw new NotImplementedException();
+      if (dynamicreqs == null)
+         dynamicreqs = createDynamicRequirements();
+
+      return requirements;
    }
+
+   protected abstract List<Requirement> createDynamicRequirements();
+
 
    @Override
    public List<R4Library> getNativeLibraries()
@@ -162,10 +169,7 @@ public abstract class AbstractModule implements ModuleExtension
    @Override
    public List<Wire> getWires()
    {
-      if (wires != null)
-         return Collections.unmodifiableList(wires);
-      else
-         return Collections.emptyList();
+      return (wires != null ? Collections.unmodifiableList(wires) : null);
    }
 
    @Override

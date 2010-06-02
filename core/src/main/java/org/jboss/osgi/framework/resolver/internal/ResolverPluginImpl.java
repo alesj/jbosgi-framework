@@ -30,8 +30,10 @@ import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.ResolveException;
 import org.apache.felix.framework.resolver.Wire;
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
@@ -62,8 +64,11 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       resolver.addModule(module);
 
       // Attach the resolver module to the deployment
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
-      bundleState.getDeploymentUnit().addAttachment(ModuleExtension.class, module);
+      if (bundle.getBundleId() != 0)
+      {
+         AbstractDeployedBundleState bundleState = AbstractDeployedBundleState.assertBundleState(bundle);
+         bundleState.getDeploymentUnit().addAttachment(ModuleExtension.class, module);
+      }
    }
 
    @Override
@@ -72,9 +77,12 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       ModuleExtension module = resolver.getModule(bundle);
       resolver.removeModule(module);
 
-      // REmove the resolver module from the deployment
-      OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
-      bundleState.getDeploymentUnit().removeAttachment(ModuleExtension.class);
+      // Remove the resolver module from the deployment
+      if (bundle.getBundleId() != 0)
+      {
+         AbstractDeployedBundleState bundleState = AbstractDeployedBundleState.assertBundleState(bundle);
+         bundleState.getDeploymentUnit().removeAttachment(ModuleExtension.class);
+      }
    }
 
    @Override
@@ -103,13 +111,20 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       ModuleExtension impModule = resolver.getModule(importer);
       ModuleExtension expModule = resolver.getModule(exporter);
       
-      Requirement req = ((ModuleExtensionImpl)impModule).getMappedRequirement(osgireq);
-      Wire wire = impModule.getWireForRequirement(req);
-      if (wire == null)
+      if (impModule.isResolved() == false || expModule.isResolved() == false)
          return false;
       
-      boolean match = wire.getExporter() == expModule;
-      return match;
+      Requirement req = ((DeployedBundleModule)impModule).getMappedRequirement(osgireq);
+      Wire wire = impModule.getWireForRequirement(req);
+      if (wire != null)
+      {
+         boolean match = wire.getExporter() == expModule;
+         return match;
+      }
+
+      // If we did not get a ResolverException, we can assume that 
+      // all packages that do not have a wire, wire to itself
+      return impModule == expModule;
    }
 
    static class JBossResolver extends AbstractResolver
@@ -136,8 +151,15 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       @Override
       public ModuleExtension createModule(Bundle bundle)
       {
-         OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
-         return new ModuleExtensionImpl(bundleState);
+         if (bundle.getBundleId() == 0)
+         {
+            return new SystemBundleModule((OSGiSystemState)bundle);
+         }
+         else
+         {
+            OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+            return new DeployedBundleModule(bundleState);
+         }
       }
 
       @Override

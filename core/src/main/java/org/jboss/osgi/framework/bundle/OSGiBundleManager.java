@@ -191,7 +191,7 @@ public class OSGiBundleManager
    {
       properties.setProperties(props);
    }
-   
+
    /**
     * Get a property
     */
@@ -788,7 +788,9 @@ public class OSGiBundleManager
             return;
       }
 
-      validateBundle(bundleState);
+      // Validate every deployed bundle (i.e. the system bundle is not validated)
+      if (bundleState instanceof AbstractDeployedBundleState)
+         validateBundle((AbstractDeployedBundleState)bundleState);
 
       allBundles.add(bundleState);
       try
@@ -808,7 +810,7 @@ public class OSGiBundleManager
     * 
     * @param bundleState the bundle state
     */
-   private void validateBundle(AbstractBundleState bundleState)
+   private void validateBundle(AbstractDeployedBundleState bundleState)
    {
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       if (osgiMetaData == null)
@@ -1146,7 +1148,7 @@ public class OSGiBundleManager
       Bundle[] bundles = (bundle != null ? new Bundle[] { bundle } : null);
       return packageAdmin.resolveBundles(bundles);
    }
-   
+
    /**
     * Load class from a bundle.
     * If it cannot be loaded, return null.
@@ -1192,7 +1194,7 @@ public class OSGiBundleManager
     * 
     * This method does nothing if called when this Framework is in the Bundle.STARTING, Bundle.ACTIVE or Bundle.STOPPING states. 
     */
-   public void initFramework()
+   public void initFramework() throws BundleException
    {
       // Log INFO about this implementation
       String implTitle = getClass().getPackage().getImplementationTitle();
@@ -1209,7 +1211,7 @@ public class OSGiBundleManager
       systemBundle.changeState(Bundle.STARTING);
 
       // Create the system bundle context
-      systemBundle.createBundleContext();
+      systemBundle.start();
 
       // [TODO] Be at start level 0
 

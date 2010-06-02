@@ -96,6 +96,19 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    private AtomicInteger state = new AtomicInteger(Bundle.UNINSTALLED);
 
    /**
+    * Create a new abstract bundle state.
+    * 
+    * @throws IllegalArgumentException for a null parameter
+    */
+   public AbstractBundleState(OSGiBundleManager bundleManager)
+   {
+      if (bundleManager == null)
+         throw new IllegalArgumentException("Null bundle manager");
+
+      this.bundleManager = bundleManager;
+   }
+
+   /**
     * Assert that the given bundle is an instance of AbstractBundleState
     * @throws IllegalArgumentException if the given bundle is not an instance of AbstractBundleState
     */
@@ -111,19 +124,6 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
          throw new IllegalArgumentException("Not an AbstractBundleState: " + bundle);
 
       return (AbstractBundleState)bundle;
-   }
-
-   /**
-    * Create a new abstract bundle state.
-    * 
-    * @throws IllegalArgumentException for a null parameter
-    */
-   public AbstractBundleState(OSGiBundleManager bundleManager)
-   {
-      if (bundleManager == null)
-         throw new IllegalArgumentException("Null bundle manager");
-
-      this.bundleManager = bundleManager;
    }
 
    /**
@@ -176,14 +176,14 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return bundleContext;
    }
 
-   public synchronized BundleContext createBundleContext()
+   synchronized BundleContext createBundleContext()
    {
       if (bundleContext == null)
          bundleContext = new OSGiBundleContextWrapper(this);
       return bundleContext;
    }
 
-   public synchronized void destroyBundleContext()
+   synchronized void destroyBundleContext()
    {
       if (bundleContext != null)
          ((OSGiBundleContextWrapper)bundleContext).destroyBundleContext();

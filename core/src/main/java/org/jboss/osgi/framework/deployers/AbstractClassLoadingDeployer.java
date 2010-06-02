@@ -89,6 +89,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
          throw new IllegalStateException("No bundle state");
 
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
+      SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
 
       OSGiClassLoadingMetaData classLoadingMetaData = new OSGiClassLoadingMetaData();
       classLoadingMetaData.setName(bundleState.getSymbolicName());
@@ -129,17 +130,16 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       List<PackageAttribute> imports = osgiMetaData.getImportPackages();
       if (imports != null && imports.isEmpty() == false)
       {
-         SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
          for (PackageAttribute metadata : imports)
          {
             String packageName = metadata.getAttribute();
 
-            // [TODO] Should system packages be added as capabilities?
-            if (syspackPlugin.isSystemPackage(packageName) == true)
-               continue;
-
-            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, metadata, false);
-            requirements.addRequirement(requirement);
+            // [JBOSGI-329] SystemBundle not added as MC module
+            if (syspackPlugin.isSystemPackage(packageName) == false)
+            {
+               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, metadata, false);
+               requirements.addRequirement(requirement);
+            }
          }
       }
 
@@ -147,17 +147,16 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       List<PackageAttribute> dynamicImports = osgiMetaData.getDynamicImports();
       if (dynamicImports != null && dynamicImports.isEmpty() == false)
       {
-         SystemPackagesPlugin syspackPlugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
          for (PackageAttribute packageAttribute : dynamicImports)
          {
             String packageName = packageAttribute.getAttribute();
 
-            // [TODO] Should system packages be added as capabilities?
-            if (syspackPlugin.isSystemPackage(packageName) == true)
-               continue;
-
-            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
-            requirements.addRequirement(requirement);
+            // [JBOSGI-329] SystemBundle not added as MC module
+            if (syspackPlugin.isSystemPackage(packageName) == false)
+            {
+               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
+               requirements.addRequirement(requirement);
+            }
          }
       }
 

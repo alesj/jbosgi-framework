@@ -91,6 +91,19 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
    }
 
    /**
+    * Assert that the given bundle is an instance of AbstractDeployedBundleState
+    * @throws IllegalArgumentException if the given bundle is not an instance of AbstractDeployedBundleState
+    */
+   public static AbstractDeployedBundleState assertBundleState(Bundle bundle)
+   {
+      bundle = AbstractBundleState.assertBundleState(bundle);
+      if (bundle instanceof AbstractDeployedBundleState == false)
+         throw new IllegalArgumentException("Not an AbstractDeployedBundleState: " + bundle);
+
+      return (AbstractDeployedBundleState)bundle;
+   }
+
+   /**
     * Get the root file for this bundle 
     */
    public VirtualFile getRoot()

@@ -26,8 +26,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
+import java.util.jar.Manifest;
 
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
@@ -55,6 +55,7 @@ public class OSGiSystemState extends AbstractBundleState
    {
       super(bundleManager);
       
+      // Initialize basic metadata
       Manifest manifest = new Manifest();
       Attributes attributes = manifest.getMainAttributes();
       attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
@@ -122,7 +123,7 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes" })
    public Enumeration getEntryPaths(String path)
    {
       System.out.println("FIXME [JBOSGI-138] getEntryPaths(" + path + ")");
@@ -135,7 +136,7 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "rawtypes" })
    public Enumeration getResources(String name) throws IOException
    {
       System.out.println("FIXME [JBOSGI-138] getResources(" + name + ")");
@@ -144,7 +145,7 @@ public class OSGiSystemState extends AbstractBundleState
 
    public void start(int options) throws BundleException
    {
-      // do nothing
+      createBundleContext();
    }
 
    public void stop(int options) throws BundleException

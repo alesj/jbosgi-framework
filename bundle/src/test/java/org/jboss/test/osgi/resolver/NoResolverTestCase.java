@@ -23,7 +23,10 @@ package org.jboss.test.osgi.resolver;
 
 // $Id$
 
-import org.jboss.osgi.framework.resolver.Resolver;
+import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.launch.OSGiFramework;
+import org.jboss.osgi.framework.plugins.ResolverPlugin;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -34,10 +37,15 @@ import org.junit.Test;
  */
 public class NoResolverTestCase extends AbstractResolverTest
 {
-   @Override
-   protected Resolver getTestResolver()
+   @Before
+   public void setUp() throws Exception
    {
-      return null;
+      super.setUp();
+
+      OSGiBundleManager bundleManager = ((OSGiFramework)getFramework()).getBundleManager();
+      ResolverPlugin installedResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (installedResolver != null)
+         bundleManager.removePlugin(installedResolver);
    }
 
    @Test

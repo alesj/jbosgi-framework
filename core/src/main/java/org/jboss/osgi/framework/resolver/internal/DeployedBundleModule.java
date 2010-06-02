@@ -32,6 +32,7 @@ import org.apache.felix.framework.capabilityset.Attribute;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Directive;
 import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.framework.util.manifestparser.CapabilityImpl;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.jboss.logging.Logger;
@@ -45,23 +46,25 @@ import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 /**
- * An implementation of the Felix Module
+ * An JBoss specific implementation of a Resolver Module
  *  
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-class ModuleExtensionImpl extends AbstractModule
+class DeployedBundleModule extends AbstractModule
 {
    // Provide logging
-   final Logger log = Logger.getLogger(ModuleExtensionImpl.class);
+   final Logger log = Logger.getLogger(DeployedBundleModule.class);
 
    private OSGiModule moduleDelegate;
    private Map<OSGiCapability, Capability> capMap;
    private Map<OSGiRequirement, Requirement> reqMap;
+   private Map<OSGiRequirement, Requirement> dynReqMap;
 
-   public ModuleExtensionImpl(OSGiBundleState bundleState)
+   public DeployedBundleModule(OSGiBundleState bundleState)
    {
       super(bundleState);
    }
@@ -95,20 +98,8 @@ class ModuleExtensionImpl extends AbstractModule
             else if (mccap instanceof OSGiPackageCapability)
             {
                OSGiPackageCapability osgicap = (OSGiPackageCapability)mccap;
-               PackageAttribute metadata = osgicap.getMetadata();
-
-               // Get the capabiliy attributes
-               List<Attribute> attrs = new ArrayList<Attribute>();
-               attrs.add(new Attribute(Capability.PACKAGE_ATTR, osgicap.getName(), false));
-               for (Entry<String, Parameter> entry : metadata.getAttributes().entrySet())
-                  attrs.add(new Attribute(entry.getKey(), entry.getValue().getValue(), false));
-
-               // Get the capabiliy directives
-               List<Directive> dirs = new ArrayList<Directive>();
-               for (Entry<String, Parameter> entry : metadata.getDirectives().entrySet())
-                  dirs.add(new Directive(entry.getKey(), entry.getValue().getValue()));
-
-               capMap.put(osgicap, new CapabilityImpl(this, Capability.PACKAGE_NAMESPACE, dirs, attrs));
+               Capability cap = packageCapability(osgicap);
+               capMap.put(osgicap, cap);
             }
             else
             {
@@ -141,20 +132,11 @@ class ModuleExtensionImpl extends AbstractModule
             if (mcreq instanceof OSGiPackageRequirement)
             {
                OSGiPackageRequirement osgireq = (OSGiPackageRequirement)mcreq;
-               PackageAttribute metadata = osgireq.getMetadata();
-
-               // Get the requirements attributes
-               List<Attribute> attrs = new ArrayList<Attribute>();
-               attrs.add(new Attribute(Capability.PACKAGE_ATTR, osgireq.getName(), false));
-               for (Entry<String, Parameter> entry : metadata.getAttributes().entrySet())
-                  attrs.add(new Attribute(entry.getKey(), entry.getValue().getValue(), false));
-
-               // Get the requirements directives
-               List<Directive> dirs = new ArrayList<Directive>();
-               for (Entry<String, Parameter> entry : metadata.getDirectives().entrySet())
-                  dirs.add(new Directive(entry.getKey(), entry.getValue().getValue()));
-
-               reqMap.put(osgireq, new RequirementImpl(this, Capability.PACKAGE_NAMESPACE, dirs, attrs));
+               if (osgireq.isDynamic() == false)
+               {
+                  Requirement req = packageRequirement(osgireq);
+                  reqMap.put(osgireq, req);
+               }
             }
             else
             {
@@ -164,6 +146,35 @@ class ModuleExtensionImpl extends AbstractModule
       }
 
       ArrayList<Requirement> result = new ArrayList<Requirement>(reqMap.values());
+      return Collections.unmodifiableList(result);
+   }
+
+   @Override
+   protected List<Requirement> createDynamicRequirements()
+   {
+      dynReqMap = new LinkedHashMap<OSGiRequirement, Requirement>();
+      if (getModuleDelegate().getRequirements() != null)
+      {
+         for (org.jboss.classloading.spi.metadata.Requirement mcreq : getModuleDelegate().getRequirements())
+         {
+            // Add the package requirements
+            if (mcreq instanceof OSGiPackageRequirement)
+            {
+               OSGiPackageRequirement osgireq = (OSGiPackageRequirement)mcreq;
+               if (osgireq.isDynamic() == true)
+               {
+                  Requirement req = packageRequirement(osgireq);
+                  dynReqMap.put(osgireq, req);
+               }
+            }
+            else
+            {
+               log.warn("Unsupported requirement: " + mcreq);
+            }
+         }
+      }
+
+      ArrayList<Requirement> result = new ArrayList<Requirement>(dynReqMap.values());
       return Collections.unmodifiableList(result);
    }
 
@@ -181,6 +192,58 @@ class ModuleExtensionImpl extends AbstractModule
          throw new IllegalStateException("Requirement map not yet created for: " + getBundle());
 
       return reqMap.get(osgireq);
+   }
+
+   private Capability packageCapability(OSGiPackageCapability osgicap)
+   {
+      PackageAttribute metadata = osgicap.getMetadata();
+
+      // Get the capabiliy attributes
+      List<Attribute> attrs = new ArrayList<Attribute>();
+      attrs.add(new Attribute(Capability.PACKAGE_ATTR, osgicap.getName(), false));
+      for (Entry<String, Parameter> entry : metadata.getAttributes().entrySet())
+      {
+         String key = entry.getKey();
+         Object value = (String)entry.getValue().getValue();
+         if (Capability.VERSION_ATTR.equals(key))
+            value = Version.parseVersion((String)value);
+         
+         attrs.add(new Attribute(key, value, false));
+      }
+
+      // Get the capabiliy directives
+      List<Directive> dirs = new ArrayList<Directive>();
+      for (Entry<String, Parameter> entry : metadata.getDirectives().entrySet())
+         dirs.add(new Directive(entry.getKey(), entry.getValue().getValue()));
+
+      CapabilityImpl cap = new CapabilityImpl(this, Capability.PACKAGE_NAMESPACE, dirs, attrs);
+      return cap;
+   }
+
+   private Requirement packageRequirement(OSGiPackageRequirement osgireq)
+   {
+      PackageAttribute metadata = osgireq.getMetadata();
+      
+      // Get the requirements attributes
+      List<Attribute> attrs = new ArrayList<Attribute>();
+      attrs.add(new Attribute(Capability.PACKAGE_ATTR, osgireq.getName(), false));
+      for (Entry<String, Parameter> entry : metadata.getAttributes().entrySet())
+      {
+         String key = entry.getKey();
+         Object value = (String)entry.getValue().getValue();
+         if (Capability.VERSION_ATTR.equals(key))
+            value = VersionRange.parse((String)value);
+         
+         attrs.add(new Attribute(key, value, false));
+      }
+
+      // Get the requirements directives
+      List<Directive> dirs = new ArrayList<Directive>();
+      for (Entry<String, Parameter> entry : metadata.getDirectives().entrySet())
+         dirs.add(new Directive(entry.getKey(), entry.getValue().getValue()));
+
+      RequirementImpl req = new RequirementImpl(this, Capability.PACKAGE_NAMESPACE, dirs, attrs);
+      return req;
    }
 
    private OSGiModule getModuleDelegate()

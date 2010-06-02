@@ -102,7 +102,7 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          allPackages.add("org.jboss.osgi.deployment.interceptor");
 
          String[] corePackages = OSGiCoreClassFilter.getCorePackages();
-         allPackageNames.addAll(Arrays.asList(corePackages));
+         allPackages.addAll(Arrays.asList(corePackages));
          
          allPackages.add("org.w3c.dom");
          allPackages.add("org.w3c.dom.bootstrap");
