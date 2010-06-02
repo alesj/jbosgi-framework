@@ -36,6 +36,7 @@ import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.framework.util.manifestparser.CapabilityImpl;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
 import org.jboss.osgi.framework.classloading.OSGiCapability;
@@ -196,7 +197,11 @@ class DeployedBundleModule extends AbstractModule
 
    private Capability packageCapability(OSGiPackageCapability osgicap)
    {
+      AbstractBundleState bundleState = osgicap.getBundleState();
       PackageAttribute metadata = osgicap.getMetadata();
+
+      String symbolicName = null;
+      Version bundleVersion = null;
 
       // Get the capabiliy attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
@@ -207,8 +212,25 @@ class DeployedBundleModule extends AbstractModule
          Object value = (String)entry.getValue().getValue();
          if (Capability.VERSION_ATTR.equals(key))
             value = Version.parseVersion((String)value);
-         
+         else if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(key))
+            symbolicName = (String)value;
+         else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
+            bundleVersion = Version.parseVersion((String)value);
+
          attrs.add(new Attribute(key, value, false));
+      }
+
+      // Now that we know that there are no bundle symbolic name and version
+      // attributes, add them since the spec says they are there implicitly.
+      if (symbolicName == null)
+      {
+         symbolicName = bundleState.getSymbolicName();
+         attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName, false));
+      }
+      if (bundleVersion == null)
+      {
+         bundleVersion = bundleState.getVersion();
+         attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersion, false));
       }
 
       // Get the capabiliy directives
@@ -223,7 +245,7 @@ class DeployedBundleModule extends AbstractModule
    private Requirement packageRequirement(OSGiPackageRequirement osgireq)
    {
       PackageAttribute metadata = osgireq.getMetadata();
-      
+
       // Get the requirements attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
       attrs.add(new Attribute(Capability.PACKAGE_ATTR, osgireq.getName(), false));
@@ -233,7 +255,9 @@ class DeployedBundleModule extends AbstractModule
          Object value = (String)entry.getValue().getValue();
          if (Capability.VERSION_ATTR.equals(key))
             value = VersionRange.parse((String)value);
-         
+         else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
+            value = VersionRange.parse((String)value);
+
          attrs.add(new Attribute(key, value, false));
       }
 

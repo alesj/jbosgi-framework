@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import javax.servlet.Servlet;
+import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 
 import org.jboss.classloader.spi.ClassLoaderDomain;
@@ -72,11 +72,11 @@ public class ClassLoaderDomainTestCase extends AbstractFrameworkTest
       loadedClass = getFramework().loadClass(ConstantsHelper.class.getName());
       assertNotNull("Class loaded: " + ConstantsHelper.class.getName(), loadedClass);
       
-      // Attempt to load a class that is not part of the JDK  
-      loadedClass = getFramework().loadClass(Servlet.class.getName());
-      assertNull("Cannot load class: " + Servlet.class.getName(), loadedClass);
+      // Attempt to load a javax.* class that is not part of the JDK  
+      loadedClass = getFramework().loadClass(Inject.class.getName());
+      assertNull("Cannot load class: " + Inject.class.getName(), loadedClass);
       
-      // Attempt to load a class that is part of the JDK  
+      // Attempt to load a javax.* class that is part of the JDK  
       loadedClass = getFramework().loadClass(SwingUtilities.class.getName());
       assertNull("Cannot load class: " + SwingUtilities.class.getName(), loadedClass);
    }
@@ -96,11 +96,11 @@ public class ClassLoaderDomainTestCase extends AbstractFrameworkTest
       loadedClass = defaultDomain.loadClass(ConstantsHelper.class.getName());
       assertNotNull("Class loaded: " + ConstantsHelper.class.getName(), loadedClass);
       
-      // Attempt to load a class that is not part of the JDK  
-      loadedClass = defaultDomain.loadClass(Servlet.class.getName());
-      assertNull("Cannot load class: " + Servlet.class.getName(), loadedClass);
+      // Attempt to load a javax.* class that is not part of the JDK  
+      loadedClass = defaultDomain.loadClass(Inject.class.getName());
+      assertNull("Cannot load class: " + Inject.class.getName(), loadedClass);
       
-      // Attempt to load a class that is part of the JDK  
+      // Attempt to load a javax.* class that is part of the JDK  
       loadedClass = defaultDomain.loadClass(SwingUtilities.class.getName());
       assertNull("Cannot load class: " + SwingUtilities.class.getName(), loadedClass);
    }

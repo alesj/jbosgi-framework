@@ -49,6 +49,12 @@
       <groupId>org.jboss.kernel</groupId>
       <artifactId>jboss-jmx-aop-mc-int</artifactId>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-common-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.kernel</groupId>
@@ -64,37 +70,7 @@
     <!-- Test bundles dependencies -->
     <dependency>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.configadmin</artifactId>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.log</artifactId>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.metatype</artifactId>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -113,51 +89,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.bundles</groupId>
-      <artifactId>jboss-osgi-common-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.bundles</groupId>
-      <artifactId>jboss-osgi-husky</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.bundles</groupId>
-      <artifactId>jboss-osgi-reflect</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.http</groupId>
-      <artifactId>jboss-osgi-http</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.jaxb</groupId>
-      <artifactId>jboss-osgi-jaxb</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.jmx</groupId>
-      <artifactId>jboss-osgi-jmx</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.jndi</groupId>
-      <artifactId>jboss-osgi-jndi</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.osgi.xerces</groupId>
-      <artifactId>jboss-osgi-xerces</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.osgi.xb</groupId>
       <artifactId>jboss-osgi-xml-binding</artifactId>
       <scope>provided</scope>
     </dependency>
-
+    
     <!-- Test Dependencies -->
     <dependency>
       <groupId>org.jboss.test</groupId>

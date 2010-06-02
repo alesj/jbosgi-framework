@@ -121,6 +121,11 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       }
    }
 
+   public AbstractBundleState getBundleState()
+   {
+      return bundleState;
+   }
+
    /**
     * Get the metadata.
     */

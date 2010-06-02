@@ -131,6 +131,11 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_VERSION_ATTRIBUTE + " on an Export-Package");
    }
 
+   public AbstractBundleState getBundleState()
+   {
+      return bundleState;
+   }
+
    public PackageAttribute getMetadata()
    {
       return metadata;

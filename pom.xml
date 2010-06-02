@@ -50,27 +50,17 @@
   
   <!-- Properties -->
   <properties>
-    <version.apache.felix.configadmin>1.0.10</version.apache.felix.configadmin>
     <version.apache.felix.framework>2.1.0-SNAPSHOT</version.apache.felix.framework>
     <version.apache.felix.log>1.0.0</version.apache.felix.log>
-    <version.apache.felix.metatype>1.0.2</version.apache.felix.metatype>
     <version.jboss.classloading>2.2.0-SNAPSHOT</version.jboss.classloading>
     <version.jboss.deployers>2.2.0.Alpha4</version.jboss.deployers>
     <version.jboss.kernel>2.2.0.Alpha9</version.jboss.kernel>
     <version.jboss.mdr>2.2.0.Alpha2</version.jboss.mdr>
-    <version.jboss.osgi.xerces>2.9.1.SP5-SNAPSHOT</version.jboss.osgi.xerces>
     <version.jboss.osgi.common>1.0.3</version.jboss.osgi.common>
-    <version.jboss.osgi.common.core>2.2.13.GA</version.jboss.osgi.common.core>
     <version.jboss.osgi.deployers>1.0.8-SNAPSHOT</version.jboss.osgi.deployers>
     <version.jboss.osgi.deployment>1.0.2</version.jboss.osgi.deployment>
     <version.jboss.osgi.equinox>3.5.2</version.jboss.osgi.equinox>
     <version.jboss.osgi.felix>2.1.0-SNAPSHOT</version.jboss.osgi.felix>
-    <version.jboss.osgi.http>1.0.0-SNAPSHOT</version.jboss.osgi.http>
-    <version.jboss.osgi.husky>1.0.4</version.jboss.osgi.husky>
-    <version.jboss.osgi.jaxb>2.1.10.SP5-SNAPSHOT</version.jboss.osgi.jaxb>
-    <version.jboss.osgi.jmx>1.0.6-SNAPSHOT</version.jboss.osgi.jmx>
-    <version.jboss.osgi.jndi>1.0.3</version.jboss.osgi.jndi>
-    <version.jboss.osgi.reflect>2.2.0</version.jboss.osgi.reflect>
     <version.jboss.osgi.spi>1.0.7-SNAPSHOT</version.jboss.osgi.spi>
     <version.jboss.osgi.vfs>1.0.0</version.jboss.osgi.vfs>
     <version.jboss.osgi.xml.binding>2.0.2.Beta4.SP2-SNAPSHOT</version.jboss.osgi.xml.binding>
@@ -201,18 +191,8 @@
       <!-- Test bundles dependencies -->
       <dependency>
         <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.configadmin</artifactId>
-        <version>${version.apache.felix.configadmin}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.log</artifactId>
         <version>${version.apache.felix.log}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.metatype</artifactId>
-        <version>${version.apache.felix.metatype}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.osgi.bundles</groupId>
@@ -220,49 +200,9 @@
         <version>${version.jboss.osgi.common}</version>
       </dependency>
       <dependency>
-        <groupId>org.jboss.osgi.bundles</groupId>
-        <artifactId>jboss-osgi-common-core</artifactId>
-        <version>${version.jboss.osgi.common.core}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi.bundles</groupId>
-        <artifactId>jboss-osgi-husky</artifactId>
-        <version>${version.jboss.osgi.husky}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi.bundles</groupId>
-        <artifactId>jboss-osgi-reflect</artifactId>
-        <version>${version.jboss.osgi.reflect}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi.http</groupId>
-        <artifactId>jboss-osgi-http</artifactId>
-        <version>${version.jboss.osgi.http}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi.jaxb</groupId>
-        <artifactId>jboss-osgi-jaxb</artifactId>
-        <version>${version.jboss.osgi.jaxb}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi.jmx</groupId>
-        <artifactId>jboss-osgi-jmx</artifactId>
-        <version>${version.jboss.osgi.jmx}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi.jndi</groupId>
-        <artifactId>jboss-osgi-jndi</artifactId>
-        <version>${version.jboss.osgi.jndi}</version>
-      </dependency>
-      <dependency>
         <groupId>org.jboss.osgi.xb</groupId>
         <artifactId>jboss-osgi-xml-binding</artifactId>
         <version>${version.jboss.osgi.xml.binding}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.osgi.xerces</groupId>
-        <artifactId>jboss-osgi-xerces</artifactId>
-        <version>${version.jboss.osgi.xerces}</version>
       </dependency>
 
       <!-- Test Dependencies -->
