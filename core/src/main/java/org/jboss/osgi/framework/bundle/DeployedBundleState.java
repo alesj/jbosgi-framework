@@ -48,7 +48,7 @@ import org.osgi.framework.BundleException;
  * @author thomas.diesler@jboss.com
  * @since 25-Dec-2009
  */
-public abstract class AbstractDeployedBundleState extends AbstractBundleState
+public abstract class DeployedBundleState extends AbstractBundleState
 {
    /** Used to generate a unique id */
    private static final AtomicLong bundleIDGenerator = new AtomicLong();
@@ -72,7 +72,7 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
     * Create a new BundleState.
     * @throws IllegalArgumentException for a null parameter
     */
-   public AbstractDeployedBundleState(OSGiBundleManager bundleManager, DeploymentUnit unit)
+   public DeployedBundleState(OSGiBundleManager bundleManager, DeploymentUnit unit)
    {
       super(bundleManager);
 
@@ -94,13 +94,13 @@ public abstract class AbstractDeployedBundleState extends AbstractBundleState
     * Assert that the given bundle is an instance of AbstractDeployedBundleState
     * @throws IllegalArgumentException if the given bundle is not an instance of AbstractDeployedBundleState
     */
-   public static AbstractDeployedBundleState assertBundleState(Bundle bundle)
+   public static DeployedBundleState assertBundleState(Bundle bundle)
    {
       bundle = AbstractBundleState.assertBundleState(bundle);
-      if (bundle instanceof AbstractDeployedBundleState == false)
+      if (bundle instanceof DeployedBundleState == false)
          throw new IllegalArgumentException("Not an AbstractDeployedBundleState: " + bundle);
 
-      return (AbstractDeployedBundleState)bundle;
+      return (DeployedBundleState)bundle;
    }
 
    /**

@@ -37,7 +37,7 @@ import org.osgi.framework.BundleException;
  * @author thomas.diesler@jboss.com
  * @since 25-Dec-2009
  */
-public class OSGiFragmentState extends AbstractDeployedBundleState
+public class OSGiFragmentState extends DeployedBundleState
 {
    // The host that this fragment is attached to
    private OSGiBundleState fragmentHost;

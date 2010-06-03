@@ -47,7 +47,7 @@ import org.osgi.service.log.LogService;
 public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 {
    private static JavaArchive archiveC;
-   
+
    @BeforeClass
    public static void beforeTestCase()
    {
@@ -66,14 +66,14 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
          }
       });
    }
-   
+
    @Before
    public void setUp() throws Exception
    {
       super.setUp();
       createFramework().start();
    }
-   
+
    @After
    public void tearDown() throws Exception
    {

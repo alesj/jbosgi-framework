@@ -21,7 +21,10 @@
  */
 package org.jboss.osgi.framework.plugins;
 
-import org.jboss.osgi.framework.resolver.Resolver;
+import java.util.List;
+
+import org.jboss.osgi.framework.classloading.OSGiRequirement;
+import org.osgi.framework.Bundle;
 
 
 //$Id$
@@ -32,6 +35,39 @@ import org.jboss.osgi.framework.resolver.Resolver;
  * @author thomas.diesler@jboss.com
  * @since 09-Nov-2009
  */
-public interface ResolverPlugin extends Resolver, Plugin
+public interface ResolverPlugin extends Plugin
 {
+   /**
+    * Add a bundle to the resolver.
+    * 
+    * @param bundle the bundle
+    * @return The resBundle associated with the added bundle.
+    */
+   void addBundle(Bundle bundle);
+   
+   /**
+    * Remove a bundle from the resolver.
+
+    * @param bundle the bundle
+    * @return The resBundle associated with the removed bundle.
+    */
+   void removeBundle(Bundle bundle);
+   
+   /**
+    * Resolve the given list of bundles.
+    * 
+    * @param bundles the bundles to resolve
+    * @return The list of resolved bundles in the resolve order or an empty list
+    */
+   List<Bundle> resolve(List<Bundle> bundles);
+
+   /**
+    * Return true if the given importer is wired to the given exporter for the given requirement.
+    * 
+    * @param importer The bundle that imports the package.
+    * @param exporter The bundle that exports the package.
+    * @param requirement The requirement
+    * @return True if the importer is wired to the exporter
+    */
+   boolean match(Bundle importer, Bundle exporter, OSGiRequirement requirement);
 }

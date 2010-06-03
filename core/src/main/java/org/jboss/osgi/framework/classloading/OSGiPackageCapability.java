@@ -31,15 +31,13 @@ import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
-import org.jboss.osgi.framework.resolver.Resolver;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -142,36 +140,41 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    }
 
    @Override
-   public boolean resolves(Module reqModule, Requirement requirement)
+   public boolean resolves(Module reqModule, Requirement mcRequirement)
    {
-      if (super.resolves(reqModule, requirement) == false)
-         return false;
-      if (requirement instanceof OSGiPackageRequirement == false)
-         return true;
-
-      OSGiPackageRequirement osgireq = (OSGiPackageRequirement)requirement;
-      if (matchAttributes(osgireq) == false)
-         return false;
-
-      OSGiBundleManager bundleManager = bundleState.getBundleManager();
-      Resolver bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (bundleResolver != null)
+      boolean match;
+      
+      // The Domain creates PackageRequirements on the fly in Domain.getExportedPackagesInternal()
+      // we only match package name and version but not any OSGi constraints
+      if (mcRequirement instanceof OSGiPackageRequirement == false)
       {
-         // Get the bundle associated with the requirement
-         String reqLocation = reqModule.getContextName();
-         AbstractBundleState reqBundle = bundleManager.getBundleByLocation(reqLocation);
-         if (reqBundle == null)
-            throw new IllegalStateException("Cannot get bundle for: " + reqLocation);
-         
-         // Get the exporter for this requirement
-         if (reqBundle instanceof OSGiBundleState)
-         {
-            boolean match = bundleResolver.match(reqBundle, bundleState, osgireq);
-            return match;
-         }
+         match = super.resolves(reqModule, mcRequirement);
+         return match;
       }
 
-      return true;
+      OSGiPackageRequirement osgiRequirement = (OSGiPackageRequirement)mcRequirement;
+      AbstractBundleState reqBundle = osgiRequirement.getBundleState();
+      
+      // Get the optional ResolverPlugin
+      OSGiBundleManager bundleManager = bundleState.getBundleManager();
+      ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (resolver != null)
+      {
+         // Match the requirement through the Resolver
+         match = resolver.match(reqBundle, bundleState, osgiRequirement);
+         
+         // [JBOSGI-330] Revisit capability matching for dynamic imports
+         if (match == false && osgiRequirement.isDynamic())
+            match = super.resolves(reqModule, mcRequirement);
+      }
+      else
+      {
+         // Match package name and version plus additional OSGi attributes
+         match = super.resolves(reqModule, mcRequirement);
+         match &= matchAttributes(osgiRequirement);
+      }
+      
+      return match;
    }
 
    /**
@@ -182,9 +185,9 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    public Module getModule()
    {
       Module module = null;
-      if (bundleState instanceof AbstractDeployedBundleState)
+      if (bundleState instanceof DeployedBundleState)
       {
-         AbstractDeployedBundleState depBundle = (AbstractDeployedBundleState)bundleState; 
+         DeployedBundleState depBundle = (DeployedBundleState)bundleState;
          DeploymentUnit unit = depBundle.getDeploymentUnit();
          module = unit.getAttachment(Module.class);
          if (module == null)
@@ -192,7 +195,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       }
       return module;
    }
-   
+
    public boolean matchNameAndVersion(OSGiPackageRequirement packageRequirement)
    {
       if (packageRequirement.isWildcard())
@@ -201,12 +204,13 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
          if (filter.matchesPackageName(getName()) == false)
             return false;
       }
-      else // for non-wildcard, we intentionaly still use direct string equals
+      else
+      // for non-wildcard, we intentionaly still use direct string equals
       {
          if (getName().equals(packageRequirement.getName()) == false)
             return false;
       }
-      
+
       boolean inRange = packageRequirement.getVersionRange().isInRange(getVersion());
       return inRange;
    }

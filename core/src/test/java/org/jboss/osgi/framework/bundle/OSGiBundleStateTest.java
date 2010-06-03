@@ -80,7 +80,7 @@ public class OSGiBundleStateTest
       assertFalse("Precondition failed", bs.isPersistentlyStarted());
       bs.start(0);
       assertTrue(bs.isPersistentlyStarted());
-      verify(bm, never()).startBundle((AbstractDeployedBundleState)any());
+      verify(bm, never()).startBundle((DeployedBundleState)any());
    }
 
    @Test

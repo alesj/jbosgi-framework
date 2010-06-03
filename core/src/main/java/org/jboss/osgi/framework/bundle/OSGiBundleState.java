@@ -56,7 +56,7 @@ import org.osgi.framework.Version;
  * @author <a href="david@redhat.com">David Bosschaert</a>
  * @version $Revision: 1.1 $
  */
-public class OSGiBundleState extends AbstractDeployedBundleState
+public class OSGiBundleState extends DeployedBundleState
 {
    // The list of attached fragments
    private List<OSGiFragmentState> attachedFragments = new CopyOnWriteArrayList<OSGiFragmentState>();

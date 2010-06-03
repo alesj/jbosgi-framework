@@ -30,9 +30,8 @@ import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.ResolveException;
 import org.apache.felix.framework.resolver.Wire;
 import org.jboss.logging.Logger;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
@@ -49,7 +48,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
 {
    // Provide logging
    final Logger log = Logger.getLogger(ResolverPluginImpl.class);
-   
+
    private AbstractResolver resolver = new JBossResolver();
 
    public ResolverPluginImpl(OSGiBundleManager bundleManager)
@@ -66,7 +65,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       // Attach the resolver module to the deployment
       if (bundle.getBundleId() != 0)
       {
-         AbstractDeployedBundleState bundleState = AbstractDeployedBundleState.assertBundleState(bundle);
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
          bundleState.getDeploymentUnit().addAttachment(ModuleExtension.class, module);
       }
    }
@@ -80,7 +79,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       // Remove the resolver module from the deployment
       if (bundle.getBundleId() != 0)
       {
-         AbstractDeployedBundleState bundleState = AbstractDeployedBundleState.assertBundleState(bundle);
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
          bundleState.getDeploymentUnit().removeAttachment(ModuleExtension.class);
       }
    }
@@ -92,15 +91,8 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       for (Bundle bundle : bundles)
       {
          ModuleExtension module = resolver.getModule(bundle);
-         try
-         {
-            resolver.resolve(module);
+         if (failsafeResolve(module) == true)
             resolved.add(bundle);
-         }
-         catch (ResolveException ex)
-         {
-            log.debug("Cannot resolve requirement: " + ex.getRequirement());
-         }
       }
       return Collections.unmodifiableList(resolved);
    }
@@ -110,21 +102,48 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    {
       ModuleExtension impModule = resolver.getModule(importer);
       ModuleExtension expModule = resolver.getModule(exporter);
-      
-      if (impModule.isResolved() == false || expModule.isResolved() == false)
+
+      // Lazily resolve the exporter and retry
+      if (expModule.isResolved() == false)
+         return failsafeResolve(expModule) && match(importer, exporter, osgireq);
+
+      // Lazily resolve the importer and retry
+      if (impModule.isResolved() == false)
+         return failsafeResolve(impModule) && match(importer, exporter, osgireq);
+
+      // A dynamic requirement does not match a specific module
+      if (osgireq.isDynamic() == true && osgireq.isOptional() == false)
          return false;
-      
+
+      // Get the potential wire for the requirement and see if it matches the given exporter 
       Requirement req = ((DeployedBundleModule)impModule).getMappedRequirement(osgireq);
       Wire wire = impModule.getWireForRequirement(req);
       if (wire != null)
       {
-         boolean match = wire.getExporter() == expModule;
-         return match;
+         Module wireExporter = wire.getExporter();
+         return wireExporter == expModule;
       }
 
       // If we did not get a ResolverException, we can assume that 
       // all packages that do not have a wire, wire to itself
-      return impModule == expModule;
+      if (impModule == expModule)
+         return true;
+
+      return false;
+   }
+
+   private boolean failsafeResolve(ModuleExtension module)
+   {
+      try
+      {
+         resolver.resolve(module);
+         return true;
+      }
+      catch (ResolveException ex)
+      {
+         log.debug("Cannot resolve requirement: " + ex.getRequirement());
+         return false;
+      }
    }
 
    static class JBossResolver extends AbstractResolver
@@ -153,11 +172,12 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       {
          if (bundle.getBundleId() == 0)
          {
-            return new SystemBundleModule((OSGiSystemState)bundle);
+            OSGiSystemState bundleState = OSGiSystemState.assertBundleState(bundle);
+            return new SystemBundleModule(bundleState);
          }
          else
          {
-            OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+            DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
             return new DeployedBundleModule(bundleState);
          }
       }
@@ -165,7 +185,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       @Override
       public ModuleExtension getModule(Bundle bundle)
       {
-         OSGiBundleState bundleState = OSGiBundleState.assertBundleState(bundle);
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
          ModuleExtension module = bundleState.getDeploymentUnit().getAttachment(ModuleExtension.class);
          if (module == null)
             throw new IllegalStateException("No module attached to: " + bundle);

@@ -60,8 +60,7 @@ public abstract class AbstractResolver
 
    public AbstractResolver()
    {
-      logger = new Logger();
-      logger.setLogLevel(Logger.LOG_DEBUG);
+      logger = new LoggerDelegate();
       resolver = new ResolverExtensionImpl(logger);
       resolverState = new ResolverStateExtensionImpl(logger);
    }

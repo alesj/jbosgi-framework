@@ -44,7 +44,7 @@ import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiFragmentState;
@@ -53,7 +53,6 @@ import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
-import org.jboss.osgi.framework.resolver.Resolver;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -173,7 +172,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       }
       else
       {
-         AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)absBundleState;
+         DeployedBundleState bundleState = (DeployedBundleState)absBundleState;
          ClassLoadingMetaData metaData = bundleState.getDeploymentUnit().getAttachment(ClassLoadingMetaData.class);
          if (metaData == null)
             throw new IllegalStateException("Cannot obtain ClassLoadingMetaData for: " + bundle);
@@ -297,7 +296,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       List<OSGiBundleState> resolvableBundles = new ArrayList<OSGiBundleState>();
 
       // Check if the external resolver plugin is available
-      Resolver bundleResolver = getBundleManager().getOptionalPlugin(ResolverPlugin.class);
+      ResolverPlugin bundleResolver = getBundleManager().getOptionalPlugin(ResolverPlugin.class);
       if (bundleResolver != null)
       {
          // Resolve the bundles through the resolver. The return is the list of

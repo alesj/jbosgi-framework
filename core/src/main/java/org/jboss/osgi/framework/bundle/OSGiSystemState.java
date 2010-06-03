@@ -32,6 +32,7 @@ import java.util.jar.Manifest;
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -60,6 +61,19 @@ public class OSGiSystemState extends AbstractBundleState
       Attributes attributes = manifest.getMainAttributes();
       attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
       osgiMetaData = new AbstractOSGiMetaData(manifest);
+   }
+
+   /**
+    * Assert that the given bundle is an instance of OSGiSystemState
+    * @throws IllegalArgumentException if the given bundle is not an instance of OSGiSystemState
+    */
+   public static OSGiSystemState assertBundleState(Bundle bundle)
+   {
+      bundle = AbstractBundleState.assertBundleState(bundle);
+      if (bundle instanceof OSGiSystemState == false)
+         throw new IllegalArgumentException("Not an OSGiSystemState: " + bundle);
+
+      return (OSGiSystemState)bundle;
    }
 
    @Override

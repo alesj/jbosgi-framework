@@ -37,7 +37,7 @@ import org.apache.felix.framework.util.manifestparser.CapabilityImpl;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
 import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiModule;
@@ -65,7 +65,7 @@ class DeployedBundleModule extends AbstractModule
    private Map<OSGiRequirement, Requirement> reqMap;
    private Map<OSGiRequirement, Requirement> dynReqMap;
 
-   public DeployedBundleModule(OSGiBundleState bundleState)
+   public DeployedBundleModule(DeployedBundleState bundleState)
    {
       super(bundleState);
    }
@@ -73,7 +73,7 @@ class DeployedBundleModule extends AbstractModule
    @Override
    public List<Capability> createCapabilities()
    {
-      OSGiBundleState bundleState = (OSGiBundleState)getBundle();
+      DeployedBundleState bundleState = DeployedBundleState.assertBundleState(getBundle());
 
       capMap = new LinkedHashMap<OSGiCapability, Capability>();
       if (getModuleDelegate().getCapabilities() != null)
@@ -274,7 +274,7 @@ class DeployedBundleModule extends AbstractModule
    {
       if (moduleDelegate == null)
       {
-         OSGiBundleState bundleState = (OSGiBundleState)getBundle();
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(getBundle());
          moduleDelegate = (OSGiModule)bundleState.getDeploymentUnit().getAttachment(org.jboss.classloading.spi.dependency.Module.class);
          if (moduleDelegate == null)
             throw new IllegalStateException("No OSGiModule attached to: " + bundleState);

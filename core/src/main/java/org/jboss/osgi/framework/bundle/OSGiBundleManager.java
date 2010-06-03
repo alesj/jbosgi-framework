@@ -563,7 +563,7 @@ public class OSGiBundleManager
    /**
     * Updates a bundle from an InputStream. 
     */
-   public void updateBundle(AbstractDeployedBundleState bundleState, InputStream in) throws BundleException
+   public void updateBundle(DeployedBundleState bundleState, InputStream in) throws BundleException
    {
       // If the specified InputStream is null, the Framework must create the InputStream from which to read the updated bundle by interpreting, 
       // in an implementation dependent manner, this bundle's Bundle-UpdateLocation Manifest header, if present, or this bundle's original location.
@@ -648,7 +648,7 @@ public class OSGiBundleManager
          if (activeBeforeUpdate)
          {
             if (updatedBundleState.isFragment() == false)
-               startBundle((AbstractDeployedBundleState)updatedBundleState);
+               startBundle((DeployedBundleState)updatedBundleState);
          }
       }
 
@@ -665,7 +665,7 @@ public class OSGiBundleManager
     * @param bundleState the bundle
     * @throws BundleException for any error
     */
-   public void uninstallBundle(AbstractDeployedBundleState bundleState) throws BundleException
+   public void uninstallBundle(DeployedBundleState bundleState) throws BundleException
    {
       long id = bundleState.getBundleId();
       if (getBundleById(id) == null)
@@ -679,7 +679,7 @@ public class OSGiBundleManager
          try
          {
             if (bundleState.isFragment() == false)
-               stopBundle((AbstractDeployedBundleState)bundleState);
+               stopBundle((DeployedBundleState)bundleState);
          }
          catch (Exception ex)
          {
@@ -745,7 +745,7 @@ public class OSGiBundleManager
          else
          {
             // Create a new OSGiBundleState
-            AbstractDeployedBundleState bundleState = new OSGiBundleState(this, unit);
+            DeployedBundleState bundleState = new OSGiBundleState(this, unit);
             absBundle = bundleState;
          }
       }
@@ -779,7 +779,7 @@ public class OSGiBundleManager
       // Do nothing if this is a bundle update
       if (bundleState instanceof OSGiBundleState)
       {
-         DeploymentUnit unit = ((AbstractDeployedBundleState)bundleState).getDeploymentUnit();
+         DeploymentUnit unit = ((DeployedBundleState)bundleState).getDeploymentUnit();
          if (unit.getAttachment(ClassLoadingMetaData.class) == null)
             throw new IllegalStateException("Cannot obtain ClassLoadingMetaData");
 
@@ -789,8 +789,8 @@ public class OSGiBundleManager
       }
 
       // Validate every deployed bundle (i.e. the system bundle is not validated)
-      if (bundleState instanceof AbstractDeployedBundleState)
-         validateBundle((AbstractDeployedBundleState)bundleState);
+      if (bundleState instanceof DeployedBundleState)
+         validateBundle((DeployedBundleState)bundleState);
 
       allBundles.add(bundleState);
       try
@@ -810,7 +810,7 @@ public class OSGiBundleManager
     * 
     * @param bundleState the bundle state
     */
-   private void validateBundle(AbstractDeployedBundleState bundleState)
+   private void validateBundle(DeployedBundleState bundleState)
    {
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       if (osgiMetaData == null)
@@ -875,7 +875,7 @@ public class OSGiBundleManager
       if (id == 0)
          throw new IllegalArgumentException("Cannot get deployment from system bundle");
 
-      AbstractDeployedBundleState bundleState = (AbstractDeployedBundleState)getBundleById(id);
+      DeployedBundleState bundleState = (DeployedBundleState)getBundleById(id);
       if (bundleState == null)
          return null;
 
@@ -966,9 +966,9 @@ public class OSGiBundleManager
          }
 
          // Fallback to the deployment name
-         else if (aux instanceof AbstractDeployedBundleState)
+         else if (aux instanceof DeployedBundleState)
          {
-            DeploymentUnit unit = ((AbstractDeployedBundleState)aux).getDeploymentUnit();
+            DeploymentUnit unit = ((DeployedBundleState)aux).getDeploymentUnit();
             if (location.equals(unit.getName()))
             {
                result = aux;
@@ -1021,7 +1021,7 @@ public class OSGiBundleManager
     * @see OSGiBundleActivatorDeployer
     * @see OSGiBundleState#startInternal()
     */
-   public void startBundle(AbstractDeployedBundleState bundleState) throws BundleException
+   public void startBundle(DeployedBundleState bundleState) throws BundleException
    {
       // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
       if (bundleState.getState() == Bundle.UNINSTALLED)
@@ -1097,7 +1097,7 @@ public class OSGiBundleManager
     * @see OSGiBundleActivatorDeployer
     * @see OSGiBundleState#stopInternal()
     */
-   public void stopBundle(AbstractDeployedBundleState bundleState) throws BundleException
+   public void stopBundle(DeployedBundleState bundleState) throws BundleException
    {
       // If this bundle's state is UNINSTALLED then an IllegalStateException is thrown. 
       if (bundleState.getState() == Bundle.UNINSTALLED)

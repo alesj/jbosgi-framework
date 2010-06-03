@@ -38,7 +38,7 @@ import org.jboss.logging.Logger;
 import org.jboss.managed.api.ManagedObject;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.osgi.framework.Bundle;
@@ -149,7 +149,7 @@ public class OSGiDeployersWrapper implements Deployers
             // Use PackageAdmin to resolve the bundles
             getPackageAdmin().resolveBundles(unresolved);
                
-            for (AbstractDeployedBundleState aux : unresolved)
+            for (DeployedBundleState aux : unresolved)
             {
                if (aux.getState() != Bundle.RESOLVED)
                   log.info("Unresolved: " + aux);

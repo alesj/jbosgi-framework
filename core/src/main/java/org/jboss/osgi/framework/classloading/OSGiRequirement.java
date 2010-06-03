@@ -21,6 +21,8 @@
 */
 package org.jboss.osgi.framework.classloading;
 
+import org.jboss.classloading.spi.metadata.Requirement;
+
 
 /**
  * A marker interface for OSGi requirements.
@@ -28,6 +30,6 @@ package org.jboss.osgi.framework.classloading;
  * @author thomas.diesler@jboss.com
  * @since 01-Jun-2010
  */
-public interface OSGiRequirement
+public interface OSGiRequirement extends Requirement
 {
 }

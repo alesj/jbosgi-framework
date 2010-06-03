@@ -26,18 +26,17 @@ package org.jboss.test.osgi.resolver;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.osgi.framework.resolver.Resolver;
+import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
- * An abstract {@link Resolver} test.
+ * An abstract {@link ResolverPlugin} test.
  * 
  * @author thomas.diesler@jboss.com
  * @since 09-Nov-2009

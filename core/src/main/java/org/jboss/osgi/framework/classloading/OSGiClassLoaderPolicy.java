@@ -40,7 +40,7 @@ import org.jboss.classloading.spi.vfs.policy.VirtualFileInfo;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.metadata.NativeLibrary;
@@ -76,9 +76,9 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy implements Bundl
          throw new IllegalArgumentException("Null bundleState");
       this.bundleState = bundleState;
       
-      if (bundleState instanceof AbstractDeployedBundleState)
+      if (bundleState instanceof DeployedBundleState)
       {
-         AbstractDeployedBundleState depBundleState = (AbstractDeployedBundleState)bundleState;
+         DeployedBundleState depBundleState = (DeployedBundleState)bundleState;
          DeploymentUnit unit = depBundleState.getDeploymentUnit();
          Module module = unit.getAttachment(Module.class);
          if (module instanceof OSGiModule == false)

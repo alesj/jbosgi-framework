@@ -30,7 +30,7 @@ import org.jboss.classloading.spi.metadata.RequirementWithImportType;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.bundle.AbstractDeployedBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
@@ -150,9 +150,9 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
    public Module getModule()
    {
       Module module = null;
-      if (bundleState instanceof AbstractDeployedBundleState)
+      if (bundleState instanceof DeployedBundleState)
       {
-         AbstractDeployedBundleState depBundle = (AbstractDeployedBundleState)bundleState;
+         DeployedBundleState depBundle = (DeployedBundleState)bundleState;
          DeploymentUnit unit = depBundle.getDeploymentUnit();
          module = unit.getAttachment(Module.class);
          if (module == null)
