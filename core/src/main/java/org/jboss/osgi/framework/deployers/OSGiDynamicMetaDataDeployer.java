@@ -29,6 +29,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.DynamicOSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
+import org.osgi.framework.Constants;
 
 /**
  * A deployer that creates {@link OSGiMetaData} for deployments that are not real bundles.
@@ -39,9 +40,9 @@ import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
  * @author thomas.diesler@jboss.com
  * @since 04-Jun-2010
  */
-public class OSGiMetaDataDeployer extends AbstractDeployer
+public class OSGiDynamicMetaDataDeployer extends AbstractDeployer
 {
-   public OSGiMetaDataDeployer()
+   public OSGiDynamicMetaDataDeployer()
    {
       setStage(DeploymentStages.POST_PARSE);
       setOutput(OSGiMetaData.class);
@@ -74,7 +75,16 @@ public class OSGiMetaDataDeployer extends AbstractDeployer
    private OSGiMetaData processBeanMetaData(DeploymentUnit unit, BeanMetaData bmd)
    {
       String symbolicName = unit.getName();
-      OSGiMetaData metadata = new DynamicOSGiMetaData(symbolicName);
+      DynamicOSGiMetaData metadata = new DynamicOSGiMetaData(symbolicName);
+      
+      // Add an Export-Package definition from the bean's package
+      String className = bmd.getBean();
+      String packageName = className.substring(0, className.lastIndexOf("."));
+      metadata.addMainAttribute(Constants.EXPORT_PACKAGE, packageName);
+      
+      // [TODO] Read the manifest and a version attribute if available
+      System.out.println(bmd);
+      
       return metadata;
    }
 }

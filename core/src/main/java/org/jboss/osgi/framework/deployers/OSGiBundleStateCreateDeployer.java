@@ -28,6 +28,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 
 /**
  * A deployer that creates the {@link AbstractBundleState} through the {@link OSGiBundleManager}.
@@ -58,8 +59,11 @@ public class OSGiBundleStateCreateDeployer extends AbstractRealDeployer
    @Override
    public void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
-      unit.setRequiredStage(DeploymentStages.DESCRIBE);
-      
+      // Bundles that are based on a valid OSGi Manifest can 
+      // move forward to DESCRIBE stage. After that, they must be started explicitly
+      if (unit.isAttachmentPresent(OSGiManifestMetaData.class))
+         unit.setRequiredStage(DeploymentStages.DESCRIBE);
+
       // Create the bundle state
       bundleManager.addDeployment(unit);
    }

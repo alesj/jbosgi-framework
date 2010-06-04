@@ -981,8 +981,6 @@ public class OSGiBundleManager
 
    /**
     * Get all the bundles
-    * 
-    * @return the bundles
     */
    public Collection<AbstractBundleState> getBundles()
    {

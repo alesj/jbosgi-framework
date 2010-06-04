@@ -533,11 +533,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    /**
     * Get ServiceReference for a given context.
-    * 
-    * 
-    *
-    * @param context the context
-    * @return service reference
     */
    private ServiceReference getServiceReferenceForContext(ControllerContext context)
    {

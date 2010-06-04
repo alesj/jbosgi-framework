@@ -25,19 +25,13 @@ package org.jboss.osgi.framework.bundle;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-import java.util.jar.Attributes.Name;
 
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.deployers.structure.spi.DeploymentRegistry;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
-import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -112,38 +106,8 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
       DeploymentUnit unit = registry.getDeployment(context);
       if (unit != null)
       {
-         synchronized (unit)
-         {
-            OSGiBundleState bundleState = (OSGiBundleState)unit.getAttachment(AbstractBundleState.class);
-            if (bundleState == null)
-            {
-               OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
-               if (osgiMetaData == null)
-               {
-                  Manifest manifest = unit.getAttachment(Manifest.class);
-                  // [TODO] we need a mechanism to construct an OSGiMetaData from an easier factory
-                  if (manifest == null)
-                     manifest = new Manifest();
-                  // [TODO] populate some bundle information
-                  Attributes attributes = manifest.getMainAttributes();
-                  attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-                  osgiMetaData = new OSGiManifestMetaData(manifest);
-                  unit.addAttachment(OSGiMetaData.class, osgiMetaData);
-               }
-
-               try
-               {
-                  bundleState = (OSGiBundleState)bundleManager.addDeployment(unit);
-                  bundleManager.addBundle(bundleState);
-                  bundleState.startInternal();
-               }
-               catch (Throwable t)
-               {
-                  throw new RuntimeException("Cannot dynamically add generic bundle: " + unit, t);
-               }
-            }
-            return bundleState;
-         }
+         OSGiBundleState bundleState = (OSGiBundleState)unit.getAttachment(AbstractBundleState.class);
+         return bundleState;
       }
 
       return bundleManager.getSystemBundle();
