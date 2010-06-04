@@ -109,6 +109,18 @@ public abstract class AbstractModule implements ModuleExtension
    }
 
    @Override
+   public boolean isStale()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean isRemovalPending()
+   {
+      return false;
+   }
+
+   @Override
    public List<Capability> getCapabilities()
    {
       if (capabilities == null)
@@ -281,12 +293,15 @@ public abstract class AbstractModule implements ModuleExtension
    public Wire getWireForRequirement(Requirement requirement)
    {
       Wire result = null;
-      for (Wire aux : getWires())
+      if (wires != null)
       {
-         if (aux.getRequirement() == requirement)
+         for (Wire aux : wires)
          {
-            result = aux;
-            break;
+            if (aux.getRequirement() == requirement)
+            {
+               result = aux;
+               break;
+            }
          }
       }
       return result;

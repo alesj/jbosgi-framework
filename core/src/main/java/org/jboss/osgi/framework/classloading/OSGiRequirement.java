@@ -25,7 +25,7 @@ import org.jboss.classloading.spi.metadata.Requirement;
 
 
 /**
- * A marker interface for OSGi requirements.
+ * An interface for OSGi requirements.
  * 
  * @author thomas.diesler@jboss.com
  * @since 01-Jun-2010

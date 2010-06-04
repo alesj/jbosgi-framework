@@ -39,13 +39,16 @@ import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
+import org.jboss.osgi.framework.classloading.OSGiBundleRequirement;
 import org.jboss.osgi.framework.classloading.OSGiCapability;
+import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
 import org.jboss.osgi.framework.classloading.OSGiModule;
 import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
+import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -104,7 +107,7 @@ class DeployedBundleModule extends AbstractModule
             }
             else
             {
-               log.warn("Unsupported capability: " + mccap);
+               throw new IllegalArgumentException("Unsupported capability: " + mccap);
             }
          }
       }
@@ -129,8 +132,19 @@ class DeployedBundleModule extends AbstractModule
       {
          for (org.jboss.classloading.spi.metadata.Requirement mcreq : getModuleDelegate().getRequirements())
          {
-            // Add the package requirements
-            if (mcreq instanceof OSGiPackageRequirement)
+            if (mcreq instanceof OSGiBundleRequirement)
+            {
+               OSGiBundleRequirement osgireq = (OSGiBundleRequirement)mcreq;
+               Requirement req = bundleRequirement(osgireq);
+               reqMap.put(osgireq, req);
+            }
+            else if (mcreq instanceof OSGiFragmentHostRequirement)
+            {
+               OSGiFragmentHostRequirement osgireq = (OSGiFragmentHostRequirement)mcreq;
+               Requirement req = fragmentHostRequirement(osgireq);
+               reqMap.put(osgireq, req);
+            }
+            else if (mcreq instanceof OSGiPackageRequirement)
             {
                OSGiPackageRequirement osgireq = (OSGiPackageRequirement)mcreq;
                if (osgireq.isDynamic() == false)
@@ -141,7 +155,7 @@ class DeployedBundleModule extends AbstractModule
             }
             else
             {
-               log.warn("Unsupported requirement: " + mcreq);
+               throw new IllegalArgumentException("Unsupported requirement: " + mcreq);
             }
          }
       }
@@ -167,10 +181,6 @@ class DeployedBundleModule extends AbstractModule
                   Requirement req = packageRequirement(osgireq);
                   dynReqMap.put(osgireq, req);
                }
-            }
-            else
-            {
-               log.warn("Unsupported requirement: " + mcreq);
             }
          }
       }
@@ -267,6 +277,58 @@ class DeployedBundleModule extends AbstractModule
          dirs.add(new Directive(entry.getKey(), entry.getValue().getValue()));
 
       RequirementImpl req = new RequirementImpl(this, Capability.PACKAGE_NAMESPACE, dirs, attrs);
+      return req;
+   }
+
+   private Requirement bundleRequirement(OSGiBundleRequirement osgireq)
+   {
+      ParameterizedAttribute metadata = osgireq.getMetadata();
+
+      // Get the requirements attributes
+      List<Attribute> attrs = new ArrayList<Attribute>();
+      attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, osgireq.getName(), false));
+      for (Entry<String, Parameter> entry : metadata.getAttributes().entrySet())
+      {
+         String key = entry.getKey();
+         Object value = (String)entry.getValue().getValue();
+         if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
+            value = VersionRange.parse((String)value);
+
+         attrs.add(new Attribute(key, value, false));
+      }
+
+      // Get the requirements directives
+      List<Directive> dirs = new ArrayList<Directive>();
+      for (Entry<String, Parameter> entry : metadata.getDirectives().entrySet())
+         dirs.add(new Directive(entry.getKey(), entry.getValue().getValue()));
+
+      RequirementImpl req = new RequirementImpl(this, Capability.MODULE_NAMESPACE, dirs, attrs);
+      return req;
+   }
+
+   private Requirement fragmentHostRequirement(OSGiFragmentHostRequirement osgireq)
+   {
+      ParameterizedAttribute metadata = osgireq.getMetadata();
+      
+      // Get the requirements attributes
+      List<Attribute> attrs = new ArrayList<Attribute>();
+      attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, osgireq.getName(), false));
+      for (Entry<String, Parameter> entry : metadata.getAttributes().entrySet())
+      {
+         String key = entry.getKey();
+         Object value = (String)entry.getValue().getValue();
+         if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
+            value = VersionRange.parse((String)value);
+
+         attrs.add(new Attribute(key, value, false));
+      }
+      
+      // Get the requirements directives
+      List<Directive> dirs = new ArrayList<Directive>();
+      for (Entry<String, Parameter> entry : metadata.getDirectives().entrySet())
+         dirs.add(new Directive(entry.getKey(), entry.getValue().getValue()));
+
+      RequirementImpl req = new RequirementImpl(this, Capability.HOST_NAMESPACE, dirs, attrs);
       return req;
    }
 

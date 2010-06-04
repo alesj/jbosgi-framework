@@ -24,16 +24,18 @@ package org.jboss.osgi.framework.deployers;
 // $Id$
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
+import org.jboss.classloading.spi.metadata.RequirementsMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
+import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
 
 /**
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
@@ -58,17 +60,21 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractClassLoadingDeploy
 
       // Initialize the Fragment-Host 
       ParameterizedAttribute hostAttr = osgiMetaData.getFragmentHost();
-      FragmentHostMetaData fragmentHost = new FragmentHostMetaData(hostAttr.getAttribute());
-      classLoadingMetaData.setFragmentHost(fragmentHost);
+      FragmentHostMetaData hostMetaData = new FragmentHostMetaData(hostAttr);
+      classLoadingMetaData.setFragmentHost(hostMetaData);
 
       Parameter bundleVersionAttr = hostAttr.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
       if (bundleVersionAttr != null)
-         fragmentHost.setBundleVersion((Version)bundleVersionAttr.getValue());
+         hostMetaData.setBundleVersion(AbstractVersionRange.valueOf(bundleVersionAttr.getValue().toString()));
 
       Parameter extensionDirective = hostAttr.getDirective(Constants.EXTENSION_DIRECTIVE);
       if (extensionDirective != null)
-         fragmentHost.setExtension((String)extensionDirective.getValue());
+         hostMetaData.setExtension((String)extensionDirective.getValue());
 
+      RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
+      OSGiFragmentHostRequirement requirement = OSGiFragmentHostRequirement.create(hostMetaData);
+      requirements.addRequirement(requirement);
+      
       // TODO Modify the CL metadata of the host such that eventually the CL policy
       // contains a DelegateLoader for the attached fragment
 

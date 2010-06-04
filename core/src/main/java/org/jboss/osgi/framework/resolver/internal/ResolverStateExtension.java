@@ -23,6 +23,7 @@ package org.jboss.osgi.framework.resolver.internal;
 
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.Resolver;
+import org.osgi.framework.Bundle;
 
 /**
  * An extension to the Apache Felix ResolverState.

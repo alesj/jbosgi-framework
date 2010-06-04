@@ -38,6 +38,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.metadata.VersionRange;
 import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.plugins.StartLevelPlugin;
 import org.osgi.framework.AdminPermission;
@@ -112,8 +113,8 @@ public class OSGiBundleState extends DeployedBundleState
       if (hostName.equals(fragHost.getSymbolicName()) == false)
          return false;
 
-      Version version = fragHost.getBundleVersion();
-      if (version != null && hostVersion.equals(version) == false)
+      VersionRange versionRange = fragHost.getBundleVersion();
+      if (versionRange != null && versionRange.isInRange(hostVersion) == false)
          return false;
 
       return true;

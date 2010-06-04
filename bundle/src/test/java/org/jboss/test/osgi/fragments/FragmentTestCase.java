@@ -29,9 +29,7 @@ import static org.junit.Assert.fail;
 
 import java.net.URL;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
-import org.jboss.osgi.spi.framework.OSGiBootstrap;
-import org.jboss.osgi.spi.framework.OSGiBootstrapProvider;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;
@@ -41,7 +39,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.launch.Framework;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
@@ -50,29 +47,20 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
-public class FragmentTestCase extends AbstractFrameworkTest
+public class FragmentTestCase extends OSGiFrameworkTest
 {
-   private Framework framework;
-   private BundleContext context;
-
    @Before
    public void setUp() throws Exception
    {
-      OSGiBootstrapProvider bootProvider = OSGiBootstrap.getBootstrapProvider();
-      framework = bootProvider.getFramework();
-      framework.start();
-
-      context = framework.getBundleContext();
+      super.setUp();
+      createFramework().start();
    }
 
    @After
    public void tearDown() throws Exception
    {
-      if (framework != null)
-      {
-         framework.stop();
-         framework.waitForStop(5000);
-      }
+      shutdownFramework();
+      super.tearDown();
    }
 
    @Test
@@ -80,7 +68,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
    {
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
-      Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
+      Bundle hostA = installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
       assertBundleState(Bundle.INSTALLED, hostA.getState());
 
       hostA.start();
@@ -106,7 +94,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       // Export-Package: org.jboss.test.osgi.fragments.fragA
       // Include-Resource: resources/resource.txt=resource.txt
       // Fragment-Host: simple-hostA
-      Bundle fragA = context.installBundle(getTestArchivePath("fragments-simple-fragA.jar"));
+      Bundle fragA = installBundle(getTestArchivePath("fragments-simple-fragA.jar"));
       assertBundleState(Bundle.INSTALLED, fragA.getState());
 
       URL entryURL = fragA.getEntry("resources/resource.txt");
@@ -134,14 +122,14 @@ public class FragmentTestCase extends AbstractFrameworkTest
    {
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
-      Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
+      Bundle hostA = installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
       assertBundleState(Bundle.INSTALLED, hostA.getState());
 
       // Bundle-SymbolicName: simple-fragA
       // Export-Package: org.jboss.test.osgi.fragments.fragA
       // Include-Resource: resources/resource.txt=resource.txt
       // Fragment-Host: simple-hostA
-      Bundle fragA = context.installBundle(getTestArchivePath("fragments-simple-fragA.jar"));
+      Bundle fragA = installBundle(getTestArchivePath("fragments-simple-fragA.jar"));
       assertBundleState(Bundle.INSTALLED, fragA.getState());
 
       hostA.start();
@@ -171,27 +159,21 @@ public class FragmentTestCase extends AbstractFrameworkTest
    @Test
    public void testFragmentHidesPrivatePackage() throws Exception
    {
-      if (context != null)
-      {
-         System.out.println("FIXME [JBCL-137] Add support for OSGi Fragments");
-         return;
-      }
-
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
-      Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
+      Bundle hostA = installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
       assertBundleState(Bundle.INSTALLED, hostA.getState());
 
       // Bundle-SymbolicName: simple-hostB
       // Export-Package: org.jboss.test.osgi.fragments.subA
       // Private-Package: org.jboss.test.osgi.fragments.hostB 
-      Bundle hostB = context.installBundle(getTestArchivePath("fragments-simple-hostB.jar"));
+      Bundle hostB = installBundle(getTestArchivePath("fragments-simple-hostB.jar"));
       assertBundleState(Bundle.INSTALLED, hostB.getState());
 
       // Bundle-SymbolicName: simple-fragB
       // Import-Package: org.jboss.test.osgi.fragments.subA
       // Fragment-Host: simple-hostA
-      Bundle fragB = context.installBundle(getTestArchivePath("fragments-simple-fragB.jar"));
+      Bundle fragB = installBundle(getTestArchivePath("fragments-simple-fragB.jar"));
       assertBundleState(Bundle.INSTALLED, fragB.getState());
 
       hostA.start();
@@ -216,21 +198,15 @@ public class FragmentTestCase extends AbstractFrameworkTest
    @Test
    public void testFragmentExportsPackage() throws Exception
    {
-      if (context != null)
-      {
-         System.out.println("FIXME [JBCL-137] Add support for OSGi Fragments");
-         return;
-      }
-
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
-      Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
+      Bundle hostA = installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
       assertBundleState(Bundle.INSTALLED, hostA.getState());
 
       // Bundle-SymbolicName: simple-hostC
       // Import-Package: org.jboss.test.osgi.fragments.fragA
       // Private-Package: org.jboss.test.osgi.fragments.hostC 
-      Bundle hostC = context.installBundle(getTestArchivePath("fragments-simple-hostC.jar"));
+      Bundle hostC = installBundle(getTestArchivePath("fragments-simple-hostC.jar"));
       assertBundleState(Bundle.INSTALLED, hostA.getState());
 
       hostA.start();
@@ -251,7 +227,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       // Export-Package: org.jboss.test.osgi.fragments.fragA
       // Include-Resource: resources/resource.txt=resource.txt
       // Fragment-Host: simple-hostA
-      Bundle fragA = context.installBundle(getTestArchivePath("fragments-simple-fragA.jar"));
+      Bundle fragA = installBundle(getTestArchivePath("fragments-simple-fragA.jar"));
       assertBundleState(Bundle.INSTALLED, fragA.getState());
 
       try
@@ -267,6 +243,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       }
 
       // Refreshing HostA causes the FragA to get attached
+      BundleContext context = getSystemContext();
       ServiceReference sref = context.getServiceReference(PackageAdmin.class.getName());
       PackageAdmin packageAdmin = (PackageAdmin)context.getService(sref);
       packageAdmin.refreshPackages(new Bundle[] { hostA });
@@ -296,22 +273,16 @@ public class FragmentTestCase extends AbstractFrameworkTest
    @Test
    public void testFragmentRequireBundle() throws Exception
    {
-      if (context != null)
-      {
-         System.out.println("FIXME [JBCL-137] Add support for OSGi Fragments");
-         return;
-      }
-
       // Bundle-SymbolicName: simple-hostA
       // Private-Package: org.jboss.test.osgi.fragments.hostA, org.jboss.test.osgi.fragments.subA 
-      Bundle hostA = context.installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
+      Bundle hostA = installBundle(getTestArchivePath("fragments-simple-hostA.jar"));
       assertBundleState(Bundle.INSTALLED, hostA.getState());
 
       // Bundle-SymbolicName: simple-fragC
       // Export-Package: org.jboss.test.osgi.fragments.fragC
       // Require-Bundle: simple-hostB
       // Fragment-Host: simple-hostA
-      Bundle fragC = context.installBundle(getTestArchivePath("fragments-simple-fragC.jar"));
+      Bundle fragC = installBundle(getTestArchivePath("fragments-simple-fragC.jar"));
       assertBundleState(Bundle.INSTALLED, fragC.getState());
 
       try
@@ -335,7 +306,7 @@ public class FragmentTestCase extends AbstractFrameworkTest
       // Bundle-SymbolicName: simple-hostB
       // Export-Package: org.jboss.test.osgi.fragments.subA
       // Private-Package: org.jboss.test.osgi.fragments.hostB 
-      Bundle hostB = context.installBundle(getTestArchivePath("fragments-simple-hostB.jar"));
+      Bundle hostB = installBundle(getTestArchivePath("fragments-simple-hostB.jar"));
       assertBundleState(Bundle.INSTALLED, hostB.getState());
 
       // HostA should resolve and start after HostB got installed

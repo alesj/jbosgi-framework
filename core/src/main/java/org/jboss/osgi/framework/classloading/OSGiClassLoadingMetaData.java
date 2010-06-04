@@ -29,7 +29,8 @@ import java.util.List;
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
-import org.osgi.framework.Version;
+import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.metadata.VersionRange;
 
 /**
  * An extension of {@link ClassLoadingMetaData} that captures OSGi specific 
@@ -106,16 +107,23 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
     */
    public static class FragmentHostMetaData
    {
+      private ParameterizedAttribute metadata;
       private String symbolicName;
-      private Version bundleVersion;
+      private VersionRange bundleVersion;
       private String extension;
       
-      public FragmentHostMetaData(String symbolicName)
+      public FragmentHostMetaData(ParameterizedAttribute metadata)
       {
-         if (symbolicName == null)
-            throw new IllegalArgumentException("Null symbolicName");
+         if (metadata == null)
+            throw new IllegalArgumentException("Null metadata");
          
-         this.symbolicName = symbolicName;
+         this.metadata = metadata;
+         this.symbolicName = metadata.getAttribute();
+      }
+
+      public ParameterizedAttribute getMetadata()
+      {
+         return metadata;
       }
 
       public String getSymbolicName()
@@ -123,11 +131,23 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
          return symbolicName;
       }
 
-      public Version getBundleVersion()
+      /**
+       * The version range to select the the host bundle. 
+       * If a range is used, then the fragment can attach to multiple hosts
+       */
+      public VersionRange getBundleVersion()
       {
          return bundleVersion;
       }
 
+      /**
+       * Indicates this extension is a system or boot class path
+       * extension. It is only applicable when the Fragment-Host is the System Bundle
+       * 
+       * The following values are supported:
+       * - framework - The fragment bundle is a Framework extension bundle.
+       * - bootclasspath - The fragment bundle is a boot class path extension bundle.
+       */
       public String getExtension()
       {
          return extension;
@@ -138,7 +158,7 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
          this.extension = extension;
       }
 
-      public void setBundleVersion(Version bundleVersion)
+      public void setBundleVersion(VersionRange bundleVersion)
       {
          this.bundleVersion = bundleVersion;
       }

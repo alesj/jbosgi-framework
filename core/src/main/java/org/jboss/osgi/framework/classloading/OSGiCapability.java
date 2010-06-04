@@ -25,7 +25,7 @@ import org.jboss.classloading.spi.metadata.Capability;
 
 
 /**
- * A marker interface for OSGi capabilities.
+ * An interface for OSGi capabilities.
  * 
  * @author thomas.diesler@jboss.com
  * @since 01-Jun-2010

@@ -31,7 +31,6 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 /**
@@ -40,7 +39,6 @@ import org.osgi.framework.Version;
  * todo BundlePermission/PROVIDE
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
- * @version $Revision: 1.1 $
  */
 public class OSGiBundleCapability extends ModuleCapability implements OSGiCapability
 {
@@ -50,13 +48,6 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    /** The bundle state */
    private AbstractBundleState bundleState;
 
-   /**
-    * Create a new OSGiBundleCapability
-    * 
-    * @param bundleState the bundleState
-    * @return the capability
-    * @throws IllegalArgumentException for a null metadata
-    */
    public static OSGiBundleCapability create(AbstractBundleState bundleState)
    {
       if (bundleState == null)
@@ -68,14 +59,6 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
       return new OSGiBundleCapability(symbolicName, version, bundleState);
    }
 
-   /**
-    * Create a new OSGiBundleCapability.
-    * 
-    * @param name the name
-    * @param version the version pass null of the default version
-    * @param metadata the metadata
-    * @throws IllegalArgumentException for a null name or requireBundle
-    */
    public OSGiBundleCapability(String name, Version version, AbstractBundleState bundleState)
    {
       super(name, version);
@@ -84,11 +67,6 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
       this.bundleState = bundleState;
    }
 
-   /**
-    * Get the metadata.
-    * 
-    * @return the metadata.
-    */
    public OSGiMetaData getMetaData()
    {
       return bundleState.getOSGiMetaData();
@@ -113,21 +91,6 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
       ParameterizedAttribute ourParameters = getMetaData().getBundleParameters();
       if (ourParameters == null)
          return false;
-
-      Map<String, Parameter> params = bundleRequirement.getAttributes();
-      if (params != null && params.isEmpty() == false)
-      {
-         for (String name : params.keySet())
-         {
-            if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(name))
-               continue;
-
-            String reqValue = (String)params.get(name).getValue();
-            String ourValue = ourParameters.getAttributeValue(name, String.class);
-            if (reqValue.equals(ourValue) == false)
-               return false;
-         }
-      }
 
       return true;
    }
