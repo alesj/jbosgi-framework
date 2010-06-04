@@ -52,6 +52,8 @@ public class Activator implements BundleActivator
          }
       }).start();
 
+      // Wait with exiting the activator so that the thread gets a chance to call stop() before
+      // we exit from here.
       Thread.sleep(2000);
    }
 
