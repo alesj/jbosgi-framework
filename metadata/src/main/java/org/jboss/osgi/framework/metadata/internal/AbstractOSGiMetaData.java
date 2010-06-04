@@ -58,11 +58,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.Manifest;
 import java.util.jar.Attributes.Name;
 
 import org.jboss.classloading.spi.version.VersionComparatorRegistry;
-import org.jboss.deployers.vfs.spi.deployer.helpers.AbstractManifestMetaData;
 import org.jboss.osgi.framework.metadata.ActivationPolicyMetaData;
 import org.jboss.osgi.framework.metadata.CaseInsensitiveDictionary;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
@@ -78,8 +76,9 @@ import org.osgi.framework.Version;
  * Abstract OSGi meta data.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
+ * @author Thomas.Diesler@jboss.com
  */
-public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OSGiMetaData
+public abstract class AbstractOSGiMetaData implements OSGiMetaData
 {
    private static final long serialVersionUID = 1L;
 
@@ -91,23 +90,19 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
       registry.registerVersionComparator(Version.class, String.class, new OSGiVersionToStringComparator());
    }
 
+   // The cached attributes
    protected transient Map<String, Object> cachedAttributes = new ConcurrentHashMap<String, Object>();
-
+   // The parameters on the Bundle-SymbolicName
    protected transient ParameterizedAttribute parameters;
 
-   public AbstractOSGiMetaData()
-   {
-   }
-
-   public AbstractOSGiMetaData(Manifest manifest)
-   {
-      super(manifest);
-   }
-
-   @SuppressWarnings({ "unchecked", "rawtypes" })
+   protected abstract Map<Name, String> getMainAttributes();
+   
+   protected abstract String getMainAttribute(String key);
+   
+   @SuppressWarnings({ "unchecked" })
    public Dictionary<String, String> getHeaders()
    {
-      Map<Name, String> attributes = (Map)getManifest().getMainAttributes();
+      Map<Name, String> attributes = getMainAttributes();
       Dictionary<String, String> result = new Hashtable<String, String>();
       for (Entry<Name, String> entry : attributes.entrySet())
          result.put(entry.getKey().toString(), entry.getValue());
@@ -274,5 +269,4 @@ public class AbstractOSGiMetaData extends AbstractManifestMetaData implements OS
       }
       return value;
    }
-
 }

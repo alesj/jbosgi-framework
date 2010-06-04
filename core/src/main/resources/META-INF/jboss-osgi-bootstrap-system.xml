@@ -141,6 +141,7 @@
   <bean name="OSGiContextTrackerDeployer" class="org.jboss.osgi.framework.deployers.OSGiContextTrackerDeployer" />
   <bean name="OSGiDeploymentMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiDeploymentMetaDataDeployer" />
   <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
+  <bean name="OSGiMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiMetaDataDeployer" />
   <bean name="OSGiNativeCodeMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiNativeCodeMetaDataDeployer" />
 
   <bean name="OSGiSingletonSchemaResolverFactory">

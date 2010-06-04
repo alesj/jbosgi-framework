@@ -36,7 +36,7 @@ import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.VersionRange;
-import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
+import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractPackageAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameterizedAttribute;
@@ -59,13 +59,11 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
    public void testSerializable() throws Exception
    {
       Manifest manifest = getManifest(createName(null));
-      OSGiMetaData metaData = new AbstractOSGiMetaData(manifest);
+      OSGiMetaData metaData = new OSGiManifestMetaData(manifest);
       ActivationPolicyMetaData apmd = metaData.getBundleActivationPolicy();
       assertNotNull(apmd);
 
       metaData = serializeDeserialize((Serializable)metaData, OSGiMetaData.class);
-      String vendor = metaData.getMainAttribute("Implementation-Vendor");
-      assertEquals("jboss.org", vendor);
       String bundleName = metaData.getBundleName();
       assertEquals("SomeBundleName", bundleName);
       apmd = metaData.getBundleActivationPolicy();
@@ -79,7 +77,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
    public void testSimpleManifest() throws Exception
    {
       Manifest manifest = getManifest(createName("Simple"));
-      OSGiMetaData metaData = new AbstractOSGiMetaData(manifest);
+      OSGiMetaData metaData = new OSGiManifestMetaData(manifest);
 
       assertEquals("org.jboss.test.osgi.bundle.metadata.BundleActivator", metaData.getBundleActivator());
       assertEquals(Arrays.asList("test.jar", "mc.jar", "seam.jar"), metaData.getBundleClassPath());
@@ -97,7 +95,7 @@ public class HeaderValuesTestCase extends AbstractManifestTestCase
    public void testJavaccManifest() throws Exception
    {
       Manifest manifest = getManifest(createName("JavaCC"));
-      OSGiMetaData metaData = new AbstractOSGiMetaData(manifest);
+      OSGiMetaData metaData = new OSGiManifestMetaData(manifest);
 
       List<ParameterizedAttribute> bundleNativeCode = new ArrayList<ParameterizedAttribute>();
       Map<String, Parameter> bnc1 = new HashMap<String, Parameter>();

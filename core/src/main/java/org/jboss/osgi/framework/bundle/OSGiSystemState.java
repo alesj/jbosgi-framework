@@ -31,7 +31,7 @@ import java.util.jar.Manifest;
 
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
+import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -60,7 +60,7 @@ public class OSGiSystemState extends AbstractBundleState
       Manifest manifest = new Manifest();
       Attributes attributes = manifest.getMainAttributes();
       attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-      osgiMetaData = new AbstractOSGiMetaData(manifest);
+      osgiMetaData = new OSGiManifestMetaData(manifest);
    }
 
    /**

@@ -34,7 +34,7 @@ import org.jboss.deployers.structure.spi.DeploymentRegistry;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
+import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
 import org.osgi.framework.Constants;
@@ -127,7 +127,7 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
                   // [TODO] populate some bundle information
                   Attributes attributes = manifest.getMainAttributes();
                   attributes.put(new Name(Constants.BUNDLE_SYMBOLICNAME), unit.getName());
-                  osgiMetaData = new AbstractOSGiMetaData(manifest);
+                  osgiMetaData = new OSGiManifestMetaData(manifest);
                   unit.addAttachment(OSGiMetaData.class, osgiMetaData);
                }
 

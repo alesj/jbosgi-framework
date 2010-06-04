@@ -25,8 +25,7 @@ import java.util.jar.Manifest;
 
 import org.jboss.deployers.vfs.spi.deployer.ManifestDeployer;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
-import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
+import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.jboss.osgi.spi.OSGiConstants;
 import org.jboss.osgi.spi.util.BundleInfo;
 import org.jboss.vfs.VirtualFile;
@@ -40,27 +39,27 @@ import org.jboss.vfs.VirtualFile;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class OSGiManifestParsingDeployer extends ManifestDeployer<OSGiMetaData>
+public class OSGiManifestParsingDeployer extends ManifestDeployer<OSGiManifestMetaData>
 {
    public OSGiManifestParsingDeployer()
    {
-      super(OSGiMetaData.class);
+      super(OSGiManifestMetaData.class);
       setTopLevelOnly(true);
    }
 
    @Override
-   protected OSGiMetaData createMetaData(Manifest manifest) throws Exception
+   protected OSGiManifestMetaData createMetaData(Manifest manifest) throws Exception
    {
       int manifestVersion = BundleInfo.getBundleManifestVersion(manifest);
       if (manifestVersion < 0 || manifestVersion > 2)
          return null;
       
-      AbstractOSGiMetaData osgiMetaData = new AbstractOSGiMetaData(manifest);
+      OSGiManifestMetaData osgiMetaData = new OSGiManifestMetaData(manifest);
       return osgiMetaData;
    }
 
    @Override
-   protected void init(VFSDeploymentUnit unit, OSGiMetaData osgiMetaData, VirtualFile file) throws Exception
+   protected void init(VFSDeploymentUnit unit, OSGiManifestMetaData osgiMetaData, VirtualFile file) throws Exception
    {
       super.init(unit, osgiMetaData, file);
 

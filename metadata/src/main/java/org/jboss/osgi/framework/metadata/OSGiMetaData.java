@@ -25,15 +25,13 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.List;
 
-import org.jboss.deployers.vfs.spi.deployer.ManifestMetaData;
-
 /**
- * OSGi specific manifest meta data.
+ * OSGi specific meta data.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  * @author thomas.diesler@jboss.com
  */
-public interface OSGiMetaData extends ManifestMetaData
+public interface OSGiMetaData 
 {
    /**
     * Get the headers in raw unlocalized format.
