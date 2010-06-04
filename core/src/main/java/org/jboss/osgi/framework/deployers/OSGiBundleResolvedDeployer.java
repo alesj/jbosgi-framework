@@ -25,8 +25,7 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.osgi.framework.bundle.OSGiBundleState;
-import org.jboss.osgi.framework.bundle.OSGiFragmentState;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.osgi.framework.Bundle;
 
 /**
@@ -35,25 +34,23 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @since 24-Feb-2010
  */
-public class OSGiBundleStateResolveDeployer extends AbstractSimpleRealDeployer<OSGiBundleState>
+public class OSGiBundleResolvedDeployer extends AbstractSimpleRealDeployer<AbstractBundleState>
 {
    // The relative order at which to change the bindle state to RESOLVED
    static final int RELATIVE_ORDER = 200;
    
-   public OSGiBundleStateResolveDeployer()
+   public OSGiBundleResolvedDeployer()
    {
-      super(OSGiBundleState.class);
+      super(AbstractBundleState.class);
       setStage(DeploymentStages.CLASSLOADER);
       setRelativeOrder(RELATIVE_ORDER);
       setTopLevelOnly(true);
    }
 
    @Override
-   public void deploy(DeploymentUnit unit, OSGiBundleState bundleState) throws DeploymentException
+   public void deploy(DeploymentUnit unit, AbstractBundleState bundleState) throws DeploymentException
    {
       // Change the bundle state to RESOLVED
       bundleState.changeState(Bundle.RESOLVED);
-      for (OSGiFragmentState fragment : bundleState.getAttachedFragments())
-         fragment.changeState(Bundle.RESOLVED);
    }
 }

@@ -32,10 +32,7 @@ import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
-import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
-import org.osgi.framework.Constants;
 
 /**
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
@@ -63,24 +60,8 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractClassLoadingDeploy
       FragmentHostMetaData hostMetaData = new FragmentHostMetaData(hostAttr);
       classLoadingMetaData.setFragmentHost(hostMetaData);
 
-      Parameter bundleVersionAttr = hostAttr.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
-      if (bundleVersionAttr != null)
-         hostMetaData.setBundleVersion(AbstractVersionRange.valueOf(bundleVersionAttr.getValue().toString()));
-
-      Parameter extensionDirective = hostAttr.getDirective(Constants.EXTENSION_DIRECTIVE);
-      if (extensionDirective != null)
-         hostMetaData.setExtension((String)extensionDirective.getValue());
-
+      // Add the fragment host requirement
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
-      OSGiFragmentHostRequirement requirement = OSGiFragmentHostRequirement.create(hostMetaData);
-      requirements.addRequirement(requirement);
-      
-      // TODO Modify the CL metadata of the host such that eventually the CL policy
-      // contains a DelegateLoader for the attached fragment
-
-      // Adding the fragment as an OSGiBundleRequirement to the host does not work because 
-      // those requirements end up as DependencyItems already during the INSTALL phase. 
-      // Remember to do equivalent code in OSGiBundleClassLoadingDeployer
-      // in case the fragment gets installed before the host.
+      requirements.addRequirement(OSGiFragmentHostRequirement.create(hostMetaData));
    }
 }

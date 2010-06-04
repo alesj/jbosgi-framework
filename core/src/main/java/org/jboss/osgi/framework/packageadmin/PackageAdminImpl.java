@@ -264,7 +264,34 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
    public void refreshPackages(Bundle[] bundles)
    {
-      // [TODO] refreshPackages(Bundle[] bundles)
+      throw new NotImplementedException();
+      
+      // This method returns to the caller immediately and then performs the following steps on a separate thread:
+      //
+      //   1. Compute a graph of bundles starting with the specified bundles. If no bundles are specified, 
+      //      compute a graph of bundles starting with bundle updated or uninstalled since the last call to this method. 
+      //      Add to the graph any bundle that is wired to a package that is currently exported by a bundle in the graph. 
+      //      The graph is fully constructed when there is no bundle outside the graph that is wired to a bundle in the graph. 
+      //      The graph may contain UNINSTALLED bundles that are currently still exporting packages.
+      //
+      //   2. Each bundle in the graph that is in the ACTIVE state will be stopped as described in the Bundle.stop method.
+      //
+      //   3. Each bundle in the graph that is in the RESOLVED state is unresolved and thus moved to the INSTALLED state. 
+      //      The effect of this step is that bundles in the graph are no longer RESOLVED.
+      //
+      //   4. Each bundle in the graph that is in the UNINSTALLED state is removed from the graph and is now completely removed from the Framework.
+      //
+      //   5. Each bundle in the graph that was in the ACTIVE state prior to Step 2 is started as described in the Bundle.start method, 
+      //      causing all bundles required for the restart to be resolved. It is possible that, as a result of the previous steps, 
+      //      packages that were previously exported no longer are. Therefore, some bundles may be unresolvable until another bundle 
+      //      offering a compatible package for export has been installed in the Framework.
+      //
+      //   6. A framework event of type FrameworkEvent.PACKAGES_REFRESHED is fired.
+      //
+      // For any exceptions that are thrown during any of these steps, a FrameworkEvent of type ERROR is fired containing the exception. 
+      // The source bundle for these events should be the specific bundle to which the exception is related. If no specific bundle can 
+      // be associated with the exception then the System Bundle must be used as the source bundle for the event.
+
    }
 
    public boolean resolveBundles(Bundle[] bundleArr)

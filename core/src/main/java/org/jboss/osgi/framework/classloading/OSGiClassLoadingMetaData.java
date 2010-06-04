@@ -29,8 +29,11 @@ import java.util.List;
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
+import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.VersionRange;
+import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
+import org.osgi.framework.Constants;
 
 /**
  * An extension of {@link ClassLoadingMetaData} that captures OSGi specific 
@@ -119,6 +122,14 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
          
          this.metadata = metadata;
          this.symbolicName = metadata.getAttribute();
+         
+         Parameter bundleVersionAttr = metadata.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+         if (bundleVersionAttr != null)
+            bundleVersion = AbstractVersionRange.valueOf(bundleVersionAttr.getValue().toString());
+
+         Parameter extensionDirective = metadata.getDirective(Constants.EXTENSION_DIRECTIVE);
+         if (extensionDirective != null)
+            extension = (String)extensionDirective.getValue();
       }
 
       public ParameterizedAttribute getMetadata()
@@ -151,16 +162,6 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
       public String getExtension()
       {
          return extension;
-      }
-
-      public void setExtension(String extension)
-      {
-         this.extension = extension;
-      }
-
-      public void setBundleVersion(VersionRange bundleVersion)
-      {
-         this.bundleVersion = bundleVersion;
       }
    }
 }
