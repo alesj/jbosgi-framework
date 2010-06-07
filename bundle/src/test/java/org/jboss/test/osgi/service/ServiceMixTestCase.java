@@ -35,7 +35,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.Deployment;
@@ -65,17 +64,18 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    @Test
    public void testGetServiceReferenceFromMC() throws Throwable
    {
-      Deployment bean = deployBeans("beanA", A.class);
+      Deployment beans = createDeployment("beanA", null, A.class);
+      deploy(addBeanMetaData(beans, A.class));
       try
       {
          // Bundle-SymbolicName: org.jboss.test.osgi.service1
          // Import-Package: org.jboss.test.osgi.service.support.a
-         Archive<?> assembly1 = assembleArchive("simple1", "/bundles/service/service-bundle1");
-         Bundle bundle1 = installBundle(assembly1);
+         Archive<?> assembly2 = assembleArchive("simple1", "/bundles/service/service-bundle1");
+         Bundle bundle2 = installBundle(assembly2);
          try
          {
-            bundle1.start();
-            BundleContext bundleContext1 = bundle1.getBundleContext();
+            bundle2.start();
+            BundleContext bundleContext1 = bundle2.getBundleContext();
             assertNotNull(bundleContext1);
 
             ServiceReference ref1 = bundleContext1.getServiceReference(A.class.getName());
@@ -83,12 +83,12 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
             try
             {
                Bundle refsBundle = ref1.getBundle();
-               assertEquals(refsBundle, getBundle(bean));
+               assertEquals(refsBundle, getBundle(beans));
 
                assertNotNull(bundleContext1.getService(ref1));
-               assertUsingBundles(ref1, bundle1);
+               assertUsingBundles(ref1, bundle2);
 
-               ServiceReference[] inUse = bundle1.getServicesInUse();
+               ServiceReference[] inUse = bundle2.getServicesInUse();
                assertArrayEquals(new ServiceReference[] { ref1 }, inUse);
             }
             finally
@@ -103,12 +103,12 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
          }
          finally
          {
-            bundle1.uninstall();
+            bundle2.uninstall();
          }
       }
       finally
       {
-         undeploy(bean);
+         undeploy(beans);
       }
    }
 
@@ -117,8 +117,10 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
       builder.addPropertyMetaData("a", builder.createContextualInject());
-      BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean = addBeans("beanA", bmd, A.class, C.class);
+      
+      Deployment beans = createDeployment("beanA", null, A.class, C.class);
+      addBeanMetaData(beans, builder.getBeanMetaData());
+      addDeployment(beans);
       try
       {
          KernelControllerContext kcc = getControllerContext("C", null);
@@ -145,7 +147,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
                assertSame(a, getter(c, "getA", "C"));
 
                ServiceReference ref1 = bundleContext1.getServiceReference(A.class.getName());
-               assertUsingBundles(ref1, LazyBundle.getBundle(getDeploymentUnit(bean)));
+               assertUsingBundles(ref1, LazyBundle.getBundle(getDeploymentUnit(beans)));
 
                change(kcc, ControllerState.DESCRIBED);
                // we did un-injection, should be removed now
@@ -169,7 +171,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
       finally
       {
-         undeploy(bean);
+         undeploy(beans);
       }
    }
 
@@ -178,8 +180,10 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
       builder.addPropertyMetaData("a", builder.createInject("A"));
-      BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean = addBeans("beanA", bmd, C.class, A.class);
+
+      Deployment beans = createDeployment("beanA", null, A.class, C.class);
+      addBeanMetaData(beans, builder.getBeanMetaData());
+      addDeployment(beans);
       try
       {
          KernelControllerContext kcc = getControllerContext("C", null);
@@ -208,7 +212,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
                assertSame(a, getter(c, "getA", "C"));
 
                ServiceReference ref1 = bundleContext1.getServiceReference(A.class.getName());
-               assertUsingBundles(ref1, LazyBundle.getBundle(getDeploymentUnit(bean)));
+               assertUsingBundles(ref1, LazyBundle.getBundle(getDeploymentUnit(beans)));
 
                change(kcc, ControllerState.DESCRIBED);
                // we did un-injection, should be removed now
@@ -232,7 +236,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
       finally
       {
-         undeploy(bean);
+         undeploy(beans);
       }
    }
 
@@ -242,8 +246,9 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C", C.class.getName());
       builder.addPropertyMetaData("msg", builder.createInject("A", "msg"));
       builder.addInstall("calc", "A", int.class.getName(), 123);
-      BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean = addBeans("beanA", bmd, C.class, A.class);
+      Deployment beans = createDeployment("beanA", null, A.class, C.class);
+      addBeanMetaData(beans, builder.getBeanMetaData());
+      addDeployment(beans);
       try
       {
          // Bundle-SymbolicName: org.jboss.test.osgi.service3
@@ -283,7 +288,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
       finally
       {
-         undeploy(bean);
+         undeploy(beans);
       }
    }
 
@@ -293,14 +298,16 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C1", C.class.getName());
       builder.addPropertyMetaData("a", builder.createInject("A"));
-      BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean1 = addBeans("beanA1", bmd, C.class, A.class, ServiceMixFactory.class);
+      Deployment beans1 = createDeployment("beanA1", null, A.class, C.class, ServiceMixFactory.class);
+      addBeanMetaData(beans1, builder.getBeanMetaData());
+      addDeployment(beans1);
       try
       {
          builder = BeanMetaDataBuilder.createBuilder("C2", C.class.getName());
          builder.addPropertyMetaData("a", builder.createInject("A"));
-         bmd = builder.getBeanMetaData();
-         Deployment bean2 = addBeans("beanA2", bmd, E.class);
+         Deployment beans2 = createDeployment("beanA2", null, E.class);
+         addBeanMetaData(beans2, builder.getBeanMetaData());
+         addDeployment(beans2);
          try
          {
             // Bundle-SymbolicName: org.jboss.test.osgi.service4
@@ -329,12 +336,12 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
                   Object c1 = getBean("C1");
                   a1 = getter(c1, "getA", "C1");
                   Object msg1 = getter(a1, "getMsg", "A1");
-                  assertEquals(msg1, getBundle(bean1).getSymbolicName());
+                  assertEquals(msg1, getBundle(beans1).getSymbolicName());
 
                   Object c2 = getBean("C2");
                   a2 = getter(c2, "getA", "C2");
                   Object msg2 = getter(a2, "getMsg", "A2");
-                  assertEquals(msg2, getBundle(bean2).getSymbolicName());
+                  assertEquals(msg2, getBundle(beans2).getSymbolicName());
                }
                finally
                {
@@ -354,12 +361,12 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
          }
          finally
          {
-            undeploy(bean2);
+            undeploy(beans2);
          }
       }
       finally
       {
-         undeploy(bean1);
+         undeploy(beans1);
       }
    }
 
@@ -369,8 +376,9 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    {
       BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder("C1", C.class.getName());
       builder.addPropertyMetaData("a", builder.createInject("A"));
-      BeanMetaData bmd = builder.getBeanMetaData();
-      Deployment bean1 = addBeans("beanA1", bmd, C.class, A.class, ServiceMixFactory.class);
+      Deployment beans1 = createDeployment("beanA1", null, A.class, C.class, ServiceMixFactory.class);
+      addBeanMetaData(beans1, builder.getBeanMetaData());
+      addDeployment(beans1);
       try
       {
          // Bundle-SymbolicName: org.jboss.test.osgi.service4
@@ -439,14 +447,15 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
       finally
       {
-         undeploy(bean1);
+         undeploy(beans1);
       }
    }
 
    @Test
    public void testFiltering() throws Throwable
    {
-      Deployment bean = deployBeans("beanA", A.class);
+      Deployment beans1 = createDeployment("beanA", null, A.class);
+      deploy(addBeanMetaData(beans1, A.class));
       try
       {
          // Bundle-SymbolicName: org.jboss.test.osgi.service1
@@ -500,7 +509,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
       finally
       {
-         undeploy(bean);
+         undeploy(beans1);
       }
    }
 
@@ -508,11 +517,9 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    public void testBeansMix() throws Throwable
    {
       Archive<?> assembly = assembleArchive("beans1", "/bundles/service/service-beans1", A.class);
-      Deployment deployment = addDeployment(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
+      Deployment deployment = deploy(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
       try
       {
-         checkComplete();
-
          Bundle bundle = getBundle(getDeploymentUnit(deployment));
          bundle.start();
 
@@ -555,20 +562,18 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
          assertNotNull(reg1);
 
          Archive<?> assembly = assembleArchive("beans1", "/bundles/service/service-beans2", C.class);
-         Deployment deployment = addDeployment(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
+         Deployment beans = deploy(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
          try
          {
-            checkComplete();
-
-            Bundle beans = getBundle(getDeploymentUnit(deployment));
-            beans.start();
+            Bundle beansBundle = getBundle(getDeploymentUnit(beans));
+            beansBundle.start();
 
             Object c = getBean("C");
             assertEquals(a, getter(c, "getA", "C"));
          }
          finally
          {
-            undeploy(deployment);
+            undeploy(beans);
          }
       }
       finally
@@ -581,12 +586,10 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    public void testExposedClasses() throws Throwable
    {
       Archive<?> assembly = assembleArchive("beans3", "/bundles/service/service-beans3", A.class);
-      Deployment deployment = addDeployment(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
+      Deployment beans = deploy(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
       try
       {
-         checkComplete();
-
-         Bundle bundle = getBundle(getDeploymentUnit(deployment));
+         Bundle bundle = getBundle(getDeploymentUnit(beans));
          bundle.start();
 
          // Bundle-SymbolicName: org.jboss.test.osgi.service1
@@ -611,7 +614,7 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
       }
       finally
       {
-         undeploy(deployment);
+         undeploy(beans);
       }
    }
 }
