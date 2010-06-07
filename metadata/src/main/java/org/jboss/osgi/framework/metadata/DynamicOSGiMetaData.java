@@ -19,17 +19,18 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.osgi.framework.metadata.internal;
+package org.jboss.osgi.framework.metadata;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.jar.Attributes.Name;
 
+import org.jboss.osgi.framework.metadata.internal.AbstractOSGiMetaData;
 import org.osgi.framework.Constants;
 
 /**
@@ -40,9 +41,9 @@ import org.osgi.framework.Constants;
  * @author Thomas.Diesler@jboss.com
  * @since 04-Jun-2010
  */
-public class DynamicOSGiMetaData extends AbstractOSGiMetaData implements Externalizable
+class DynamicOSGiMetaData extends AbstractOSGiMetaData implements Externalizable
 {
-   private Map<Name, String> attributes = new HashMap<Name, String>();
+   private Map<Name, String> attributes = new LinkedHashMap<Name, String>();
    
    public DynamicOSGiMetaData(String symbolicName)
    {

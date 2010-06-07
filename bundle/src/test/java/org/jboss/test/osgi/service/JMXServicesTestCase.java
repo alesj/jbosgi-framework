@@ -23,15 +23,7 @@ package org.jboss.test.osgi.service;
 
 // $Id: $
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.net.URL;
-
-import javax.management.ObjectName;
-
 import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
-import org.jboss.test.osgi.service.support.MockInvokerMBean;
 import org.junit.Test;
 
 /**
@@ -42,6 +34,14 @@ import org.junit.Test;
  */
 public class JMXServicesTestCase extends AbstractFrameworkTest
 {
+   @Test
+   public void testMBeans() throws Throwable
+   {
+      System.out.println("FIXME [JBOSGI-141] Service integration with MC");
+   }
+   
+   /*
+
    @Test
    public void testAtJmx() throws Throwable
    {
@@ -61,13 +61,6 @@ public class JMXServicesTestCase extends AbstractFrameworkTest
       }
    }
 
-   @Test
-   public void testMBeans() throws Throwable
-   {
-      System.out.println("FIXME [JBOSGI-141] Service integration with MC");
-   }
-   
-   /*
    public void testAtJmx() throws Throwable
    {
       MockInvokerMBean invoker = (MockInvokerMBean) getBean("Invoker");

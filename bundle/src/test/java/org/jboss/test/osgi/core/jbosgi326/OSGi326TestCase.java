@@ -58,7 +58,8 @@ public class OSGi326TestCase extends AbstractFrameworkTest
    {
       BundleContext sysContext = getFramework().getBundleContext();
 
-      Deployment beanB = deployBeans("beanB", SomeServiceB.class);
+      Deployment beanB = createDeployment("beanB", null, SomeServiceB.class);
+      deploy(addBeanMetaData(beanB, SomeServiceB.class));
       try
       {
          ServiceReference sref = sysContext.getServiceReference(SomeService.class.getName());
@@ -140,7 +141,8 @@ public class OSGi326TestCase extends AbstractFrameworkTest
       {
          bundleA.start();
 
-         Deployment beanB = deployBeans("beanB", SomeServiceB.class);
+         Deployment beanB = createDeployment("beanB", null, SomeServiceB.class);
+         deploy(addBeanMetaData(beanB, SomeServiceB.class));
          try
          {
             ServiceReference[] srefs = sysContext.getServiceReferences(SomeService.class.getName(), null);
@@ -182,7 +184,8 @@ public class OSGi326TestCase extends AbstractFrameworkTest
    {
       BundleContext sysContext = getFramework().getBundleContext();
 
-      Deployment beanB = deployBeans("beanB", SomeServiceB.class);
+      Deployment beanB = createDeployment("beanB", null, SomeServiceB.class);
+      deploy(addBeanMetaData(beanB, SomeServiceB.class));
       try
       {
          JavaArchive archiveA = getBundleArchive();

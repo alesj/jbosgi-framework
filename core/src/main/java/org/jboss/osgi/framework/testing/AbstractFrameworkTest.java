@@ -5,16 +5,16 @@
  * full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
+ * under the terms of the GNU Lesser General protected License as
  * published by the Free Software Foundation; either version 2.1 of
  * the License, or (at your option) any later version.
  *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * Lesser General protected License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
+ * You should have received a copy of the GNU Lesser General protected
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
@@ -23,9 +23,10 @@ package org.jboss.osgi.framework.testing;
 
 // $Id: $
 
-import java.net.URL;
+import java.util.ArrayList;
 
 import org.jboss.beans.metadata.spi.BeanMetaData;
+import org.jboss.beans.metadata.spi.BeanMetaDataFactory;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.classloader.spi.ClassLoaderDomain;
 import org.jboss.classloader.spi.ClassLoaderSystem;
@@ -38,13 +39,14 @@ import org.jboss.deployers.spi.attachments.MutableAttachments;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.structure.spi.main.MainDeployerStructure;
 import org.jboss.kernel.Kernel;
-import org.jboss.kernel.plugins.deployment.xml.BasicXMLDeployer;
+import org.jboss.kernel.plugins.deployment.AbstractKernelDeployment;
 import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.kernel.spi.dependency.KernelControllerContext;
 import org.jboss.kernel.spi.deployment.KernelDeployment;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.deployers.AbstractDeployment;
 import org.jboss.osgi.framework.launch.OSGiFramework;
+import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.osgi.framework.BundleException;
@@ -58,8 +60,6 @@ import org.osgi.framework.launch.Framework;
  */
 public abstract class AbstractFrameworkTest extends OSGiFrameworkTest
 {
-   protected BasicXMLDeployer deployer;
-
    protected OSGiBundleManager getBundleManager()
    {
       Framework framework;
@@ -116,17 +116,11 @@ public abstract class AbstractFrameworkTest extends OSGiFrameworkTest
       getDeployerClient().checkComplete();
    }
 
-   public DeploymentUnit getDeploymentUnit(Deployment deployment) throws Exception
+   protected DeploymentUnit getDeploymentUnit(Deployment deployment) throws Exception
    {
       DeployerClient deployerClient = getDeployerClient();
       MainDeployerStructure deployerStructure = (MainDeployerStructure)deployerClient;
       return deployerStructure.getDeploymentUnit(deployment.getName());
-   }
-
-   public void undeploy(Deployment deployment) throws Exception
-   {
-      DeployerClient deployerClient = getDeployerClient();
-      deployerClient.undeploy(deployment);
    }
 
    protected DeployerClient getDeployerClient()
@@ -134,53 +128,52 @@ public abstract class AbstractFrameworkTest extends OSGiFrameworkTest
       return getBundleManager().getDeployerClient();
    }
 
-   protected KernelDeployment deploy(URL urlDeployment) throws Throwable
+   protected Deployment createDeployment(String name, String[] resources, Class<?>... packages) throws Exception
    {
-      return getDeployer().deploy(urlDeployment);
+      Archive<?> assembly = assembleArchive(name, resources, packages);
+      Deployment deployment = AbstractDeployment.createDeployment(toVirtualFile(assembly));
+      return deployment;
    }
 
-   protected void undeploy(URL urlDeployment) throws Throwable
+   protected Deployment addBeanMetaData(Deployment deployment, Class<?> beanClass)
    {
-      getDeployer().undeploy(urlDeployment);
+      BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder(beanClass.getSimpleName(), beanClass.getName());
+      return addBeanMetaData(deployment, builder.getBeanMetaData());
    }
 
-   protected BasicXMLDeployer getDeployer()
+   protected Deployment addBeanMetaData(Deployment deployment, BeanMetaData bmd)
    {
-      if (deployer == null)
+      MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
+      KernelDeployment kdep = att.getAttachment(KernelDeployment.class);
+      if (kdep == null)
       {
-         deployer = new BasicXMLDeployer(getKernel());
+         kdep = new AbstractKernelDeployment();
+         ((AbstractKernelDeployment)kdep).setBeanFactories(new ArrayList<BeanMetaDataFactory>());
+         att.addAttachment(KernelDeployment.class, kdep);
       }
-      return deployer;
+      kdep.getBeanFactories().add((BeanMetaDataFactory)bmd);
+      return deployment;
    }
 
-   protected Deployment deployBeans(String name, Class<?> beanClass) throws Exception
+   protected Deployment addOSGiMetaData(Deployment deployment, OSGiMetaData metadata)
    {
-      return deployBeans(name, null, new Class<?>[] { beanClass });
+      MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
+      att.addAttachment(OSGiMetaData.class, metadata);
+      return deployment;
    }
 
-   protected Deployment deployBeans(String name, BeanMetaData bmd, Class<?>... packages) throws Exception
+   protected Deployment deploy(Deployment deployment) throws Exception
    {
-      Deployment deployment = addBeans(name, bmd, packages);
+      getDeployerClient().addDeployment(deployment);
+      getDeployerClient().process();
       getDeployerClient().checkComplete();
       return deployment;
    }
 
-   protected Deployment addBeans(String name, BeanMetaData bmd, Class<?>... packages) throws Exception
+   protected void undeploy(Deployment deployment) throws Exception
    {
-      Archive<?> assembly = assembleArchive(name, new String[0], packages);
-   
-      if (bmd == null)
-      {
-         Class<?> beanClass = packages[0];
-         BeanMetaDataBuilder builder = BeanMetaDataBuilder.createBuilder(beanClass.getSimpleName(), beanClass.getName());
-         bmd = builder.getBeanMetaData();
-      }
-   
-      Deployment deployment = AbstractDeployment.createDeployment(toVirtualFile(assembly));
-      MutableAttachments att = (MutableAttachments)deployment.getPredeterminedManagedObjects();
-      att.addAttachment(BeanMetaData.class, bmd);
-   
-      return addDeployment(deployment);
+      DeployerClient deployerClient = getDeployerClient();
+      deployerClient.undeploy(deployment);
    }
 
    protected Deployment addDeployment(Deployment deployment) throws DeploymentException

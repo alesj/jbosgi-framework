@@ -26,10 +26,10 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.kernel.spi.deployment.KernelDeployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.internal.DynamicOSGiMetaData;
+import org.jboss.osgi.framework.metadata.OSGiMetaDataBuilder;
 import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
-import org.osgi.framework.Constants;
 
 /**
  * A deployer that creates {@link OSGiMetaData} for deployments that are not real bundles.
@@ -64,27 +64,29 @@ public class OSGiDynamicMetaDataDeployer extends AbstractDeployer
          return;
       }
       
-      if (unit.isAttachmentPresent(BeanMetaData.class))
+      if (unit.isAttachmentPresent(KernelDeployment.class))
       {
-         BeanMetaData bmd = unit.getAttachment(BeanMetaData.class);
-         OSGiMetaData metadata = processBeanMetaData(unit, bmd);
+         KernelDeployment deployment = unit.getAttachment(KernelDeployment.class);
+         OSGiMetaData metadata = processMetaData(unit, deployment);
          unit.addAttachment(OSGiMetaData.class, metadata);
       }
    }
 
-   private OSGiMetaData processBeanMetaData(DeploymentUnit unit, BeanMetaData bmd)
+   private OSGiMetaData processMetaData(DeploymentUnit unit, KernelDeployment deployment)
    {
       String symbolicName = unit.getName();
-      DynamicOSGiMetaData metadata = new DynamicOSGiMetaData(symbolicName);
+      OSGiMetaDataBuilder builder = OSGiMetaDataBuilder.createBuilder(symbolicName);
       
       // Add an Export-Package definition from the bean's package
-      String className = bmd.getBean();
-      String packageName = className.substring(0, className.lastIndexOf("."));
-      metadata.addMainAttribute(Constants.EXPORT_PACKAGE, packageName);
+      for (BeanMetaData bmd : deployment.getBeans())
+      {
+         String className = bmd.getBean();
+         String packageName = className.substring(0, className.lastIndexOf("."));
+         builder.addExportPackages(packageName);
+      }
       
       // [TODO] Read the manifest and a version attribute if available
-      System.out.println(bmd);
       
-      return metadata;
+      return builder.getOSGiMetaData();
    }
 }
