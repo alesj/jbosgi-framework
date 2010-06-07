@@ -141,9 +141,12 @@
   <bean name="OSGiContextTrackerDeployer" class="org.jboss.osgi.framework.deployers.OSGiContextTrackerDeployer" />
   <bean name="OSGiDeploymentMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiDeploymentMetaDataDeployer" />
   <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
-  <bean name="OSGiDynamicMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiDynamicMetaDataDeployer" />
+  <bean name="OSGiManifestMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestMetaDataDeployer" />
   <bean name="OSGiNativeCodeMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiNativeCodeMetaDataDeployer" />
 
+  <!-- Dynamic OSGiMetaData Deployers -->
+  <bean name="OSGiKernelDeploymentDeployer" class="org.jboss.osgi.framework.deployers.OSGiKernelDeploymentDeployer" />
+  
   <bean name="OSGiSingletonSchemaResolverFactory">
     <constructor factoryClass="org.jboss.xb.binding.sunday.unmarshalling.SingletonSchemaResolverFactory" factoryMethod="getInstance" />
   </bean>

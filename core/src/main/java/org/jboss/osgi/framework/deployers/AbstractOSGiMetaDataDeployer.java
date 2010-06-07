@@ -21,14 +21,11 @@
 */
 package org.jboss.osgi.framework.deployers;
 
-import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.kernel.spi.deployment.KernelDeployment;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.OSGiMetaDataBuilder;
 import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 
 /**
@@ -40,12 +37,20 @@ import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
  * @author thomas.diesler@jboss.com
  * @since 04-Jun-2010
  */
-public class OSGiDynamicMetaDataDeployer extends AbstractDeployer
+public abstract class AbstractOSGiMetaDataDeployer<T> extends AbstractDeployer
 {
-   public OSGiDynamicMetaDataDeployer()
+   // The optional metadata attachment
+   private Class<T> attachmentType;
+   
+   protected AbstractOSGiMetaDataDeployer(Class<T> attachmentType)
    {
+      if (attachmentType == null)
+         throw new IllegalArgumentException("Null attachment type");
+      this.attachmentType = attachmentType;
+      
       setStage(DeploymentStages.POST_PARSE);
       setOutput(OSGiMetaData.class);
+      setInput(attachmentType);
       setTopLevelOnly(true);
    }
 
@@ -56,7 +61,7 @@ public class OSGiDynamicMetaDataDeployer extends AbstractDeployer
          return;
       
       // The {@link OSGiManifestMetaData} is likely to have been created by the {@link OSGiManifestParsingDeployer}
-      // This is the {@link OSGiMetaData} with the higest priority, in which case we don't create one. 
+      // This is the {@link OSGiMetaData} with the higest priority, in which case we don't look further.
       if (unit.isAttachmentPresent(OSGiManifestMetaData.class))
       {
          OSGiMetaData metadata = unit.getAttachment(OSGiManifestMetaData.class);
@@ -64,29 +69,17 @@ public class OSGiDynamicMetaDataDeployer extends AbstractDeployer
          return;
       }
       
-      if (unit.isAttachmentPresent(KernelDeployment.class))
+      // Process the given metadata type and turn it into an instance of {@link OSGiMetaData}
+      if (unit.isAttachmentPresent(attachmentType))
       {
-         KernelDeployment deployment = unit.getAttachment(KernelDeployment.class);
-         OSGiMetaData metadata = processMetaData(unit, deployment);
+         T attachment = unit.getAttachment(attachmentType);
+         OSGiMetaData metadata = deployInternal(unit, attachment);
          unit.addAttachment(OSGiMetaData.class, metadata);
       }
    }
 
-   private OSGiMetaData processMetaData(DeploymentUnit unit, KernelDeployment deployment)
-   {
-      String symbolicName = unit.getName();
-      OSGiMetaDataBuilder builder = OSGiMetaDataBuilder.createBuilder(symbolicName);
-      
-      // Add an Export-Package definition from the bean's package
-      for (BeanMetaData bmd : deployment.getBeans())
-      {
-         String className = bmd.getBean();
-         String packageName = className.substring(0, className.lastIndexOf("."));
-         builder.addExportPackages(packageName);
-      }
-      
-      // [TODO] Read the manifest and a version attribute if available
-      
-      return builder.getOSGiMetaData();
-   }
+   /**
+    * Overwrite to generate an instance of {@link OSGiMetaData} from the given attachment. 
+    */
+   protected abstract OSGiMetaData deployInternal(DeploymentUnit unit, T attachment);
 }
