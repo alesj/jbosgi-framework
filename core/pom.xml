@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- ====================================================================== -->
-<!--                                                                        -->
-<!-- JBoss, the OpenSource J2EE webOS                                       -->
-<!--                                                                        -->
-<!-- Distributable under LGPL license.                                      -->
-<!-- See terms of license at http://www.gnu.org.                            -->
-<!--                                                                        -->
+<!-- -->
+<!-- JBoss, the OpenSource J2EE webOS -->
+<!-- -->
+<!-- Distributable under LGPL license. -->
+<!-- See terms of license at http://www.gnu.org. -->
+<!-- -->
 <!-- ====================================================================== -->
 
-<!-- 
-    Set these VM properties in your IDE debugger 
-    
-    -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework-core/target} 
-    -Dlog4j.configuration=log4j-console.xml 
--->
+<!-- Set these VM properties in your IDE debugger -Dlog4j.output.dir=${workspace_loc:jboss-osgi-framework-core/target} -Dlog4j.configuration=log4j-console.xml -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -39,6 +34,12 @@
     <dependency>
       <groupId>org.jboss.osgi.framework</groupId>
       <artifactId>jboss-osgi-framework-resolver</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.apache.felix.framework</artifactId>
+        </exclusion>
+      </exclusions>
       <version>${version}</version>
     </dependency>
     <dependency>
@@ -57,7 +58,7 @@
       <groupId>org.jboss</groupId>
       <artifactId>jboss-mdr</artifactId>
     </dependency>
-    
+
     <!-- JBoss OSGi Dependencies -->
     <dependency>
       <groupId>org.jboss.osgi</groupId>
@@ -89,7 +90,7 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
-    
+
     <!-- Provided Dependencies -->
 
     <!-- Test Dependencies -->
@@ -98,7 +99,7 @@
       <artifactId>mockito-all</artifactId>
     </dependency>
   </dependencies>
-  
+
   <!-- Build -->
   <build>
     <plugins>

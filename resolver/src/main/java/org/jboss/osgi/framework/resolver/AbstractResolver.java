@@ -19,29 +19,41 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver.internal;
+package org.jboss.osgi.framework.resolver;
 
+import java.util.List;
+import java.util.Map;
+
+import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.Resolver;
-import org.osgi.framework.Bundle;
+import org.apache.felix.framework.resolver.ResolverImpl;
+import org.apache.felix.framework.resolver.Wire;
 
 /**
- * An extension to the Apache Felix ResolverState.
+ * An extension to the Apache Felix Resolver.
  *  
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-interface ResolverStateExtension extends Resolver.ResolverState
+class AbstractResolver implements Resolver
 {
-   void addModule(Module module);
-   
-   void removeModule(Module module);
+   private Resolver delegate;
 
-   Module findHost(Module rootModule);
+   public AbstractResolver(Logger logger)
+   {
+      this.delegate = new ResolverImpl(logger);
+   }
 
-   void checkSingleton(Module module);
+   @Override
+   public Map<Module, List<Wire>> resolve(ResolverState state, Module module)
+   {
+      return delegate.resolve(state, module);
+   }
 
-   void detachFragment(Module host, Module fragment);
-
-   void moduleResolved(Module module);
+   @Override
+   public Map<Module, List<Wire>> resolve(ResolverState state, Module module, String pkgName)
+   {
+      return delegate.resolve(state, module, pkgName);
+   }
 }

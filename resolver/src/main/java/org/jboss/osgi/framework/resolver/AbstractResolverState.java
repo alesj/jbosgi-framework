@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver.internal;
+package org.jboss.osgi.framework.resolver;
 
 import java.util.Set;
 
@@ -29,6 +29,7 @@ import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.ResolveException;
+import org.apache.felix.framework.resolver.Resolver.ResolverState;
 
 /**
  * An extension to the Apache Felix ResolverState.
@@ -36,28 +37,25 @@ import org.apache.felix.framework.resolver.ResolveException;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-class ResolverStateExtensionImpl implements ResolverStateExtension
+public class AbstractResolverState implements ResolverState
 {
    private FelixResolverState delegate;
 
-   public ResolverStateExtensionImpl(Logger logger)
+   public AbstractResolverState(Logger logger)
    {
       delegate = new FelixResolverState(logger, null);
    }
 
-   @Override
    public void addModule(Module module)
    {
       delegate.addModule(module);
    }
 
-   @Override
    public void removeModule(Module module)
    {
       delegate.removeModule(module);
    }
 
-   @Override
    public void detachFragment(Module host, Module fragment)
    {
       delegate.detachFragment(host, fragment);
@@ -81,19 +79,16 @@ class ResolverStateExtensionImpl implements ResolverStateExtension
       delegate.checkExecutionEnvironment(module);
    }
 
-   @Override
    public void checkSingleton(Module module)
    {
       delegate.checkSingleton(module);
    }
 
-   @Override
    public Module findHost(Module rootModule) throws ResolveException
    {
       return delegate.findHost(rootModule);
    }
 
-   @Override
    public void moduleResolved(Module module)
    {
       delegate.moduleResolved(module);

@@ -49,6 +49,7 @@ import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.resolver.AbstractModule;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 

@@ -36,6 +36,8 @@ import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
+import org.jboss.osgi.framework.resolver.AbstractResolverPlugin;
+import org.jboss.osgi.framework.resolver.AbstractModule;
 import org.osgi.framework.Bundle;
 
 /**
@@ -49,7 +51,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    // Provide logging
    final Logger log = Logger.getLogger(ResolverPluginImpl.class);
 
-   private AbstractResolver resolver = new JBossResolver();
+   private AbstractResolverPlugin resolver = new JBossResolver();
 
    public ResolverPluginImpl(OSGiBundleManager bundleManager)
    {
@@ -59,28 +61,28 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    @Override
    public void addBundle(Bundle bundle)
    {
-      ModuleExtension module = resolver.createModule(bundle);
+      AbstractModule module = resolver.createModule(bundle);
       resolver.addModule(module);
 
       // Attach the resolver module to the deployment
       if (bundle.getBundleId() != 0)
       {
          DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-         bundleState.getDeploymentUnit().addAttachment(ModuleExtension.class, module);
+         bundleState.getDeploymentUnit().addAttachment(AbstractModule.class, module);
       }
    }
 
    @Override
    public void removeBundle(Bundle bundle)
    {
-      ModuleExtension module = resolver.getModule(bundle);
+      AbstractModule module = resolver.getModule(bundle);
       resolver.removeModule(module);
 
       // Remove the resolver module from the deployment
       if (bundle.getBundleId() != 0)
       {
          DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-         bundleState.getDeploymentUnit().removeAttachment(ModuleExtension.class);
+         bundleState.getDeploymentUnit().removeAttachment(AbstractModule.class);
       }
    }
 
@@ -90,7 +92,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       List<Bundle> resolved = new ArrayList<Bundle>();
       for (Bundle bundle : bundles)
       {
-         ModuleExtension module = resolver.getModule(bundle);
+         AbstractModule module = resolver.getModule(bundle);
          if (failsafeResolve(module) == true)
             resolved.add(bundle);
       }
@@ -100,8 +102,8 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    @Override
    public boolean match(Bundle importer, Bundle exporter, OSGiRequirement osgireq)
    {
-      ModuleExtension impModule = resolver.getModule(importer);
-      ModuleExtension expModule = resolver.getModule(exporter);
+      AbstractModule impModule = resolver.getModule(importer);
+      AbstractModule expModule = resolver.getModule(exporter);
 
       // Lazily resolve the exporter and retry
       if (expModule.isResolved() == false)
@@ -132,7 +134,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       return false;
    }
 
-   private boolean failsafeResolve(ModuleExtension module)
+   private boolean failsafeResolve(AbstractModule module)
    {
       try
       {
@@ -146,7 +148,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       }
    }
 
-   static class JBossResolver extends AbstractResolver
+   static class JBossResolver extends AbstractResolverPlugin
    {
       @Override
       public boolean acquireGlobalLock()
@@ -168,7 +170,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       }
 
       @Override
-      public ModuleExtension createModule(Bundle bundle)
+      public AbstractModule createModule(Bundle bundle)
       {
          if (bundle.getBundleId() == 0)
          {
@@ -183,10 +185,10 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       }
 
       @Override
-      public ModuleExtension getModule(Bundle bundle)
+      public AbstractModule getModule(Bundle bundle)
       {
          DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-         ModuleExtension module = bundleState.getDeploymentUnit().getAttachment(ModuleExtension.class);
+         AbstractModule module = bundleState.getDeploymentUnit().getAttachment(AbstractModule.class);
          if (module == null)
             throw new IllegalStateException("No module attached to: " + bundle);
 

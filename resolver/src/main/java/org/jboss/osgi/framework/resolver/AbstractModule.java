@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver.internal;
+package org.jboss.osgi.framework.resolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +54,7 @@ import org.osgi.framework.Version;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public abstract class AbstractModule implements ModuleExtension
+public abstract class AbstractModule implements Module
 {
    // Provide logging
    final Logger log = Logger.getLogger(AbstractModule.class);
@@ -297,7 +297,10 @@ public abstract class AbstractModule implements ModuleExtension
       throw new NotImplementedException();
    }
 
-   @Override
+   /** 
+    * Gets the potential wire for a given requirement.
+    * @return The wire or null 
+    */
    public Wire getWireForRequirement(Requirement requirement)
    {
       Wire result = null;

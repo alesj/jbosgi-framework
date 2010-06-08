@@ -35,6 +35,7 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
+import org.jboss.osgi.framework.resolver.AbstractModule;
 import org.osgi.framework.Version;
 
 /**

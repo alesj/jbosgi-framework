@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver.internal;
+package org.jboss.osgi.framework.resolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,27 +50,42 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public abstract class AbstractResolver
+public abstract class AbstractResolverPlugin
 {
    // TODO abstract logging
    private Logger logger;
    
-   private ResolverExtension resolver;
-   private ResolverStateExtension resolverState;
+   private AbstractResolver resolver;
+   private AbstractResolverState resolverState;
 
-   public AbstractResolver()
+   public AbstractResolverPlugin()
    {
-      logger = new LoggerDelegate();
-      resolver = new ResolverExtensionImpl(logger);
-      resolverState = new ResolverStateExtensionImpl(logger);
+      logger = getLogger();
+      resolver = getAbstractResolver(logger);
+      resolverState = getAbstractResolverState(logger);
    }
 
-   public void addModule(ModuleExtension module)
+   protected Logger getLogger()
+   {
+      return new LoggerDelegate();
+   }
+
+   protected AbstractResolver getAbstractResolver(Logger logger)
+   {
+      return new AbstractResolver(logger);
+   }
+
+   protected AbstractResolverState getAbstractResolverState(Logger logger)
+   {
+      return new AbstractResolverState(logger);
+   }
+
+   public void addModule(AbstractModule module)
    {
       resolverState.addModule(module);
    }
 
-   public void removeModule(ModuleExtension module)
+   public void removeModule(AbstractModule module)
    {
       resolverState.removeModule(module);
    }
@@ -299,9 +314,9 @@ public abstract class AbstractResolver
 
    public abstract void releaseGlobalLock();
 
-   public abstract ModuleExtension createModule(Bundle bundle);
+   public abstract AbstractModule createModule(Bundle bundle);
 
-   public abstract ModuleExtension getModule(Bundle bundle);
+   public abstract AbstractModule getModule(Bundle bundle);
    
    public abstract void markBundleResolved(Module module);
 }

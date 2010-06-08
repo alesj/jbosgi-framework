@@ -41,6 +41,11 @@
       <classifier>sources</classifier>
     </dependency>
 
+    <dependency>
+      <groupId>org.jboss.osgi</groupId>
+      <artifactId>jboss-osgi-spi</artifactId>
+    </dependency>
+    
     <!-- OSGi Dependencies -->
     <dependency>
       <groupId>org.osgi</groupId>
