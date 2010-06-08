@@ -24,6 +24,8 @@ package org.jboss.osgi.framework.resolver.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.Permission;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -233,9 +235,15 @@ public abstract class AbstractModule implements ModuleExtension
    }
 
    @Override
-   public Object getSecurityContext()
+   public ProtectionDomain getSecurityContext()
    {
       throw new NotImplementedException();
+   }
+
+   @Override
+   public boolean impliesDirect(Permission permission)
+   {
+      return true;
    }
 
    @Override
