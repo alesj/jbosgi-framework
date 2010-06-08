@@ -82,27 +82,38 @@ public class OSGiSystemState extends AbstractBundleState
       return osgiMetaData;
    }
 
+   @Override
    public boolean isFragment()
    {
       return false;
    }
    
+   @Override
+   public boolean isPersistentlyStarted()
+   {
+      return false;
+   }
+
+   @Override
    public long getBundleId()
    {
       return 0;
    }
    
+   @Override
    public String getLocation()
    {
       return Constants.SYSTEM_BUNDLE_LOCATION;
    }
 
+   @Override
    public Class<?> loadClass(String name) throws ClassNotFoundException
    {
       ClassLoaderDomain domain = getBundleManager().getClassLoaderDomain();
       return domain.loadClass(name);
    }
    
+   @Override
    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse)
    {
       System.out.println("FIXME [JBOSGI-138] findEntries(" + path + "," + filePattern + "," + recurse + ")");
@@ -131,12 +142,14 @@ public class OSGiSystemState extends AbstractBundleState
       */
    }
 
+   @Override
    public URL getEntry(String path)
    {
       System.out.println("FIXME [JBOSGI-138] getEntry(" + path + ")");
       return null;
    }
 
+   @Override
    @SuppressWarnings({ "rawtypes" })
    public Enumeration getEntryPaths(String path)
    {
@@ -144,12 +157,14 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
+   @Override
    public URL getResource(String name)
    {
       System.out.println("FIXME [JBOSGI-138] getResource(" + name + ")");
       return null;
    }
 
+   @Override
    @SuppressWarnings({ "rawtypes" })
    public Enumeration getResources(String name) throws IOException
    {
@@ -157,11 +172,13 @@ public class OSGiSystemState extends AbstractBundleState
       return null;
    }
 
+   @Override
    public void start(int options) throws BundleException
    {
       createBundleContext();
    }
 
+   @Override
    public void stop(int options) throws BundleException
    {
       final OSGiBundleManager bundleManager = getBundleManager();
@@ -174,6 +191,7 @@ public class OSGiSystemState extends AbstractBundleState
       });
    }
 
+   @Override
    public void update() throws BundleException
    {
       final OSGiBundleManager bundleManager = getBundleManager();
@@ -186,11 +204,13 @@ public class OSGiSystemState extends AbstractBundleState
       });
    }
 
+   @Override
    public void update(InputStream in) throws BundleException
    {
       throw new BundleException("The system bundle cannot be updated from a stream");
    }
 
+   @Override
    public void uninstall() throws BundleException
    {
       throw new BundleException("The system bundle cannot be uninstalled");

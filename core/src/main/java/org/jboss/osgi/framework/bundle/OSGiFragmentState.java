@@ -57,17 +57,26 @@ public class OSGiFragmentState extends DeployedBundleState
       this.fragmentHost = fragmentHost;
    }
 
+   @Override
+   public boolean isPersistentlyStarted()
+   {
+      return false;
+   }
+
+   @Override
    public boolean isFragment()
    {
       return true;
    }
 
+   @Override
    public URL getResource(String name)
    {
       // Null if the resource could not be found or if this bundle is a fragment bundle
       return null;
    }
 
+   @Override
    @SuppressWarnings("rawtypes")
    public Enumeration getResources(String name) throws IOException
    {
@@ -84,7 +93,7 @@ public class OSGiFragmentState extends DeployedBundleState
       // must search the fragment's JAR for the localization entry.
       if (getState() == Bundle.RESOLVED)
       {
-         OSGiBundleState host = getFragmentHost();
+         AbstractBundleState host = getFragmentHost();
          return host.getLocalizationEntry(entryPath);
       }
       else
@@ -94,27 +103,32 @@ public class OSGiFragmentState extends DeployedBundleState
       }
    }
    
+   @Override
    @SuppressWarnings("rawtypes")
    public Class loadClass(String name) throws ClassNotFoundException
    {
       throw new ClassNotFoundException("Cannot load class from a fragment: " + this);
    }
 
+   @Override
    public void start(int options) throws BundleException
    {
       throw new BundleException("Cannot start fragment bundle: " + this);
    }
 
+   @Override
    public void stop(int options) throws BundleException
    {
       throw new BundleException("Cannot stop fragment bundle: " + this);
    }
 
+   @Override
    public void update() throws BundleException
    {
       throw new NotImplementedException();
    }
 
+   @Override
    public void update(InputStream input) throws BundleException
    {
       throw new NotImplementedException();

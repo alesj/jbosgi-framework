@@ -244,7 +244,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
       // [TODO] Add support for multiple hosts
       OSGiFragmentState bundleState = (OSGiFragmentState)absBundleState;
-      OSGiBundleState fragmentHost = bundleState.getFragmentHost();
+      AbstractBundleState fragmentHost = bundleState.getFragmentHost();
       if (fragmentHost != null)
       {
          bundles.add(fragmentHost.getBundle());
@@ -348,7 +348,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       Iterator<OSGiBundleState> itBundles = resolvableBundles.iterator();
       while(itBundles.hasNext())
       {
-         OSGiBundleState bundleState = itBundles.next();
+         AbstractBundleState bundleState = itBundles.next();
          try
          {
             verifyExecutionEnvironment(bundleState, true);
@@ -435,7 +435,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       }
    }
 
-   private boolean verifyExecutionEnvironment(OSGiBundleState bundleState, boolean errorOnFail) throws BundleException
+   private boolean verifyExecutionEnvironment(AbstractBundleState bundleState, boolean errorOnFail) throws BundleException
    {
       // A bundle can only resolve if the framework is running on a VM which
       // implements one of the listed required execution environments. 

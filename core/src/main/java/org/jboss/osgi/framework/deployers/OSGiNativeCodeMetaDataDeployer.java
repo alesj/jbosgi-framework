@@ -123,7 +123,7 @@ public class OSGiNativeCodeMetaDataDeployer extends AbstractRealDeployer
       if (classLoadingMetaData == null)
          throw new IllegalStateException("No ClassLoadingMetaData");
 
-      OSGiBundleState bundleState = (OSGiBundleState)absBundleState;
+      AbstractBundleState bundleState = (AbstractBundleState)absBundleState;
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
       List<ParameterizedAttribute> nativeCodeParams = osgiMetaData.getBundleNativeCode();

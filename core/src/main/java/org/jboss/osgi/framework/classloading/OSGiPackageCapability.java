@@ -155,6 +155,13 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       OSGiPackageRequirement osgiRequirement = (OSGiPackageRequirement)mcRequirement;
       AbstractBundleState reqBundle = osgiRequirement.getBundleState();
       
+      // [JBOSGI-330] Revisit capability matching for dynamic imports
+      if (osgiRequirement.isDynamic() && osgiRequirement.isOptional() == false)
+      {
+         match = super.resolves(reqModule, mcRequirement);
+         return match;
+      }
+      
       // Get the optional ResolverPlugin
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
@@ -162,10 +169,6 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       {
          // Match the requirement through the Resolver
          match = resolver.match(reqBundle, bundleState, osgiRequirement);
-         
-         // [JBOSGI-330] Revisit capability matching for dynamic imports
-         if (match == false && osgiRequirement.isDynamic())
-            match = super.resolves(reqModule, mcRequirement);
       }
       else
       {

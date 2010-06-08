@@ -280,7 +280,7 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy implements Bundl
          return libraryFile;
       }
 
-      private File getUniqueLibraryFile(final OSGiBundleState bundleState, final String libpath)
+      private File getUniqueLibraryFile(final AbstractBundleState bundleState, final String libpath)
       {
          OSGiBundleManager bundleManager = bundleState.getBundleManager();
          String timestamp = new SimpleDateFormat("-yyyyMMdd-HHmmssSSS").format(new Date(bundleState.getLastModified()));

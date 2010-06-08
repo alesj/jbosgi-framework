@@ -106,7 +106,7 @@ public class ControllerContextPluginImpl extends AbstractPlugin implements Contr
       DeploymentUnit unit = registry.getDeployment(context);
       if (unit != null)
       {
-         OSGiBundleState bundleState = (OSGiBundleState)unit.getAttachment(AbstractBundleState.class);
+         AbstractBundleState bundleState = (AbstractBundleState)unit.getAttachment(AbstractBundleState.class);
          return bundleState;
       }
 

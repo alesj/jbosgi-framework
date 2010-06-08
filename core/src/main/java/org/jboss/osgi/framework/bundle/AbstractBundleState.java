@@ -95,6 +95,12 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
    /** The bundle state */
    private AtomicInteger state = new AtomicInteger(Bundle.UNINSTALLED);
 
+   /** 
+    * Whether the bundle is to be started. 
+    * Calling start() doesn't always start the bundle immediately the start level service might start it later.
+    */
+   protected boolean persistentlyStarted = false;
+
    /**
     * Create a new abstract bundle state.
     * 
@@ -163,6 +169,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return state.get();
    }
 
+   public abstract boolean isPersistentlyStarted();
+   
    public abstract boolean isFragment();
 
    public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType)

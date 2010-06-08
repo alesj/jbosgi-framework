@@ -139,12 +139,8 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    @Override
    public boolean isBundlePersistentlyStarted(Bundle bundle)
    {
-      OSGiBundleState obs = OSGiBundleState.assertBundleState(bundle);
-      if (obs != null)
-      {
-         return obs.isPersistentlyStarted();
-      }
-      return false;
+      AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
+      return bundleState.isPersistentlyStarted();
    }
 
    @Override

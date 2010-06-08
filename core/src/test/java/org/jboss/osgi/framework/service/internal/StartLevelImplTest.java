@@ -215,15 +215,15 @@ public class StartLevelImplTest
       OSGiBundleManager bm = mock(OSGiBundleManager.class);
       StartLevel sl = new StartLevelImpl(bm);
       
-      OSGiBundleState abs1 = mock(OSGiBundleState.class);
+      AbstractBundleState abs1 = mock(OSGiBundleState.class);
       stub(abs1.isPersistentlyStarted()).toReturn(true);
       assertTrue(sl.isBundlePersistentlyStarted(abs1));
 
-      OSGiBundleState abs2 = mock(OSGiBundleState.class);
+      AbstractBundleState abs2 = mock(OSGiBundleState.class);
       stub(abs2.isPersistentlyStarted()).toReturn(false);
       assertFalse(sl.isBundlePersistentlyStarted(abs2));
       
-      OSGiBundleState abs3 = mock(OSGiBundleState.class);
+      AbstractBundleState abs3 = mock(OSGiBundleState.class);
       stub(abs3.isPersistentlyStarted()).toReturn(true);
       OSGiBundleWrapper bw = new OSGiBundleWrapper(abs3);
       assertTrue(sl.isBundlePersistentlyStarted(bw));
