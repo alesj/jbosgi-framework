@@ -43,10 +43,10 @@ public class AbstractPackageAttribute extends AbstractParameterizedAttribute imp
    protected PackageInfo packageInfo;
    protected VersionRange versionRange;
 
-   public AbstractPackageAttribute(String attribute, Map<String, Parameter> attributes, Map<String, Parameter> directives)
+   public AbstractPackageAttribute(String packageName, Map<String, Parameter> attributes, Map<String, Parameter> directives)
    {
-      super(attribute, attributes, directives);
-      packageInfo = new PackageInfoImpl(attribute);
+      super(packageName, attributes, directives);
+      packageInfo = new PackageInfoImpl(packageName);
    }
 
    public PackageInfo getPackageInfo()

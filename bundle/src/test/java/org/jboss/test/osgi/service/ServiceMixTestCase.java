@@ -615,6 +615,9 @@ public class ServiceMixTestCase extends AbstractServiceMixTest
    @Test
    public void testExposedClasses() throws Throwable
    {
+      // <osgi xmlns="urn:jboss:pojo2osgi:1.0" name="A" class="org.jboss.test.osgi.service.support.a.A">
+      //   <exposed-type>org.jboss.test.osgi.service.support.a.AMBean</exposed-type>
+      // </osgi>
       Archive<?> assembly = assembleArchive("beans3", "/bundles/service/service-beans3", A.class);
       Deployment beans = deploy(AbstractDeployment.createDeployment(toVirtualFile(assembly)));
       try

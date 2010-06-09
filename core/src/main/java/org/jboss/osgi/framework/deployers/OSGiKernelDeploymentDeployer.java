@@ -21,9 +21,12 @@
 */
 package org.jboss.osgi.framework.deployers;
 
+import java.util.List;
+
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.kernel.spi.deployment.KernelDeployment;
+import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaDataBuilder;
 
@@ -35,27 +38,47 @@ import org.jboss.osgi.framework.metadata.OSGiMetaDataBuilder;
  */
 public class OSGiKernelDeploymentDeployer extends AbstractOSGiMetaDataDeployer<KernelDeployment>
 {
+   // Provide logging
+   private static final Logger log = Logger.getLogger(OSGiKernelDeploymentDeployer.class);
+
    public OSGiKernelDeploymentDeployer()
    {
       super(KernelDeployment.class);
    }
 
    @Override
-   protected OSGiMetaData deployInternal(DeploymentUnit unit, KernelDeployment attachment)
+   protected OSGiMetaData createOSGiMetaData(DeploymentUnit unit, KernelDeployment attachment)
    {
-      String symbolicName = unit.getName();
-      OSGiMetaDataBuilder builder = OSGiMetaDataBuilder.createBuilder(symbolicName);
-      
-      // Add an Export-Package definition from the bean's package
-      for (BeanMetaData bmd : attachment.getBeans())
+      OSGiMetaData meatadata = null;
+
+      // Generate an Export-Package for every top level bean package in the KernelDeployemnt 
+      List<BeanMetaData> beansMetaData = attachment.getBeans();
+      if (beansMetaData != null)
       {
-         String className = bmd.getBean();
-         String packageName = className.substring(0, className.lastIndexOf("."));
-         builder.addExportPackages(packageName);
+         String symbolicName = unit.getName();
+         OSGiMetaDataBuilder builder = OSGiMetaDataBuilder.createBuilder(symbolicName);
+
+         // Add an Export-Package definition from the bean's package
+         for (BeanMetaData bmd : beansMetaData)
+         {
+            String className = bmd.getBean();
+            if (className != null && className.startsWith("java.") == false)
+            {
+               String packageName = className.substring(0, className.lastIndexOf("."));
+               builder.addExportPackages(packageName);
+            }
+            else
+            {
+               log.debug("Ignore export package for: " + bmd);
+            }
+         }
+         
+         // Add DynamicImport-Package: *
+         builder.addDynamicImportPackages("*");
+         
+         meatadata = builder.getOSGiMetaData();
       }
       
-      // [TODO] Read the manifest and a version attribute if available
-      
-      return builder.getOSGiMetaData();
+      return meatadata;
    }
 }

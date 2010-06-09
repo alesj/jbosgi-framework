@@ -33,4 +33,10 @@
     </constructor>
   </bean>
   
+  <bean name="OSGiResolverPlugin" class="org.jboss.osgi.framework.resolver.felix.FelixResolverPlugin">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  
+  <bean name="OSGiKernelDeploymentDeployer" class="org.jboss.osgi.framework.deployers.OSGiKernelDeploymentDeployer" />
+  
 </deployment>

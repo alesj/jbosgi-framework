@@ -41,13 +41,13 @@ public abstract class AbstractOSGiMetaDataDeployer<T> extends AbstractDeployer
 {
    // The optional metadata attachment
    private Class<T> attachmentType;
-   
+
    protected AbstractOSGiMetaDataDeployer(Class<T> attachmentType)
    {
       if (attachmentType == null)
          throw new IllegalArgumentException("Null attachment type");
       this.attachmentType = attachmentType;
-      
+
       setStage(DeploymentStages.POST_PARSE);
       setOutput(OSGiMetaData.class);
       setInput(attachmentType);
@@ -59,7 +59,7 @@ public abstract class AbstractOSGiMetaDataDeployer<T> extends AbstractDeployer
    {
       if (unit.isAttachmentPresent(OSGiMetaData.class))
          return;
-      
+
       // The {@link OSGiManifestMetaData} is likely to have been created by the {@link OSGiManifestParsingDeployer}
       // This is the {@link OSGiMetaData} with the higest priority, in which case we don't look further.
       if (unit.isAttachmentPresent(OSGiManifestMetaData.class))
@@ -68,18 +68,19 @@ public abstract class AbstractOSGiMetaDataDeployer<T> extends AbstractDeployer
          unit.addAttachment(OSGiMetaData.class, metadata);
          return;
       }
-      
+
       // Process the given metadata type and turn it into an instance of {@link OSGiMetaData}
       if (unit.isAttachmentPresent(attachmentType))
       {
          T attachment = unit.getAttachment(attachmentType);
-         OSGiMetaData metadata = deployInternal(unit, attachment);
-         unit.addAttachment(OSGiMetaData.class, metadata);
+         OSGiMetaData metadata = createOSGiMetaData(unit, attachment);
+         if (metadata != null)
+            unit.addAttachment(OSGiMetaData.class, metadata);
       }
    }
 
    /**
     * Overwrite to generate an instance of {@link OSGiMetaData} from the given attachment. 
     */
-   protected abstract OSGiMetaData deployInternal(DeploymentUnit unit, T attachment);
+   protected abstract OSGiMetaData createOSGiMetaData(DeploymentUnit unit, T attachment);
 }

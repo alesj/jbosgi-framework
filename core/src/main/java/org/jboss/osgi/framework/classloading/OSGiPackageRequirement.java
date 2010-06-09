@@ -108,17 +108,14 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       this.bundleState = bundleState;
       this.metadata = packageAttribute;
 
-      if (packageAttribute != null)
-      {
-         // resolution:=optional
-         String resolution = packageAttribute.getDirectiveValue(Constants.RESOLUTION_DIRECTIVE, String.class);
-         if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
-            setOptional(true);
+      // resolution:=optional
+      String resolution = packageAttribute.getDirectiveValue(Constants.RESOLUTION_DIRECTIVE, String.class);
+      if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
+         setOptional(true);
 
-         // DynamicImport-Package
-         if (isDynamic == true)
-            setDynamic(true);
-      }
+      // DynamicImport-Package
+      if (isDynamic == true)
+         setDynamic(true);
    }
 
    public AbstractBundleState getBundleState()

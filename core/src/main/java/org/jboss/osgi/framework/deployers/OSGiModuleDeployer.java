@@ -57,15 +57,6 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
          return;
       
       deployInternal(unit, metaData);
-
-      // Add the bundle to the resolver
-      Module module = unit.getAttachment(Module.class);
-      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (bundleResolver != null && module instanceof OSGiModule)
-      {
-         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-         bundleResolver.addBundle(bundleState);
-      }
    }
 
    @Override
@@ -86,6 +77,15 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
    protected void deployInternal(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
    {
       super.deploy(unit, metaData);
+      
+      // Add the bundle to the resolver
+      Module module = unit.getAttachment(Module.class);
+      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (bundleResolver != null && module instanceof OSGiModule)
+      {
+         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
+         bundleResolver.addBundle(bundleState);
+      }
    }
    
    @Override

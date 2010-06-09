@@ -39,7 +39,7 @@ public class OSGiManifestMetaDataDeployer extends AbstractOSGiMetaDataDeployer<O
    }
 
    @Override
-   protected OSGiMetaData deployInternal(DeploymentUnit unit, OSGiManifestMetaData attachment)
+   protected OSGiMetaData createOSGiMetaData(DeploymentUnit unit, OSGiManifestMetaData attachment)
    {
       // The {@link OSGiManifestMetaData} is likely to have been created by the {@link OSGiManifestParsingDeployer}
       // This is the {@link OSGiMetaData} with the higest priority. 

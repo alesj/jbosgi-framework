@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver.internal;
+package org.jboss.osgi.framework.resolver.felix;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,14 +46,14 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
+public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugin
 {
    // Provide logging
-   final Logger log = Logger.getLogger(ResolverPluginImpl.class);
+   final Logger log = Logger.getLogger(FelixResolverPlugin.class);
 
    private AbstractResolverPlugin resolver = new JBossResolver();
 
-   public ResolverPluginImpl(OSGiBundleManager bundleManager)
+   public FelixResolverPlugin(OSGiBundleManager bundleManager)
    {
       super(bundleManager);
    }
