@@ -33,11 +33,12 @@ import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiSystemState;
+import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
-import org.jboss.osgi.framework.resolver.AbstractResolverPlugin;
 import org.jboss.osgi.framework.resolver.AbstractModule;
+import org.jboss.osgi.framework.resolver.AbstractResolverPlugin;
 import org.osgi.framework.Bundle;
 
 /**
@@ -100,18 +101,21 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
    }
 
    @Override
-   public boolean match(Bundle importer, Bundle exporter, OSGiRequirement osgireq)
+   public boolean match(OSGiCapability osgicap, OSGiRequirement osgireq)
    {
-      AbstractModule impModule = resolver.getModule(importer);
+      Bundle exporter = osgicap.getBundleState();
       AbstractModule expModule = resolver.getModule(exporter);
+      
+      Bundle importer = osgireq.getBundle();
+      AbstractModule impModule = resolver.getModule(importer);
 
       // Lazily resolve the exporter and retry
       if (expModule.isResolved() == false)
-         return failsafeResolve(expModule) && match(importer, exporter, osgireq);
+         return failsafeResolve(expModule) && match(osgicap, osgireq);
 
       // Lazily resolve the importer and retry
       if (impModule.isResolved() == false)
-         return failsafeResolve(impModule) && match(importer, exporter, osgireq);
+         return failsafeResolve(impModule) && match(osgicap, osgireq);
 
       // A dynamic requirement does not match a specific module
       if (osgireq.isDynamic() == true && osgireq.isOptional() == false)

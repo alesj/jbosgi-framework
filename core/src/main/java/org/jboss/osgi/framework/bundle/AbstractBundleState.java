@@ -67,7 +67,6 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
-import org.osgi.framework.Version;
 
 /**
  * The abstract state of all bundles.
@@ -91,6 +90,9 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    /** The bundle */
    private Bundle bundle;
+
+   /** The bundle symbolic name */
+   private String symbolicName;
 
    /** The bundle state */
    private AtomicInteger state = new AtomicInteger(Bundle.UNINSTALLED);
@@ -142,43 +144,33 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return bundleManager;
    }
 
+   @Override
    public String getSymbolicName()
    {
-      String symbolicName = getOSGiMetaData().getBundleSymbolicName();
       if (symbolicName == null)
-         symbolicName = "anonymous-bundle" + getBundleId();
+         symbolicName = getOSGiMetaData().getBundleSymbolicName();
 
       return symbolicName;
    }
 
-   public Version getVersion()
-   {
-      String versionstr = getOSGiMetaData().getBundleVersion();
-      try
-      {
-         return Version.parseVersion(versionstr);
-      }
-      catch (NumberFormatException ex)
-      {
-         return Version.emptyVersion;
-      }
-   }
-
+   @Override
    public int getState()
    {
       return state.get();
    }
 
    public abstract boolean isPersistentlyStarted();
-   
+
    public abstract boolean isFragment();
 
+   @Override
    public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType)
    {
       throw new NotImplementedException();
    }
 
-   public synchronized BundleContext getBundleContext()
+   @Override
+   public BundleContext getBundleContext()
    {
       checkAdminPermission(AdminPermission.CONTEXT);
       return bundleContext;
@@ -198,7 +190,8 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       bundleContext = null;
    }
 
-   public synchronized Bundle getBundle()
+   @Override
+   public Bundle getBundle()
    {
       checkValidBundleContext();
       return getBundleInternal();
@@ -211,6 +204,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return bundle;
    }
 
+   @Override
    public Bundle getBundle(long id)
    {
       checkValidBundleContext();
@@ -218,6 +212,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return bundleState != null ? bundleState.getBundleInternal() : null;
    }
 
+   @Override
    public Bundle[] getBundles()
    {
       checkValidBundleContext();
@@ -237,6 +232,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
     * Returns the time when this bundle was last modified. 
     * A bundle is considered to be modified when it is installed, updated or uninstalled
     */
+   @Override
    public long getLastModified()
    {
       return lastModified;
@@ -249,11 +245,21 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
 
    /**
     * Get the osgiMetaData.
-    * 
-    * @return the osgiMetaData.
     */
    public abstract OSGiMetaData getOSGiMetaData();
 
+   /**
+    * Updates this bundle. 
+    * 
+    * This method performs the same function as calling update(InputStream) with a null InputStream
+    */
+   @Override
+   public void update() throws BundleException
+   {
+      update(null);
+   }
+
+   @Override
    public Dictionary<String, String> getHeaders()
    {
       // If the specified locale is null then the locale returned 
@@ -261,6 +267,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return getHeaders(null);
    }
 
+   @Override
    @SuppressWarnings("unchecked")
    public Dictionary<String, String> getHeaders(String locale)
    {
@@ -342,9 +349,9 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       // appending the .properties suffix. If a translation is not found, the locale
       // must be made more generic by first removing the variant, then the country
       // and finally the language until an entry is found that contains a valid translation.
-      
+
       String entryPath = baseName + "_" + locale + ".properties";
-      
+
       URL entryURL = getLocalizationEntry(entryPath);
       while (entryURL == null)
       {
@@ -393,12 +400,14 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return null;
    }
 
+   @Override
    public String getProperty(String key)
    {
       checkValidBundleContext();
       return getBundleManager().getProperty(key);
    }
 
+   @Override
    public File getDataFile(String filename)
    {
       checkValidBundleContext();
@@ -406,6 +415,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return storagePlugin != null ? storagePlugin.getDataFile(this, filename) : null;
    }
 
+   @Override
    public boolean hasPermission(Object permission)
    {
       if (permission == null || permission instanceof Permission == false)
@@ -419,12 +429,14 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return true;
    }
 
+   @Override
    public Filter createFilter(String filter) throws InvalidSyntaxException
    {
       checkValidBundleContext();
       return FrameworkUtil.createFilter(filter);
    }
 
+   @Override
    public void addServiceListener(ServiceListener listener)
    {
       try
@@ -437,6 +449,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       }
    }
 
+   @Override
    public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException
    {
       addServiceListenerInternal(listener, filter);
@@ -449,6 +462,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.addServiceListener(this, listener, filter);
    }
 
+   @Override
    public void removeServiceListener(ServiceListener listener)
    {
       checkValidBundleContext();
@@ -457,6 +471,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.removeServiceListener(this, listener);
    }
 
+   @Override
    public ServiceReference[] getRegisteredServices()
    {
       checkInstalled();
@@ -482,6 +497,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return usedByCount > 0;
    }
 
+   @Override
    public ServiceReference[] getServicesInUse()
    {
       checkInstalled();
@@ -489,6 +505,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return plugin.getServicesInUse(this);
    }
 
+   @Override
    public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException
    {
       checkValidBundleContext();
@@ -496,6 +513,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return plugin.getServiceReferences(this, clazz, filter, false);
    }
 
+   @Override
    public Object getService(ServiceReference reference)
    {
       checkValidBundleContext();
@@ -503,6 +521,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return plugin.getService(this, reference);
    }
 
+   @Override
    public ServiceReference getServiceReference(String clazz)
    {
       checkValidBundleContext();
@@ -510,6 +529,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return plugin.getServiceReference(this, clazz);
    }
 
+   @Override
    public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException
    {
       checkValidBundleContext();
@@ -542,6 +562,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.unregisterService(serviceState);
    }
 
+   @Override
    public boolean ungetService(ServiceReference reference)
    {
       checkValidBundleContext();
@@ -554,6 +575,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       return removeContextInUse(context);
    }
 
+   @Override
    public void addBundleListener(BundleListener listener)
    {
       checkValidBundleContext();
@@ -565,6 +587,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.addBundleListener(this, listener);
    }
 
+   @Override
    public void removeBundleListener(BundleListener listener)
    {
       checkValidBundleContext();
@@ -576,11 +599,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.removeBundleListener(this, listener);
    }
 
+   @Override
    public void start() throws BundleException
    {
       start(0);
    }
 
+   @Override
    public void stop() throws BundleException
    {
       stop(0);
@@ -596,6 +621,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.removeServiceListeners(this);
    }
 
+   @Override
    public void addFrameworkListener(FrameworkListener listener)
    {
       checkValidBundleContext();
@@ -604,6 +630,7 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.addFrameworkListener(this, listener);
    }
 
+   @Override
    public void removeFrameworkListener(FrameworkListener listener)
    {
       checkValidBundleContext();
@@ -612,11 +639,13 @@ public abstract class AbstractBundleState extends AbstractContextTracker impleme
       plugin.removeFrameworkListener(this, listener);
    }
 
+   @Override
    public Bundle installBundle(String location) throws BundleException
    {
       return installBundle(location, null);
    }
 
+   @Override
    public Bundle installBundle(String location, InputStream input) throws BundleException
    {
       checkValidBundleContext();

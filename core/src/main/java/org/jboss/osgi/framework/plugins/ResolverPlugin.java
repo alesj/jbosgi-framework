@@ -23,6 +23,7 @@ package org.jboss.osgi.framework.plugins;
 
 import java.util.List;
 
+import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.osgi.framework.Bundle;
 
@@ -62,12 +63,7 @@ public interface ResolverPlugin extends Plugin
    List<Bundle> resolve(List<Bundle> bundles);
 
    /**
-    * Return true if the given importer is wired to the given exporter for the given requirement.
-    * 
-    * @param importer The bundle that imports the package.
-    * @param exporter The bundle that exports the package.
-    * @param requirement The requirement
-    * @return True if the importer is wired to the exporter
+    * Return true if the given capability matches the requirement.
     */
-   boolean match(Bundle importer, Bundle exporter, OSGiRequirement requirement);
+   boolean match(OSGiCapability capability, OSGiRequirement requirement);
 }

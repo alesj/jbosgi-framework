@@ -22,6 +22,7 @@
 package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.VersionRange;
@@ -36,9 +37,10 @@ public class OSGiFragmentHostRequirement extends ModuleRequirement implements OS
 {
    private static final long serialVersionUID = -1337312549822378204L;
 
+   private AbstractBundleState bundleState;
    private ParameterizedAttribute metadata;
    
-   public static OSGiFragmentHostRequirement create(FragmentHostMetaData hostMetaData)
+   public static OSGiFragmentHostRequirement create(AbstractBundleState bundleState, FragmentHostMetaData hostMetaData)
    {
       if (hostMetaData == null)
          throw new IllegalArgumentException("Null host metadata");
@@ -47,16 +49,19 @@ public class OSGiFragmentHostRequirement extends ModuleRequirement implements OS
       VersionRange version = hostMetaData.getBundleVersion();
       ParameterizedAttribute metadata = hostMetaData.getMetadata();
 
-      return new OSGiFragmentHostRequirement(name, version, metadata);
+      return new OSGiFragmentHostRequirement(bundleState, name, version, metadata);
    }
 
-   private OSGiFragmentHostRequirement(String name, VersionRange versionRange, ParameterizedAttribute metadata)
+   private OSGiFragmentHostRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, ParameterizedAttribute metadata)
    {
       super(name);
       
+      if (bundleState == null)
+         throw new IllegalArgumentException("Null bundleState");
       if (metadata == null)
          throw new IllegalArgumentException("Null metadata");
       
+      this.bundleState = bundleState;
       this.metadata = metadata;
       
       if (versionRange != null)
@@ -64,6 +69,12 @@ public class OSGiFragmentHostRequirement extends ModuleRequirement implements OS
          String rangeSpec = versionRange.toString();
          setVersionRange(org.jboss.classloading.spi.version.VersionRange.valueOf(rangeSpec));
       }
+   }
+
+   @Override
+   public AbstractBundleState getBundle()
+   {
+      return bundleState;
    }
 
    public ParameterizedAttribute getMetadata()

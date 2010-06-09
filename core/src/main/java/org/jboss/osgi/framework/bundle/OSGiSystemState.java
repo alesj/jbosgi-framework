@@ -35,6 +35,7 @@ import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 /**
  * OSGiSystemBundle.
@@ -48,6 +49,8 @@ public class OSGiSystemState extends AbstractBundleState
 {
    /** The osgi metadata */
    private OSGiMetaData osgiMetaData;
+   /** The bundle version */
+   private Version version;
 
    /**
     * Create a new OSGiSystemBundle.
@@ -214,5 +217,16 @@ public class OSGiSystemState extends AbstractBundleState
    public void uninstall() throws BundleException
    {
       throw new BundleException("The system bundle cannot be uninstalled");
+   }
+
+   @Override
+   public Version getVersion()
+   {
+      if (version == null)
+      {
+         String versionstr = getOSGiMetaData().getBundleVersion();
+         version = Version.parseVersion(versionstr);
+      }
+      return version;
    }
 }

@@ -62,6 +62,6 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractClassLoadingDeploy
 
       // Add the fragment host requirement
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
-      requirements.addRequirement(OSGiFragmentHostRequirement.create(hostMetaData));
+      requirements.addRequirement(OSGiFragmentHostRequirement.create(bundleState, hostMetaData));
    }
 }

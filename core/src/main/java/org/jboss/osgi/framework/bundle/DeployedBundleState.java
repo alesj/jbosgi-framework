@@ -41,6 +41,7 @@ import org.jboss.osgi.vfs.VirtualFile;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Version;
 
 /**
  * The abstract state of a user deployed {@link Bundle} or Fragment.
@@ -62,11 +63,17 @@ public abstract class DeployedBundleState extends AbstractBundleState
    /** The bundle root file */
    private VirtualFile rootFile;
 
+   /** The OSGi meta data */
+   private OSGiMetaData osgiMetaData;
+
    /** The list of deployment units */
    private List<DeploymentUnit> units = new ArrayList<DeploymentUnit>();
 
    /** The headers localized with the default locale */
    Dictionary<String, String> headersOnUninstall;
+
+   /** The bundle version */
+   private Version version;
 
    /**
     * Create a new BundleState.
@@ -86,6 +93,7 @@ public abstract class DeployedBundleState extends AbstractBundleState
       rootFile = (dep != null ? dep.getRoot() : AbstractDeployment.getRoot(unit));
 
       bundleId = bundleIDGenerator.incrementAndGet();
+      osgiMetaData = unit.getAttachment(OSGiMetaData.class);
 
       addDeploymentUnit(unit);
    }
@@ -103,9 +111,6 @@ public abstract class DeployedBundleState extends AbstractBundleState
       return (DeployedBundleState)bundle;
    }
 
-   /**
-    * Get the root file for this bundle 
-    */
    public VirtualFile getRoot()
    {
       return rootFile;
@@ -114,14 +119,30 @@ public abstract class DeployedBundleState extends AbstractBundleState
    @Override
    public OSGiMetaData getOSGiMetaData()
    {
-      DeploymentUnit unit = getDeploymentUnit();
-      OSGiMetaData osgiMetaData = unit.getAttachment(OSGiMetaData.class);
       return osgiMetaData;
    }
 
+   @Override
    public long getBundleId()
    {
       return bundleId;
+   }
+
+   @Override
+   public String getLocation()
+   {
+      return location;
+   }
+
+   @Override
+   public Version getVersion()
+   {
+      if (version == null)
+      {
+         String versionstr = getOSGiMetaData().getBundleVersion();
+         version = Version.parseVersion(versionstr);
+      }
+      return version;
    }
 
    /**
@@ -160,9 +181,26 @@ public abstract class DeployedBundleState extends AbstractBundleState
       return Collections.unmodifiableList(units);
    }
 
-   public String getLocation()
+   /**
+    * Updates this bundle from an InputStream. 
+    */
+   @Override
+   public void update(InputStream in) throws BundleException
    {
-      return location;
+      checkAdminPermission(AdminPermission.LIFECYCLE);
+      try
+      {
+         getBundleManager().updateBundle(this, in);
+         osgiMetaData = getDeploymentUnit().getAttachment(OSGiMetaData.class);
+         version = Version.parseVersion(osgiMetaData.getBundleVersion());
+      }
+      catch (Exception ex)
+      {
+         if (ex instanceof BundleException)
+            throw (BundleException)ex;
+
+         throw new BundleException("Cannot update bundle: " + this, ex);
+      }
    }
 
    @Override

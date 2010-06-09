@@ -24,7 +24,6 @@ package org.jboss.osgi.framework.bundle;
 // $Id: $
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -140,11 +139,13 @@ public class OSGiBundleState extends DeployedBundleState
       clMetaData.attachClassLoadingMetaData(fragMetaData);
    }
 
+   @Override
    public boolean isFragment()
    {
       return false;
    }
 
+   @Override
    public boolean isPersistentlyStarted()
    {
       return persistentlyStarted;
@@ -165,6 +166,7 @@ public class OSGiBundleState extends DeployedBundleState
       startLevel = sl;
    }
 
+   @Override
    public Class<?> loadClass(String name) throws ClassNotFoundException
    {
       checkInstalled();
@@ -190,6 +192,7 @@ public class OSGiBundleState extends DeployedBundleState
       return clazz;
    }
 
+   @Override
    public URL getResource(String name)
    {
       checkInstalled();
@@ -241,7 +244,7 @@ public class OSGiBundleState extends DeployedBundleState
       return entryURL;
    }
 
-   // [TODO] options
+   @Override
    public void start(int options) throws BundleException
    {
       checkInstalled();
@@ -258,6 +261,7 @@ public class OSGiBundleState extends DeployedBundleState
       }
    }
 
+   @Override
    public void stop(int options) throws BundleException
    {
       checkInstalled();
@@ -415,35 +419,6 @@ public class OSGiBundleState extends DeployedBundleState
 
       if (rethrow != null)
          throw new BundleException("Error during stop of bundle: " + this, rethrow);
-   }
-
-   /**
-    * Updates this bundle. 
-    * 
-    * This method performs the same function as calling update(InputStream) with a null InputStream
-    */
-   public void update() throws BundleException
-   {
-      update(null);
-   }
-
-   /**
-    * Updates this bundle from an InputStream. 
-    */
-   public void update(InputStream in) throws BundleException
-   {
-      checkAdminPermission(AdminPermission.LIFECYCLE);
-      try
-      {
-         getBundleManager().updateBundle(this, in);
-      }
-      catch (Exception ex)
-      {
-         if (ex instanceof BundleException)
-            throw (BundleException)ex;
-
-         throw new BundleException("Cannot update bundle: " + this, ex);
-      }
    }
 
    @Override

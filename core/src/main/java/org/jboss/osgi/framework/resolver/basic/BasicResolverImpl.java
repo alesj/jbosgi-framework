@@ -23,6 +23,7 @@ package org.jboss.osgi.framework.resolver.basic;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,6 @@ import org.jboss.classloading.plugins.metadata.PackageRequirement;
 import org.jboss.classloading.spi.metadata.Capability;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.classloading.spi.metadata.Requirement;
-import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
@@ -41,8 +41,10 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractPackageAttribute;
+import org.jboss.osgi.framework.metadata.internal.AbstractParameter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
@@ -97,9 +99,7 @@ public class BasicResolverImpl extends AbstractResolver
    public List<Bundle> resolve(List<Bundle> bundles)
    {
       List<Bundle> resolvedBundles = new ArrayList<Bundle>();
-      for (OSGiBundleState aux : resolveBundles(bundles))
-         resolvedBundles.add(aux.getBundleInternal());
-      
+      resolvedBundles.addAll(resolveBundles(bundles));
       return Collections.unmodifiableList(resolvedBundles);
    }
 
@@ -441,10 +441,12 @@ public class BasicResolverImpl extends AbstractResolver
                   PackageCapability otherPackage = otherCapability.getPackageCapability();
                   String packageName = otherPackage.getName();
                   Object version = otherPackage.getVersion();
-                  VersionRange versionRange = new VersionRange(version, true, version, true);
 
-                  AbstractPackageAttribute attribs = new AbstractPackageAttribute(packageName, null, null);
-                  OSGiPackageRequirement newPackageRequirement = new OSGiPackageRequirement(bundle, packageName, versionRange, attribs, false);
+                  Map<String, Parameter> attributes = new HashMap<String, Parameter>();
+                  attributes.put(Constants.VERSION_ATTRIBUTE, new AbstractParameter(version.toString()));
+                  AbstractPackageAttribute packageAttrs = new AbstractPackageAttribute(packageName, null, null);
+                  OSGiPackageRequirement newPackageRequirement = OSGiPackageRequirement.create(bundle, packageAttrs, false);
+                  
                   BundleRequirement newBundleRequirement = new BundleRequirement(bundle, newPackageRequirement);
                   newBundleRequirement.wireCapability(otherCapability);
                   bundleRequirements.add(newBundleRequirement);

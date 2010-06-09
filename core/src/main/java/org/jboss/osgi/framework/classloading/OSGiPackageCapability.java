@@ -38,6 +38,7 @@ import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
+import org.jboss.osgi.framework.resolver.felix.FelixResolverPlugin;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -129,6 +130,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_VERSION_ATTRIBUTE + " on an Export-Package");
    }
 
+   @Override
    public AbstractBundleState getBundleState()
    {
       return bundleState;
@@ -140,41 +142,43 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    }
 
    @Override
-   public boolean resolves(Module reqModule, Requirement mcRequirement)
+   public boolean resolves(Module reqModule, Requirement mcreq)
    {
       boolean match;
       
       // The Domain creates PackageRequirements on the fly in Domain.getExportedPackagesInternal()
       // we only match package name and version but not any OSGi constraints
-      if (mcRequirement instanceof OSGiPackageRequirement == false)
+      if (mcreq instanceof OSGiPackageRequirement == false)
       {
-         match = super.resolves(reqModule, mcRequirement);
+         match = super.resolves(reqModule, mcreq);
          return match;
       }
 
-      OSGiPackageRequirement osgiRequirement = (OSGiPackageRequirement)mcRequirement;
-      AbstractBundleState reqBundle = osgiRequirement.getBundleState();
-      
-      // [JBOSGI-330] Revisit capability matching for dynamic imports
-      if (osgiRequirement.isDynamic() && osgiRequirement.isOptional() == false)
-      {
-         match = super.resolves(reqModule, mcRequirement);
-         return match;
-      }
+      OSGiPackageRequirement osgireq = (OSGiPackageRequirement)mcreq;
       
       // Get the optional ResolverPlugin
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
       if (resolver != null)
       {
+         // [JBOSGI-330] Revisit capability matching for dynamic imports
+         if (resolver instanceof FelixResolverPlugin)
+         {
+            if (osgireq.isDynamic() && osgireq.isOptional() == false)
+            {
+               match = super.resolves(reqModule, mcreq);
+               return match;
+            }
+         }
+         
          // Match the requirement through the Resolver
-         match = resolver.match(reqBundle, bundleState, osgiRequirement);
+         match = resolver.match(this, osgireq);
       }
       else
       {
          // Match package name and version plus additional OSGi attributes
-         match = super.resolves(reqModule, mcRequirement);
-         match &= matchAttributes(osgiRequirement);
+         match = super.resolves(reqModule, mcreq);
+         match &= matchAttributes(osgireq);
       }
       
       return match;

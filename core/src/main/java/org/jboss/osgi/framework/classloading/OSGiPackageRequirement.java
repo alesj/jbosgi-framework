@@ -88,16 +88,7 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       return new OSGiPackageRequirement(bundleState, name, range, metadata, isDynamic);
    }
 
-   /**
-    * Create a new OSGiPackageRequirement.
-    * 
-    * @param bundleState the bundleState
-    * @param name the name
-    * @param versionRange the version range - pass null for all versions
-    * @param packageAttribute the require package metadata
-    * @throws IllegalArgumentException for a null name or requirePackage
-    */
-   public OSGiPackageRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, PackageAttribute packageAttribute, boolean isDynamic)
+   private OSGiPackageRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, PackageAttribute packageAttribute, boolean isDynamic)
    {
       super(name, versionRange);
       if (bundleState == null)
@@ -118,7 +109,8 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
          setDynamic(true);
    }
 
-   public AbstractBundleState getBundleState()
+   @Override
+   public AbstractBundleState getBundle()
    {
       return bundleState;
    }

@@ -59,12 +59,18 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
       return new OSGiBundleCapability(symbolicName, version, bundleState);
    }
 
-   public OSGiBundleCapability(String name, Version version, AbstractBundleState bundleState)
+   private OSGiBundleCapability(String name, Version version, AbstractBundleState bundleState)
    {
       super(name, version);
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
       this.bundleState = bundleState;
+   }
+
+   @Override
+   public AbstractBundleState getBundleState()
+   {
+      return bundleState;
    }
 
    public OSGiMetaData getMetaData()

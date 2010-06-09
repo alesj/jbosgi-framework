@@ -31,6 +31,7 @@ import org.jboss.classloading.plugins.metadata.PackageRequirement;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
+import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
@@ -104,10 +105,14 @@ public abstract class AbstractResolver extends AbstractPlugin implements Resolve
       resolverBundleMap.remove(bundleState);
    }
 
-   public boolean match(Bundle importer, Bundle exporter, OSGiRequirement osgireq)
+   @Override
+   public boolean match(OSGiCapability osgicap, OSGiRequirement osgireq)
    {
+      Bundle importer = osgireq.getBundle();
       if (importer == null)
          throw new IllegalArgumentException("Null importer");
+      
+      Bundle exporter = osgicap.getBundleState();
       if (exporter == null)
          throw new IllegalArgumentException("Null exporter");
       

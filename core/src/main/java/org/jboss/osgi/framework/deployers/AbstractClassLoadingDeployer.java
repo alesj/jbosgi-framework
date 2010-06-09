@@ -110,7 +110,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       {
          for (ParameterizedAttribute requireBundle : requireBundles)
          {
-            OSGiBundleRequirement requirement = OSGiBundleRequirement.create(requireBundle);
+            OSGiBundleRequirement requirement = OSGiBundleRequirement.create(bundleState, requireBundle);
             requirements.addRequirement(requirement);
          }
       }

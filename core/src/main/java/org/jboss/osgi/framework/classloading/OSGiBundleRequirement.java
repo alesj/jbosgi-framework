@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
 import org.jboss.classloading.spi.version.VersionRange;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
@@ -43,11 +44,12 @@ public class OSGiBundleRequirement extends ModuleRequirement implements OSGiRequ
    /** The serialVersionUID */
    private static final long serialVersionUID = 4264597072894634275L;
 
+   private AbstractBundleState bundleState;
    private ParameterizedAttribute metadata;
    private String visibility;
    private String resolution;
 
-   public static OSGiBundleRequirement create(ParameterizedAttribute metadata)
+   public static OSGiBundleRequirement create(AbstractBundleState bundleState, ParameterizedAttribute metadata)
    {
       if (metadata == null)
          throw new IllegalArgumentException("Null metadata");
@@ -62,19 +64,19 @@ public class OSGiBundleRequirement extends ModuleRequirement implements OSGiRequ
       String visibility = metadata.getDirectiveValue(Constants.VISIBILITY_DIRECTIVE, String.class);
       String resolution = metadata.getDirectiveValue(Constants.RESOLUTION_DIRECTIVE, String.class);
 
-      return new OSGiBundleRequirement(name, range, visibility, resolution, metadata);
+      return new OSGiBundleRequirement(bundleState, name, range, visibility, resolution, metadata);
    }
 
-   /**
-    * Create a new OSGiBundleRequirement.
-    */
-   private OSGiBundleRequirement(String name, VersionRange versionRange, String visdir, String resdir, ParameterizedAttribute metadata)
+   private OSGiBundleRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, String visdir, String resdir, ParameterizedAttribute metadata)
    {
       super(name, versionRange);
 
+      if (bundleState == null)
+         throw new IllegalArgumentException("Null bundleState");
       if (metadata == null)
          throw new IllegalArgumentException("Null metadata");
 
+      this.bundleState = bundleState;
       this.metadata = metadata;
 
       visibility = visdir;
@@ -90,6 +92,12 @@ public class OSGiBundleRequirement extends ModuleRequirement implements OSGiRequ
 
       if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
          setOptional(true);
+   }
+
+   @Override
+   public AbstractBundleState getBundle()
+   {
+      return bundleState;
    }
 
    public ParameterizedAttribute getMetadata()
