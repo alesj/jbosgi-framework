@@ -23,8 +23,8 @@ package org.jboss.osgi.framework.deployers;
 
 // $Id$
 
-import org.jboss.deployers.plugins.classloading.DeploymentMetaData;
 import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.spi.classloading.DeploymentMetaData;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
