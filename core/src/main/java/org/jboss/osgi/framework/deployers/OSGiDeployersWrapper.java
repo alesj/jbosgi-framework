@@ -49,6 +49,10 @@ import org.osgi.service.packageadmin.PackageAdmin;
 /**
  * A Deployers implementation that wraps the deployers that are associated with the MainDeployer.
  * 
+ * [JBOSGi-340] Autostart bundles when deployed in JBossAS
+ * 
+ * https://jira.jboss.org/jira/browse/JBOSGI-340
+ * 
  * @author thomas.diesler@jboss.com
  * @since 04-Sep-2009
  */
@@ -56,7 +60,7 @@ public class OSGiDeployersWrapper implements Deployers
 {
    /** The log */
    private static final Logger log = Logger.getLogger(OSGiDeployersWrapper.class);
-   
+
    private MainDeployer mainDeployer;
    private Deployers deployers;
    private OSGiBundleManager bundleManager;
@@ -89,7 +93,7 @@ public class OSGiDeployersWrapper implements Deployers
          ServiceReference sref = sysContext.getServiceReference(PackageAdmin.class.getName());
          if (sref == null)
             throw new IllegalStateException("Cannot obtain PackageAdmin");
-         
+
          packageAdmin = (PackageAdmin)sysContext.getService(sref);
       }
       return packageAdmin;
@@ -119,7 +123,7 @@ public class OSGiDeployersWrapper implements Deployers
             }
          }
       }
-      
+
       // Process deploy contexts
       if (deploy != null)
       {
@@ -130,16 +134,16 @@ public class OSGiDeployersWrapper implements Deployers
             AbstractBundleState bundle = unit.getAttachment(AbstractBundleState.class);
             if (bundle == null || bundle.isFragment())
                continue;
-            
+
             Deployment dep = unit.getAttachment(Deployment.class);
             boolean autoStart = (dep != null ? dep.isAutoStart() : true);
-            
+
             if (autoStart == true && bundle.getState() == Bundle.INSTALLED)
             {
                unresolvedBundles.add(0, (OSGiBundleState)bundle);
             }
          }
-         
+
          // Try to resolve all unresolved bundles
          if (unresolvedBundles.isEmpty() == false)
          {
@@ -148,16 +152,16 @@ public class OSGiDeployersWrapper implements Deployers
 
             // Use PackageAdmin to resolve the bundles
             getPackageAdmin().resolveBundles(unresolved);
-               
+
             for (DeployedBundleState aux : unresolved)
             {
                if (aux.getState() != Bundle.RESOLVED)
                   log.info("Unresolved: " + aux);
-               
+
                if (aux.getState() == Bundle.RESOLVED)
                {
                   unresolvedBundles.remove(aux);
-                  
+
                   try
                   {
                      // When resolved progress to INSTALLED
@@ -184,7 +188,8 @@ public class OSGiDeployersWrapper implements Deployers
       deployers.checkComplete(contexts);
    }
 
-   public void checkComplete(Collection<DeploymentContext> errors, Collection<org.jboss.deployers.client.spi.Deployment> missingDeployer) throws DeploymentException
+   public void checkComplete(Collection<DeploymentContext> errors, Collection<org.jboss.deployers.client.spi.Deployment> missingDeployer)
+         throws DeploymentException
    {
       deployers.checkComplete(errors, missingDeployer);
    }

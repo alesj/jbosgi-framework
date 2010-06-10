@@ -37,7 +37,6 @@ import org.jboss.osgi.framework.plugins.ResolverPlugin;
  * The OSGiModuleDeployer creates the {@link OSGiModule}.
  * 
  * @author thomas.diesler@jboss.com
- * @version $Revision$
  */
 public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
 {
@@ -51,12 +50,16 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
    @Override
    public void deploy(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
    {
-      // Do nothing if the workaround is enabled
-      // In which case the work is expected to get done in {@link OSGiModuleDeployerWorkaround}
-      if ("true".equals(bundleManager.getProperty("jbosgi317.workaround")))
-         return;
+      super.deploy(unit, metaData);
       
-      deployInternal(unit, metaData);
+      // Add the bundle to the resolver
+      Module module = unit.getAttachment(Module.class);
+      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (bundleResolver != null && module instanceof OSGiModule)
+      {
+         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
+         bundleResolver.addBundle(bundleState);
+      }
    }
 
    @Override
@@ -74,20 +77,6 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
       super.undeploy(unit, deployment);
    }
 
-   protected void deployInternal(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
-   {
-      super.deploy(unit, metaData);
-      
-      // Add the bundle to the resolver
-      Module module = unit.getAttachment(Module.class);
-      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (bundleResolver != null && module instanceof OSGiModule)
-      {
-         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-         bundleResolver.addBundle(bundleState);
-      }
-   }
-   
    @Override
    protected ClassLoaderPolicyModule createModule(DeploymentUnit unit, ClassLoadingMetaData metaData) throws DeploymentException
    {
