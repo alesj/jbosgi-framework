@@ -34,7 +34,7 @@ import org.jboss.osgi.framework.classloading.OSGiModule;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 
 /**
- * The OSGiModuleDeployer creates the {@link OSGiModule}.
+ * The OSGiModuleDeployer creates an {@link OSGiModule} if we have {@link OSGiClassLoadingMetaData}. 
  * 
  * @author thomas.diesler@jboss.com
  */
@@ -42,9 +42,13 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
 {
    protected OSGiBundleManager bundleManager;
 
-   public void setBundleManager(OSGiBundleManager bundleManager)
+   public OSGiModuleDeployer(OSGiBundleManager bundleManager)
    {
       this.bundleManager = bundleManager;
+
+      // Make sure we come first, otherwise a plain {@link Module} would be created
+      // which is then not registered with the OSGi resolver.
+      setRelativeOrder(Integer.MIN_VALUE);
    }
 
    @Override
@@ -65,15 +69,17 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
    @Override
    public void undeploy(DeploymentUnit unit, ClassLoadingMetaData deployment)
    {
-      // Remove the bundle from the resolver
-      Module module = unit.getAttachment(Module.class);
-      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (bundleResolver != null && module instanceof OSGiModule)
+      if (bundleManager != null)
       {
-         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-         bundleResolver.removeBundle(bundleState);
+         // Remove the bundle from the resolver
+         Module module = unit.getAttachment(Module.class);
+         ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+         if (bundleResolver != null && module instanceof OSGiModule)
+         {
+            AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
+            bundleResolver.removeBundle(bundleState);
+         }
       }
-      
       super.undeploy(unit, deployment);
    }
 

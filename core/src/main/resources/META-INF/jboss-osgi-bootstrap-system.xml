@@ -182,8 +182,8 @@
     <property name="factory"><inject bean="OSGiClassLoaderFactory"/></property>
   </bean>
   <bean name="OSGiModuleDeployer" class="org.jboss.osgi.framework.deployers.OSGiModuleDeployer">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
     <property name="classLoading"><inject bean="ClassLoading" /></property>
-    <property name="bundleManager"><inject bean="OSGiBundleManager" /></property>
   </bean>
   <bean name="OSGiFragmentAttachmentDeployer" class="org.jboss.osgi.framework.deployers.OSGiFragmentAttachmentDeployer"/>
    
