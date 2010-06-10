@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 /**
- * DynamicImport-Package takes presendence over embedded classes
+ * [JBOSGI-323] DynamicImport-Package takes presendence over embedded classes
  *
  * https://jira.jboss.org/jira/browse/JBOSGI-323
  * 

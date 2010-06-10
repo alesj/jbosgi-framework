@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.osgi.service;
+package org.jboss.test.osgi.core.jbosg331;
 
 import static org.junit.Assert.fail;
 
@@ -29,24 +29,28 @@ import java.util.Set;
 
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.bundle.support.y.Activator;
+import org.jboss.test.osgi.service.AbstractServiceMixTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 
 /**
+ * [JBOSGI-331] Activator cannot change bundle start level
+ * 
+ * https://jira.jboss.org/browse/JBOSGI-331
+ * 
+ * This test isolates the failure observed by the Start Level Service OSGi TCK test
+ * StartLevelControl.testActivatorChangeBundleStartLevel()
+ * 
  * @author <a href="david@redhat.com">David Bosschaert</a>
  */
-public class DeployerTestCase extends AbstractServiceMixTest
+public class OSGi331TestCase extends AbstractServiceMixTest
 {
-   /**
-    * This test isolates the failure observed by the Start Level Service OSGi TCK test
-    *   StartLevelControl.testActivatorChangeBundleStartLevel()
-    */
    @Test
    public void testStopBundleFromWithinStartProcess() throws Exception
    {
-      System.out.println("FIXME [JBOSGI-331] Start Level TCK Failure: testActivatorChangeBundleStartLevel()");
+      System.out.println("FIXME [JBOSGI-331] Activator cannot change bundle start level");
 
       // Exit the test until its fixed
       if (true)
@@ -77,9 +81,7 @@ public class DeployerTestCase extends AbstractServiceMixTest
       };
       getSystemContext().addBundleListener(bl);
 
-      Archive<?> assembly = assembleArchive("some_bundle",
-            "/bundles/lifecycle/bundle-stop-in-activator",
-            Activator.class);
+      Archive<?> assembly = assembleArchive("some_bundle", "/bundles/lifecycle/bundle-stop-in-activator", Activator.class);
       Bundle b = installBundle(assembly);
       b.start();
 
@@ -97,7 +99,7 @@ public class DeployerTestCase extends AbstractServiceMixTest
          s.wait(timeout);
          if (s.contains(value))
             return;
-         
+
          fail("Set " + s + " does not contain value '" + value + "' after timeout of " + timeout + " ms.");
       }
    }

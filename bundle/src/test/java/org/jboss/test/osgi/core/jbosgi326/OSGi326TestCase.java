@@ -44,7 +44,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
- * MC service does not maintain properties
+ * [JBOSGI-326] MC service does not maintain properties
  *
  * https://jira.jboss.org/jira/browse/JBOSGI-326
  * 
