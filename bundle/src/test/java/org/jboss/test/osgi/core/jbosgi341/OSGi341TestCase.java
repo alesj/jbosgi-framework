@@ -33,9 +33,11 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.core.jbosgi341.support.a.A;
 import org.jboss.test.osgi.core.jbosgi341.support.b.B;
 import org.jboss.test.osgi.core.jbosgi341.support.c.C;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * [JBOSGI-341] Endless loop at AS server startup
@@ -48,6 +50,33 @@ import org.osgi.framework.Constants;
 public class OSGi341TestCase extends OSGiFrameworkTest
 {
    @Test
+   public void testEventAdmin() throws Exception
+   {
+      Bundle common = installBundle("bundles/jboss-osgi-common.jar");
+      Bundle eventadmin = installBundle("bundles/org.apache.felix.eventadmin.jar");
+      Bundle cmpd = installBundle("bundles/org.osgi.compendium.jar");
+      try
+      {
+         assertBundleState(Bundle.INSTALLED, common.getState());
+         assertBundleState(Bundle.INSTALLED, eventadmin.getState());
+         assertBundleState(Bundle.INSTALLED, cmpd.getState());
+         
+         PackageAdmin pa = getPackageAdmin();
+         pa.resolveBundles(null);
+         
+         assertBundleState(Bundle.RESOLVED, common.getState());
+         assertBundleState(Bundle.RESOLVED, eventadmin.getState());
+         assertBundleState(Bundle.RESOLVED, cmpd.getState());
+      }
+      finally
+      {
+         common.uninstall();
+         eventadmin.uninstall();
+         cmpd.uninstall();
+      }
+   }
+   
+   @Ignore
    public void testCircularMandatory() throws Exception
    {
       Bundle bundleA = installBundle(A.class, B.class, Constants.RESOLUTION_MANDATORY);
@@ -69,7 +98,7 @@ public class OSGi341TestCase extends OSGiFrameworkTest
       }
    }
 
-   @Test
+   @Ignore
    public void testCircularOptional() throws Exception
    {
       Bundle bundleA = installBundle(A.class, B.class, Constants.RESOLUTION_OPTIONAL);

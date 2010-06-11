@@ -27,10 +27,14 @@ import org.jboss.classloading.plugins.metadata.ModuleCapability;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.classloading.spi.version.VersionRange;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
+import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.osgi.framework.Version;
 
 /**
@@ -79,26 +83,53 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    }
 
    @Override
-   public boolean resolves(Module reqModule, Requirement requirement)
+   public boolean resolves(Module reqModule, Requirement mcreq)
    {
-      if (super.resolves(reqModule, requirement) == false)
-         return false;
-      if (requirement instanceof OSGiBundleRequirement == false)
-         return true;
+      if (mcreq instanceof OSGiBundleRequirement == false)
+         throw new IllegalStateException("Invalid requirement: " + mcreq);
+      
+      OSGiBundleRequirement osgireq = (OSGiBundleRequirement)mcreq;
+      
+      // Check the optional resolver for the wired capability
+      OSGiBundleManager bundleManager = bundleState.getBundleManager();
+      ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (resolver != null)
+      {
+         OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
+         return osgicap == this;
+      }
 
+      boolean match = super.resolves(reqModule, mcreq);
+      match &= matchAttributes(mcreq);
+      
+      return match;
+   }
+
+   @Override
+   public OSGiModule getModule()
+   {
+      OSGiModule module = null;
+      if (bundleState instanceof DeployedBundleState)
+      {
+         DeployedBundleState depBundle = (DeployedBundleState)bundleState;
+         DeploymentUnit unit = depBundle.getDeploymentUnit();
+         module = (OSGiModule)unit.getAttachment(Module.class);
+         if (module == null)
+            throw new IllegalStateException("Cannot obtain module from: " + bundleState);
+      }
+      return module;
+   }
+
+   private boolean matchAttributes(Requirement requirement)
+   {
       // Review its not clear to me from the spec whether attribute matching 
       // beyond the version should work for require-bundle?
       Version ourVersion = Version.parseVersion(getMetaData().getBundleVersion());
       OSGiBundleRequirement bundleRequirement = (OSGiBundleRequirement)requirement;
       VersionRange requiredRange = bundleRequirement.getVersionRange();
-      if (requiredRange.isInRange(ourVersion) == false)
-         return false;
+      boolean match = requiredRange.isInRange(ourVersion);
 
-      ParameterizedAttribute ourParameters = getMetaData().getBundleParameters();
-      if (ourParameters == null)
-         return false;
-
-      return true;
+      return match;
    }
 
    @Override

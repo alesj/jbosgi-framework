@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.ResolveException;
@@ -52,7 +53,7 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
    // Provide logging
    final Logger log = Logger.getLogger(FelixResolverPlugin.class);
 
-   private AbstractResolverPlugin resolver = new JBossResolver();
+   private JBossResolver resolver = new JBossResolver();
 
    public FelixResolverPlugin(OSGiBundleManager bundleManager)
    {
@@ -101,41 +102,28 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
    }
 
    @Override
-   public boolean match(OSGiCapability osgicap, OSGiRequirement osgireq)
+   public OSGiCapability getWiredCapability(OSGiRequirement osgireq)
    {
-      Bundle exporter = osgicap.getBundleState();
-      AbstractModule expModule = resolver.getModule(exporter);
-      
       Bundle importer = osgireq.getBundle();
-      AbstractModule impModule = resolver.getModule(importer);
-
-      // Lazily resolve the exporter and retry
-      if (expModule.isResolved() == false)
-         return failsafeResolve(expModule) && match(osgicap, osgireq);
+      AbstractBundleModule impModule = resolver.getModule(importer);
 
       // Lazily resolve the importer and retry
-      if (impModule.isResolved() == false)
-         return failsafeResolve(impModule) && match(osgicap, osgireq);
-
-      // A dynamic requirement does not match a specific module
-      if (osgireq.isDynamic() == true && osgireq.isOptional() == false)
-         return false;
+      if (impModule.isResolved() == false && failsafeResolve(impModule) == true)
+         return getWiredCapability(osgireq);
 
       // Get the potential wire for the requirement and see if it matches the given exporter 
-      Requirement req = ((DeployedBundleModule)impModule).getMappedRequirement(osgireq);
+      Requirement req = impModule.getMappedRequirement(osgireq);
       Wire wire = impModule.getWireForRequirement(req);
       if (wire != null)
       {
-         Module wireExporter = wire.getExporter();
-         return wireExporter == expModule;
+         Capability wiredcap = wire.getCapability();
+         Bundle expBundle = wire.getExporter().getBundle();
+         AbstractBundleModule expModule = resolver.getModule(expBundle);
+         OSGiCapability osgicap = expModule.getMappedCapability(wiredcap);
+         return osgicap;
       }
 
-      // If we did not get a ResolverException, we can assume that 
-      // all packages that do not have a wire, wire to itself
-      if (impModule == expModule)
-         return true;
-
-      return false;
+      return null;
    }
 
    private boolean failsafeResolve(AbstractModule module)
@@ -189,14 +177,14 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
       }
 
       @Override
-      public AbstractModule getModule(Bundle bundle)
+      public AbstractBundleModule getModule(Bundle bundle)
       {
          DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
          AbstractModule module = bundleState.getDeploymentUnit().getAttachment(AbstractModule.class);
          if (module == null)
             throw new IllegalStateException("No module attached to: " + bundle);
 
-         return module;
+         return (AbstractBundleModule)module;
       }
    }
 }

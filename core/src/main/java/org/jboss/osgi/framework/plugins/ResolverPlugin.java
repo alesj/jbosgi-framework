@@ -27,9 +27,6 @@ import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.osgi.framework.Bundle;
 
-
-//$Id$
-
 /**
  * A plugin that handles the resolve phase of bundles.
  * 
@@ -63,7 +60,8 @@ public interface ResolverPlugin extends Plugin
    List<Bundle> resolve(List<Bundle> bundles);
 
    /**
-    * Return true if the given capability matches the requirement.
+    * Get the wired capability for the given requirement.
+    * @return Null, if the requirement is not wired.
     */
-   boolean match(OSGiCapability capability, OSGiRequirement requirement);
+   OSGiCapability getWiredCapability(OSGiRequirement requirement);
 }

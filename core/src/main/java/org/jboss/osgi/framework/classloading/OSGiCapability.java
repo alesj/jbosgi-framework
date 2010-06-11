@@ -33,5 +33,13 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
  */
 public interface OSGiCapability extends Capability
 {
+   /**
+    * Get the Bundle associated with this capability
+    */
    AbstractBundleState getBundleState();
+   
+   /**
+    * Get the Module associated with this capability
+    */
+   OSGiModule getModule();
 }
