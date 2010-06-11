@@ -86,10 +86,10 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    public boolean resolves(Module reqModule, Requirement mcreq)
    {
       if (mcreq instanceof OSGiBundleRequirement == false)
-         throw new IllegalStateException("Invalid requirement: " + mcreq);
-      
+         return false;
+
       OSGiBundleRequirement osgireq = (OSGiBundleRequirement)mcreq;
-      
+
       // Check the optional resolver for the wired capability
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
@@ -101,7 +101,7 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
 
       boolean match = super.resolves(reqModule, mcreq);
       match &= matchAttributes(mcreq);
-      
+
       return match;
    }
 

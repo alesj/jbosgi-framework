@@ -86,14 +86,20 @@ abstract class AbstractBundleModule extends AbstractModule
          // Module capabilities resolve required-bundle dependencies, while host capabilities resolve fragment-host dependencies.
          if (mccap instanceof OSGiBundleCapability)
          {
+            OSGiBundleCapability osgicap = (OSGiBundleCapability)mccap;
             if (mccap.getBundleState().isFragment() == false)
             {
-               OSGiBundleCapability osgicap = (OSGiBundleCapability)mccap;
                List<Attribute> attrs = new ArrayList<Attribute>(2);
                attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, osgicap.getName(), false));
                attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, osgicap.getVersion(), false));
                capMap.put(new CapabilityImpl(this, Capability.HOST_NAMESPACE, new ArrayList<Directive>(0), attrs), osgicap);
             }
+            
+            // Always add the module capability 
+            List<Attribute> attrs = new ArrayList<Attribute>(2);
+            attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, getBundle().getSymbolicName(), false));
+            attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, getBundle().getVersion(), false));
+            capMap.put(new CapabilityImpl(this, Capability.MODULE_NAMESPACE, new ArrayList<Directive>(0), attrs), osgicap);
          }
 
          // Add the package capabilities
@@ -110,14 +116,6 @@ abstract class AbstractBundleModule extends AbstractModule
       }
 
       ArrayList<Capability> result = new ArrayList<Capability>(capMap.keySet());
-
-      // Always add the module capability 
-      List<Attribute> attrs = new ArrayList<Attribute>(2);
-      attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, getBundle().getSymbolicName(), false));
-      attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, getBundle().getVersion(), false));
-      CapabilityImpl modcap = new CapabilityImpl(this, Capability.MODULE_NAMESPACE, new ArrayList<Directive>(0), attrs);
-      result.add(0, modcap);
-
       return Collections.unmodifiableList(result);
    }
 
@@ -180,12 +178,12 @@ abstract class AbstractBundleModule extends AbstractModule
       return Collections.unmodifiableList(result);
    }
 
-   OSGiCapability getMappedCapability(Capability osgicap)
+   OSGiCapability getMappedCapability(Capability cap)
    {
       if (capMap == null)
          throw new IllegalStateException("Capability map not yet created for: " + getBundle());
 
-      return capMap.get(osgicap);
+      return capMap.get(cap);
    }
 
    Requirement getMappedRequirement(OSGiRequirement osgireq)

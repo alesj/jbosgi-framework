@@ -159,7 +159,8 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       if (resolver != null)
       {
          OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
-         return osgicap == this;
+         boolean match = (osgicap == this);
+         return match;
       }
 
       // Match package name and version plus additional OSGi attributes
