@@ -22,6 +22,7 @@
 package org.jboss.osgi.framework.resolver.felix;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.classloading.spi.dependency.Module;
@@ -45,55 +46,63 @@ class DeployedBundleModule extends AbstractBundleModule
    final Logger log = Logger.getLogger(DeployedBundleModule.class);
 
    private OSGiModule moduleDelegate;
-
+   private List<OSGiCapability> capabilities;
+   private List<OSGiRequirement> requirements;
+   
    public DeployedBundleModule(DeployedBundleState bundleState)
    {
       super(bundleState);
    }
 
    @Override
-   List<OSGiCapability> getModuleCapabilities()
+   List<OSGiCapability> getOSGiCapabilities()
    {
-      List<OSGiCapability> result = new ArrayList<OSGiCapability>();
-      List<Capability> mccaps = getModuleDelegate().getCapabilities();
-      if (mccaps != null)
+      if (capabilities == null)
       {
-         for (Capability mccap : mccaps)
+         capabilities = new ArrayList<OSGiCapability>();
+         List<Capability> mccaps = getModuleDelegate().getCapabilities();
+         if (mccaps != null)
          {
-            if (mccap instanceof OSGiCapability)
+            for (Capability mccap : mccaps)
             {
-               result.add((OSGiCapability)mccap);
+               if (mccap instanceof OSGiCapability)
+               {
+                  capabilities.add((OSGiCapability)mccap);
+               }
+               else
+               {
+                  throw new IllegalArgumentException("Unsupported capability: " + mccap);
+               }
+               
             }
-            else
-            {
-               throw new IllegalArgumentException("Unsupported capability: " + mccap);
-            }
-            
          }
       }
-      return result;
+      return Collections.unmodifiableList(capabilities);
    }
 
    @Override
-   List<OSGiRequirement> getModuleRequirements()
+   List<OSGiRequirement> getOSGiRequirements()
    {
-      List<OSGiRequirement> result = new ArrayList<OSGiRequirement>();
-      if (getModuleDelegate().getRequirements() != null)
+      if (requirements == null)
       {
-         for (Requirement mcreq : getModuleDelegate().getRequirements())
+         requirements = new ArrayList<OSGiRequirement>();
+         if (getModuleDelegate().getRequirements() != null)
          {
-            if (mcreq instanceof OSGiRequirement)
+            for (Requirement mcreq : getModuleDelegate().getRequirements())
             {
-               result.add((OSGiRequirement)mcreq);
+               if (mcreq instanceof OSGiRequirement)
+               {
+                  requirements.add((OSGiRequirement)mcreq);
+               }
+               else
+               {
+                  throw new IllegalArgumentException("Unsupported requirement: " + mcreq);
+               }
+               
             }
-            else
-            {
-               throw new IllegalArgumentException("Unsupported requirement: " + mcreq);
-            }
-            
          }
       }
-      return result;
+      return Collections.unmodifiableList(requirements);
    }
 
    private OSGiModule getModuleDelegate()

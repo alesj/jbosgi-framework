@@ -151,21 +151,35 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
          return match;
       }
 
+      boolean match = false;
       OSGiPackageRequirement osgireq = (OSGiPackageRequirement)mcreq;
 
-      // Check the optional resolver for the wired capability
+      // Get the optional resolver
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (resolver != null)
+
+      // If there is no resolver, match package name and version plus additional attributes
+      if (resolver == null)
       {
-         OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
-         boolean match = (osgicap == this);
+         match = super.resolves(reqModule, mcreq);
+         match &= matchAttributes(osgireq);
          return match;
       }
 
-      // Match package name and version plus additional OSGi attributes
-      boolean match = super.resolves(reqModule, mcreq);
-      match &= matchAttributes(osgireq);
+      // Get the wired capability from the resolver
+      OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
+      if (osgicap != null)
+      {
+         match = (osgicap == this);
+         return match;
+      }
+
+      // Match dynamic non-optional requirements
+      if (osgireq.isDynamic() && osgireq.isOptional() == false)
+      {
+         match = super.resolves(reqModule, mcreq);
+         match &= matchAttributes(osgireq);
+      }
 
       return match;
    }

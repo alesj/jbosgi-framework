@@ -51,45 +51,49 @@ class SystemBundleModule extends AbstractBundleModule
    // Provide logging
    final Logger log = Logger.getLogger(SystemBundleModule.class);
 
+   private List<OSGiCapability> capabilities;
+   
    public SystemBundleModule(OSGiSystemState bundleState)
    {
       super(bundleState);
    }
 
    @Override
-   List<OSGiCapability> getModuleCapabilities()
+   List<OSGiCapability> getOSGiCapabilities()
    {
-      List<OSGiCapability> capList = new ArrayList<OSGiCapability>();
-
-      OSGiSystemState bundleState = OSGiSystemState.assertBundleState(getBundle());
-      OSGiBundleManager bundleManager = bundleState.getBundleManager();
-      SystemPackagesPlugin plugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
-      for (String packageSpec : plugin.getSystemPackages(true))
+      if (capabilities == null)
       {
-         String packname = packageSpec;
-         Version version = null;
+         capabilities = new ArrayList<OSGiCapability>();
 
-         int versionIndex = packname.indexOf(";version=");
-         if (versionIndex > 0)
+         OSGiSystemState bundleState = OSGiSystemState.assertBundleState(getBundle());
+         OSGiBundleManager bundleManager = bundleState.getBundleManager();
+         SystemPackagesPlugin plugin = bundleManager.getPlugin(SystemPackagesPlugin.class);
+         for (String packageSpec : plugin.getSystemPackages(true))
          {
-            packname = packageSpec.substring(0, versionIndex);
-            version = Version.parseVersion(packageSpec.substring(versionIndex + 9));
+            String packname = packageSpec;
+            Version version = null;
+
+            int versionIndex = packname.indexOf(";version=");
+            if (versionIndex > 0)
+            {
+               packname = packageSpec.substring(0, versionIndex);
+               version = Version.parseVersion(packageSpec.substring(versionIndex + 9));
+            }
+
+            Map<String, Parameter> attrs = new HashMap<String, Parameter>();
+            if (version != null)
+               attrs.put(Constants.VERSION_ATTRIBUTE, new AbstractParameter(version.toString()));
+            
+            AbstractPackageAttribute metadata = new AbstractPackageAttribute(packname, attrs, null);
+            capabilities.add(OSGiPackageCapability.create(bundleState, metadata));
          }
-
-         Map<String, Parameter> attrs = new HashMap<String, Parameter>();
-         if (version != null)
-            attrs.put(Constants.VERSION_ATTRIBUTE, new AbstractParameter(version.toString()));
-         
-         AbstractPackageAttribute metadata = new AbstractPackageAttribute(packname, attrs, null);
-         capList.add(OSGiPackageCapability.create(bundleState, metadata));
       }
-
-      return Collections.unmodifiableList(capList);
+      return Collections.unmodifiableList(capabilities);
    }
 
 
    @Override
-   List<OSGiRequirement> getModuleRequirements()
+   List<OSGiRequirement> getOSGiRequirements()
    {
       return Collections.emptyList();
    }

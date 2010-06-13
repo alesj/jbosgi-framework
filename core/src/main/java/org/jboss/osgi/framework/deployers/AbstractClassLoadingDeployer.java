@@ -38,10 +38,10 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
-import org.jboss.osgi.framework.classloading.OSGiBundleRequirement;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
+import org.jboss.osgi.framework.classloading.OSGiRequiredBundleRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
@@ -110,7 +110,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       {
          for (ParameterizedAttribute requireBundle : requireBundles)
          {
-            OSGiBundleRequirement requirement = OSGiBundleRequirement.create(bundleState, requireBundle);
+            OSGiRequiredBundleRequirement requirement = OSGiRequiredBundleRequirement.create(bundleState, requireBundle);
             requirements.addRequirement(requirement);
          }
       }

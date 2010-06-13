@@ -38,11 +38,11 @@ import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
-import org.jboss.osgi.framework.classloading.OSGiBundleRequirement;
 import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
 import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
+import org.jboss.osgi.framework.classloading.OSGiRequiredBundleRequirement;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
@@ -71,15 +71,15 @@ abstract class AbstractBundleModule extends AbstractModule
       super(bundleState);
    }
 
-   abstract List<OSGiCapability> getModuleCapabilities();
+   abstract List<OSGiCapability> getOSGiCapabilities();
 
-   abstract List<OSGiRequirement> getModuleRequirements();
+   abstract List<OSGiRequirement> getOSGiRequirements();
 
    @Override
    public List<Capability> createCapabilities()
    {
       capMap = new LinkedHashMap<Capability, OSGiCapability>();
-      for (OSGiCapability mccap : getModuleCapabilities())
+      for (OSGiCapability mccap : getOSGiCapabilities())
       {
          // Add a module capability and a host capability to all non-fragment bundles. 
          // A host capability is the same as a module capability, but with a different capability namespace. 
@@ -97,8 +97,8 @@ abstract class AbstractBundleModule extends AbstractModule
             
             // Always add the module capability 
             List<Attribute> attrs = new ArrayList<Attribute>(2);
-            attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, getBundle().getSymbolicName(), false));
-            attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, getBundle().getVersion(), false));
+            attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, osgicap.getName(), false));
+            attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, osgicap.getVersion(), false));
             capMap.put(new CapabilityImpl(this, Capability.MODULE_NAMESPACE, new ArrayList<Directive>(0), attrs), osgicap);
          }
 
@@ -123,12 +123,12 @@ abstract class AbstractBundleModule extends AbstractModule
    public List<Requirement> createRequirements()
    {
       reqMap = new LinkedHashMap<OSGiRequirement, Requirement>();
-      for (OSGiRequirement mcreq : getModuleRequirements())
+      for (OSGiRequirement mcreq : getOSGiRequirements())
       {
-         if (mcreq instanceof OSGiBundleRequirement)
+         if (mcreq instanceof OSGiRequiredBundleRequirement)
          {
-            OSGiBundleRequirement osgireq = (OSGiBundleRequirement)mcreq;
-            Requirement req = bundleRequirement(osgireq);
+            OSGiRequiredBundleRequirement osgireq = (OSGiRequiredBundleRequirement)mcreq;
+            Requirement req = requireBundleRequiment(osgireq);
             reqMap.put(osgireq, req);
          }
          else if (mcreq instanceof OSGiFragmentHostRequirement)
@@ -160,7 +160,7 @@ abstract class AbstractBundleModule extends AbstractModule
    protected List<Requirement> createDynamicRequirements()
    {
       dynReqMap = new LinkedHashMap<OSGiRequirement, Requirement>();
-      for (OSGiRequirement mcreq : getModuleRequirements())
+      for (OSGiRequirement mcreq : getOSGiRequirements())
       {
          // Add the package requirements
          if (mcreq instanceof OSGiPackageRequirement)
@@ -269,7 +269,7 @@ abstract class AbstractBundleModule extends AbstractModule
       return req;
    }
 
-   private Requirement bundleRequirement(OSGiBundleRequirement osgireq)
+   private Requirement requireBundleRequiment(OSGiRequiredBundleRequirement osgireq)
    {
       ParameterizedAttribute metadata = osgireq.getMetadata();
 

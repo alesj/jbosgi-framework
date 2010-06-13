@@ -56,6 +56,7 @@ import org.jboss.kernel.Kernel;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.deployment.deployer.Deployment;
 import org.jboss.osgi.deployment.deployer.DeploymentFactory;
+import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.deployers.AbstractDeployment;
 import org.jboss.osgi.framework.deployers.OSGiBundleActivatorDeployer;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
@@ -1047,9 +1048,14 @@ public class OSGiBundleManager
 
          if (bundleState.getState() != Bundle.RESOLVED)
          {
-            DeploymentUnit unit = bundleState.getDeploymentUnit();
-            DeploymentException ex = unit.removeAttachment(DeploymentException.class);
-            throw new BundleException("Cannot resolve bundle: " + bundleState, ex);
+            StringBuffer buffer = new StringBuffer("Cannot resolve bundle " + bundleState);
+            ResolverPlugin resolver = getOptionalPlugin(ResolverPlugin.class);
+            if (resolver != null)
+            {
+               List<OSGiRequirement> unresolved = resolver.getUnresolvedRequirements(bundleState);
+               buffer.append(" " + unresolved);
+            }
+            throw new BundleException(buffer.toString());
          }
       }
 

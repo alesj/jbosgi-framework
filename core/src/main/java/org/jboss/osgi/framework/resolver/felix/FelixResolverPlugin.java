@@ -23,7 +23,9 @@ package org.jboss.osgi.framework.resolver.felix;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
@@ -34,7 +36,11 @@ import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiSystemState;
+import org.jboss.osgi.framework.classloading.OSGiBundleCapability;
 import org.jboss.osgi.framework.classloading.OSGiCapability;
+import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
+import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
+import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
@@ -111,6 +117,10 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
       if (impModule.isResolved() == false && failsafeResolve(impModule) == true)
          return getWiredCapability(osgireq);
 
+      // If the importer is not resolved, we cannot return a wire
+      if (impModule.isResolved() == false)
+         return null;
+      
       // Get the potential wire for the requirement and see if it matches the given exporter 
       Requirement req = impModule.getMappedRequirement(osgireq);
       Wire wire = impModule.getWireForRequirement(req);
@@ -119,11 +129,79 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
          Capability wiredcap = wire.getCapability();
          Bundle expBundle = wire.getExporter().getBundle();
          AbstractBundleModule expModule = resolver.getModule(expBundle);
-         OSGiCapability osgicap = expModule.getMappedCapability(wiredcap);
-         return osgicap;
+         OSGiCapability match = expModule.getMappedCapability(wiredcap);
+         if (match == null)
+            throw new IllegalStateException("Cannot find capability mapping for: " + wire);
+         
+         return match;
       }
 
+      // Felix does not maintain wires to capabilies provided by the same bundle. 
+      // For package requirements we try to find the matching capability. 
+      if (osgireq instanceof OSGiPackageRequirement)
+      {
+         OSGiPackageRequirement packreq = (OSGiPackageRequirement)osgireq;
+         if (packreq.isDynamic() == false || packreq.isOptional())
+         {
+            for (OSGiCapability osgicap : impModule.getOSGiCapabilities())
+            {
+               if (osgicap instanceof OSGiPackageCapability)
+               {
+                  OSGiPackageCapability packcap = (OSGiPackageCapability)osgicap;
+                  if (packcap.matchNameAndVersion(packreq) && packcap.matchAttributes(packreq))
+                  {
+                     return packcap;
+                  }
+               }
+            }
+         }
+      }
+      
+      // Felix does not maintain wires to the fragment host. 
+      // For fragment host requirements we try to find the matching capability. 
+      if (osgireq instanceof OSGiFragmentHostRequirement)
+      {
+         AbstractBundleModule foundHost = (AbstractBundleModule)resolver.findHost(impModule);
+         if (foundHost != null)
+         {
+            for (OSGiCapability osgicap : foundHost.getOSGiCapabilities())
+            {
+               if (osgicap instanceof OSGiBundleCapability)
+               {
+                  return osgicap;
+               }
+            }
+         }
+      }
+      
       return null;
+   }
+
+   @Override
+   public List<OSGiRequirement> getUnresolvedRequirements(Bundle bundle)
+   {
+      List<OSGiRequirement> result = new ArrayList<OSGiRequirement>();
+      AbstractBundleModule module = resolver.getModule(bundle);
+      for (OSGiRequirement req : module.getOSGiRequirements())
+      {
+         OSGiCapability cap = getWiredCapability(req);
+         if (cap == null)
+            result.add(req);
+      }
+      return Collections.unmodifiableList(result);
+   }
+
+   @Override
+   public Map<OSGiRequirement, OSGiCapability> getWiring(Bundle bundle)
+   {
+      Map<OSGiRequirement, OSGiCapability> result = new LinkedHashMap<OSGiRequirement, OSGiCapability>();
+      AbstractBundleModule module = resolver.getModule(bundle);
+      for (OSGiRequirement req : module.getOSGiRequirements())
+      {
+         OSGiCapability cap = getWiredCapability(req);
+         result.put(req, cap);
+      }
+      return Collections.unmodifiableMap(result);
    }
 
    private boolean failsafeResolve(AbstractModule module)

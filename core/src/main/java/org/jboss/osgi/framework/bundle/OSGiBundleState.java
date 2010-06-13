@@ -112,7 +112,7 @@ public class OSGiBundleState extends DeployedBundleState
       if (hostName.equals(fragHost.getSymbolicName()) == false)
          return false;
 
-      VersionRange versionRange = fragHost.getBundleVersion();
+      VersionRange versionRange = fragHost.getVersionRange();
       if (versionRange != null && versionRange.isInRange(hostVersion) == false)
          return false;
 
