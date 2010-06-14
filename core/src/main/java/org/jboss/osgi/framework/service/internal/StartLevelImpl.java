@@ -37,6 +37,7 @@ import org.jboss.osgi.framework.plugins.StartLevelPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.startlevel.StartLevel;
@@ -53,32 +54,7 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    private static final Logger log = Logger.getLogger(StartLevelImpl.class);
 
    FrameworkEventsPlugin eventsPlugin;
-
-   /* Different executors expose different TCK behaviour.
-    * You really want to use Executors.newSingleThreadExecutor() as the Start Level Service spec
-    * mandates the serialization of requests, however it causes the 
-    *   StartLevelControl.testSetBundleStartLevel()
-    * and 
-    *   StartLevelControl.testActivatorChangeBundleStartLevel()
-    * tests to fail in the TCK. 
-    */
    Executor executor = Executors.newSingleThreadExecutor();
-   // This executor fixes the StartLevelControl.testActivatorChangeBundleStartLevel()
-   /* Executor executor = new Executor()
-   {
-      public void execute(Runnable command)
-      {
-         new Thread(command).start();
-      }
-   }; */
-   // This one fixes the StartLevelControl.testSetBundleStartLevel()
-   /* Executor executor = new Executor()
-   {
-      public void execute(Runnable command)
-      {
-         command.run();
-      }
-   }; */
 
    private int initialStartLevel = 1;
    private ServiceRegistration registration;
@@ -88,6 +64,19 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    {
       super(bundleManager);
       eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
+
+      String beginning = bundleManager.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
+      if (beginning != null)
+      {
+         try
+         {
+            initialStartLevel = Integer.parseInt(beginning);
+         }
+         catch (NumberFormatException nfe)
+         {
+            log.error("Could not set beginning start level to: '" + beginning + "'");
+         }
+      }
    }
 
    @Override

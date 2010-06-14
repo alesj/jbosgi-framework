@@ -33,6 +33,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,6 +48,7 @@ import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.startlevel.StartLevel;
@@ -67,6 +69,15 @@ public class StartLevelImplTest
 
       sl.setInitialBundleStartLevel(42);
       assertEquals(42, sl.getInitialBundleStartLevel());
+   }
+
+   @Test
+   public void testAltInitialStartLevel()
+   {
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      when(bm.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL)).thenReturn("15");
+      StartLevel sl = new StartLevelImpl(bm);
+      assertEquals(15, sl.getInitialBundleStartLevel());
    }
 
    @SuppressWarnings("unchecked")
