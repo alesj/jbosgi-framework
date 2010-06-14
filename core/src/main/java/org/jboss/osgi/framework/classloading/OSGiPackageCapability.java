@@ -151,7 +151,6 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
          return match;
       }
 
-      boolean match = false;
       OSGiPackageRequirement osgireq = (OSGiPackageRequirement)mcreq;
 
       // Get the optional resolver
@@ -161,7 +160,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       // If there is no resolver, match package name and version plus additional attributes
       if (resolver == null)
       {
-         match = super.resolves(reqModule, mcreq);
+         boolean match = super.resolves(reqModule, mcreq);
          match &= matchAttributes(osgireq);
          return match;
       }
@@ -170,18 +169,19 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
       if (osgicap != null)
       {
-         match = (osgicap == this);
+         boolean match = (osgicap == this);
          return match;
       }
 
       // Match dynamic non-optional requirements
       if (osgireq.isDynamic() && osgireq.isOptional() == false)
       {
-         match = super.resolves(reqModule, mcreq);
+         boolean match = super.resolves(reqModule, mcreq);
          match &= matchAttributes(osgireq);
+         return match;
       }
 
-      return match;
+      return false;
    }
 
    @Override

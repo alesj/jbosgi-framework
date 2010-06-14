@@ -34,7 +34,6 @@ import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -51,13 +50,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
  */
 public class FragmentTestCase extends OSGiFrameworkTest
 {
-   @Before
-   public void setUp() throws Exception
-   {
-      super.setUp();
-      createFramework().start();
-   }
-
    @After
    public void tearDown() throws Exception
    {
@@ -119,7 +111,7 @@ public class FragmentTestCase extends OSGiFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragA.getState());
    }
 
-   @Test
+   @Ignore
    public void testAttachedFragment() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA
@@ -280,7 +272,7 @@ public class FragmentTestCase extends OSGiFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragA.getState());
    }
 
-   @Ignore
+   @Test
    public void testFragmentRequireBundle() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA

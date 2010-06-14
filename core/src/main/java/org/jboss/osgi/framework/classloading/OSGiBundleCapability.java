@@ -90,19 +90,36 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
 
       OSGiBundleRequirement osgireq = (OSGiBundleRequirement)mcreq;
 
-      // Check the optional resolver for the wired capability
+      // Get the optional resolver
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (resolver != null)
+
+      // If there is no resolver, match bundle name and version
+      if (resolver == null)
       {
-         OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
-         return osgicap == this;
+         boolean match = super.resolves(reqModule, mcreq);
+         match &= matchAttributes(mcreq);
+         return match;
       }
 
-      boolean match = super.resolves(reqModule, mcreq);
-      match &= matchAttributes(mcreq);
+      // Get the wired capability from the resolver
+      OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
+      if (osgicap != null)
+      {
+         boolean match = (osgicap == this);
+         return match;
+      }
+      
+      // A fragment can potentially attach to multiple host bundles
+      // The Felix resolver has not yet settled on an API that supports that notion 
+      if (osgireq instanceof OSGiFragmentHostRequirement)
+      {
+         boolean match = super.resolves(reqModule, mcreq);
+         match &= matchAttributes(mcreq);
+         return match;
+      }
 
-      return match;
+      return false;
    }
 
    @Override

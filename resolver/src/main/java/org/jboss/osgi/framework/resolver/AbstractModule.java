@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -201,25 +200,24 @@ public abstract class AbstractModule implements Module
    @Override
    public void attachFragments(List<Module> modules) throws Exception
    {
-      if (fragments == null)
-         fragments = new ArrayList<Module>();
-
-      fragments.addAll(modules);
+      fragments = modules;
+      capabilities = null;
    }
 
    @Override
    public void removeFragments()
    {
       fragments = null;
+      capabilities = null;
    }
 
    @Override
    public List<Module> getFragments()
    {
-      if (fragments != null)
-         return Collections.unmodifiableList(fragments);
-      else
+      if (fragments == null)
          return Collections.emptyList();
+      
+      return fragments;
    }
 
    @Override

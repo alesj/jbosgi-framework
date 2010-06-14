@@ -57,7 +57,7 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
    }
 
    @Override
-   public AbstractBundleState getBundle()
+   public AbstractBundleState getBundleState()
    {
       return bundleState;
    }

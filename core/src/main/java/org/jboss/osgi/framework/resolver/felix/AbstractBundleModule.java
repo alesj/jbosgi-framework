@@ -32,6 +32,8 @@ import org.apache.felix.framework.capabilityset.Attribute;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Directive;
 import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.resolver.FragmentRequirement;
+import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.framework.util.manifestparser.CapabilityImpl;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
@@ -94,7 +96,7 @@ abstract class AbstractBundleModule extends AbstractModule
                attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, osgicap.getVersion(), false));
                capMap.put(new CapabilityImpl(this, Capability.HOST_NAMESPACE, new ArrayList<Directive>(0), attrs), osgicap);
             }
-            
+
             // Always add the module capability 
             List<Attribute> attrs = new ArrayList<Attribute>(2);
             attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, osgicap.getName(), false));
@@ -116,6 +118,18 @@ abstract class AbstractBundleModule extends AbstractModule
       }
 
       ArrayList<Capability> result = new ArrayList<Capability>(capMap.keySet());
+
+      // Add the capabilities of attached fragments
+      for (Module aux : getFragments())
+      {
+         AbstractBundleModule fragModule = (AbstractBundleModule)aux;
+         for (Capability fragCap : fragModule.getCapabilities())
+         {
+            CapabilityImpl cap = new CapabilityImpl(this, fragCap.getNamespace(), fragCap.getDirectives(), fragCap.getAttributes());
+            result.add(cap);
+         }
+      }
+
       return Collections.unmodifiableList(result);
    }
 
@@ -153,6 +167,21 @@ abstract class AbstractBundleModule extends AbstractModule
       }
 
       ArrayList<Requirement> result = new ArrayList<Requirement>(reqMap.values());
+
+      // Add the requirements of attached fragments
+      for (Module auxModule : getFragments())
+      {
+         AbstractBundleModule fragModule = (AbstractBundleModule)auxModule;
+         for (Requirement aux : fragModule.getRequirements())
+         {
+            if (Capability.PACKAGE_NAMESPACE.equals(aux.getNamespace()) || Capability.MODULE_NAMESPACE.equals(aux.getNamespace()))
+            {
+               FragmentRequirement req = new FragmentRequirement(this, aux);
+               result.add(req);
+            }
+         }
+      }
+
       return Collections.unmodifiableList(result);
    }
 
