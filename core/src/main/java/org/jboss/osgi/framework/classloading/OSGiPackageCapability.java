@@ -157,8 +157,9 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
 
-      // If there is no resolver, match package name and version plus additional attributes
-      if (resolver == null)
+      // If there is no resolver or the requirement is dynamic and non-optional
+      // match package name and version plus additional attributes
+      if (resolver == null || (osgireq.isDynamic() && osgireq.isOptional() == false))
       {
          boolean match = super.resolves(reqModule, mcreq);
          match &= matchAttributes(osgireq);
@@ -170,14 +171,6 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       if (osgicap != null)
       {
          boolean match = (osgicap == this);
-         return match;
-      }
-
-      // Match dynamic non-optional requirements
-      if (osgireq.isDynamic() && osgireq.isOptional() == false)
-      {
-         boolean match = super.resolves(reqModule, mcreq);
-         match &= matchAttributes(osgireq);
          return match;
       }
 

@@ -67,6 +67,13 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       });
    }
 
+   @Before
+   public void setUp() throws Exception
+   {
+      super.setUp();
+      createFramework().start();
+   }
+
    @After
    public void tearDown() throws Exception
    {

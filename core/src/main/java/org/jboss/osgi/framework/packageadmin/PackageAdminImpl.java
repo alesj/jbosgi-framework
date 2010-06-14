@@ -368,7 +368,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       }
 
       // True if all bundles are resolvable.
-      boolean allResolved = true;
+      boolean allResolved = (resolvableBundles.size() > 0);
 
       // Advance the bundles to stage CLASSLOADER and check at the end
       if (advanceBundlesToClassloader(resolvableBundles) == false)
