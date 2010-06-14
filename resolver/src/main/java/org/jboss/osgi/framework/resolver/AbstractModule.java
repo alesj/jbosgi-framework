@@ -36,6 +36,7 @@ import java.util.Map;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.resolver.Content;
+import org.apache.felix.framework.resolver.FragmentRequirement;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.Wire;
 import org.apache.felix.framework.util.manifestparser.R4Library;
@@ -202,6 +203,7 @@ public abstract class AbstractModule implements Module
    {
       fragments = modules;
       capabilities = null;
+      requirements = null;
    }
 
    @Override
@@ -209,6 +211,7 @@ public abstract class AbstractModule implements Module
    {
       fragments = null;
       capabilities = null;
+      requirements = null;
    }
 
    @Override
@@ -306,7 +309,11 @@ public abstract class AbstractModule implements Module
       {
          for (Wire aux : wires)
          {
-            if (aux.getRequirement() == requirement)
+            Requirement auxreq = aux.getRequirement();
+            if (auxreq instanceof FragmentRequirement)
+                auxreq = ((FragmentRequirement)auxreq).getRequirement();
+            
+            if (auxreq.equals(requirement))
             {
                result = aux;
                break;
