@@ -21,16 +21,17 @@
 */
 package org.jboss.osgi.framework.classloading;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.classloader.spi.ClassLoaderPolicy;
 import org.jboss.classloading.spi.dependency.Module;
-import org.jboss.classloading.spi.dependency.RequirementDependencyItem;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.plugins.classloader.VFSDeploymentClassLoaderPolicyModule;
+import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.vfs.VirtualFile;
 
 /**
  * The {@link Module} that represents and OSGi bundle deployment.
@@ -45,8 +46,6 @@ public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
    // Provide logging
    private static final Logger log = Logger.getLogger(OSGiModule.class);
    
-   private List<String> lines = new ArrayList<String>();
-   
    public OSGiModule(DeploymentUnit unit, ClassLoadingMetaData metaData)
    {
       super(unit);
@@ -57,25 +56,25 @@ public class OSGiModule extends VFSDeploymentClassLoaderPolicyModule
    @Override
    public ClassLoaderPolicy createClassLoaderPolicy()
    {
-      throw new IllegalStateException("OSGiClassLoaderFactory is expected to create the policy");
+      VFSDeploymentUnit unit = (VFSDeploymentUnit)getDeploymentUnit();
+      return createClassLoaderPolicyInternal(unit);
+   }
+   
+   ClassLoaderPolicy createClassLoaderPolicyInternal(VFSDeploymentUnit unit)
+   {
+      AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
+      VirtualFile[] roots = getClassLoaderPolicyRoots(bundleState, unit);
+      ClassLoaderPolicy policy = new OSGiClassLoaderPolicy(bundleState, roots);
+      unit.addAttachment(ClassLoaderPolicy.class, policy);
+      return policy;
    }
 
-   @Override
-   protected Module resolveModule(RequirementDependencyItem dependency, boolean resolveSpace)
+   private VirtualFile[] getClassLoaderPolicyRoots(AbstractBundleState bundleState, VFSDeploymentUnit vfsUnit)
    {
-      Module result = super.resolveModule(dependency, resolveSpace);
-      
-//      String line = this + " : " + dependency.getRequirement() + ",resolveSpace=" + resolveSpace + " => " + result;
-//      boolean loopdetected = lines.contains(line);
-//      lines.add(line);
-//      if (loopdetected)
-//      {
-//         for (String aux : lines)
-//            System.out.println(aux);
-//         
-//         System.exit(0);
-//      }
-      
-      return result;
+      // The classpath is initialised by the bundle structure deployer
+      List<VirtualFile> classPaths = vfsUnit.getClassPath();
+      VirtualFile[] policyRoots = new VirtualFile[classPaths.size()];
+      classPaths.toArray(policyRoots);
+      return policyRoots;
    }
 }
