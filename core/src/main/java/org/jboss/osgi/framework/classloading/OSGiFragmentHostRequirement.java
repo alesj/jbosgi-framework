@@ -21,11 +21,10 @@
 */
 package org.jboss.osgi.framework.classloading;
 
-import org.jboss.classloading.plugins.metadata.ModuleRequirement;
+import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
-import org.jboss.osgi.framework.metadata.VersionRange;
 
 /**
  * A ModuleRequirement that is associated with Fragment-Host.
@@ -33,52 +32,24 @@ import org.jboss.osgi.framework.metadata.VersionRange;
  * @author thomas.diesler@jboss.com
  * @since 03-Jun-2010
  */
-public class OSGiFragmentHostRequirement extends ModuleRequirement implements OSGiRequirement
+public class OSGiFragmentHostRequirement extends OSGiBundleRequirement
 {
    private static final long serialVersionUID = -1337312549822378204L;
 
-   private AbstractBundleState bundleState;
-   private ParameterizedAttribute metadata;
-   
    public static OSGiFragmentHostRequirement create(AbstractBundleState bundleState, FragmentHostMetaData hostMetaData)
    {
       if (hostMetaData == null)
          throw new IllegalArgumentException("Null host metadata");
 
       String name = hostMetaData.getSymbolicName();
-      VersionRange version = hostMetaData.getBundleVersion();
+      VersionRange versionRange = hostMetaData.getVersionRange();
       ParameterizedAttribute metadata = hostMetaData.getMetadata();
 
-      return new OSGiFragmentHostRequirement(bundleState, name, version, metadata);
+      return new OSGiFragmentHostRequirement(bundleState, name, versionRange, metadata);
    }
 
    private OSGiFragmentHostRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, ParameterizedAttribute metadata)
    {
-      super(name);
-      
-      if (bundleState == null)
-         throw new IllegalArgumentException("Null bundleState");
-      if (metadata == null)
-         throw new IllegalArgumentException("Null metadata");
-      
-      this.bundleState = bundleState;
-      this.metadata = metadata;
-      
-      if (versionRange != null)
-      {
-         String rangeSpec = versionRange.toString();
-         setVersionRange(org.jboss.classloading.spi.version.VersionRange.valueOf(rangeSpec));
-      }
-   }
-
-   @Override
-   public AbstractBundleState getBundle()
-   {
-      return bundleState;
-   }
-
-   public ParameterizedAttribute getMetadata()
-   {
-      return metadata;
+      super(bundleState, name, versionRange, metadata);
    }
 }

@@ -90,6 +90,11 @@ public abstract class AbstractResolverPlugin
       resolverState.removeModule(module);
    }
 
+   public AbstractModule findHost(AbstractModule fragModule)
+   {
+      return (AbstractModule)resolverState.findHost(fragModule);
+   }
+   
    public void resolve(Module rootModule) throws ResolveException
    {
       if (!rootModule.isResolved())

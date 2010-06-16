@@ -265,7 +265,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
    public void refreshPackages(Bundle[] bundles)
    {
       throw new NotImplementedException();
-      
+
       // This method returns to the caller immediately and then performs the following steps on a separate thread:
       //
       //   1. Compute a graph of bundles starting with the specified bundles. If no bundles are specified, 
@@ -294,6 +294,15 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
    }
 
+   /**
+    * Resolve the specified bundles. The Framework must attempt to resolve the specified bundles that are unresolved. 
+    * Additional bundles that are not included in the specified bundles may be resolved as a result of calling
+    * this method. 
+    * 
+    * If <code>null</code> is specified then the Framework will attempt to resolve all unresolved bundles. 
+    * This method must not cause any bundle to be refreshed, stopped, or started. 
+    * This method will not return until the operation has completed.
+    */
    public boolean resolveBundles(Bundle[] bundleArr)
    {
       // Collect the bundles that are in state INSTALLED
@@ -302,9 +311,8 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       {
          for (Bundle bundle : getBundleManager().getBundles(Bundle.INSTALLED))
          {
-            AbstractBundleState bundleState = AbstractBundleState.assertBundleState(bundle);
-            if (bundleState.isFragment() == false)
-               unresolvedBundles.add(bundleState);
+            DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
+            unresolvedBundles.add(bundleState);
          }
       }
       else
@@ -312,12 +320,27 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          for (Bundle bundle : bundleArr)
          {
             if (bundle.getState() == Bundle.INSTALLED)
-               unresolvedBundles.add(OSGiBundleState.assertBundleState(bundle));
+               unresolvedBundles.add(DeployedBundleState.assertBundleState(bundle));
          }
       }
 
       if (unresolvedBundles.isEmpty())
          return true;
+
+      // Remove the bundles that do not pass the execution env check
+      Iterator<Bundle> itBundles = unresolvedBundles.iterator();
+      while (itBundles.hasNext())
+      {
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(itBundles.next());
+         try
+         {
+            verifyExecutionEnvironment(bundleState, true);
+         }
+         catch (BundleException ex)
+         {
+            itBundles.remove();
+         }
+      }
 
       // The list of bundle deployments which should be able to advance to CLASSLOADER stage
       List<OSGiBundleState> resolvableBundles = new ArrayList<OSGiBundleState>();
@@ -330,8 +353,8 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          // bundles that the external resolver could actually resolve
          for (Bundle aux : bundleResolver.resolve(unresolvedBundles))
          {
-            OSGiBundleState bundleState = OSGiBundleState.assertBundleState(aux);
-            resolvableBundles.add(bundleState);
+            if (AbstractBundleState.assertBundleState(aux).isFragment() == false)
+               resolvableBundles.add(OSGiBundleState.assertBundleState(aux));
          }
       }
       else
@@ -339,28 +362,13 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          // Every unresolved bundle is automatically copied to the list of resolvable bundles
          for (Bundle aux : unresolvedBundles)
          {
-            OSGiBundleState bundleState = OSGiBundleState.assertBundleState(aux);
-            resolvableBundles.add(bundleState);
+            if (AbstractBundleState.assertBundleState(aux).isFragment() == false)
+               resolvableBundles.add(OSGiBundleState.assertBundleState(aux));
          }
       }
 
-      // Remove the bundles that do not pass the execution env check
-      Iterator<OSGiBundleState> itBundles = resolvableBundles.iterator();
-      while(itBundles.hasNext())
-      {
-         AbstractBundleState bundleState = itBundles.next();
-         try
-         {
-            verifyExecutionEnvironment(bundleState, true);
-         }
-         catch (BundleException ex)
-         {
-            itBundles.remove();
-         }
-      }
-      
-      // We can only return true if all bundles are resolvable.
-      boolean allResolved = resolvableBundles.containsAll(unresolvedBundles);
+      // True if all bundles are resolvable.
+      boolean allResolved = (resolvableBundles.size() > 0);
 
       // Advance the bundles to stage CLASSLOADER and check at the end
       if (advanceBundlesToClassloader(resolvableBundles) == false)
@@ -368,23 +376,23 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
          resetBundleDeploymentStates(resolvableBundles);
          allResolved = false;
       }
-      
+
       return allResolved;
    }
 
-   private boolean advanceBundlesToClassloader(List<OSGiBundleState> resolvableBundles) 
+   private boolean advanceBundlesToClassloader(List<OSGiBundleState> resolvableBundles)
    {
       DeployerClient deployerClient = getBundleManager().getDeployerClient();
 
       // Remember the state of every deployment unit
-      for (OSGiBundleState bundleState: resolvableBundles)
+      for (OSGiBundleState bundleState : resolvableBundles)
       {
          DeploymentUnit unit = bundleState.getDeploymentUnit();
          unit.addAttachment(StateTuple.class, new StateTuple(unit));
       }
 
       // Change to DeploymentStage CLASSLOADER 
-      for (OSGiBundleState bundleState: resolvableBundles)
+      for (OSGiBundleState bundleState : resolvableBundles)
       {
          try
          {
@@ -403,7 +411,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
             log.error("Error resolving bundle: " + bundleState, ex);
          }
       }
-      
+
       // Check that every deployment could reach the desired stage
       try
       {
@@ -422,9 +430,9 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       }
    }
 
-   private void resetBundleDeploymentStates(List<OSGiBundleState> resolvableBundles) 
+   private void resetBundleDeploymentStates(List<OSGiBundleState> resolvableBundles)
    {
-      for (OSGiBundleState bundleState: resolvableBundles)
+      for (OSGiBundleState bundleState : resolvableBundles)
       {
          DeploymentUnit unit = bundleState.getDeploymentUnit();
          StateTuple stateTuple = unit.removeAttachment(StateTuple.class);
@@ -453,7 +461,7 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
             break;
          }
       }
-      
+
       if (foundExecEnv == false)
       {
          String msg = "Cannot find required execution environment " + reqExecEnvs + ", we have: " + fwExecEnvs;
@@ -462,22 +470,22 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
          log.error(msg);
       }
-      
+
       return foundExecEnv;
    }
-   
+
    static class StateTuple
    {
       ControllerState requiredState;
       DeploymentStage requiredStage;
-      
+
       StateTuple(DeploymentUnit unit)
       {
          ControllerContext context = unit.getAttachment(ControllerContext.class);
          requiredState = context.getRequiredState();
          requiredStage = unit.getRequiredStage();
       }
-      
+
       void reset(DeploymentUnit unit)
       {
          ControllerContext context = unit.getAttachment(ControllerContext.class);

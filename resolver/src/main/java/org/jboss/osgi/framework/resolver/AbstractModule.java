@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -37,6 +36,7 @@ import java.util.Map;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.resolver.Content;
+import org.apache.felix.framework.resolver.FragmentRequirement;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.Wire;
 import org.apache.felix.framework.util.manifestparser.R4Library;
@@ -201,25 +201,26 @@ public abstract class AbstractModule implements Module
    @Override
    public void attachFragments(List<Module> modules) throws Exception
    {
-      if (fragments == null)
-         fragments = new ArrayList<Module>();
-
-      fragments.addAll(modules);
+      fragments = modules;
+      capabilities = null;
+      requirements = null;
    }
 
    @Override
    public void removeFragments()
    {
       fragments = null;
+      capabilities = null;
+      requirements = null;
    }
 
    @Override
    public List<Module> getFragments()
    {
-      if (fragments != null)
-         return Collections.unmodifiableList(fragments);
-      else
+      if (fragments == null)
          return Collections.emptyList();
+      
+      return fragments;
    }
 
    @Override
@@ -308,7 +309,11 @@ public abstract class AbstractModule implements Module
       {
          for (Wire aux : wires)
          {
-            if (aux.getRequirement() == requirement)
+            Requirement auxreq = aux.getRequirement();
+            if (auxreq instanceof FragmentRequirement)
+                auxreq = ((FragmentRequirement)auxreq).getRequirement();
+            
+            if (auxreq.equals(requirement))
             {
                result = aux;
                break;

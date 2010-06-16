@@ -33,5 +33,5 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
  */
 public interface OSGiRequirement extends Requirement
 {
-   AbstractBundleState getBundle();
+   AbstractBundleState getBundleState();
 }

@@ -30,12 +30,11 @@ import org.jboss.osgi.testing.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archives;
 import org.jboss.shrinkwrap.api.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.test.osgi.core.jbosgi341.support.a.A;
-import org.jboss.test.osgi.core.jbosgi341.support.b.B;
-import org.jboss.test.osgi.core.jbosgi341.support.c.C;
+import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.event.EventAdmin;
 
 /**
  * [JBOSGI-341] Endless loop at AS server startup
@@ -47,55 +46,56 @@ import org.osgi.framework.Constants;
  */
 public class OSGi341TestCase extends OSGiFrameworkTest
 {
-   @Test
-   public void testCircularMandatory() throws Exception
+   @After
+   public void tearDown() throws Exception
    {
-      Bundle bundleA = installBundle(A.class, B.class, Constants.RESOLUTION_MANDATORY);
-      Bundle bundleB = installBundle(B.class, C.class, Constants.RESOLUTION_MANDATORY);
-      Bundle bundleC = installBundle(C.class, A.class, Constants.RESOLUTION_MANDATORY);
+      shutdownFramework();
+      super.tearDown();
+   }
+
+   @Test
+   public void testCompendiumFirst() throws Exception
+   {
+      Bundle compendium = installCompendium();
+      Bundle eventadmin = installEventAdmin();
       
       try
       {
-         bundleA.start();
-         assertBundleState(Bundle.ACTIVE, bundleA.getState());
-         assertBundleState(Bundle.RESOLVED, bundleB.getState());
-         assertBundleState(Bundle.RESOLVED, bundleC.getState());
+         eventadmin.start();
+         assertBundleState(Bundle.ACTIVE, eventadmin.getState());
+         assertBundleState(Bundle.RESOLVED, compendium.getState());
       }
       finally
       {
-         bundleA.uninstall();
-         bundleB.uninstall();
-         bundleC.uninstall();
+         compendium.uninstall();
+         eventadmin.uninstall();
       }
    }
 
    @Test
-   public void testCircularOptional() throws Exception
+   public void testCompendiumLast() throws Exception
    {
-      Bundle bundleA = installBundle(A.class, B.class, Constants.RESOLUTION_OPTIONAL);
-      Bundle bundleB = installBundle(B.class, C.class, Constants.RESOLUTION_OPTIONAL);
-      Bundle bundleC = installBundle(C.class, A.class, Constants.RESOLUTION_OPTIONAL);
+      Bundle eventadmin = installEventAdmin();
+      Bundle compendium = installCompendium();
       
       try
       {
-         bundleA.start();
-         assertBundleState(Bundle.ACTIVE, bundleA.getState());
-         assertBundleState(Bundle.RESOLVED, bundleB.getState());
-         assertBundleState(Bundle.RESOLVED, bundleC.getState());
+         eventadmin.start();
+         assertBundleState(Bundle.ACTIVE, eventadmin.getState());
+         assertBundleState(Bundle.RESOLVED, compendium.getState());
       }
       finally
       {
-         bundleA.uninstall();
-         bundleB.uninstall();
-         bundleC.uninstall();
+         compendium.uninstall();
+         eventadmin.uninstall();
       }
    }
 
-   private Bundle installBundle(final Class<?> exp, final Class<?> imp, final String resolution) throws Exception
+   private Bundle installCompendium() throws Exception
    {
-      final JavaArchive archive = Archives.create("jbosgi323-bundle" + exp.getSimpleName(), JavaArchive.class);
-      archive.addClass(exp);
-      archive.addClass(imp);
+      final JavaArchive archive = Archives.create("jbosgi341-compendium", JavaArchive.class);
+      archive.addClass(ConfigurationAdmin.class);
+      archive.addClass(EventAdmin.class);
       archive.setManifest(new Asset()
       {
          public InputStream openStream()
@@ -103,8 +103,33 @@ public class OSGi341TestCase extends OSGiFrameworkTest
             OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
             builder.addBundleManifestVersion(2);
             builder.addBundleSymbolicName(archive.getName());
-            builder.addExportPackages(exp);
-            builder.addImportPackages(imp.getPackage().getName() + ";resolution:=" + resolution);
+            builder.addExportPackages(ConfigurationAdmin.class, EventAdmin.class);
+            builder.addImportPackages(ConfigurationAdmin.class.getPackage().getName() + ";resolution:=optional");
+            builder.addImportPackages(EventAdmin.class.getPackage().getName() + ";resolution:=optional");
+            builder.addDynamicImportPackages("*");
+            return builder.openStream();
+         }
+      });
+      
+      return installBundle(archive);
+   }
+
+
+   private Bundle installEventAdmin() throws Exception
+   {
+      final JavaArchive archive = Archives.create("jbosgi341-eventadmin", JavaArchive.class);
+      archive.addClass(EventAdmin.class);
+      archive.setManifest(new Asset()
+      {
+         public InputStream openStream()
+         {
+            OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+            builder.addBundleManifestVersion(2);
+            builder.addBundleSymbolicName(archive.getName());
+            builder.addExportPackages(EventAdmin.class);
+            builder.addImportPackages(ConfigurationAdmin.class.getPackage().getName() + ";resolution:=optional");
+            builder.addImportPackages(EventAdmin.class.getPackage().getName());
+            builder.addDynamicImportPackages("org.osgi.service.log");
             return builder.openStream();
          }
       });

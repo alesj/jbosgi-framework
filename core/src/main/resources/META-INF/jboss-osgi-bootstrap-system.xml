@@ -53,26 +53,29 @@
   ********************************
   -->
   
-  <bean name="OSGiSystemPackages" class="org.jboss.osgi.framework.plugins.internal.SystemPackagesPluginImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" state="Instantiated"/></parameter></constructor>
-  </bean>
-  <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-  </bean>
-  <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-  </bean>
   <bean name="OSGiControllerContextPlugin" class="org.jboss.osgi.framework.bundle.ControllerContextPluginImpl">
     <constructor>
       <parameter><inject bean="OSGiBundleManager" /></parameter>
       <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
     </constructor>
   </bean>
+  <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="OSGiResolverPlugin" class="org.jboss.osgi.framework.resolver.felix.FelixResolverPlugin">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
   <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
     <constructor>
       <parameter><inject bean="OSGiBundleManager" /></parameter>
       <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
     </constructor>
+  </bean>
+  <bean name="OSGiStoragePlugin" class="org.jboss.osgi.framework.plugins.internal.BundleStoragePluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
+  <bean name="OSGiSystemPackages" class="org.jboss.osgi.framework.plugins.internal.SystemPackagesPluginImpl">
+    <constructor><parameter><inject bean="OSGiBundleManager" state="Instantiated"/></parameter></constructor>
   </bean>
   
   <!-- 
@@ -83,8 +86,8 @@
   ********************************
   -->
   
-  <bean name="StartLevelService" class="org.jboss.osgi.framework.service.internal.StartLevelImpl">
-    <related-class name="org.osgi.service.startlevel.StartLevel">OSGi</related-class>
+  <bean name="DeployerService" class="org.jboss.osgi.framework.service.internal.DeployerServiceImpl">
+    <related-class name="org.jboss.osgi.deployment.deployer.DeployerService">OSGi</related-class>
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
     <demand state="PreInstall">MDRService</demand>
   </bean>
@@ -93,13 +96,13 @@
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
     <demand state="PreInstall">MDRService</demand>
   </bean>
-  <bean name="DeployerService" class="org.jboss.osgi.framework.service.internal.DeployerServiceImpl">
-    <related-class name="org.jboss.osgi.deployment.deployer.DeployerService">OSGi</related-class>
+  <bean name="LifecycleInterceptorService" class="org.jboss.osgi.framework.service.internal.LifecycleInterceptorServiceImpl">
+    <related-class name="org.jboss.osgi.deployment.interceptor.LifecycleInterceptorService">OSGi</related-class>
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
     <demand state="PreInstall">MDRService</demand>
   </bean>
-  <bean name="LifecycleInterceptorService" class="org.jboss.osgi.framework.service.internal.LifecycleInterceptorServiceImpl">
-    <related-class name="org.jboss.osgi.deployment.interceptor.LifecycleInterceptorService">OSGi</related-class>
+  <bean name="StartLevelService" class="org.jboss.osgi.framework.service.internal.StartLevelImpl">
+    <related-class name="org.osgi.service.startlevel.StartLevel">OSGi</related-class>
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
     <demand state="PreInstall">MDRService</demand>
   </bean>
@@ -140,20 +143,6 @@
   <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
   <bean name="OSGiManifestMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestMetaDataDeployer" />
   <bean name="OSGiNativeCodeMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiNativeCodeMetaDataDeployer" />
-
-  <bean name="OSGiSingletonSchemaResolverFactory">
-    <constructor factoryClass="org.jboss.xb.binding.sunday.unmarshalling.SingletonSchemaResolverFactory" factoryMethod="getInstance" />
-  </bean>
-  <bean name="Pojo2OSGiSchema" class="org.jboss.xb.binding.resolver.MutableSchemaResolver">
-    <constructor factoryMethod="getSchemaBindingResolver"><factory bean="OSGiSingletonSchemaResolverFactory" /></constructor>
-    <install method="mapURIToClass">
-      <parameter>urn:jboss:pojo2osgi:1.0</parameter>
-      <parameter>org.jboss.osgi.framework.metadata.internal.OSGiPojoMetaData</parameter>
-    </install>
-    <uninstall method="removeURIToClassMapping">
-      <parameter>urn:jboss:pojo2osgi:1.0</parameter>
-    </uninstall>
-  </bean>
   
   <!--
   ********************************

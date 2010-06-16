@@ -38,7 +38,6 @@ import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
-import org.jboss.osgi.framework.resolver.felix.FelixResolverPlugin;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -144,59 +143,49 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    @Override
    public boolean resolves(Module reqModule, Requirement mcreq)
    {
-      boolean match;
-      
       // The Domain creates PackageRequirements on the fly in Domain.getExportedPackagesInternal()
-      // we only match package name and version but not any OSGi constraints
+      // For this, we only match package name and version but not any OSGi constraints
       if (mcreq instanceof OSGiPackageRequirement == false)
       {
-         match = super.resolves(reqModule, mcreq);
+         boolean match = super.resolves(reqModule, mcreq);
          return match;
       }
 
       OSGiPackageRequirement osgireq = (OSGiPackageRequirement)mcreq;
-      
-      // Get the optional ResolverPlugin
+
+      // Get the optional resolver
       OSGiBundleManager bundleManager = bundleState.getBundleManager();
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (resolver != null)
+
+      // If there is no resolver or the requirement is dynamic and non-optional
+      // match package name and version plus additional attributes
+      if (resolver == null || (osgireq.isDynamic() && osgireq.isOptional() == false))
       {
-         // [JBOSGI-330] Revisit capability matching for dynamic imports
-         if (resolver instanceof FelixResolverPlugin)
-         {
-            if (osgireq.isDynamic() && osgireq.isOptional() == false)
-            {
-               match = super.resolves(reqModule, mcreq);
-               return match;
-            }
-         }
-         
-         // Match the requirement through the Resolver
-         match = resolver.match(this, osgireq);
-      }
-      else
-      {
-         // Match package name and version plus additional OSGi attributes
-         match = super.resolves(reqModule, mcreq);
+         boolean match = super.resolves(reqModule, mcreq);
          match &= matchAttributes(osgireq);
+         return match;
       }
-      
-      return match;
+
+      // Get the wired capability from the resolver
+      OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
+      if (osgicap != null)
+      {
+         boolean match = (osgicap == this);
+         return match;
+      }
+
+      return false;
    }
 
-   /**
-    * Get the Module associated with this capability
-    * 
-    * @return the module
-    */
-   public Module getModule()
+   @Override
+   public OSGiModule getModule()
    {
-      Module module = null;
+      OSGiModule module = null;
       if (bundleState instanceof DeployedBundleState)
       {
          DeployedBundleState depBundle = (DeployedBundleState)bundleState;
          DeploymentUnit unit = depBundle.getDeploymentUnit();
-         module = unit.getAttachment(Module.class);
+         module = (OSGiModule)unit.getAttachment(Module.class);
          if (module == null)
             throw new IllegalStateException("Cannot obtain module from: " + bundleState);
       }

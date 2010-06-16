@@ -23,17 +23,24 @@ package org.jboss.osgi.framework.resolver.felix;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.ResolveException;
 import org.apache.felix.framework.resolver.Wire;
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
+import org.jboss.osgi.framework.bundle.OSGiFragmentState;
 import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.classloading.OSGiCapability;
+import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
+import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
@@ -52,7 +59,7 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
    // Provide logging
    final Logger log = Logger.getLogger(FelixResolverPlugin.class);
 
-   private AbstractResolverPlugin resolver = new JBossResolver();
+   private JBossResolver resolver = new JBossResolver();
 
    public FelixResolverPlugin(OSGiBundleManager bundleManager)
    {
@@ -101,41 +108,99 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
    }
 
    @Override
-   public boolean match(OSGiCapability osgicap, OSGiRequirement osgireq)
+   public OSGiCapability getWiredCapability(OSGiRequirement osgireq)
    {
-      Bundle exporter = osgicap.getBundleState();
-      AbstractModule expModule = resolver.getModule(exporter);
-      
-      Bundle importer = osgireq.getBundle();
-      AbstractModule impModule = resolver.getModule(importer);
-
-      // Lazily resolve the exporter and retry
-      if (expModule.isResolved() == false)
-         return failsafeResolve(expModule) && match(osgicap, osgireq);
+      AbstractBundleState importer = osgireq.getBundleState();
+      AbstractBundleModule impModule = resolver.getModule(importer);
 
       // Lazily resolve the importer and retry
+      if (impModule.isResolved() == false && failsafeResolve(impModule) == true)
+         return getWiredCapability(osgireq);
+
+      // If the importer is not resolved, we cannot return a wire
       if (impModule.isResolved() == false)
-         return failsafeResolve(impModule) && match(osgicap, osgireq);
+         return null;
+      
+      
+      // Get the potential wire for the requirement
+      Requirement req = impModule.getMappedRequirement(osgireq);
+      OSGiCapability osgicap = getWiredCapability(impModule, req);
+      
+      if (osgicap == null && importer.isFragment())
+      {
+         OSGiFragmentState fragState = OSGiFragmentState.assertBundleState(importer);
+         AbstractBundleModule hostModule = resolver.getModule(fragState.getFragmentHost());
+         osgicap = getWiredCapability(hostModule, req);
+      }
+      
+      // Felix does not maintain wires to capabilies provided by the same bundle
+      if (osgicap == null && osgireq instanceof OSGiPackageRequirement)
+      {
+         OSGiPackageRequirement packreq = (OSGiPackageRequirement)osgireq;
 
-      // A dynamic requirement does not match a specific module
-      if (osgireq.isDynamic() == true && osgireq.isOptional() == false)
-         return false;
+         // For non-dynamic package imports check if the importer also 
+         // also provides a matching capability
+         if (packreq.isDynamic() == false || packreq.isOptional())
+         {
+            for (OSGiCapability aux : impModule.getOSGiCapabilities())
+            {
+               if (aux instanceof OSGiPackageCapability)
+               {
+                  OSGiPackageCapability packcap = (OSGiPackageCapability)aux;
+                  if (packcap.matchNameAndVersion(packreq) && packcap.matchAttributes(packreq))
+                  {
+                     osgicap = packcap;
+                     break;
+                  }
+               }
+            }
+         }
+      }
+      
+      return osgicap;
+   }
 
-      // Get the potential wire for the requirement and see if it matches the given exporter 
-      Requirement req = ((DeployedBundleModule)impModule).getMappedRequirement(osgireq);
+   private OSGiCapability getWiredCapability(AbstractBundleModule impModule, Requirement req)
+   {
+      OSGiCapability osgicap = null;
       Wire wire = impModule.getWireForRequirement(req);
       if (wire != null)
       {
-         Module wireExporter = wire.getExporter();
-         return wireExporter == expModule;
+         Capability wiredcap = wire.getCapability();
+         Bundle expBundle = wire.getExporter().getBundle();
+         AbstractBundleModule expModule = resolver.getModule(expBundle);
+         osgicap = expModule.getMappedCapability(wiredcap);
+         if (osgicap == null)
+            throw new IllegalStateException("Cannot find capability mapping for: " + wire);
       }
+      return osgicap;
+   }
 
-      // If we did not get a ResolverException, we can assume that 
-      // all packages that do not have a wire, wire to itself
-      if (impModule == expModule)
-         return true;
+   @Override
+   public List<OSGiRequirement> getUnresolvedRequirements(Bundle bundle)
+   {
+      List<OSGiRequirement> result = new ArrayList<OSGiRequirement>();
+      AbstractBundleModule module = resolver.getModule(bundle);
+      for (OSGiRequirement req : module.getOSGiRequirements())
+      {
+         OSGiCapability cap = getWiredCapability(req);
+         if (cap == null)
+            result.add(req);
+      }
+      return Collections.unmodifiableList(result);
+   }
 
-      return false;
+   @Override
+   public Map<OSGiRequirement, OSGiCapability> getWiring(Bundle bundle)
+   {
+      Map<OSGiRequirement, OSGiCapability> result = new LinkedHashMap<OSGiRequirement, OSGiCapability>();
+      AbstractBundleModule module = resolver.getModule(bundle);
+      for (OSGiRequirement req : module.getOSGiRequirements())
+      {
+         OSGiCapability cap = getWiredCapability(req);
+         result.put(req, cap);
+      }
+      return Collections.unmodifiableMap(result);
    }
 
    private boolean failsafeResolve(AbstractModule module)
@@ -154,6 +219,8 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
 
    static class JBossResolver extends AbstractResolverPlugin
    {
+      private SystemBundleModule sysModule;
+      
       @Override
       public boolean acquireGlobalLock()
       {
@@ -179,7 +246,8 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
          if (bundle.getBundleId() == 0)
          {
             OSGiSystemState bundleState = OSGiSystemState.assertBundleState(bundle);
-            return new SystemBundleModule(bundleState);
+            sysModule = new SystemBundleModule(bundleState);
+            return sysModule;
          }
          else
          {
@@ -189,14 +257,23 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
       }
 
       @Override
-      public AbstractModule getModule(Bundle bundle)
+      public AbstractBundleModule getModule(Bundle bundle)
       {
-         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-         AbstractModule module = bundleState.getDeploymentUnit().getAttachment(AbstractModule.class);
-         if (module == null)
+         AbstractBundleModule result = null;
+         if (bundle.getBundleId() == 0)
+         {
+            result = sysModule;
+         }
+         else
+         {
+            DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
+            result = (AbstractBundleModule)bundleState.getDeploymentUnit().getAttachment(AbstractModule.class);
+         }
+         
+         if (result == null)
             throw new IllegalStateException("No module attached to: " + bundle);
 
-         return module;
+         return result;
       }
    }
 }
