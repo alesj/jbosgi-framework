@@ -73,9 +73,6 @@ public class OSGiKernelDeploymentDeployer extends AbstractOSGiMetaDataDeployer<K
             }
          }
          
-         // Add DynamicImport-Package: *
-         builder.addDynamicImportPackages("*");
-         
          meatadata = builder.getOSGiMetaData();
       }
       

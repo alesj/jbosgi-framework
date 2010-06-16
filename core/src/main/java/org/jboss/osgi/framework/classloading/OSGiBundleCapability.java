@@ -27,10 +27,14 @@ import org.jboss.classloading.plugins.metadata.ModuleCapability;
 import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.classloading.spi.version.VersionRange;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
+import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.osgi.framework.Version;
 
 /**
@@ -79,26 +83,70 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    }
 
    @Override
-   public boolean resolves(Module reqModule, Requirement requirement)
+   public boolean resolves(Module reqModule, Requirement mcreq)
    {
-      if (super.resolves(reqModule, requirement) == false)
+      if (mcreq instanceof OSGiBundleRequirement == false)
          return false;
-      if (requirement instanceof OSGiBundleRequirement == false)
-         return true;
 
+      OSGiBundleRequirement osgireq = (OSGiBundleRequirement)mcreq;
+
+      // Get the optional resolver
+      OSGiBundleManager bundleManager = bundleState.getBundleManager();
+      ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+
+      // If there is no resolver, match bundle name and version
+      if (resolver == null)
+      {
+         boolean match = super.resolves(reqModule, mcreq);
+         match &= matchAttributes(mcreq);
+         return match;
+      }
+
+      // Get the wired capability from the resolver
+      OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
+      if (osgicap != null)
+      {
+         boolean match = (osgicap == this);
+         return match;
+      }
+      
+      // A fragment can potentially attach to multiple host bundles
+      // The Felix resolver has not yet settled on an API that supports that notion 
+      if (osgireq instanceof OSGiFragmentHostRequirement)
+      {
+         boolean match = super.resolves(reqModule, mcreq);
+         match &= matchAttributes(mcreq);
+         return match;
+      }
+
+      return false;
+   }
+
+   @Override
+   public OSGiModule getModule()
+   {
+      OSGiModule module = null;
+      if (bundleState instanceof DeployedBundleState)
+      {
+         DeployedBundleState depBundle = (DeployedBundleState)bundleState;
+         DeploymentUnit unit = depBundle.getDeploymentUnit();
+         module = (OSGiModule)unit.getAttachment(Module.class);
+         if (module == null)
+            throw new IllegalStateException("Cannot obtain module from: " + bundleState);
+      }
+      return module;
+   }
+
+   private boolean matchAttributes(Requirement requirement)
+   {
       // Review its not clear to me from the spec whether attribute matching 
       // beyond the version should work for require-bundle?
       Version ourVersion = Version.parseVersion(getMetaData().getBundleVersion());
       OSGiBundleRequirement bundleRequirement = (OSGiBundleRequirement)requirement;
       VersionRange requiredRange = bundleRequirement.getVersionRange();
-      if (requiredRange.isInRange(ourVersion) == false)
-         return false;
+      boolean match = requiredRange.isInRange(ourVersion);
 
-      ParameterizedAttribute ourParameters = getMetaData().getBundleParameters();
-      if (ourParameters == null)
-         return false;
-
-      return true;
+      return match;
    }
 
    @Override

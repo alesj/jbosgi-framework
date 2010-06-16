@@ -34,7 +34,6 @@ import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -50,13 +49,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
  */
 public class FragmentTestCase extends OSGiFrameworkTest
 {
-   @Before
-   public void setUp() throws Exception
-   {
-      super.setUp();
-      createFramework().start();
-   }
-
    @After
    public void tearDown() throws Exception
    {

@@ -46,12 +46,17 @@ public class RequireBundleTestCase extends AbstractFrameworkTest
    @Test
    public void testSimpleRequireBundle() throws Exception
    {
+      // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleA
+      // Export-Package: org.jboss.test.osgi.classloader.support.a;version=1.0.0;test=x
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/classloader/bundleA", A.class);
       Bundle bundleA = installBundle(assemblyA);
       try
       {
          bundleA.start();
          assertLoadClass(bundleA, A.class.getName());
+         
+         // Bundle-SymbolicName: org.jboss.test.osgi.classloader.bundleB
+         // Require-Bundle: org.jboss.test.osgi.classloader.bundleA
          Archive<?> assemblyB = assembleArchive("simplerequirebundleA", "/bundles/classloader/simplerequirebundleA", B.class);
          Bundle bundleB = installBundle(assemblyB);
          try

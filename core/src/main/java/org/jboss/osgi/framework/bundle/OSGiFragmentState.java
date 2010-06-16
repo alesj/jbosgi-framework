@@ -47,6 +47,19 @@ public class OSGiFragmentState extends DeployedBundleState
       super(bundleManager, unit);
    }
 
+   /**
+    * Assert that the given bundle is an instance of OSGiFragmentState
+    * @throws IllegalArgumentException if the given bundle is not an instance of OSGiFragmentState
+    */
+   public static OSGiFragmentState assertBundleState(Bundle bundle)
+   {
+      bundle = AbstractBundleState.assertBundleState(bundle);
+      if (bundle instanceof OSGiFragmentState == false)
+         throw new IllegalArgumentException("Not an OSGiFragmentState: " + bundle);
+
+      return (OSGiFragmentState)bundle;
+   }
+
    public OSGiBundleState getFragmentHost()
    {
       return fragmentHost;

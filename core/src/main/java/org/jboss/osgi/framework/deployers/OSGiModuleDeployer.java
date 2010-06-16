@@ -58,11 +58,11 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
       
       // Add the bundle to the resolver
       Module module = unit.getAttachment(Module.class);
-      ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (bundleResolver != null && module instanceof OSGiModule)
+      ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+      if (resolver != null && module instanceof OSGiModule)
       {
          AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-         bundleResolver.addBundle(bundleState);
+         resolver.addBundle(bundleState);
       }
    }
 

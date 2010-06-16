@@ -31,7 +31,6 @@ import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
-import org.jboss.osgi.framework.metadata.VersionRange;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.osgi.framework.Constants;
 
@@ -110,9 +109,9 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
     */
    public static class FragmentHostMetaData
    {
-      private ParameterizedAttribute metadata;
       private String symbolicName;
-      private VersionRange bundleVersion;
+      private AbstractVersionRange versionRange;
+      private ParameterizedAttribute metadata;
       private String extension;
       
       public FragmentHostMetaData(ParameterizedAttribute metadata)
@@ -123,9 +122,9 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
          this.metadata = metadata;
          this.symbolicName = metadata.getAttribute();
          
-         Parameter bundleVersionAttr = metadata.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
-         if (bundleVersionAttr != null)
-            bundleVersion = AbstractVersionRange.valueOf(bundleVersionAttr.getValue().toString());
+         String versionStr = metadata.getAttributeValue(Constants.BUNDLE_VERSION_ATTRIBUTE, String.class);
+         if (versionStr != null)
+            versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
 
          Parameter extensionDirective = metadata.getDirective(Constants.EXTENSION_DIRECTIVE);
          if (extensionDirective != null)
@@ -146,9 +145,9 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
        * The version range to select the the host bundle. 
        * If a range is used, then the fragment can attach to multiple hosts
        */
-      public VersionRange getBundleVersion()
+      public AbstractVersionRange getVersionRange()
       {
-         return bundleVersion;
+         return versionRange;
       }
 
       /**

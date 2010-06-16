@@ -224,7 +224,7 @@ public class BundleLifecycleTestCase extends AbstractFrameworkTest
          boolean allResolved = packageAdmin.resolveBundles(new Bundle[] { bundleB });
          assertFalse("Resolve fails", allResolved);
 
-         // Verify that the bundkle is still in state INSTALLED
+         // Verify that the bundle is still in state INSTALLED
          assertBundleState(Bundle.INSTALLED, bundleB.getState());
       }
       finally

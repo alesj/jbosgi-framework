@@ -110,7 +110,7 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
    }
 
    @Override
-   public AbstractBundleState getBundle()
+   public AbstractBundleState getBundleState()
    {
       return bundleState;
    }
