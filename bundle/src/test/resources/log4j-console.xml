@@ -9,7 +9,6 @@
 
   <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
     <param name="Target" value="System.out" />
-    <param name="Threshold" value="DEBUG" />
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %-5p [%c{1}] %m%n" />
     </layout>
@@ -19,8 +18,11 @@
   <!-- Limit categories -->
   <!-- ================ -->
 
-  <!-- Show jboss deployer traces  
-  <category name="org.jboss.deployer">
+  <!-- Show jboss classloading traces - ->
+  <category name="org.jboss.classloading">
+    <priority value="TRACE" />
+  </category>
+  <category name="org.jboss.classloader">
     <priority value="TRACE" />
   </category>
   -->
