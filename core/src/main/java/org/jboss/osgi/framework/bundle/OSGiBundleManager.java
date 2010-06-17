@@ -1382,18 +1382,17 @@ public class OSGiBundleManager
     */
    public FrameworkEvent waitForStop(long timeout) throws InterruptedException
    {
-      // Only wait when this Framework is in Bundle.STARTING, Bundle.ACTIVE, or Bundle.STOPPING state
-      int state = systemBundle.getState();
-      if (state != Bundle.STARTING && state != Bundle.ACTIVE && state != Bundle.STOPPING)
-         return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
-
       synchronized (stopMonitor)
       {
+         // Only wait when this Framework is in Bundle.STARTING, Bundle.ACTIVE, or Bundle.STOPPING state
+         int state = systemBundle.getState();
+         if (state != Bundle.STARTING && state != Bundle.ACTIVE && state != Bundle.STOPPING)
+            return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
+         
          stopMonitor.wait(timeout);
       }
 
-      state = systemBundle.getState();
-      if (state != Bundle.RESOLVED)
+      if (systemBundle.getState() != Bundle.RESOLVED)
          return new FrameworkEvent(FrameworkEvent.WAIT_TIMEDOUT, systemBundle, null);
 
       return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
