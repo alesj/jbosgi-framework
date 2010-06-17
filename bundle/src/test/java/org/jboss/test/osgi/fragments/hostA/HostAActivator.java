@@ -23,16 +23,20 @@ package org.jboss.test.osgi.fragments.hostA;
 
 //$Id$
 
+import org.jboss.logging.Logger;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 public class HostAActivator implements BundleActivator
 {
+   // Provide logging
+   private static final Logger log = Logger.getLogger(HostAActivator.class);
+   
    public void start(BundleContext context)
    {
       SubBeanA subBean = new SubBeanA();
-      subBean.getProvider(context);
+      log.info(subBean.getProvider(context));
    }
 
    public void stop(BundleContext context)

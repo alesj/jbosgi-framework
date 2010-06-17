@@ -80,8 +80,8 @@ public class StartLevelImplTest
       assertEquals(15, sl.getInitialBundleStartLevel());
    }
 
-   @SuppressWarnings("unchecked")
    @Test
+   @SuppressWarnings("rawtypes")
    public void testStartStopService()
    {
       ServiceRegistration sr = mock(ServiceRegistration.class);

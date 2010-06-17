@@ -215,7 +215,7 @@ public class OSGiClassLoaderPolicy extends VFSClassLoaderPolicy implements Bundl
                if (file != null)
                {
                   result = new VirtualFileInfo(file, root);
-                  return result;
+                  break;
                }
             }
             catch (Exception ignored)
