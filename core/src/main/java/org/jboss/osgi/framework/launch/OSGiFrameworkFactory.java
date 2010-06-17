@@ -123,6 +123,7 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       {
          // Default bootstrap paths
          List<String> bootstraps = new ArrayList<String>();
+         bootstraps.add("jboss-osgi-bootstrap.xml"); // needed by standalone runtime
          bootstraps.add("META-INF/jboss-osgi-bootstrap.xml");
          bootstraps.add("META-INF/jboss-osgi-bootstrap-container.xml");
          bootstraps.add("META-INF/jboss-osgi-bootstrap-system.xml");
