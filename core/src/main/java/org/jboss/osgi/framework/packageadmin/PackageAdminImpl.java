@@ -37,7 +37,6 @@ import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.DeployerClient;
 import org.jboss.deployers.client.spi.IncompleteDeploymentException;
-import org.jboss.deployers.plugins.classloading.AbstractDeploymentClassLoaderPolicyModule;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.DeploymentStage;
 import org.jboss.deployers.spi.deployer.DeploymentStages;
@@ -49,11 +48,11 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiFragmentState;
 import org.jboss.osgi.framework.bundle.OSGiSystemState;
+import org.jboss.osgi.framework.classloading.OSGiModule;
 import org.jboss.osgi.framework.plugins.PackageAdminPlugin;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractServicePlugin;
-import org.jboss.osgi.spi.NotImplementedException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -98,10 +97,9 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
       ClassLoader classLoader = clazz.getClassLoader();
       Module module = ClassLoading.getModuleForClassLoader(classLoader);
-      if (module instanceof AbstractDeploymentClassLoaderPolicyModule)
+      if (module instanceof OSGiModule)
       {
-         AbstractDeploymentClassLoaderPolicyModule deploymentModule = (AbstractDeploymentClassLoaderPolicyModule)module;
-         DeploymentUnit unit = deploymentModule.getDeploymentUnit();
+         DeploymentUnit unit = ((OSGiModule)module).getDeploymentUnit();
          AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
          if (bundleState != null)
          {
@@ -121,14 +119,33 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
       return bundleState.isFragment() ? BUNDLE_TYPE_FRAGMENT : 0;
    }
 
+   /**
+    * Returns the bundles with the specified symbolic name whose bundle version is within the specified version range. 
+    * If no bundles are installed that have the specified symbolic name, then null is returned. 
+    * If a version range is specified, then only the bundles that have the specified symbolic name and whose bundle 
+    * versions belong to the specified version range are returned. The returned bundles are ordered by version in descending 
+    * version order so that the first element of the array contains the bundle with the highest version. 
+    */
    public Bundle[] getBundles(String symbolicName, String versionRange)
    {
-      throw new NotImplementedException();
+      if (symbolicName == null)
+         throw new IllegalArgumentException("Null symbolic name");
+      
+      List<Bundle> result = new ArrayList<Bundle>();
+      for (AbstractBundleState bundleState : getBundleManager().getBundles())
+      {
+         if (symbolicName.equals(bundleState.getSymbolicName()))
+            result.add(bundleState.getBundleInternal());
+      }
+      
+      // TODO sort result list
+      
+      return result.toArray(new Bundle[result.size()]);
    }
 
    public ExportedPackage getExportedPackage(String name)
    {
-      throw new NotImplementedException();
+      return null;
    }
 
    public ExportedPackage[] getExportedPackages(Bundle bundle)
@@ -264,8 +281,6 @@ public class PackageAdminImpl extends AbstractServicePlugin implements PackageAd
 
    public void refreshPackages(Bundle[] bundles)
    {
-      throw new NotImplementedException();
-
       // This method returns to the caller immediately and then performs the following steps on a separate thread:
       //
       //   1. Compute a graph of bundles starting with the specified bundles. If no bundles are specified, 
