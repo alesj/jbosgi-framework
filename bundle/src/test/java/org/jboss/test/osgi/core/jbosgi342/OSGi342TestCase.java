@@ -82,8 +82,7 @@ public class OSGi342TestCase extends OSGiFrameworkTest
          PackageAdmin pa = getPackageAdmin();
          assertTrue("All bundles resolved", pa.resolveBundles(null));
 
-         System.out.println("FIXME [JBOSGI-342] Bundle resolution depends on install order");
-         //assertBundleState(Bundle.RESOLVED, eventadmin.getState());
+         assertBundleState(Bundle.RESOLVED, eventadmin.getState());
          assertBundleState(Bundle.RESOLVED, cmpd.getState());
       }
       finally
