@@ -24,9 +24,17 @@ package org.jboss.test.osgi.launch;
 // $Id$
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.InputStreamReader;
+
+import org.jboss.osgi.framework.launch.OSGiFrameworkFactory;
 import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.jboss.osgi.spi.util.ServiceLoader;
+import org.junit.Assume;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
@@ -34,6 +42,8 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 /**
  * Test OSGi System bundle access
+ * 
+ * [JBOSGI-316] Verify integrity of the jboss-osgi-framework-all.jar
  * 
  * @author thomas.diesler@jboss.com
  * @since 27-Jul-2009
@@ -66,9 +76,7 @@ public class FrameworkLaunchTestCase
    @Test
    public void testFrameworkAllLaunch() throws Exception
    {
-      System.out.println("FIXME: [JBOSGI-316] Test integrity of the jboss-osgi-framework-all.jar");
-      
-      /* Get the aggregated framework jar
+      // Get the aggregated jboss-osgi-framework-all.jar
       File[] files = new File("./target").listFiles(new FilenameFilter()
       {
          public boolean accept(File dir, String name)
@@ -76,24 +84,43 @@ public class FrameworkLaunchTestCase
             return name.startsWith("jboss-osgi-framework-") && name.endsWith("-all.jar");
          }
       });
-      assertEquals(1, files.length);
       
-      // Use a classloader that only contains the aggregated framework jar
-      URL frameworkAllURL = files[0].toURI().toURL();
-      URLClassLoader loader = new URLClassLoader(new URL[] { frameworkAllURL }, null);
-
+      // Assume that the jboss-osgi-framework-all.jar exists
+      Assume.assumeTrue(files.length == 1);
       
-      // Load the FrameworkFactory
-      Class<?> factoryClass = loader.loadClass(OSGiFrameworkFactory.class.getName());
-      Object frameworkFactory = factoryClass.newInstance();
-
-      // Construct the Framework
-      Method method = factoryClass.getMethod("newFramework", Map.class);
-      Object framework = method.invoke(frameworkFactory, new Object[] { null });
-
-      // Start the Framework
-      method = framework.getClass().getMethod("start", new Class[] {});
-      method.invoke(framework, new Object[] {});
-      */
+      // Run the java command
+      String alljar = files[0].getAbsolutePath();
+      String cmd = "java -cp " + alljar + " " + OSGiFrameworkFactory.class.getName();
+      Process proc = Runtime.getRuntime().exec(cmd);
+      int exitValue = proc.waitFor();
+      
+      // Delete/move the jboss-osgi-framework.log
+      File logfile = new File("./generated/jboss-osgi-framework.log");
+      if (logfile.exists())
+      {
+         File logdir = logfile.getParentFile();
+         File targetdir = new File("./target");
+         if (targetdir.exists())
+            logfile.renameTo(new File("./target/framework-jbosgi316.log"));
+         else
+            logfile.delete();
+         
+         logdir.delete();
+      }
+      
+      // Generate the error message and fail
+      if (exitValue != 0)
+      {
+         StringBuffer failmsg = new StringBuffer("Error running command: " + cmd + "\n");
+         BufferedReader errReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+         String line = errReader.readLine();
+         while(line != null)
+         {
+            failmsg.append("\n" + line);
+            line = errReader.readLine();
+         }
+         
+         fail(failmsg.toString());
+      }
    }
 }

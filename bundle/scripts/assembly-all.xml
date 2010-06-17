@@ -49,6 +49,9 @@
         <include>*:mcann-core:jar</include>
         <include>*:org.osgi.core:jar</include>
         <include>*:org.osgi.compendium:jar</include>
+        <include>*:scanning-plugins:jar</include>
+        <include>*:scanning-spi:jar</include>
+        <include>*:scanning-impl:jar</include>
       </includes>
       <useStrictFiltering>true</useStrictFiltering>
       <scope>provided</scope>
@@ -75,8 +78,14 @@
       <directory>src/etc/osgitck</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
-        <include>jboss-osgi-bootstrap.xml</include>
         <include>log4j.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/etc/osgitck</directory>
+      <outputDirectory>/META-INF</outputDirectory>
+      <includes>
+        <include>jboss-osgi-bootstrap.xml</include>
       </includes>
     </fileSet>
   </fileSets>

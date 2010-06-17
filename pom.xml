@@ -223,46 +223,6 @@
   <!-- Profiles -->
   <profiles>
   
-    <!-- 
-      Name: distro 
-      Desc: Build the distribution 
-    -->
-    <profile>
-      <id>distro</id>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>true</skipTests>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!--
-      Name: remote-testing 
-      Descr: Setup for remote integration testing
-    -->
-    <profile>
-      <id>remote-testing</id>
-      <activation>
-        <property>
-          <name>target.container</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>true</skipTests>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 
 </project>
