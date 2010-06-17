@@ -36,7 +36,6 @@ import org.jboss.osgi.spi.util.ConstantsHelper;
 import org.jboss.osgi.spi.util.ServiceLoader;
 import org.junit.Assume;
 import org.junit.Test;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -51,7 +50,7 @@ import org.osgi.framework.launch.FrameworkFactory;
 public class FrameworkLaunchTestCase
 {
    @Test
-   public void testFrameworkLaunch() throws BundleException
+   public void testFrameworkLaunch() throws Exception
    {
       FrameworkFactory factory = ServiceLoader.loadService(FrameworkFactory.class);
       Framework framework = factory.newFramework(null);
@@ -71,6 +70,18 @@ public class FrameworkLaunchTestCase
 
       state = ConstantsHelper.bundleState(framework.getState());
       assertEquals("ACTIVE", state);
+      
+      // This method is expected to return immediately
+      // The stop process is started by another thread
+      framework.stop();
+      
+      state = ConstantsHelper.bundleState(framework.getState());
+      assertEquals("ACTIVE", state);
+      
+      framework.waitForStop(2000);
+      
+      state = ConstantsHelper.bundleState(framework.getState());
+      assertEquals("RESOLVED", state);
    }
 
    @Test

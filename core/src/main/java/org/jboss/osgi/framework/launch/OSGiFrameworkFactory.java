@@ -68,14 +68,12 @@ public class OSGiFrameworkFactory implements FrameworkFactory
    /** The system property used to get a bootstrap path loaded from a classloader */
    public static final String BOOTSTRAP_PATH = "org.jboss.osgi.framework.bootstrap.path";
    
+   // Main entry point used by FrameworkLaunchTestCase
    public static void main(String[] args) throws Exception
    {
       OSGiFrameworkFactory factory = new OSGiFrameworkFactory();
       Framework framework = factory.newFramework(null);
       framework.start();
-      System.out.println(framework.getSymbolicName());
-      framework.stop();
-      framework.waitForStop(5000);
    }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })
