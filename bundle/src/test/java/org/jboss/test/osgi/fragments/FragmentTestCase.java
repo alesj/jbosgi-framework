@@ -34,7 +34,6 @@ import org.jboss.test.osgi.fragments.fragA.FragBeanA;
 import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.junit.After;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -57,7 +56,7 @@ public class FragmentTestCase extends OSGiFrameworkTest
       super.tearDown();
    }
 
-   @Ignore
+   @Test
    public void testHostOnly() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA
@@ -81,7 +80,7 @@ public class FragmentTestCase extends OSGiFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, hostA.getState());
    }
 
-   @Ignore
+   @Test
    public void testFragmentOnly() throws Exception
    {
       // Bundle-SymbolicName: simple-fragA
@@ -111,7 +110,7 @@ public class FragmentTestCase extends OSGiFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragA.getState());
    }
 
-   @Ignore
+   @Test
    public void testAttachedFragment() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA
@@ -191,7 +190,7 @@ public class FragmentTestCase extends OSGiFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragB.getState());
    }
 
-   @Ignore
+   @Test
    public void testFragmentExportsPackage() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA
@@ -269,7 +268,7 @@ public class FragmentTestCase extends OSGiFrameworkTest
       assertBundleState(Bundle.UNINSTALLED, fragA.getState());
    }
 
-   @Ignore
+   @Test
    public void testFragmentRequireBundle() throws Exception
    {
       // Bundle-SymbolicName: simple-hostA
