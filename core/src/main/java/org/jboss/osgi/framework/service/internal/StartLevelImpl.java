@@ -137,9 +137,12 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    {
       final OSGiBundleState obs = OSGiBundleState.assertBundleState(bundle);
       obs.setStartLevel(sl);
-
+      
       if (sl <= getStartLevel())
       {
+         if (bundle.getState() == Bundle.ACTIVE)
+            return;
+
          log.info("Start Level Service about to start: " + obs);
          executor.execute(new Runnable()
          {
@@ -164,6 +167,9 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
       }
       else
       {
+         if (bundle.getState() != Bundle.ACTIVE)
+            return;
+
          log.info("Start Level Service about to stop: " + obs);
          executor.execute(new Runnable()
          {

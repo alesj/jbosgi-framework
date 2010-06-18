@@ -260,11 +260,78 @@ public class StartLevelImplTest
       sl.setBundleStartLevel(abs, 2);
       verify(abs).start(Bundle.START_TRANSIENT);
       verify(abs).setStartLevel(2);
+      when(abs.getState()).thenReturn(Bundle.ACTIVE);
 
       verify(abs, never()).stop(anyInt());
       sl.setBundleStartLevel(abs, 8);
       verify(abs).stop(Bundle.STOP_TRANSIENT);
       verify(abs).setStartLevel(8);
+   }
+
+   @Test
+   public void testIncreaseBundleStartOnStoppedBundle() throws Exception
+   {
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      StartLevelImpl sl = new StartLevelImpl(bm);
+      sl.executor = new SameThreadTestExecutor();
+      sl.eventsPlugin = mock(FrameworkEventsPlugin.class);
+
+      OSGiBundleState bs = mock(OSGiBundleState.class);
+      sl.setBundleStartLevel(bs, 4);
+      verify(bs, never()).stop(anyInt());
+      verify(bs, never()).stop();
+   }
+
+   @Test
+   public void testIncreaseBundleStartOnStartedBundle() throws Exception
+   {
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      StartLevelImpl sl = new StartLevelImpl(bm);
+      sl.executor = new SameThreadTestExecutor();
+      sl.eventsPlugin = mock(FrameworkEventsPlugin.class);
+
+      OSGiBundleState bs = mock(OSGiBundleState.class);
+      when(bs.getState()).thenReturn(Bundle.ACTIVE);
+      sl.setBundleStartLevel(bs, 4);
+      verify(bs).stop(Bundle.STOP_TRANSIENT);
+   }
+
+   @Test
+   public void testDecreaseBundleStateOnStoppedBundle() throws Exception
+   {
+      BundleContext sbc = mock(BundleContext.class);
+
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      when(bm.getSystemContext()).thenReturn(sbc);
+      StartLevelImpl sl = new StartLevelImpl(bm);
+      sl.executor = new SameThreadTestExecutor();
+      sl.eventsPlugin = mock(FrameworkEventsPlugin.class);
+      sl.setStartLevel(7);
+
+      OSGiBundleState bs = mock(OSGiBundleState.class);
+      when(bs.getStartLevel()).thenReturn(8);
+      sl.setBundleStartLevel(bs, 7);
+      verify(bs).start(Bundle.START_TRANSIENT);
+   }
+
+   @Test
+   public void testDecreaseBundleStateOnStartedBundle() throws Exception
+   {
+      BundleContext sbc = mock(BundleContext.class);
+
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      when(bm.getSystemContext()).thenReturn(sbc);
+      StartLevelImpl sl = new StartLevelImpl(bm);
+      sl.executor = new SameThreadTestExecutor();
+      sl.eventsPlugin = mock(FrameworkEventsPlugin.class);
+      sl.setStartLevel(7);
+
+      OSGiBundleState bs = mock(OSGiBundleState.class);
+      when(bs.getState()).thenReturn(Bundle.ACTIVE);
+      when(bs.getStartLevel()).thenReturn(8);
+      sl.setBundleStartLevel(bs, 7);
+      verify(bs, never()).start(anyInt());
+      verify(bs, never()).start();
    }
 
    private static final class SameThreadTestExecutor implements Executor
