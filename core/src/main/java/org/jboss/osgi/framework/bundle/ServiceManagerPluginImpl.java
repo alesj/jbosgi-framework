@@ -471,13 +471,22 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    {
       ControllerContextPlugin plugin = getBundleManager().getPlugin(ControllerContextPlugin.class);
 
+      boolean trace = log.isTraceEnabled();
+      if (trace)
+         log.trace("getServiceReferences(" + targetBundle + "," + className + "," + filter + "," + checkAssignable + ")");
+      
       // Get all installed contexts
       KernelController controller = kernel.getController();
       List<ControllerContext> contexts = new ArrayList<ControllerContext>(controller.getContextsByState(ControllerState.INSTALLED));
 
       // No services found
       if (contexts == null || contexts.isEmpty())
+      {
+         if (trace)
+            log.trace("Cannot get service references, no contexts found");
+         
          return Collections.emptyList();
+      }
 
       if (filter == null)
          filter = NoFilter.INSTANCE;
@@ -485,6 +494,9 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       // Don't check assignabilty for the system bundle
       if (targetBundle.getBundleId() == 0)
          checkAssignable = false;
+      
+      if (trace)
+         log.trace("Considered contexts: : " + contexts.size());
       
       Iterator<ControllerContext> iterator = contexts.iterator();
       while (iterator.hasNext())
@@ -512,11 +524,17 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          AbstractBundleState sourceBundle = plugin.getBundleForContext(context);
          if (checkAssignable == true && MDRUtils.isAssignableTo(context, sourceBundle, targetBundle, classNames) == false)
          {
+            if (trace)
+               log.trace("Remove context, not assignable: " + context);
+            
             iterator.remove();
             continue;
          }
       }
 
+      if (trace)
+         log.trace("Remaining contexts: : " + contexts.size());
+      
       // Sort by the spec, should bubble up
       List<ControllerContext> sorted = new ArrayList<ControllerContext>(contexts);
       Collections.sort(sorted, ContextComparator.getInstance());
@@ -526,6 +544,9 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
       for (ControllerContext context : sorted)
       {
          ServiceReference sref = getServiceReferenceForContext(context);
+         if (trace)
+            log.trace("Found, ServiceReference: " + sref);
+         
          result.add(sref);
       }
       return result;

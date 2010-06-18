@@ -32,6 +32,12 @@
   <!-- Limit categories -->
   <!-- ================ -->
 
+  <!-- Show jboss osgi traces - ->
+  <category name="org.jboss.osgi">
+    <priority value="TRACE" />
+  </category>
+  -->
+  
   <!-- Show jboss classloading traces - ->
   <category name="org.jboss.classloading">
     <priority value="TRACE" />
@@ -40,7 +46,7 @@
     <priority value="TRACE" />
   </category>
   -->
-
+  
   <!-- ======================= -->
   <!-- Setup the Root category -->
   <!-- ======================= -->
