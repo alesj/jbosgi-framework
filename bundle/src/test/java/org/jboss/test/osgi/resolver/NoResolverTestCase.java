@@ -51,6 +51,6 @@ public class NoResolverTestCase extends AbstractResolverTest
    @Test
    public void testPreferredExporterHigherVersion() throws Exception
    {
-      System.out.println("FIXME [JBCL-133] Implement resolver preferences");
+      // [JBCL-133] Implement resolver preferences
    }
 }

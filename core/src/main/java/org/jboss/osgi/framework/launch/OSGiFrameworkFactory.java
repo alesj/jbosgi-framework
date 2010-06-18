@@ -67,6 +67,14 @@ public class OSGiFrameworkFactory implements FrameworkFactory
 
    /** The system property used to get a bootstrap path loaded from a classloader */
    public static final String BOOTSTRAP_PATH = "org.jboss.osgi.framework.bootstrap.path";
+   
+   // Main entry point used by FrameworkLaunchTestCase
+   public static void main(String[] args) throws Exception
+   {
+      OSGiFrameworkFactory factory = new OSGiFrameworkFactory();
+      Framework framework = factory.newFramework(null);
+      framework.start();
+   }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public Framework newFramework(Map configuration)
@@ -115,7 +123,7 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       {
          // Default bootstrap paths
          List<String> bootstraps = new ArrayList<String>();
-         bootstraps.add("jboss-osgi-bootstrap.xml");
+         bootstraps.add("jboss-osgi-bootstrap.xml"); // needed by standalone runtime
          bootstraps.add("META-INF/jboss-osgi-bootstrap.xml");
          bootstraps.add("META-INF/jboss-osgi-bootstrap-container.xml");
          bootstraps.add("META-INF/jboss-osgi-bootstrap-system.xml");

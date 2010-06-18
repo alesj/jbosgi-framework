@@ -80,8 +80,8 @@ public class StartLevelImplTest
       assertEquals(15, sl.getInitialBundleStartLevel());
    }
 
-   @SuppressWarnings("unchecked")
    @Test
+   @SuppressWarnings("rawtypes")
    public void testStartStopService()
    {
       ServiceRegistration sr = mock(ServiceRegistration.class);
@@ -194,7 +194,7 @@ public class StartLevelImplTest
          }
 
          @Override
-         void decreaseStartLevel(int sl)
+         public synchronized void decreaseStartLevel(int sl)
          {
             trace.append("decreased");
             super.decreaseStartLevel(sl);

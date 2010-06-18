@@ -21,7 +21,6 @@
 */
 package org.jboss.osgi.framework.deployers;
 
-import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.classloading.spi.dependency.policy.ClassLoaderPolicyModule;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.deployers.spi.DeploymentException;
@@ -57,11 +56,10 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
       super.deploy(unit, metaData);
       
       // Add the bundle to the resolver
-      Module module = unit.getAttachment(Module.class);
+      AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
       ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-      if (resolver != null && module instanceof OSGiModule)
+      if (resolver != null && bundleState != null)
       {
-         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
          resolver.addBundle(bundleState);
       }
    }
@@ -72,11 +70,10 @@ public class OSGiModuleDeployer extends VFSClassLoaderDescribeDeployer
       if (bundleManager != null)
       {
          // Remove the bundle from the resolver
-         Module module = unit.getAttachment(Module.class);
+         AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
          ResolverPlugin bundleResolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-         if (bundleResolver != null && module instanceof OSGiModule)
+         if (bundleResolver != null && bundleState != null)
          {
-            AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
             bundleResolver.removeBundle(bundleState);
          }
       }

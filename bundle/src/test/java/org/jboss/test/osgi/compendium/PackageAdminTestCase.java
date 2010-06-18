@@ -43,7 +43,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 public class PackageAdminTestCase extends AbstractFrameworkTest
 {
    @Test
-   public void testGetBudleFromClass() throws Exception
+   public void testGetBundle() throws Exception
    {
       Archive<?> assemblyA = assembleArchive("smoke-assembled", "/bundles/smoke/smoke-assembled", PA.class);
       Bundle bundleA = installBundle(assemblyA);
@@ -79,5 +79,65 @@ public class PackageAdminTestCase extends AbstractFrameworkTest
       {
          bundleA.uninstall();
       }
+   }
+
+   @Test
+   public void testGetBundles() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testGetBundleType() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testGetExportedPackage() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testGetExportedPackagesByBundle() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testGetExportedPackagesByName() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testGetFragments() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testGetHosts() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testGetRequiredBundles() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
+   }
+
+   @Test
+   public void testRefreshPackages() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-336] Implement PackageAdmin.refreshPackages(Bundle[])");
+   }
+
+   @Test
+   public void testResolveBundles() throws Exception
+   {
+      System.out.println("FIXME [JBOSGI-343] Comprehensive PackageAdmin test coverage");
    }
 }

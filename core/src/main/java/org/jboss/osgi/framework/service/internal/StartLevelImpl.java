@@ -256,7 +256,7 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
       }
    }
 
-   synchronized void decreaseStartLevel(int sl)
+   public synchronized void decreaseStartLevel(int sl)
    {
       Collection<AbstractBundleState> bundles = getBundleManager().getBundles();
       while (startLevel > sl)

@@ -30,6 +30,7 @@ import java.util.Set;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.bundle.support.y.Activator;
 import org.jboss.test.osgi.service.AbstractServiceMixTest;
+import org.junit.Assume;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -51,10 +52,7 @@ public class OSGi331TestCase extends AbstractServiceMixTest
    public void testStopBundleFromWithinStartProcess() throws Exception
    {
       System.out.println("FIXME [JBOSGI-331] Activator cannot change bundle start level");
-
-      // Exit the test until its fixed
-      if (true)
-         return;
+      Assume.assumeTrue(false);
 
       final Set<String> s = Collections.synchronizedSet(new HashSet<String>());
       BundleListener bl = new BundleListener()

@@ -19,27 +19,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.osgi.fragments.hostA;
+package org.jboss.test.osgi.bundle.support.lifecycle1;
 
-//$Id$
-
-import org.jboss.logging.Logger;
-import org.jboss.test.osgi.fragments.subA.SubBeanA;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class HostAActivator implements BundleActivator
+/**
+ * @author <a href="david@redhat.com">David Bosschaert</a>
+ */
+public class Activator implements BundleActivator
 {
-   // Provide logging
-   private static final Logger log = Logger.getLogger(HostAActivator.class);
-   
+   private static final String COMMUNICATION_STRING = "LifecycleOrdering";
+
    public void start(BundleContext context)
    {
-      SubBeanA subBean = new SubBeanA();
-      log.info(subBean.getProvider(context));
+      synchronized (COMMUNICATION_STRING)
+      {
+         String prop = System.getProperty(COMMUNICATION_STRING, "");
+         prop += "start1";
+         System.setProperty(COMMUNICATION_STRING, prop);
+      }
    }
 
    public void stop(BundleContext context)
    {
+      synchronized (COMMUNICATION_STRING)
+      {
+         String prop = System.getProperty(COMMUNICATION_STRING, "");
+         prop += "stop1";
+         System.setProperty(COMMUNICATION_STRING, prop);
+      }
    }
 }

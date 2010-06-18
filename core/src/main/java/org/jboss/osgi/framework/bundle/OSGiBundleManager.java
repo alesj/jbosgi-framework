@@ -90,6 +90,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author <a href="david@redhat.com">David Bosschaert</a>
  * @version $Revision: 1.1 $
  */
 public class OSGiBundleManager
@@ -151,6 +152,9 @@ public class OSGiBundleManager
       this.executor = executor;
    }
 
+   /**
+    * Start method called by the Kernel when this bean is started
+    */
    public void start()
    {
       // Create the system Bundle
@@ -158,6 +162,9 @@ public class OSGiBundleManager
       addBundle(systemBundle);
    }
 
+   /**
+    * Stop method called by the Kernel when this bean is stopped
+    */
    public void stop()
    {
       // nothing to do
@@ -1296,82 +1303,54 @@ public class OSGiBundleManager
     */
    public void stopFramework()
    {
-      int beforeCount = stopMonitor.get();
       Runnable stopcmd = new Runnable()
       {
          public void run()
          {
             synchronized (stopMonitor)
             {
-               // Start the stop process
-               stopMonitor.addAndGet(1);
+               // Do nothing if the framework is not active
+               if (systemBundle.getState() != Bundle.ACTIVE)
+                  return;
 
                // This Framework's state is set to Bundle.STOPPING
                systemBundle.changeState(Bundle.STOPPING);
+            }
 
-               // If this Framework implements the optional Start Level Service Specification, 
-               // then the start level of this Framework is moved to start level zero (0), as described in the Start Level Service Specification. 
+            StartLevelPlugin startLevel = getPlugin(StartLevelPlugin.class);
+            // Move to start level 0 in the current thread.
+            startLevel.decreaseStartLevel(0);
 
-               // All installed bundles must be stopped without changing each bundle's persistent autostart setting
-               for (AbstractBundleState bundleState : getBundles())
+            // Stop registered service plugins
+            List<Plugin> reverseServicePlugins = new ArrayList<Plugin>(plugins.values());
+            Collections.reverse(reverseServicePlugins);
+            for (Plugin plugin : reverseServicePlugins)
+            {
+               if (plugin instanceof ServicePlugin)
                {
-                  if (bundleState != systemBundle)
-                  {
-                     try
-                     {
-                        // [TODO] don't change the  persistent state
-                        bundleState.stop();
-                     }
-                     catch (Exception ex)
-                     {
-                        // Any exceptions that occur during bundle stopping must be wrapped in a BundleException and then 
-                        // published as a framework event of type FrameworkEvent.ERROR
-                        fireError(bundleState, "stopping bundle", ex);
-                     }
-                  }
+                  ServicePlugin servicePlugin = (ServicePlugin)plugin;
+                  servicePlugin.stopService();
                }
+            }
 
-               // Stop registered service plugins
-               List<Plugin> reverseServicePlugins = new ArrayList<Plugin>(plugins.values());
-               Collections.reverse(reverseServicePlugins);
-               for (Plugin plugin : reverseServicePlugins)
-               {
-                  if (plugin instanceof ServicePlugin)
-                  {
-                     ServicePlugin servicePlugin = (ServicePlugin)plugin;
-                     servicePlugin.stopService();
-                  }
-               }
+            // Event handling is disabled
+            FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
+            eventsPlugin.setActive(false);
 
-               // Event handling is disabled
-               FrameworkEventsPlugin eventsPlugin = getPlugin(FrameworkEventsPlugin.class);
-               eventsPlugin.setActive(false);
+            // This Framework's state is set to Bundle.RESOLVED
+            systemBundle.changeState(Bundle.RESOLVED);
 
-               // This Framework's state is set to Bundle.RESOLVED
-               systemBundle.changeState(Bundle.RESOLVED);
+            // All resources held by this Framework are released
+            systemBundle.destroyBundleContext();
 
-               // All resources held by this Framework are released
-               systemBundle.destroyBundleContext();
-
-               // Notify all threads that are waiting at waitForStop that the stop operation has completed
+            // Notify all threads that are waiting at waitForStop that the stop operation has completed
+            synchronized (stopMonitor)
+            {
                stopMonitor.notifyAll();
             }
          }
       };
       executor.execute(stopcmd);
-
-      // Wait for the stop thread
-      while (stopMonitor.get() == beforeCount)
-      {
-         try
-         {
-            Thread.sleep(100);
-         }
-         catch (InterruptedException ex)
-         {
-            // ignore
-         }
-      }
    }
 
    /**
@@ -1386,23 +1365,17 @@ public class OSGiBundleManager
     */
    public FrameworkEvent waitForStop(long timeout) throws InterruptedException
    {
-      int state = systemBundle.getState();
-
-      // Only wait when this Framework is in Bundle.STARTING, Bundle.ACTIVE, or Bundle.STOPPING state
-      if (state != Bundle.STARTING && state != Bundle.ACTIVE && state != Bundle.STOPPING)
-         return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
-
-      long timeoutTime = System.currentTimeMillis() + timeout;
       synchronized (stopMonitor)
       {
-         while (state != Bundle.RESOLVED && System.currentTimeMillis() < timeoutTime)
-         {
-            stopMonitor.wait(timeout);
-            state = systemBundle.getState();
-         }
+         // Only wait when this Framework is in Bundle.STARTING, Bundle.ACTIVE, or Bundle.STOPPING state
+         int state = systemBundle.getState();
+         if (state != Bundle.STARTING && state != Bundle.ACTIVE && state != Bundle.STOPPING)
+            return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
+         
+         stopMonitor.wait(timeout);
       }
 
-      if (System.currentTimeMillis() > timeoutTime)
+      if (systemBundle.getState() != Bundle.RESOLVED)
          return new FrameworkEvent(FrameworkEvent.WAIT_TIMEDOUT, systemBundle, null);
 
       return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);

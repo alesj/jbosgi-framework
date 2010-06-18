@@ -21,7 +21,7 @@
 */
 package org.jboss.osgi.framework.deployers;
 
-// $Id$
+import java.lang.reflect.Method;
 
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.classloading.DeploymentMetaData;
@@ -41,11 +41,33 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
  */
 public class OSGiDeploymentMetaDataDeployer extends AbstractRealDeployer
 {
+   private static Class<?> dmdClass;
+   
+   static
+   {
+      ClassLoader cl = OSGiDeploymentMetaDataDeployer.class.getClassLoader();
+      try
+      {
+         dmdClass = cl.loadClass("org.jboss.deployers.plugins.classloading.DeploymentMetaData");
+      }
+      catch (ClassNotFoundException e)
+      {
+         try
+         {
+            dmdClass = cl.loadClass("org.jboss.deployers.spi.classloading.DeploymentMetaData");
+         }
+         catch (ClassNotFoundException cnfe)
+         {
+            throw new RuntimeException("Cannot load DeploymentMetaData class", cnfe);
+         }
+      }
+   }
+   
    public OSGiDeploymentMetaDataDeployer()
    {
       setInput(OSGiMetaData.class);
-      addInput(DeploymentMetaData.class);
-      addOutput(DeploymentMetaData.class);
+      addInput(dmdClass);
+      addOutput(dmdClass);
       setStage(DeploymentStages.POST_PARSE);
       setTopLevelOnly(true);
    }
@@ -53,11 +75,28 @@ public class OSGiDeploymentMetaDataDeployer extends AbstractRealDeployer
    @Override
    protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
-      if (unit.isAttachmentPresent(DeploymentMetaData.class))
+      if (unit.isAttachmentPresent(dmdClass))
          return;
 
-      DeploymentMetaData deploymentMetaData = new DeploymentMetaData();
-      unit.addAttachment(DeploymentMetaData.class, deploymentMetaData);
-      deploymentMetaData.setLazyResolve(true);
+      // [TODO] Restore the code below when JBoss-6.0.0.M3 stops being supported
+      // http://community.jboss.org/thread/153008
+      
+      //DeploymentMetaData deploymentMetaData = new DeploymentMetaData();
+      //unit.addAttachment(DeploymentMetaData.class, deploymentMetaData);
+      //deploymentMetaData.setLazyResolve(true);
+
+      // Incompatible change in jboss-deployers
+      // http://community.jboss.org/thread/153008
+      try
+      {
+         Object deploymentMetaData = dmdClass.newInstance();
+         unit.addAttachment(dmdClass.getName(), deploymentMetaData);
+         Method setLazyResolve = dmdClass.getMethod("setLazyResolve", boolean.class);
+         setLazyResolve.invoke(deploymentMetaData, true);
+      }
+      catch (Exception e)
+      {
+         throw DeploymentException.rethrowAsDeploymentException("Error handling depoyment metadata", e);
+      }
    }
 }
