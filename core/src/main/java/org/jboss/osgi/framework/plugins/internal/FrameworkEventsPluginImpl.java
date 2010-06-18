@@ -64,7 +64,6 @@ import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.service.EventHook;
 import org.osgi.framework.hooks.service.ListenerHook;
 import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
-import org.osgi.service.event.EventAdmin;
 
 /**
  * A plugin that manages {@link FrameworkListener}, {@link BundleListener}, {@link ServiceListener} and their 
@@ -560,9 +559,6 @@ public class FrameworkEventsPluginImpl extends AbstractPlugin implements Framewo
       else
          log.debug("Service " + typeName + ": " + service);
       
-      if (type == ServiceEvent.UNREGISTERING && service.toString().contains(EventAdmin.class.getName()))
-         log.info("UNREGISTERING EventAdmin", new RuntimeException());
-
       // Do nothing if the Framework is not active
       if (getBundleManager().isFrameworkActive() == false)
          return;
