@@ -19,33 +19,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.plugins;
+package org.jboss.test.osgi.bundle.support.lifecycle2;
 
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
- * The StartLevel service plugin
- * 
- * @author thomas.diesler@jboss.com
  * @author <a href="david@redhat.com">David Bosschaert</a>
- * @since 07-Sep-2009
  */
-public interface StartLevelPlugin extends ServicePlugin, StartLevel
+public class Activator implements BundleActivator
 {
+   private static final String COMMUNICATION_STRING = "LifecycleOrdering";
 
-   /**
-    * Increase the start level to the specified level. 
-    * This method moves to the specified start level in the current thread and
-    * returns when the desired start level has been reached.
-    * @param level the target start level.
-    */
-   void increaseStartLevel(int level);
+   public void start(BundleContext context)
+   {
+      synchronized (COMMUNICATION_STRING)
+      {
+         String prop = System.getProperty(COMMUNICATION_STRING, "");
+         prop += "start2";
+         System.setProperty(COMMUNICATION_STRING, prop);
+      }
+   }
 
-   /**
-    * Decrease the start level to the specified level.
-    * This method moves to the specified start level in the current thread and
-    * returns when the desired start level has been reached.
-    * @param level the target start level.
-    */
-   void decreaseStartLevel(int level);
+   public void stop(BundleContext context)
+   {
+      synchronized (COMMUNICATION_STRING)
+      {
+         String prop = System.getProperty(COMMUNICATION_STRING, "");
+         prop += "stop2";
+         System.setProperty(COMMUNICATION_STRING, prop);
+      }
+   }
 }

@@ -194,7 +194,7 @@ public class StartLevelImplTest
          }
 
          @Override
-         void decreaseStartLevel(int sl)
+         public synchronized void decreaseStartLevel(int sl)
          {
             trace.append("decreased");
             super.decreaseStartLevel(sl);

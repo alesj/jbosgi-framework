@@ -90,6 +90,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author <a href="david@redhat.com">David Bosschaert</a>
  * @version $Revision: 1.1 $
  */
 public class OSGiBundleManager
@@ -1316,27 +1317,9 @@ public class OSGiBundleManager
                systemBundle.changeState(Bundle.STOPPING);
             }
 
-            // If this Framework implements the optional Start Level Service Specification, 
-            // then the start level of this Framework is moved to start level zero (0), as described in the Start Level Service Specification. 
-
-            // All installed bundles must be stopped without changing each bundle's persistent autostart setting
-            for (AbstractBundleState bundleState : getBundles())
-            {
-               if (bundleState != systemBundle)
-               {
-                  try
-                  {
-                     // [TODO] don't change the  persistent state
-                     bundleState.stop();
-                  }
-                  catch (Exception ex)
-                  {
-                     // Any exceptions that occur during bundle stopping must be wrapped in a BundleException and then 
-                     // published as a framework event of type FrameworkEvent.ERROR
-                     fireError(bundleState, "stopping bundle", ex);
-                  }
-               }
-            }
+            StartLevelPlugin startLevel = getPlugin(StartLevelPlugin.class);
+            // Move to start level 0 in the current thread.
+            startLevel.decreaseStartLevel(0);
 
             // Stop registered service plugins
             List<Plugin> reverseServicePlugins = new ArrayList<Plugin>(plugins.values());
