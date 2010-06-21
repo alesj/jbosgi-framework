@@ -24,6 +24,7 @@ package org.jboss.osgi.framework.plugins;
 import java.util.Dictionary;
 import java.util.Set;
 
+import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiServiceState;
 import org.osgi.framework.Bundle;
@@ -143,4 +144,27 @@ public interface ServiceManagerPlugin extends Plugin
     * @param bundleState The bundle that registered the services.
     */
    void unregisterServices(AbstractBundleState bundleState);
+
+   /**
+    * Get bundle for user tracker.
+    *
+    * @param user the user tracker object
+    * @return bundle state
+    */
+   AbstractBundleState getBundleForUser(Object user);
+
+   /**
+    * Get the bundle that provides the given controller context.
+    * 
+    * [TODO ServiceMix] describe the intension, not the implementation
+    * 
+    * If context corresponds to an OSGi service, return the bundle that 
+    * registered the service.
+    * 
+    * If the context was provided by a non OSGi deployment, dynamically create an OSGi bundle
+    * and register it with the {@link OSGiBundleManager}
+    * 
+    * If the context was not provided by a deployment, return the system bundle.
+    */
+   AbstractBundleState getBundleForContext(ControllerContext context);
 }

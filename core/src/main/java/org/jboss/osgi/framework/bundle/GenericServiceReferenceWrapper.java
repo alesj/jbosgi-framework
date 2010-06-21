@@ -31,7 +31,7 @@ import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.tracker.ContextTracker;
 import org.jboss.dependency.spi.tracker.ContextTracking;
 import org.jboss.kernel.plugins.dependency.AbstractKernelControllerContext;
-import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
+import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.util.KernelUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -128,7 +128,7 @@ class GenericServiceReferenceWrapper extends ControllerContextHandle implements 
             return null;
 
          OSGiBundleManager manager = bundleState.getBundleManager();
-         ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+         ServiceManagerPlugin plugin = manager.getPlugin(ServiceManagerPlugin.class);
 
          Set<Object> users = ct.getUsers(context);
          Set<Bundle> bundles = new HashSet<Bundle>();

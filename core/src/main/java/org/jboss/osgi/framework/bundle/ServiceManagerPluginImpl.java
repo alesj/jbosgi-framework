@@ -54,7 +54,6 @@ import org.jboss.metadata.spi.retrieval.MetaDataRetrieval;
 import org.jboss.metadata.spi.retrieval.MetaDataRetrievalFactory;
 import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.ScopeKey;
-import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
@@ -173,16 +172,12 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
    @Override
    public Set<Bundle> getUsingBundles(OSGiServiceState serviceState)
    {
-      AbstractBundleState bundleState = serviceState.getBundleState();
-      OSGiBundleManager manager = bundleState.getBundleManager();
-      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-
       ContextTracker contextTracker = serviceState.getContextTracker();
       Set<Object> users = contextTracker.getUsers(serviceState);
       Set<Bundle> bundles = new HashSet<Bundle>();
       for (Object user : users)
       {
-         AbstractBundleState abs = plugin.getBundleForUser(user);
+         AbstractBundleState abs = getBundleForUser(user);
          bundles.add(abs.getBundleInternal());
       }
       return bundles;
@@ -346,7 +341,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    private void internalUnregister(OSGiServiceState serviceState)
    {
-      AbstractBundleState bundleState = serviceState.getBundleState();
       ContextTracker ct = serviceState.getContextTracker();
       if (ct != null) // nobody used us?
       {
@@ -354,12 +348,9 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          if (users.isEmpty() == false)
          {
             Set<AbstractBundleState> used = new HashSet<AbstractBundleState>();
-            OSGiBundleManager manager = bundleState.getBundleManager();
-            ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-
             for (Object user : users)
             {
-               AbstractBundleState using = plugin.getBundleForUser(user);
+               AbstractBundleState using = getBundleForUser(user);
                if (used.add(using) == true)
                {
                   // ungetService will cleanup service cache
@@ -469,8 +460,6 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
 
    private List<ServiceReference> getServiceReferencesInternal(AbstractBundleState targetBundle, String className, Filter filter, boolean checkAssignable)
    {
-      ControllerContextPlugin plugin = getBundleManager().getPlugin(ControllerContextPlugin.class);
-
       boolean trace = log.isTraceEnabled();
       if (trace)
          log.trace("getServiceReferences(" + targetBundle + "," + className + "," + filter + "," + checkAssignable + ")");
@@ -521,7 +510,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          }
 
          // Check assignability
-         AbstractBundleState sourceBundle = plugin.getBundleForContext(context);
+         AbstractBundleState sourceBundle = getBundleForContext(context);
          if (checkAssignable == true && MDRUtils.isAssignableTo(context, sourceBundle, targetBundle, classNames) == false)
          {
             if (trace)
@@ -569,9 +558,7 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
          if (sref == null)
          {
             // For ServiceMix behaviour we can generically wrap the context
-            OSGiBundleManager manager = getBundleManager();
-            ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
-            AbstractBundleState bundleState = plugin.getBundleForContext(context);
+            AbstractBundleState bundleState = getBundleForContext(context);
             sref = new GenericServiceReferenceWrapper(bundleState, (AbstractKernelControllerContext)context);
             srefCache.put(context, sref);
          }
@@ -632,5 +619,36 @@ public class ServiceManagerPluginImpl extends AbstractPlugin implements ServiceM
             }
          }
       }
+   }
+
+   @Override
+   public AbstractBundleState getBundleForUser(Object user)
+   {
+      if (user instanceof AbstractBundleState)
+         return (AbstractBundleState)user;
+      else if (user instanceof ControllerContext)
+         return getBundleForContext((ControllerContext)user);
+      else
+         throw new IllegalArgumentException("Unknown tracker type: " + user);
+   }
+
+   @Override
+   public AbstractBundleState getBundleForContext(ControllerContext context)
+   {
+      if (context instanceof OSGiServiceState)
+      {
+         OSGiServiceState service = (OSGiServiceState)context;
+         return service.getBundleState();
+      }
+
+      OSGiBundleManager bundleManager = getBundleManager();
+      DeploymentUnit unit = registry.getDeployment(context);
+      if (unit != null)
+      {
+         AbstractBundleState bundleState = (AbstractBundleState)unit.getAttachment(AbstractBundleState.class);
+         return bundleState;
+      }
+
+      return bundleManager.getSystemBundle();
    }
 }

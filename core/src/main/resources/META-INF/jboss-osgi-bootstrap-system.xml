@@ -53,12 +53,6 @@
   ********************************
   -->
   
-  <bean name="OSGiControllerContextPlugin" class="org.jboss.osgi.framework.bundle.ControllerContextPluginImpl">
-    <constructor>
-      <parameter><inject bean="OSGiBundleManager" /></parameter>
-      <parameter><inject bean="OSGiDeploymentRegistry" /></parameter>
-    </constructor>
-  </bean>
   <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
@@ -137,7 +131,7 @@
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="OSGiBundleStateInstallDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleStateInstallDeployer"/>
-  <bean name="OSGiBundleStructure" class="org.jboss.osgi.deployer.BundleStructureDeployer" />
+  <bean name="OSGiBundleStructureDeployer" class="org.jboss.osgi.framework.deployers.OSGiBundleStructureDeployer" />
   <bean name="OSGiContextTrackerDeployer" class="org.jboss.osgi.framework.deployers.OSGiContextTrackerDeployer" />
   <bean name="OSGiDeploymentMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiDeploymentMetaDataDeployer" />
   <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />

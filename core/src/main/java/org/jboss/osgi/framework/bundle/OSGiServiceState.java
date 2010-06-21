@@ -47,7 +47,6 @@ import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.Scope;
 import org.jboss.metadata.spi.scope.ScopeKey;
 import org.jboss.osgi.framework.metadata.CaseInsensitiveDictionary;
-import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
 import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.spi.util.BundleClassLoader;
@@ -274,7 +273,7 @@ public class OSGiServiceState extends OSGiControllerContext implements ServiceRe
    protected Object getActualUser(ControllerContext context)
    {
       OSGiBundleManager manager = bundleState.getBundleManager();
-      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      ServiceManagerPlugin plugin = manager.getPlugin(ServiceManagerPlugin.class);
       return plugin.getBundleForContext(context);
    }
 

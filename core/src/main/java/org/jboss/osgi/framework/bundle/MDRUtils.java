@@ -33,7 +33,7 @@ import org.jboss.logging.Logger;
 import org.jboss.metadata.spi.MetaData;
 import org.jboss.metadata.spi.scope.CommonLevels;
 import org.jboss.metadata.spi.scope.ScopeLevel;
-import org.jboss.osgi.framework.plugins.ControllerContextPlugin;
+import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.util.KernelUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -322,7 +322,7 @@ public class MDRUtils
          throw new IllegalArgumentException("Null bundle state");
 
       OSGiBundleManager manager = sourceBundle.getBundleManager();
-      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      ServiceManagerPlugin plugin = manager.getPlugin(ServiceManagerPlugin.class);
       AbstractBundleState targetBundle = plugin.getBundleForContext(context);
       return isAssignableTo(context, sourceBundle, targetBundle, className);
    }
@@ -342,7 +342,7 @@ public class MDRUtils
          throw new IllegalArgumentException("Null bundle state");
 
       OSGiBundleManager manager = sourceBundle.getBundleManager();
-      ControllerContextPlugin plugin = manager.getPlugin(ControllerContextPlugin.class);
+      ServiceManagerPlugin plugin = manager.getPlugin(ServiceManagerPlugin.class);
 
       // context's bundle
       AbstractBundleState targetBundle = plugin.getBundleForContext(context);
