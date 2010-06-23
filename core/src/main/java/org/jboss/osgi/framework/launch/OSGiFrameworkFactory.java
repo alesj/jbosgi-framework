@@ -29,7 +29,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +62,10 @@ public class OSGiFrameworkFactory implements FrameworkFactory
    final Logger log = Logger.getLogger(OSGiFrameworkFactory.class);
    
    /** The system property used to get a bootstrap url */
-   public static final String BOOTSTRAP_URL = "org.jboss.osgi.framework.bootstrap.url";
+   public static final String BOOTSTRAP_URLS = "org.jboss.osgi.framework.bootstrap.urls";
 
    /** The system property used to get a bootstrap path loaded from a classloader */
-   public static final String BOOTSTRAP_PATH = "org.jboss.osgi.framework.bootstrap.path";
+   public static final String BOOTSTRAP_PATHS = "org.jboss.osgi.framework.bootstrap.paths";
    
    // Main entry point used by FrameworkLaunchTestCase
    public static void main(String[] args) throws Exception
@@ -91,31 +90,40 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       List<URL> urls = null;
 
       // Specified URL property
-      String bootstrapURL = getProperty(BOOTSTRAP_URL);
-      if (bootstrapURL != null)
+      String bootstrapURLs = getProperty(BOOTSTRAP_URLS);
+      if (bootstrapURLs != null)
       {
-         log.debug("System defined bootstrap url: " + bootstrapURL);
-         try
+         log.debug("System defined bootstrap url(s): " + bootstrapURLs);
+
+         urls = new ArrayList<URL>();
+         for (String url : bootstrapURLs.split(" "))
          {
-            urls = Collections.singletonList(new URL(bootstrapURL));
-         }
-         catch (MalformedURLException e)
-         {
-            throw new RuntimeException("Invalid system property " + BOOTSTRAP_URL, e);
+            try
+            {
+               urls.add(new URL(url));
+            }
+            catch (MalformedURLException e)
+            {
+               throw new RuntimeException("Invalid system property " + BOOTSTRAP_URLS, e);
+            }
          }
       }
 
       // Specified resource path
-      String bootstrapPath = getProperty(BOOTSTRAP_PATH);
-      if (urls == null && bootstrapPath != null)
+      String bootstrapPaths = getProperty(BOOTSTRAP_PATHS);
+      if (urls == null && bootstrapPaths != null)
       {
-         log.debug("System defined bootstrap path: " + bootstrapPath);
-         
-         URL url = getResourceURL(bootstrapPath);
-         if (url == null)
-            throw new IllegalStateException("Cannot find bootstrap: " + bootstrapPath);
+         log.debug("System defined bootstrap path(s): " + bootstrapPaths);
 
-         urls = Collections.singletonList(url);
+         urls = new ArrayList<URL>();
+         for (String path : bootstrapPaths.split(" "))
+         {
+            URL url = getResourceURL(path);
+            if (url != null)
+               urls.add(url);
+            else
+               throw new IllegalStateException("Cannot find bootstrap: " + path);
+         }
       }
 
       // Discover the URL if not given explicitly
@@ -123,10 +131,10 @@ public class OSGiFrameworkFactory implements FrameworkFactory
       {
          // Default bootstrap paths
          List<String> bootstraps = new ArrayList<String>();
-         bootstraps.add("jboss-osgi-bootstrap.xml"); // needed by standalone runtime
-         bootstraps.add("META-INF/jboss-osgi-bootstrap.xml");
-         bootstraps.add("META-INF/jboss-osgi-bootstrap-container.xml");
          bootstraps.add("META-INF/jboss-osgi-bootstrap-system.xml");
+         bootstraps.add("META-INF/jboss-osgi-bootstrap-container.xml");
+         bootstraps.add("META-INF/jboss-osgi-bootstrap.xml");
+         bootstraps.add("jboss-osgi-bootstrap.xml"); // needed by standalone runtime
 
          urls = new ArrayList<URL>();
          for (String path : bootstraps)

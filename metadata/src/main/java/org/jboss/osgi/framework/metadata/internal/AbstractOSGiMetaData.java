@@ -81,6 +81,7 @@ import org.osgi.framework.Version;
 public abstract class AbstractOSGiMetaData implements OSGiMetaData
 {
    private static final long serialVersionUID = 1L;
+   private static final int START_LEVEL_NOT_DEFINED = -1;
 
    static
    {
@@ -94,6 +95,8 @@ public abstract class AbstractOSGiMetaData implements OSGiMetaData
    protected transient Map<String, Object> cachedAttributes = new ConcurrentHashMap<String, Object>();
    // The parameters on the Bundle-SymbolicName
    protected transient ParameterizedAttribute parameters;
+   // The initial bundle start level if it has been defined for this bundle. 
+   protected transient int initialStartLevel = START_LEVEL_NOT_DEFINED;
 
    protected abstract Map<Name, String> getMainAttributes();
    
@@ -268,5 +271,15 @@ public abstract class AbstractOSGiMetaData implements OSGiMetaData
             cachedAttributes.put(key, value);
       }
       return value;
+   }
+
+   public int getInitialStartLevel()
+   {
+      return initialStartLevel;
+   }
+
+   public void setInitialStartLevel(int sl)
+   {
+      initialStartLevel = sl;
    }
 }

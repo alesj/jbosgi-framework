@@ -24,6 +24,10 @@ package org.jboss.osgi.framework.service.internal;
 //$Id$
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -40,6 +44,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Version;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
@@ -57,6 +62,7 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    Executor executor = Executors.newSingleThreadExecutor();
 
    private int initialStartLevel = 1;
+   private Map<String, Integer> initialBundleStartLevels = Collections.emptyMap();
    private ServiceRegistration registration;
    private int startLevel = 0; // Guarded by this
 
@@ -77,6 +83,29 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
             log.error("Could not set beginning start level to: '" + beginning + "'");
          }
       }
+   }
+
+   public void setBundleMetaData(List<? extends StartLevelBeanEntry> bundles)
+   {
+      if (bundles == null)
+         return;
+
+      Map<String, Integer> m = new HashMap<String, Integer>();
+      for (StartLevelBeanEntry bundle : bundles)
+      {
+         Version v = Version.parseVersion(bundle.getVersion());
+
+         String key;
+         if (Version.emptyVersion.equals(v))
+            key=bundle.getSymbolicName();
+         else
+            key = bundle.getSymbolicName() + ":" + bundle.getVersion();
+
+         int sl = bundle.getStartLevel();
+         if (sl != INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED)
+            m.put(key, sl);
+      }
+      initialBundleStartLevels = Collections.unmodifiableMap(m);
    }
 
    @Override
@@ -111,6 +140,22 @@ public class StartLevelImpl extends AbstractServicePlugin implements StartLevelP
    public int getInitialBundleStartLevel()
    {
       return initialStartLevel;
+   }
+
+   @Override
+   public int getInitialBundleStartLevel(String bsn, Version version)
+   {
+      String key = bsn + ":" + version;
+      Integer initial = initialBundleStartLevels.get(key);
+      if (initial == null)
+      {
+         // Get the bundle start level that applies to all bundles given a bsn
+         initial = initialBundleStartLevels.get(bsn);
+         if (initial == null)
+            return INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED;
+      }
+
+      return initial;
    }
 
    @Override

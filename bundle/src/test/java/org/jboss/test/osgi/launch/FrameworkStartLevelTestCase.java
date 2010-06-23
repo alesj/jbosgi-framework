@@ -24,10 +24,14 @@ package org.jboss.test.osgi.launch;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import org.jboss.osgi.testing.OSGiFrameworkTest;
+import org.jboss.osgi.framework.launch.OSGiFrameworkFactory;
+import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -39,47 +43,84 @@ import org.osgi.service.startlevel.StartLevel;
 /**
  * @author <a href="david@redhat.com">David Bosschaert</a>
  */
-public class FrameworkStartLevelTestCase extends OSGiFrameworkTest
+public class FrameworkStartLevelTestCase extends AbstractFrameworkTest
 {
+   private static final String COMMUNICATION_STRING = "LifecycleOrdering";
+   private Properties savedProperties;
+
+   @Before
+   public void setUp() throws Exception
+   {
+      StringBuilder bs = new StringBuilder();
+      bs.append("META-INF/jboss-osgi-bootstrap.xml");
+      bs.append(' ');
+      bs.append("META-INF/jboss-osgi-bootstrap-container.xml");
+      bs.append(' ');
+      bs.append("META-INF/jboss-osgi-bootstrap-system.xml");
+      bs.append(' ');
+      bs.append("bootstrap/startlevel/test-startlevel-0.xml");
+
+      savedProperties = (Properties)System.getProperties().clone();
+      System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_PATHS, bs.toString());
+
+      createFramework();
+      getFramework().start();
+   }
+
+   @After
+   public void tearDown() throws Exception
+   {
+      shutdownFramework();
+
+      System.setProperties(savedProperties);
+   }
+
    @Test
    public void testFrameworkShutdown() throws Exception
    {
-      // We expect 2 started events...
-      final CountDownLatch latch = new CountDownLatch(2);
-      BundleListener bl = new BundleListener()
+      try
       {
-         @Override
-         public void bundleChanged(BundleEvent event)
+         // We expect 2 started events...
+         final CountDownLatch latch = new CountDownLatch(2);
+         BundleListener bl = new BundleListener()
          {
-            if (event.getType() == BundleEvent.STARTED)
-               latch.countDown();
-         }
-      };
-      BundleContext ctx = getFramework().getBundleContext();
-      ctx.addBundleListener(bl);
+            @Override
+            public void bundleChanged(BundleEvent event)
+            {
+               if (event.getType() == BundleEvent.STARTED)
+                  latch.countDown();
+            }
+         };
+         BundleContext ctx = getFramework().getBundleContext();
+         ctx.addBundleListener(bl);
 
-      ServiceReference sref = ctx.getServiceReference(StartLevel.class.getName());
-      StartLevel sls = (StartLevel)ctx.getService(sref);
+         ServiceReference sref = ctx.getServiceReference(StartLevel.class.getName());
+         StartLevel sls = (StartLevel)ctx.getService(sref);
 
-      Archive<?> assA = assembleArchive("lifecycle-order1", "/bundles/lifecycle/order01",
-            org.jboss.test.osgi.bundle.support.lifecycle1.Activator.class);
-      Bundle ba = installBundle(assA);
-      sls.setBundleStartLevel(ba, 3);
+         Archive<?> assA = assembleArchive("lifecycle-order1", "/bundles/lifecycle/order01",
+               org.jboss.test.osgi.bundle.support.lifecycle1.Activator.class);
+         Bundle ba = installBundle(assA);
+         sls.setBundleStartLevel(ba, 3);
 
-      Archive<?> assB = assembleArchive("lifecycle-order2", "/bundles/lifecycle/order02",
-            org.jboss.test.osgi.bundle.support.lifecycle2.Activator.class);
-      Bundle bb = installBundle(assB);
-      sls.setBundleStartLevel(bb, 2);
+         Archive<?> assB = assembleArchive("lifecycle-order2", "/bundles/lifecycle/order02",
+               org.jboss.test.osgi.bundle.support.lifecycle2.Activator.class);
+         Bundle bb = installBundle(assB);
+         sls.setBundleStartLevel(bb, 2);
 
-      ba.start();
-      bb.start();
-      sls.setStartLevel(5);
+         ba.start();
+         bb.start();
+         sls.setStartLevel(5);
 
-      latch.await(10, SECONDS);
-      assertEquals("start2start1", System.getProperty("LifecycleOrdering"));
+         latch.await(10, SECONDS);
+         assertEquals("start2start1", System.getProperty(COMMUNICATION_STRING));
 
-      getFramework().stop();
-      getFramework().waitForStop(10000);
-      assertEquals("start2start1stop1stop2", System.getProperty("LifecycleOrdering"));
+         getFramework().stop();
+         getFramework().waitForStop(10000);
+         assertEquals("start2start1stop1stop2", System.getProperty(COMMUNICATION_STRING));
+      }
+      finally
+      {
+         System.setProperty(COMMUNICATION_STRING, "");
+      }
    }
 }

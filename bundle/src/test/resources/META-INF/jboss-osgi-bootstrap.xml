@@ -33,20 +33,5 @@
     </constructor>
   </bean>
   
-  <bean name="OSGiKernelDeploymentDeployer" class="org.jboss.osgi.framework.deployers.OSGiKernelDeploymentDeployer" />
-  
-  <bean name="OSGiSingletonSchemaResolverFactory">
-    <constructor factoryClass="org.jboss.xb.binding.sunday.unmarshalling.SingletonSchemaResolverFactory" factoryMethod="getInstance" />
-  </bean>
-  <bean name="Pojo2OSGiSchema" class="org.jboss.xb.binding.resolver.MutableSchemaResolver">
-    <constructor factoryMethod="getSchemaBindingResolver"><factory bean="OSGiSingletonSchemaResolverFactory" /></constructor>
-    <install method="mapURIToClass">
-      <parameter>urn:jboss:pojo2osgi:1.0</parameter>
-      <parameter>org.jboss.osgi.framework.metadata.internal.OSGiPojoMetaData</parameter>
-    </install>
-    <uninstall method="removeURIToClassMapping">
-      <parameter>urn:jboss:pojo2osgi:1.0</parameter>
-    </uninstall>
-  </bean>
-  
+  <bean name="OSGiKernelDeploymentDeployer" class="org.jboss.osgi.framework.deployers.OSGiKernelDeploymentDeployer" />  
 </deployment>

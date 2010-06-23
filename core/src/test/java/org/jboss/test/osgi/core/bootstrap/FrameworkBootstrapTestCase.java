@@ -44,13 +44,13 @@ public class FrameworkBootstrapTestCase extends OSGiTest
       try
       {
          String bootURL = getResourceURL("bootstrap/test-bootstrap-one.xml").toString();
-         System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_URL, bootURL);
+         System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_URLS, bootURL);
          Framework framework = new OSGiFrameworkFactory().newFramework(null);
          assertNotNull("Framework not null", framework);
 
          try
          {
-            System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_URL, "file:///does-not-exist");
+            System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_URLS, "file:///does-not-exist");
             new OSGiFrameworkFactory().newFramework(null);
             fail("IllegalStateException expected");
          }
@@ -61,7 +61,7 @@ public class FrameworkBootstrapTestCase extends OSGiTest
       }
       finally
       {
-         System.clearProperty(OSGiFrameworkFactory.BOOTSTRAP_URL);
+         System.clearProperty(OSGiFrameworkFactory.BOOTSTRAP_URLS);
       }
    }
 
@@ -70,13 +70,13 @@ public class FrameworkBootstrapTestCase extends OSGiTest
    {
       try
       {
-         System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_PATH, "bootstrap/META-INF/test-bootstrap-two.xml");
+         System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_PATHS, "bootstrap/META-INF/test-bootstrap-two.xml");
          Framework framework = new OSGiFrameworkFactory().newFramework(null);
          assertNotNull("Framework not null", framework);
          
          try
          {
-            System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_PATH, "does-not-exist");
+            System.setProperty(OSGiFrameworkFactory.BOOTSTRAP_PATHS, "does-not-exist");
             new OSGiFrameworkFactory().newFramework(null);
             fail("IllegalStateException expected");
          }
@@ -87,7 +87,7 @@ public class FrameworkBootstrapTestCase extends OSGiTest
       }
       finally
       {
-         System.clearProperty(OSGiFrameworkFactory.BOOTSTRAP_PATH);
+         System.clearProperty(OSGiFrameworkFactory.BOOTSTRAP_PATHS);
       }
    }
 }

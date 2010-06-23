@@ -67,7 +67,7 @@ public class OSGiBundleState extends DeployedBundleState
    private boolean persistentlyStarted = false; // TODO needs to be persisted
 
    /** The bundle start level */
-   private int startLevel = 1; // TODO needs to be persisted
+   private int startLevel = StartLevelPlugin.INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED; // TODO needs to be persisted
 
    /**
     * Create a new BundleState.
@@ -75,11 +75,21 @@ public class OSGiBundleState extends DeployedBundleState
    public OSGiBundleState(OSGiBundleManager bundleManager, DeploymentUnit unit)
    {
       super(bundleManager, unit);
+   }
 
-      StartLevelPlugin slp = bundleManager.getOptionalPlugin(StartLevelPlugin.class);
-      if (slp != null)
+   private void initializeStartLevel()
+   {
+      if (startLevel == StartLevelPlugin.INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED)
       {
-         startLevel = slp.getInitialBundleStartLevel();
+         int sl = getOSGiMetaData().getInitialStartLevel();
+         if (sl != StartLevelPlugin.INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED)
+            startLevel = sl;
+         else
+         {
+            StartLevelPlugin slp = getBundleManager().getOptionalPlugin(StartLevelPlugin.class);
+            if (slp != null)
+               startLevel = slp.getInitialBundleStartLevel();
+         }
       }
    }
 
@@ -249,15 +259,16 @@ public class OSGiBundleState extends DeployedBundleState
    {
       checkInstalled();
       checkAdminPermission(AdminPermission.EXECUTE);
+      initializeStartLevel();
       if ((options & Bundle.START_TRANSIENT) == 0)
       {
          setPersistentlyStarted(true);
       }
 
-      StartLevelPlugin sls = getBundleManager().getPlugin(StartLevelPlugin.class);
-      if (sls.getStartLevel() >= getStartLevel() && isPersistentlyStarted())
-      {
-         getBundleManager().startBundle(this);
+      if (isPersistentlyStarted()) {
+         StartLevelPlugin sls = getBundleManager().getOptionalPlugin(StartLevelPlugin.class);
+         if (sls == null || sls.getStartLevel() >= getStartLevel())
+            getBundleManager().startBundle(this);
       }
    }
 

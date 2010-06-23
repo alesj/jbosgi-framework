@@ -1274,9 +1274,10 @@ public class OSGiBundleManager
          resolver.resolve(Collections.singletonList(systemBundle.getBundleInternal()));
       }
 
-      StartLevelPlugin startLevel = getPlugin(StartLevelPlugin.class);
-      // Call sls.increaseStartLevel() which is synchronous because we need to wait until the start level is reached
-      startLevel.increaseStartLevel(startLevel.getInitialBundleStartLevel());
+      StartLevelPlugin startLevel = getOptionalPlugin(StartLevelPlugin.class);
+      if (startLevel != null)
+         // Call sls.increaseStartLevel() which is synchronous because we need to wait until the start level is reached
+         startLevel.increaseStartLevel(startLevel.getInitialBundleStartLevel());
 
       // This Framework's state is set to ACTIVE
       systemBundle.changeState(Bundle.ACTIVE);
@@ -1317,9 +1318,32 @@ public class OSGiBundleManager
                systemBundle.changeState(Bundle.STOPPING);
             }
 
-            StartLevelPlugin startLevel = getPlugin(StartLevelPlugin.class);
-            // Move to start level 0 in the current thread.
-            startLevel.decreaseStartLevel(0);
+            StartLevelPlugin startLevel = getOptionalPlugin(StartLevelPlugin.class);
+            if (startLevel != null)
+               // Move to start level 0 in the current thread.
+               startLevel.decreaseStartLevel(0);
+            else
+            {
+               // No Start Level Service available, stop all bundles individually...
+               // All installed bundles must be stopped without changing each bundle's persistent autostart setting
+               for (AbstractBundleState bundleState : getBundles())
+               {
+                  if (bundleState != systemBundle)
+                  {
+                     try
+                     {
+                        // [TODO] don't change the  persistent state
+                        bundleState.stop();
+                     }
+                     catch (Exception ex)
+                     {
+                        // Any exceptions that occur during bundle stopping must be wrapped in a BundleException and then 
+                        // published as a framework event of type FrameworkEvent.ERROR
+                        fireError(bundleState, "stopping bundle", ex);
+                     }
+                  }
+               }
+            }
 
             // Stop registered service plugins
             List<Plugin> reverseServicePlugins = new ArrayList<Plugin>(plugins.values());

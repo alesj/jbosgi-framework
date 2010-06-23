@@ -95,11 +95,6 @@
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
     <demand state="PreInstall">MDRService</demand>
   </bean>
-  <bean name="StartLevelService" class="org.jboss.osgi.framework.service.internal.StartLevelImpl">
-    <related-class name="org.osgi.service.startlevel.StartLevel">OSGi</related-class>
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
-    <demand state="PreInstall">MDRService</demand>
-  </bean>
   
   <!--
   ********************************
@@ -137,6 +132,9 @@
   <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
   <bean name="OSGiManifestMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestMetaDataDeployer" />
   <bean name="OSGiNativeCodeMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiNativeCodeMetaDataDeployer" />
+  <bean name="OSGiStartLevelMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiStartLevelMetaDataDeployer">
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  </bean>
   
   <!--
   ********************************
@@ -170,4 +168,34 @@
   </bean>
   <bean name="OSGiFragmentAttachmentDeployer" class="org.jboss.osgi.framework.deployers.OSGiFragmentAttachmentDeployer"/>
    
+  <!--
+  ********************************
+  *                              *  
+  *  OSGi Custom Bean Schemas    *
+  *                              *
+  ********************************
+  -->
+  <bean name="OSGiSingletonSchemaResolverFactory">
+    <constructor factoryClass="org.jboss.xb.binding.sunday.unmarshalling.SingletonSchemaResolverFactory" factoryMethod="getInstance" />
+  </bean>
+  <bean name="Pojo2OSGiSchema" class="org.jboss.xb.binding.resolver.MutableSchemaResolver">
+    <constructor factoryMethod="getSchemaBindingResolver"><factory bean="OSGiSingletonSchemaResolverFactory" /></constructor>
+    <install method="mapURIToClass">
+      <parameter>urn:jboss:pojo2osgi:1.0</parameter>
+      <parameter>org.jboss.osgi.framework.metadata.internal.OSGiPojoMetaData</parameter>
+    </install>
+    <uninstall method="removeURIToClassMapping">
+      <parameter>urn:jboss:pojo2osgi:1.0</parameter>
+    </uninstall>
+  </bean>  
+  <bean name="StartLevelSchema" class="org.jboss.xb.binding.resolver.MutableSchemaResolver">
+    <constructor factoryMethod="getSchemaBindingResolver"><factory bean="OSGiSingletonSchemaResolverFactory" /></constructor>
+    <install method="mapURIToClass">
+      <parameter>urn:jboss:startlevel:1.0</parameter>
+      <parameter>org.jboss.osgi.framework.service.internal.StartLevelBeanDefinition</parameter>
+    </install>
+    <uninstall method="removeURIToClassMapping">
+      <parameter>urn:jboss:startlevel:1.0</parameter>
+    </uninstall>
+  </bean>  
 </deployment>

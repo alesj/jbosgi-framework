@@ -44,13 +44,16 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.bundle.OSGiBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleWrapper;
+import org.jboss.osgi.framework.bundle.OSGiSystemState;
 import org.jboss.osgi.framework.plugins.FrameworkEventsPlugin;
+import org.jboss.osgi.framework.plugins.StartLevelPlugin;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Version;
 import org.osgi.service.startlevel.StartLevel;
 
 
@@ -113,6 +116,14 @@ public class StartLevelImplTest
       stub(b.getStartLevel()).toReturn(17);
 
       assertEquals(17, sl.getBundleStartLevel(b));
+   }
+
+   @Test
+   public void testSystemBundleStartLevel()
+   {
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      StartLevel sl = new StartLevelImpl(bm);
+      assertEquals(0, sl.getBundleStartLevel(mock(OSGiSystemState.class)));
    }
 
    @Test
@@ -332,6 +343,48 @@ public class StartLevelImplTest
       sl.setBundleStartLevel(bs, 7);
       verify(bs, never()).start(anyInt());
       verify(bs, never()).start();
+   }
+   
+   @Test
+   public void testBundleMetaDataInjection()
+   {
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      StartLevelImpl sl = new StartLevelImpl(bm);
+
+      StartLevelBeanEntry entry1 = new StartLevelBeanEntry();
+      entry1.setSymbolicName("foo.bar.something");
+      entry1.setVersion("1.2.3.with_a_suffix");
+      entry1.setStartLevel(9);
+
+      StartLevelBeanEntry entry2 = new StartLevelBeanEntry();
+      entry2.setSymbolicName("foo.bar.something");
+      entry2.setStartLevel(16);
+
+      StartLevelBeanEntry entry3 = new StartLevelBeanEntry();
+      entry3.setSymbolicName("foo.bar.somethingelse");
+      entry3.setStartLevel(5);
+
+      StartLevelBeanEntry entry4 = new StartLevelBeanEntry();
+      entry4.setSymbolicName("foo.bar.unrelated");
+      entry4.setVersion("9.1.2");
+      entry4.setStartLevel(99);
+
+      sl.setBundleMetaData(Arrays.asList(entry1, entry2, entry3, entry4));
+
+      assertEquals(9, sl.getInitialBundleStartLevel("foo.bar.something", new Version(1, 2, 3, "with_a_suffix")));
+      assertEquals(16, sl.getInitialBundleStartLevel("foo.bar.something", new Version(1, 2, 3, "with_another_suffix")));
+      assertEquals(16, sl.getInitialBundleStartLevel("foo.bar.something", new Version(1, 2, 3)));
+      assertEquals(5, sl.getInitialBundleStartLevel("foo.bar.somethingelse", new Version(0, 0, 0)));
+      assertEquals(5, sl.getInitialBundleStartLevel("foo.bar.somethingelse", new Version(9, 2, 3, "some_suffix")));
+   }
+   
+   @Test
+   public void testNoBundleMetaDataInjection()
+   {
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      StartLevelImpl sl = new StartLevelImpl(bm);
+      assertEquals(StartLevelPlugin.INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED,
+            sl.getInitialBundleStartLevel("hello", new Version(1, 2, 3)));
    }
 
    private static final class SameThreadTestExecutor implements Executor

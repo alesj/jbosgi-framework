@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
 import org.jboss.metadata.spi.MutableMetaData;
@@ -50,7 +51,7 @@ public class OSGiBundleStateTest
 
       // Set up the OSGiBundleState
       OSGiBundleManager bm = mock(OSGiBundleManager.class);
-      stub(bm.getPlugin(StartLevelPlugin.class)).toReturn(sls);
+      stub(bm.getOptionalPlugin(StartLevelPlugin.class)).toReturn(sls);
       OSGiBundleState bs = new OSGiBundleState(bm, mockDeploymentUnit());
 
       // Initialise the Bundle State to be installed
@@ -70,7 +71,7 @@ public class OSGiBundleStateTest
 
       // Set up the OSGiBundleState
       OSGiBundleManager bm = mock(OSGiBundleManager.class);
-      stub(bm.getPlugin(StartLevelPlugin.class)).toReturn(sls);
+      stub(bm.getOptionalPlugin(StartLevelPlugin.class)).toReturn(sls);
       OSGiBundleState bs = new OSGiBundleState(bm, mockDeploymentUnit());
 
       // Initialise the Bundle State to be installed
@@ -81,6 +82,23 @@ public class OSGiBundleStateTest
       bs.start(0);
       assertTrue(bs.isPersistentlyStarted());
       verify(bm, never()).startBundle((DeployedBundleState)any());
+   }
+
+   @Test
+   public void testStartWhenWithoutStartLevelService() throws Exception
+   {
+      // Set up the OSGiBundleState
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      OSGiBundleState bs = new OSGiBundleState(bm, mockDeploymentUnit());
+
+      // Initialise the Bundle State to be installed
+      bs.changeState(Bundle.INSTALLED);
+      bs.setStartLevel(5); // higher than the system start level
+
+      assertFalse("Precondition failed", bs.isPersistentlyStarted());
+      bs.start(0);
+      assertTrue(bs.isPersistentlyStarted());
+      verify(bm).startBundle((DeployedBundleState)any());
    }
 
    @Test
@@ -115,7 +133,7 @@ public class OSGiBundleStateTest
    }
 
    @Test
-   public void testConstructor()
+   public void testConstructor() throws Exception
    {
       StartLevelPlugin sls = mock(StartLevelPlugin.class);
       stub(sls.getInitialBundleStartLevel()).toReturn(42);
@@ -123,19 +141,33 @@ public class OSGiBundleStateTest
       OSGiBundleManager bm = mock(OSGiBundleManager.class);
       stub(bm.getOptionalPlugin(StartLevelPlugin.class)).toReturn(sls);
       OSGiBundleState obs = new OSGiBundleState(bm, mockDeploymentUnit());
+      assertEquals(StartLevelPlugin.INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED, obs.getStartLevel());
 
+      obs.changeState(Bundle.INSTALLED);
+      obs.start();
       assertEquals(42, obs.getStartLevel());
-   }
-
-   @Test
-   public void testStartLevel()
-   {
-      OSGiBundleManager bm = mock(OSGiBundleManager.class);
-      OSGiBundleState obs = new OSGiBundleState(bm, mockDeploymentUnit());
-      assertEquals(1, obs.getStartLevel());
 
       obs.setStartLevel(15);
       assertEquals(15, obs.getStartLevel());
+   }
+
+   @Test
+   public void testStartLevelFromOSGiMetaData() throws Exception
+   {
+      StartLevelPlugin sls = mock(StartLevelPlugin.class);
+      stub(sls.getInitialBundleStartLevel()).toReturn(42);
+
+      OSGiBundleManager bm = mock(OSGiBundleManager.class);
+      stub(bm.getOptionalPlugin(StartLevelPlugin.class)).toReturn(sls);
+      OSGiBundleState obs = new OSGiBundleState(bm, mockDeploymentUnit(5));
+      assertEquals(StartLevelPlugin.INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED, obs.getStartLevel());
+
+      obs.changeState(Bundle.INSTALLED);
+      obs.start();
+      assertEquals(5, obs.getStartLevel());
+
+      obs.setStartLevel(6);
+      assertEquals(6, obs.getStartLevel());
    }
 
    @Test
@@ -153,11 +185,17 @@ public class OSGiBundleStateTest
 
    private VFSDeploymentUnit mockDeploymentUnit()
    {
+      return mockDeploymentUnit(StartLevelPlugin.INITIAL_BUNDLE_STARTLEVEL_UNSPECIFIED);
+   }
+
+   private VFSDeploymentUnit mockDeploymentUnit(int initialBundleStartLevel)
+   {
       VFSDeploymentUnit du = mock(VFSDeploymentUnit.class);
       MutableMetaData mmd = mock(MutableMetaData.class);
       stub(du.getMutableMetaData()).toReturn(mmd);
       OSGiMetaData omd = mock(OSGiMetaData.class);
-      stub(du.getAttachment(OSGiMetaData.class)).toReturn(omd);
+      when(omd.getInitialStartLevel()).thenReturn(initialBundleStartLevel);
+      when(du.getAttachment(OSGiMetaData.class)).thenReturn(omd);
       return du;
    }
 }
