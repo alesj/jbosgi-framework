@@ -23,13 +23,18 @@ package org.jboss.test.osgi.bundle;
 
 // $Id: $
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -43,7 +48,7 @@ import org.osgi.framework.Constants;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class SystemBundleTestCase extends AbstractFrameworkTest
+public class SystemBundleTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testBundleId() throws Exception
@@ -61,18 +66,6 @@ public class SystemBundleTestCase extends AbstractFrameworkTest
    public void testState() throws Exception
    {
       assertEquals(Bundle.ACTIVE, getFramework().getState());
-   }
-
-   @Test
-   public void testStartStop() throws Exception
-   {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
-   }
-
-   @Test
-   public void testUpdate() throws Exception
-   {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
    }
 
    @Test
@@ -95,10 +88,6 @@ public class SystemBundleTestCase extends AbstractFrameworkTest
    {
       Dictionary expected = new Hashtable();
       expected.put(Constants.BUNDLE_SYMBOLICNAME, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-      // todo expected.put(Attributes.Name.IMPLEMENTATION_TITLE.toString(), "JBoss OSGi");
-      // todo expected.put(Attributes.Name.IMPLEMENTATION_VENDOR.toString(), "jboss.org");
-      // todo expected.put(Attributes.Name.IMPLEMENTATION_VERSION.toString(), "r4v41");
-
       Dictionary dictionary = getFramework().getHeaders();
       assertEquals(expected, dictionary);
    }
@@ -110,38 +99,47 @@ public class SystemBundleTestCase extends AbstractFrameworkTest
    }
 
    @Test
-   public void testGetEntry()
+   public void testGetEntry() throws BundleException
    {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
+      URL was = getFramework().getEntry("META-INF/services");
+      assertNull("Entry null", was);
    }
 
    @Test
-   public void testGetEntryPath()
+   @SuppressWarnings("rawtypes")
+   public void testGetEntryPaths() throws BundleException
    {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
+      Enumeration was = getFramework().getEntryPaths("META-INF/services");
+      assertNull("Entries null", was);
    }
 
    @Test
-   public void testFindEntries()
+   @SuppressWarnings("rawtypes")
+   public void testFindEntries() throws BundleException
    {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
+      Enumeration was = getFramework().findEntries("META-INF/services", "*.xml", true);
+      assertNull("Entries null", was);
    }
 
    @Test
-   public void testLoadClass()
+   public void testLoadClass() throws ClassNotFoundException, BundleException
    {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
+      Class<?> was = getFramework().loadClass(Bundle.class.getName());
+      assertNotNull("Class not null", was);
    }
 
    @Test
-   public void testGetResource()
+   public void testGetResource() throws BundleException
    {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
+      URL was = getFramework().getResource("META-INF/services/jboss-osgi-bootstrap-system.xml");
+      assertNull("Resource not null", was);
    }
 
    @Test
-   public void testGetResources()
+   @SuppressWarnings("rawtypes")
+   public void testGetResources() throws BundleException, IOException
    {
-      System.out.println("FIXME [JBOSGI-138] Proper system BundleContext implementation");
+      Enumeration was = getFramework().getResources("META-INF/services/jboss-osgi-bootstrap-system.xml");
+      assertNotNull("Resources not null", was);
    }
 }

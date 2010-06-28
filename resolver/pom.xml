@@ -34,12 +34,14 @@
 
   <!-- Dependencies -->
   <dependencies>
+    <!-- 
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
       <version>${version.apache.felix.framework}</version>
       <classifier>sources</classifier>
     </dependency>
+    -->
 
     <dependency>
       <groupId>org.jboss.osgi</groupId>
@@ -55,6 +57,7 @@
 
   <build>
     <plugins>
+      <!-- 
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
@@ -92,6 +95,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>

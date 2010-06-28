@@ -119,36 +119,16 @@ public class OSGiSystemState extends AbstractBundleState
    @Override
    public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse)
    {
-      System.out.println("FIXME [JBOSGI-138] findEntries(" + path + "," + filePattern + "," + recurse + ")");
-      return null;
-
       // [Bug-1472] Clarify the semantic of resource API when called on the system bundle
       // https://www.osgi.org/members/bugzilla/show_bug.cgi?id=1472
-      /*
-      Vector<URL> entryList = new Vector<URL>();
-      for (Bundle bundle : getBundleManager().getBundles())
-      {
-         if (bundle != this)
-         {
-            Enumeration<URL> bundleEntries = bundle.findEntries(path, filePattern, recurse);
-            if (bundleEntries != null)
-            {
-               while(bundleEntries.hasMoreElements())
-               {
-                  URL next = bundleEntries.nextElement();
-                  entryList.add(next);
-               }
-            }
-         }
-      }
-      return (entryList.size() > 0 ? entryList.elements() : null);
-      */
+      return null;
    }
 
    @Override
    public URL getEntry(String path)
    {
-      System.out.println("FIXME [JBOSGI-138] getEntry(" + path + ")");
+      // [Bug-1472] Clarify the semantic of resource API when called on the system bundle
+      // https://www.osgi.org/members/bugzilla/show_bug.cgi?id=1472
       return null;
    }
 
@@ -156,23 +136,22 @@ public class OSGiSystemState extends AbstractBundleState
    @SuppressWarnings({ "rawtypes" })
    public Enumeration getEntryPaths(String path)
    {
-      System.out.println("FIXME [JBOSGI-138] getEntryPaths(" + path + ")");
+      // [Bug-1472] Clarify the semantic of resource API when called on the system bundle
+      // https://www.osgi.org/members/bugzilla/show_bug.cgi?id=1472
       return null;
    }
 
    @Override
    public URL getResource(String name)
    {
-      System.out.println("FIXME [JBOSGI-138] getResource(" + name + ")");
-      return null;
+      return getClass().getClassLoader().getResource(name);
    }
 
    @Override
    @SuppressWarnings({ "rawtypes" })
    public Enumeration getResources(String name) throws IOException
    {
-      System.out.println("FIXME [JBOSGI-138] getResources(" + name + ")");
-      return null;
+      return getClass().getClassLoader().getResources(name);
    }
 
    @Override
