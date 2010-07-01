@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jboss.osgi.framework.bundle.OSGiBundleWrapper;
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
 import org.jboss.test.osgi.service.support.a.A;
@@ -49,7 +49,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @version $Revision$
  */
-public class ServiceFactoryTestCase extends AbstractFrameworkTest
+public class ServiceFactoryTestCase extends OSGiFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };

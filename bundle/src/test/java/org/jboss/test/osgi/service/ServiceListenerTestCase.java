@@ -27,7 +27,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Hashtable;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -44,7 +44,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @since 20-Mar-2010
  */
-public class ServiceListenerTestCase extends AbstractFrameworkTest
+public class ServiceListenerTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testServiceListener() throws Exception

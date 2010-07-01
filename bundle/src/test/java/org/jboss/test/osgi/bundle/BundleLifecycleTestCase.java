@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.bundle.support.a.ActivatorA;
 import org.jboss.test.osgi.bundle.support.a.FailOnStartActivator;
@@ -54,7 +54,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author thomas.diesler@jboss.com
  * @since 15-Dec-2009
  */
-public class BundleLifecycleTestCase extends AbstractFrameworkTest
+public class BundleLifecycleTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testSimpleStart() throws Exception

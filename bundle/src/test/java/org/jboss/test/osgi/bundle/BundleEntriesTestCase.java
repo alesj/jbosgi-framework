@@ -35,7 +35,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
@@ -48,7 +48,7 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleEntriesTestCase extends AbstractFrameworkTest
+public class BundleEntriesTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testEntriesNotInstalled() throws Exception

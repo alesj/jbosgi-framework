@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -44,7 +44,7 @@ import org.osgi.framework.hooks.service.FindHook;
  * @author thomas.diesler@jboss.com
  * @since 20-Mar-2010
  */
-public class ServiceFindHookTestCase extends AbstractFrameworkTest
+public class ServiceFindHookTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testFindHook() throws Exception

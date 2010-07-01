@@ -35,7 +35,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.osgi.vfs.VFSUtils;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.Test;
@@ -52,7 +52,7 @@ import org.osgi.framework.Constants;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleTestCase extends AbstractFrameworkTest
+public class BundleTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testBundleId() throws Exception

@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.service.support.a.A;
 import org.junit.Test;
@@ -54,7 +54,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class ServiceReferenceTestCase extends AbstractFrameworkTest
+public class ServiceReferenceTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testGetProperty() throws Exception

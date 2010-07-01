@@ -30,7 +30,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.service.support.SimpleServiceFactory;
 import org.junit.Test;
@@ -48,7 +48,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class ServiceRegistrationTestCase extends AbstractFrameworkTest
+public class ServiceRegistrationTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testGetReference() throws Exception

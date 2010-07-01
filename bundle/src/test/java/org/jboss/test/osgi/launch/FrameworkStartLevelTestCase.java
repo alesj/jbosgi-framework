@@ -28,7 +28,7 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import org.jboss.osgi.framework.launch.OSGiFrameworkFactory;
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +43,7 @@ import org.osgi.service.startlevel.StartLevel;
 /**
  * @author <a href="david@redhat.com">David Bosschaert</a>
  */
-public class FrameworkStartLevelTestCase extends AbstractFrameworkTest
+public class FrameworkStartLevelTestCase extends OSGiFrameworkTest
 {
    private static final String COMMUNICATION_STRING = "LifecycleOrdering";
    private Properties savedProperties;

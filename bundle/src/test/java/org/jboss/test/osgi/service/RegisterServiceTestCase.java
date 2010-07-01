@@ -30,7 +30,7 @@ import static org.junit.Assert.fail;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -48,7 +48,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class RegisterServiceTestCase extends AbstractFrameworkTest
+public class RegisterServiceTestCase extends OSGiFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
    static String[] OBJCLASSES = new String[] { OBJCLASS };

@@ -26,7 +26,7 @@ package org.jboss.test.osgi.compendium;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.compendium.support.a.PA;
 import org.jboss.test.osgi.compendium.support.b.Other;
@@ -40,7 +40,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  * @author thomas.diesler@jboss.com
  */
-public class PackageAdminTestCase extends AbstractFrameworkTest
+public class PackageAdminTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testGetBundle() throws Exception

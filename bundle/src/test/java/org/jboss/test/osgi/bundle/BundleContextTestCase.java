@@ -39,7 +39,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class BundleContextTestCase extends AbstractFrameworkTest
+public class BundleContextTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testGetBundle() throws Exception

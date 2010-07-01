@@ -36,10 +36,10 @@ import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.VersionRange;
-import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractPackageAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractParameterizedAttribute;
+import org.jboss.osgi.framework.metadata.internal.OSGiManifestMetaData;
 import org.jboss.osgi.framework.metadata.internal.OSGiParameters;
 import org.junit.Test;
 

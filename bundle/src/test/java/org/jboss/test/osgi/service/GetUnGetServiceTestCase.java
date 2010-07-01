@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.service.support.BrokenServiceFactory;
 import org.junit.Test;
@@ -48,7 +48,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author Thomas.Diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class GetUnGetServiceTestCase extends AbstractFrameworkTest
+public class GetUnGetServiceTestCase extends OSGiFrameworkTest
 {
    static String OBJCLASS = BundleContext.class.getName();
 

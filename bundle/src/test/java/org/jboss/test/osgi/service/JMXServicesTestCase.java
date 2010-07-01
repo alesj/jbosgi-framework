@@ -23,7 +23,7 @@ package org.jboss.test.osgi.service;
 
 // $Id: $
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.junit.Test;
 
 /**
@@ -32,7 +32,7 @@ import org.junit.Test;
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  * @author thomas.diesler@jboss.com
  */
-public class JMXServicesTestCase extends AbstractFrameworkTest
+public class JMXServicesTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testMBeans() throws Throwable

@@ -25,7 +25,7 @@ package org.jboss.test.osgi.classloader;
 
 import static org.junit.Assert.fail;
 
-import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
+import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.jboss.test.osgi.classloader.support.b.B;
@@ -41,7 +41,7 @@ import org.osgi.framework.BundleException;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-public class RequireBundleTestCase extends AbstractFrameworkTest
+public class RequireBundleTestCase extends OSGiFrameworkTest
 {
    @Test
    public void testSimpleRequireBundle() throws Exception
