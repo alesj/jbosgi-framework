@@ -28,6 +28,7 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
+import org.jboss.osgi.framework.resolver.XBundleRequirement;
 import org.osgi.framework.Constants;
 
 /**
@@ -43,20 +44,15 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
    private String visibility;
    private String resolution;
 
-   public static OSGiRequiredBundleRequirement create(AbstractBundleState bundleState, ParameterizedAttribute metadata)
+   public static OSGiRequiredBundleRequirement create(AbstractBundleState bundleState, XBundleRequirement metadata)
    {
-      if (metadata == null)
-         throw new IllegalArgumentException("Null metadata");
+      String name = metadata.getName();
 
-      String name = metadata.getAttribute();
+      String versionStr = metadata.getVersionRange().toString();
+      AbstractVersionRange versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
 
-      AbstractVersionRange versionRange = null;
-      String versionStr = metadata.getAttributeValue(Constants.BUNDLE_VERSION_ATTRIBUTE, String.class);
-      if (versionStr != null)
-         versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
-
-      String visibility = metadata.getDirectiveValue(Constants.VISIBILITY_DIRECTIVE, String.class);
-      String resolution = metadata.getDirectiveValue(Constants.RESOLUTION_DIRECTIVE, String.class);
+      String visibility = metadata.getVisibility();
+      String resolution = metadata.getResolution();
 
       return new OSGiRequiredBundleRequirement(bundleState, name, versionRange, visibility, resolution, metadata);
    }

@@ -46,6 +46,9 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
+import org.jboss.osgi.framework.resolver.XBundleRequirement;
+import org.jboss.osgi.framework.resolver.XModule;
+import org.jboss.osgi.framework.resolver.XPackageCapability;
 
 /**
  * An abstract OSGi classloading deployer, that maps {@link OSGiMetaData} into {@link ClassLoadingMetaData}.
@@ -53,14 +56,14 @@ import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
  * @author thomas.diesler@jboss.com
  * @since 07-Jan-2010
  */
-public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSGiMetaData>
+public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<XModule>
 {
    private ClassLoaderDomain domain;
    private ClassLoaderFactory factory;
 
    public AbstractClassLoadingDeployer()
    {
-      super(OSGiMetaData.class);
+      super(XModule.class);
       addInput(AbstractBundleState.class);
       addInput(ClassLoadingMetaData.class);
       addOutput(ClassLoadingMetaData.class);
@@ -79,7 +82,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
    }
 
    @Override
-   public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
+   public void deploy(DeploymentUnit unit, XModule resolverModule) throws DeploymentException
    {
       if (unit.isAttachmentPresent(ClassLoadingMetaData.class))
          return;
@@ -105,29 +108,23 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       capabilities.addCapability(bundleCapability);
 
       // Required Bundles
-      List<ParameterizedAttribute> requireBundles = osgiMetaData.getRequireBundles();
-      if (requireBundles != null && requireBundles.isEmpty() == false)
+      List<XBundleRequirement> bundleReqs = resolverModule.getBundleRequirements();
+      for (XBundleRequirement req : bundleReqs)
       {
-         for (ParameterizedAttribute requireBundle : requireBundles)
-         {
-            OSGiRequiredBundleRequirement requirement = OSGiRequiredBundleRequirement.create(bundleState, requireBundle);
-            requirements.addRequirement(requirement);
-         }
+         OSGiRequiredBundleRequirement requirement = OSGiRequiredBundleRequirement.create(bundleState, req);
+         requirements.addRequirement(requirement);
       }
 
       // Export-Package
-      List<PackageAttribute> exports = osgiMetaData.getExportPackages();
-      if (exports != null && exports.isEmpty() == false)
+      List<XPackageCapability> exports = resolverModule.getPackageCapabilities();
+      for (XPackageCapability metadata : exports)
       {
-         for (PackageAttribute metadata : exports)
-         {
-            OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, metadata);
-            capabilities.addCapability(packageCapability);
-         }
+         OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, metadata);
+         capabilities.addCapability(packageCapability);
       }
 
       // Import-Package
-      List<PackageAttribute> imports = osgiMetaData.getImportPackages();
+      List<PackageAttribute> imports = resolverModule.getImportPackages();
       if (imports != null && imports.isEmpty() == false)
       {
          for (PackageAttribute metadata : imports)
@@ -144,7 +141,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<OSG
       }
 
       // DynamicImport-Package
-      List<PackageAttribute> dynamicImports = osgiMetaData.getDynamicImports();
+      List<PackageAttribute> dynamicImports = resolverModule.getDynamicImports();
       if (dynamicImports != null && dynamicImports.isEmpty() == false)
       {
          for (PackageAttribute packageAttribute : dynamicImports)

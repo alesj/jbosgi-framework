@@ -132,6 +132,7 @@
   <bean name="OSGiManifestParsingDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestParsingDeployer" />
   <bean name="OSGiManifestMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiManifestMetaDataDeployer" />
   <bean name="OSGiNativeCodeMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiNativeCodeMetaDataDeployer" />
+  <bean name="OSGiResolverMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiResolverMetaDataDeployer" />
   <bean name="OSGiStartLevelMetaDataDeployer" class="org.jboss.osgi.framework.deployers.OSGiStartLevelMetaDataDeployer">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>

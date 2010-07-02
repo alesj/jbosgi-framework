@@ -21,6 +21,7 @@
 */
 package org.jboss.osgi.framework.classloading;
 
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -38,6 +39,7 @@ import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
+import org.jboss.osgi.framework.resolver.XPackageCapability;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -59,10 +61,10 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    private AbstractBundleState bundleState;
 
    /** The export package */
-   private PackageAttribute metadata;
+   private XPackageCapability metadata;
 
    /** The mandatory attributes */
-   private String[] mandatoryAttributes;
+   private List<String> mandatoryAttributes;
 
    /**
     * Create a new OSGiPackageCapability.
@@ -73,33 +75,13 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
     * @throws IllegalArgumentException for null metadata
     */
    @SuppressWarnings("deprecation")
-   public static OSGiPackageCapability create(AbstractBundleState bundleState, PackageAttribute metadata)
+   public static OSGiPackageCapability create(AbstractBundleState bundleState, XPackageCapability metadata)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle");
 
-      String name = metadata.getAttribute();
-      String versionString = metadata.getAttributeValue(Constants.VERSION_ATTRIBUTE, String.class);
-
-      String oldVersionString = metadata.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
-      if (oldVersionString != null)
-      {
-         if (versionString != null && versionString.equals(oldVersionString) == false)
-            throw new IllegalStateException(Constants.VERSION_ATTRIBUTE + " of " + versionString + " does not match " + Constants.PACKAGE_SPECIFICATION_VERSION
-                  + " of " + oldVersionString);
-         if (versionString == null)
-            versionString = oldVersionString;
-      }
-
-      Version version = null;
-      if (versionString != null)
-      {
-         // Handle version strings with quotes 
-         if (versionString.startsWith("\"") && versionString.endsWith("\""))
-            versionString = versionString.substring(1, versionString.length() - 1);
-
-         version = Version.parseVersion(versionString);
-      }
+      String name = metadata.getName();
+      Version version = metadata.getVersion();
 
       OSGiPackageCapability capability = new OSGiPackageCapability(bundleState, name, version, metadata);
       capability.setSplitPackagePolicy(SplitPackagePolicy.First);
@@ -107,21 +89,13 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       return capability;
    }
 
-   private OSGiPackageCapability(AbstractBundleState bundleState, String name, Version version, PackageAttribute metadata)
+   private OSGiPackageCapability(AbstractBundleState bundleState, String name, Version version, XPackageCapability metadata)
    {
       super(name, version);
       this.bundleState = bundleState;
       this.metadata = metadata;
 
-      String mandatory = metadata.getDirectiveValue(Constants.MANDATORY_DIRECTIVE, String.class);
-      if (mandatory != null)
-      {
-         StringTokenizer tokens = new StringTokenizer(mandatory, ",");
-         mandatoryAttributes = new String[tokens.countTokens()];
-         int i = 0;
-         while (tokens.hasMoreTokens())
-            mandatoryAttributes[i++] = tokens.nextToken();
-      }
+      mandatoryAttributes = metadata.getMandatory();
 
       if (metadata.getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null)
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE + " on an Export-Package");
@@ -135,7 +109,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       return bundleState;
    }
 
-   public PackageAttribute getMetadata()
+   public XPackageCapability getMetadata()
    {
       return metadata;
    }
@@ -294,12 +268,10 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, Parameter> attributes = metadata.getAttributes();
-         Map<String, Parameter> directives = metadata.getDirectives();
-         for (Map.Entry<String, Parameter> entry : directives.entrySet())
-            buffer.append(";" + entry.getKey() + ":=" + entry.getValue().getValue());
-         for (Map.Entry<String, Parameter> entry : attributes.entrySet())
-            buffer.append(";" + entry.getKey() + "=" + entry.getValue().getValue());
+         Map<String, String> attributes = metadata.getAttributes();
+         Map<String, String> directives = metadata.getDirectives();
+         buffer.append(";" + attributes);
+         buffer.append(";" + directives);
          buffer.append("]");
          shortString = buffer.toString();
       }
