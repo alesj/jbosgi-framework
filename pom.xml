@@ -216,12 +216,10 @@
     <module>core</module>
     <module>metadata</module>
     <module>bundle</module>
-    <module>legacy</module>
   </modules>
   
   <!-- Profiles -->
   <profiles>
-  
   </profiles>
 
 </project>

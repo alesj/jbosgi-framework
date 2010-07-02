@@ -31,8 +31,8 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
-import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.resolver.XHostRequirement;
+import org.jboss.osgi.framework.resolver.XModule;
 
 /**
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
@@ -44,24 +44,24 @@ import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 public class OSGiFragmentClassLoadingDeployer extends AbstractClassLoadingDeployer
 {
    @Override
-   public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
+   public void deploy(DeploymentUnit unit, XModule resolverModule) throws DeploymentException
    {
-      super.deploy(unit, osgiMetaData);
+      super.deploy(unit, resolverModule);
 
       // Return if this is not a bundle fragment 
       AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);
-      if (bundleState.isFragment() == false)
-         return;
+      if (resolverModule.isFragment() == true)
+      {
+         OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
 
-      OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
+         // Initialize the Fragment-Host 
+         XHostRequirement hostReq = resolverModule.getHostRequirement();
+         FragmentHostMetaData hostMetaData = new FragmentHostMetaData(hostReq);
+         classLoadingMetaData.setFragmentHost(hostMetaData);
 
-      // Initialize the Fragment-Host 
-      ParameterizedAttribute hostAttr = osgiMetaData.getFragmentHost();
-      FragmentHostMetaData hostMetaData = new FragmentHostMetaData(hostAttr);
-      classLoadingMetaData.setFragmentHost(hostMetaData);
-
-      // Add the fragment host requirement
-      RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
-      requirements.addRequirement(OSGiFragmentHostRequirement.create(bundleState, hostMetaData));
+         // Add the fragment host requirement
+         RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
+         requirements.addRequirement(OSGiFragmentHostRequirement.create(bundleState, hostMetaData));
+      }
    }
 }

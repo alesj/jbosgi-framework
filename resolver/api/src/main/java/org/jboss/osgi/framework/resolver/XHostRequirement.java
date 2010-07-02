@@ -21,39 +21,15 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import java.util.List;
-import java.util.Map;
-
-import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.resolver.Module;
-import org.apache.felix.framework.resolver.Resolver;
-import org.apache.felix.framework.resolver.ResolverImpl;
-import org.apache.felix.framework.resolver.Wire;
-
 /**
- * An extension to the Apache Felix Resolver.
- *  
+ * A Fragment-Host requirement
+ *
  * @author thomas.diesler@jboss.com
- * @since 31-May-2010
+ * @since 02-Jul-2010
  */
-class AbstractResolver implements Resolver
+public interface XHostRequirement extends XRequirement 
 {
-   private Resolver delegate;
-
-   public AbstractResolver(Logger logger)
-   {
-      this.delegate = new ResolverImpl(logger);
-   }
-
-   @Override
-   public Map<Module, List<Wire>> resolve(ResolverState state, Module module)
-   {
-      return delegate.resolve(state, module);
-   }
-
-   @Override
-   public Map<Module, List<Wire>> resolve(ResolverState state, Module module, String pkgName)
-   {
-      return delegate.resolve(state, module, pkgName);
-   }
+   XVersionRange getVersionRange();
+   
+   String getExtension();
 }

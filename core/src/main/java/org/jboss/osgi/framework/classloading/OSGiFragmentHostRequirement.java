@@ -21,10 +21,10 @@
 */
 package org.jboss.osgi.framework.classloading;
 
+import org.jboss.classloading.plugins.metadata.ModuleRequirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
-import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 
 /**
  * A ModuleRequirement that is associated with Fragment-Host.
@@ -32,24 +32,34 @@ import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
  * @author thomas.diesler@jboss.com
  * @since 03-Jun-2010
  */
-public class OSGiFragmentHostRequirement extends OSGiBundleRequirement
+public class OSGiFragmentHostRequirement extends ModuleRequirement implements OSGiRequirement
 {
    private static final long serialVersionUID = -1337312549822378204L;
 
-   public static OSGiFragmentHostRequirement create(AbstractBundleState bundleState, FragmentHostMetaData hostMetaData)
+   private AbstractBundleState bundleState;
+
+   public static OSGiFragmentHostRequirement create(AbstractBundleState bundleState, FragmentHostMetaData metadata)
    {
-      if (hostMetaData == null)
-         throw new IllegalArgumentException("Null host metadata");
+      if (bundleState == null)
+         throw new IllegalArgumentException("Null bundleState");
+      if (metadata == null)
+         throw new IllegalArgumentException("Null metadata");
 
-      String name = hostMetaData.getSymbolicName();
-      VersionRange versionRange = hostMetaData.getVersionRange();
-      ParameterizedAttribute metadata = hostMetaData.getMetadata();
+      String name = metadata.getSymbolicName();
+      VersionRange versionRange = metadata.getVersionRange();
 
-      return new OSGiFragmentHostRequirement(bundleState, name, versionRange, metadata);
+      return new OSGiFragmentHostRequirement(bundleState, name, versionRange);
    }
 
-   private OSGiFragmentHostRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, ParameterizedAttribute metadata)
+   private OSGiFragmentHostRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange)
    {
-      super(bundleState, name, versionRange, metadata);
+      super(name, versionRange);
+      this.bundleState = bundleState;
+   }
+
+   @Override
+   public AbstractBundleState getBundleState()
+   {
+      return bundleState;
    }
 }

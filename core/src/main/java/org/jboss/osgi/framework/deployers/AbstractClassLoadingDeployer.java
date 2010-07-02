@@ -43,12 +43,11 @@ import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
 import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.classloading.OSGiRequiredBundleRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.PackageAttribute;
-import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.osgi.framework.resolver.XBundleRequirement;
 import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XPackageCapability;
+import org.jboss.osgi.framework.resolver.XPackageRequirement;
 
 /**
  * An abstract OSGi classloading deployer, that maps {@link OSGiMetaData} into {@link ClassLoadingMetaData}.
@@ -124,36 +123,30 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<XMo
       }
 
       // Import-Package
-      List<PackageAttribute> imports = resolverModule.getImportPackages();
-      if (imports != null && imports.isEmpty() == false)
+      List<XPackageRequirement> imports = resolverModule.getPackageRequirements();
+      for (XPackageRequirement metadata : imports)
       {
-         for (PackageAttribute metadata : imports)
-         {
-            String packageName = metadata.getAttribute();
+         String packageName = metadata.getName();
 
-            // [JBOSGI-329] SystemBundle not added as MC module
-            if (syspackPlugin.isSystemPackage(packageName) == false)
-            {
-               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, metadata, false);
-               requirements.addRequirement(requirement);
-            }
+         // [JBOSGI-329] SystemBundle not added as MC module
+         if (syspackPlugin.isSystemPackage(packageName) == false)
+         {
+            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, metadata);
+            requirements.addRequirement(requirement);
          }
       }
 
       // DynamicImport-Package
-      List<PackageAttribute> dynamicImports = resolverModule.getDynamicImports();
-      if (dynamicImports != null && dynamicImports.isEmpty() == false)
+      List<XPackageRequirement> dynamicImports = resolverModule.getDynamicPackageRequirements();
+      for (XPackageRequirement packageAttribute : dynamicImports)
       {
-         for (PackageAttribute packageAttribute : dynamicImports)
-         {
-            String packageName = packageAttribute.getAttribute();
+         String packageName = packageAttribute.getName();
 
-            // [JBOSGI-329] SystemBundle not added as MC module
-            if (syspackPlugin.isSystemPackage(packageName) == false)
-            {
-               OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute, true);
-               requirements.addRequirement(requirement);
-            }
+         // [JBOSGI-329] SystemBundle not added as MC module
+         if (syspackPlugin.isSystemPackage(packageName) == false)
+         {
+            OSGiPackageRequirement requirement = OSGiPackageRequirement.create(bundleState, packageAttribute);
+            requirements.addRequirement(requirement);
          }
       }
 

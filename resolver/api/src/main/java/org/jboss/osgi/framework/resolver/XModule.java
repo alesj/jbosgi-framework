@@ -24,6 +24,7 @@ package org.jboss.osgi.framework.resolver;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 
 /**
@@ -37,24 +38,44 @@ import org.osgi.framework.Bundle;
 public interface XModule 
 {
    /**
+    * Get the resover that this module has been added to 
+    */
+   XResolver getResolver();
+   
+   /**
     * Get the bundle associated with this module.
     */
    Bundle getBundle();
 
+   /**
+    * Get the module name
+    */
+   String getName();
+   
+   /**
+    * Get the module version
+    */
+   Version getVersion();
+   
    /**
     * Get this modules host capability
     */
    XHostCapability getHostCapability();
    
    /**
+    * Get the package capabilities 
+    */
+   List<XPackageCapability> getPackageCapabilities();
+
+   /**
+    * Get all module capabilities 
+    */
+   List<XCapability> getCapabilities();
+
+   /**
     * Get the bundle requirements
     */
    List<XBundleRequirement> getBundleRequirements();
-
-   /**
-    * Get the package capbilities 
-    */
-   List<XPackageCapability> getPackageCapabilities();
 
    /**
     * Get the non-dynamic package requirements  
@@ -65,4 +86,20 @@ public interface XModule
     * Get the dynamic package requirements  
     */
    List<XPackageRequirement> getDynamicPackageRequirements();
+
+   /**
+    * Get all module requirements  
+    */
+   List<XRequirement> getRequirements();
+
+   /**
+    * Get the fragment host requirement if this module is a fragment
+    * @return null if this module is not a fragment
+    */
+   XHostRequirement getHostRequirement();
+   
+   /**
+    * True is this module represents a fragment
+    */
+   boolean isFragment();
 }

@@ -23,7 +23,6 @@ package org.jboss.osgi.framework.classloading;
 
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.jboss.classloader.spi.filter.ClassFilter;
 import org.jboss.classloading.plugins.metadata.PackageCapability;
@@ -35,11 +34,10 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
-import org.jboss.osgi.framework.metadata.PackageAttribute;
-import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.resolver.XPackageCapability;
+import org.jboss.osgi.framework.resolver.XPackageRequirement;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -74,7 +72,6 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
     * @return the capability
     * @throws IllegalArgumentException for null metadata
     */
-   @SuppressWarnings("deprecation")
    public static OSGiPackageCapability create(AbstractBundleState bundleState, XPackageCapability metadata)
    {
       if (bundleState == null)
@@ -189,8 +186,8 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    public boolean matchAttributes(OSGiPackageRequirement packageRequirement)
    {
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
-      PackageAttribute capParameters = metadata;
-      PackageAttribute reqParameters = packageRequirement.getMetadata();
+      XPackageCapability cap = metadata;
+      XPackageRequirement req = packageRequirement.getMetadata();
 
       boolean validMatch = true;
 
@@ -199,8 +196,8 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       {
          for (String mand : mandatoryAttributes)
          {
-            Parameter reqAttributeValue = reqParameters.getAttribute(mand);
-            if (reqParameters == null || reqAttributeValue == null)
+            String reqAttributeValue = req.getAttribute(mand);
+            if (req == null || reqAttributeValue == null)
             {
                validMatch = false;
                break;
@@ -208,15 +205,15 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
          }
       }
 
-      if (validMatch == true && reqParameters != null)
+      if (validMatch == true && req != null)
       {
-         Map<String, Parameter> params = reqParameters.getAttributes();
+         Map<String, String> params = req.getAttributes();
          if (params != null && params.isEmpty() == false)
          {
             for (String name : params.keySet())
             {
-               String otherValue = reqParameters.getAttributeValue(name, String.class);
-               String ourValue = capParameters.getAttributeValue(name, String.class);
+               String otherValue = req.getAttribute(name);
+               String ourValue = cap.getAttribute(name);
 
                if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(name))
                {

@@ -29,10 +29,8 @@ import java.util.List;
 
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
-import org.jboss.osgi.framework.metadata.Parameter;
-import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
-import org.osgi.framework.Constants;
+import org.jboss.osgi.framework.resolver.XHostRequirement;
 
 /**
  * An extension of {@link ClassLoadingMetaData} that captures OSGi specific 
@@ -111,27 +109,21 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
    {
       private String symbolicName;
       private AbstractVersionRange versionRange;
-      private ParameterizedAttribute metadata;
-      private String extension;
+      private XHostRequirement metadata;
       
-      public FragmentHostMetaData(ParameterizedAttribute metadata)
+      public FragmentHostMetaData(XHostRequirement metadata)
       {
          if (metadata == null)
             throw new IllegalArgumentException("Null metadata");
          
          this.metadata = metadata;
-         this.symbolicName = metadata.getAttribute();
+         this.symbolicName = metadata.getName();
          
-         String versionStr = metadata.getAttributeValue(Constants.BUNDLE_VERSION_ATTRIBUTE, String.class);
-         if (versionStr != null)
-            versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
-
-         Parameter extensionDirective = metadata.getDirective(Constants.EXTENSION_DIRECTIVE);
-         if (extensionDirective != null)
-            extension = (String)extensionDirective.getValue();
+         String versionStr = metadata.getVersionRange().toString();
+         versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
       }
 
-      public ParameterizedAttribute getMetadata()
+      public XHostRequirement getMetadata()
       {
          return metadata;
       }
@@ -160,7 +152,7 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
        */
       public String getExtension()
       {
-         return extension;
+         return metadata.getExtension();
       }
    }
 }

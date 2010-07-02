@@ -37,17 +37,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jboss.osgi.framework</groupId>
-      <artifactId>jboss-osgi-framework-resolver</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.apache.felix.framework</artifactId>
-        </exclusion>
-      </exclusions>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.cl</groupId>
       <artifactId>jboss-classloader</artifactId>
     </dependency>

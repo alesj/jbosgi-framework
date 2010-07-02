@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver;
+package org.jboss.osgi.felix.resolver;
 
 import java.util.Set;
 
@@ -37,11 +37,11 @@ import org.apache.felix.framework.resolver.Resolver.ResolverState;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public class AbstractResolverState implements ResolverState
+public class ResolverStateExt implements ResolverState
 {
    private FelixResolverState delegate;
 
-   public AbstractResolverState(Logger logger)
+   public ResolverStateExt(Logger logger)
    {
       delegate = new FelixResolverState(logger, null);
    }

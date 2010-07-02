@@ -112,12 +112,12 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
       
       // A fragment can potentially attach to multiple host bundles
       // The Felix resolver has not yet settled on an API that supports that notion 
-      if (osgireq instanceof OSGiFragmentHostRequirement)
-      {
-         boolean match = super.resolves(reqModule, mcreq);
-         match &= matchAttributes(mcreq);
-         return match;
-      }
+      //if (osgireq instanceof OSGiFragmentHostRequirement)
+      //{
+      //   boolean match = super.resolves(reqModule, mcreq);
+      //   match &= matchAttributes(mcreq);
+      //   return match;
+      //}
 
       return false;
    }

@@ -21,32 +21,13 @@
  */
 package org.jboss.osgi.framework.resolver.felix;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.felix.framework.capabilityset.Capability;
-import org.apache.felix.framework.capabilityset.Requirement;
-import org.apache.felix.framework.resolver.Module;
-import org.apache.felix.framework.resolver.ResolveException;
-import org.apache.felix.framework.resolver.Wire;
 import org.jboss.logging.Logger;
-import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
-import org.jboss.osgi.framework.bundle.OSGiFragmentState;
-import org.jboss.osgi.framework.bundle.OSGiSystemState;
-import org.jboss.osgi.framework.classloading.OSGiCapability;
-import org.jboss.osgi.framework.classloading.OSGiPackageCapability;
-import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
-import org.jboss.osgi.framework.classloading.OSGiRequirement;
-import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.internal.AbstractPlugin;
-import org.jboss.osgi.framework.resolver.AbstractModule;
-import org.jboss.osgi.framework.resolver.AbstractResolverPlugin;
-import org.osgi.framework.Bundle;
+import org.jboss.osgi.framework.resolver.XModule;
+import org.jboss.osgi.framework.resolver.XResolver;
+import org.jboss.osgi.framework.resolver.XResolverCallback;
 
 /**
  * An implementation of the JBossOSGi Resolver.
@@ -54,59 +35,64 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugin
+public class FelixResolverPlugin extends AbstractPlugin implements XResolver
 {
    // Provide logging
    final Logger log = Logger.getLogger(FelixResolverPlugin.class);
 
-   private JBossResolver resolver = new JBossResolver();
+   private XResolver resolver;
 
-   public FelixResolverPlugin(OSGiBundleManager bundleManager)
+   public FelixResolverPlugin(OSGiBundleManager bundleManager, XResolver resolver)
    {
       super(bundleManager);
+      this.resolver = resolver;
    }
 
    @Override
-   public void addBundle(Bundle bundle)
+   public void addModule(XModule module)
    {
-      AbstractModule module = resolver.createModule(bundle);
       resolver.addModule(module);
 
       // Attach the resolver module to the deployment
-      if (bundle.getBundleId() != 0)
+      if (module.getBundle().getBundleId() != 0)
       {
-         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-         bundleState.getDeploymentUnit().addAttachment(AbstractModule.class, module);
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(module.getBundle());
+         bundleState.getDeploymentUnit().addAttachment(XModule.class, module);
       }
    }
 
    @Override
-   public void removeBundle(Bundle bundle)
+   public void removeModule(XModule module)
    {
-      AbstractModule module = resolver.getModule(bundle);
       resolver.removeModule(module);
 
       // Remove the resolver module from the deployment
-      if (bundle.getBundleId() != 0)
+      if (module.getBundle().getBundleId() != 0)
       {
-         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-         bundleState.getDeploymentUnit().removeAttachment(AbstractModule.class);
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(module.getBundle());
+         bundleState.getDeploymentUnit().removeAttachment(XModule.class);
       }
    }
 
    @Override
-   public List<Bundle> resolve(List<Bundle> bundles)
+   public XModule findHost(XModule fragModule)
    {
-      List<Bundle> resolved = new ArrayList<Bundle>();
-      for (Bundle bundle : bundles)
-      {
-         AbstractModule module = resolver.getModule(bundle);
-         if (failsafeResolve(module) == true)
-            resolved.add(bundle);
-      }
-      return Collections.unmodifiableList(resolved);
+      return resolver.findHost(fragModule);
    }
 
+   @Override
+   public void setCallbackHandler(XResolverCallback callback)
+   {
+      resolver.setCallbackHandler(callback);
+   }
+
+   @Override
+   public void resolve(XModule module)
+   {
+      resolver.resolve(module);
+   }
+
+   /*
    @Override
    public OSGiCapability getWiredCapability(OSGiRequirement osgireq)
    {
@@ -159,7 +145,9 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
       
       return osgicap;
    }
+   */
 
+   /*
    private OSGiCapability getWiredCapability(AbstractBundleModule impModule, Requirement req)
    {
       OSGiCapability osgicap = null;
@@ -175,7 +163,9 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
       }
       return osgicap;
    }
+   */
 
+   /*
    @Override
    public List<OSGiRequirement> getUnresolvedRequirements(Bundle bundle)
    {
@@ -189,7 +179,9 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
       }
       return Collections.unmodifiableList(result);
    }
+   */
 
+   /*
    @Override
    public Map<OSGiRequirement, OSGiCapability> getWiring(Bundle bundle)
    {
@@ -202,78 +194,5 @@ public class FelixResolverPlugin extends AbstractPlugin implements ResolverPlugi
       }
       return Collections.unmodifiableMap(result);
    }
-
-   private boolean failsafeResolve(AbstractModule module)
-   {
-      try
-      {
-         resolver.resolve(module);
-         return true;
-      }
-      catch (ResolveException ex)
-      {
-         log.debug("Cannot resolve requirement: " + ex.getRequirement());
-         return false;
-      }
-   }
-
-   static class JBossResolver extends AbstractResolverPlugin
-   {
-      private SystemBundleModule sysModule;
-      
-      @Override
-      public boolean acquireGlobalLock()
-      {
-         // nothing to do
-         return true;
-      }
-
-      @Override
-      public void releaseGlobalLock()
-      {
-         // nothing to do
-      }
-
-      @Override
-      public void markBundleResolved(Module module)
-      {
-         // nothing to do
-      }
-
-      @Override
-      public AbstractModule createModule(Bundle bundle)
-      {
-         if (bundle.getBundleId() == 0)
-         {
-            OSGiSystemState bundleState = OSGiSystemState.assertBundleState(bundle);
-            sysModule = new SystemBundleModule(bundleState);
-            return sysModule;
-         }
-         else
-         {
-            DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-            return new DeployedBundleModule(bundleState);
-         }
-      }
-
-      @Override
-      public AbstractBundleModule getModule(Bundle bundle)
-      {
-         AbstractBundleModule result = null;
-         if (bundle.getBundleId() == 0)
-         {
-            result = sysModule;
-         }
-         else
-         {
-            DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
-            result = (AbstractBundleModule)bundleState.getDeploymentUnit().getAttachment(AbstractModule.class);
-         }
-         
-         if (result == null)
-            throw new IllegalStateException("No module attached to: " + bundle);
-
-         return result;
-      }
-   }
+   */
 }

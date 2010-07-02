@@ -21,37 +21,43 @@
  */
 package org.jboss.osgi.framework.resolver;
 
+import java.util.Map;
+
+import org.osgi.framework.Constants;
+
 /**
- * An OSGi resolver.
- * 
+ * The abstract implementation of a {@link XHostRequirement}.
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XResolver 
+class AbstractFragmentHostRequirement extends AbstractRequirement implements XHostRequirement
 {
-   /**
-    * Add a module to the resolver.
-    */
-   void addModule(XModule module);
+   private XVersionRange versionRange = XVersionRange.infiniteRange;
+   private String extension;
 
-   /**
-    * Remove a module from the resolver.
-    */
-   void removeModule(XModule module);
+   public AbstractFragmentHostRequirement(AbstractModule module, String symbolicName, Map<String, String> dirs, Map<String, String> atts)
+   {
+      super(module, symbolicName, dirs, atts);
 
-   /**
-    * Find the host module for a given fragment module.
-    */
-   XModule findHost(XModule fragModule);
-   
-   /**
-    * Resolve the given root module
-    * @throws XResolverException if the module cannot be resolved
-    */
-   void resolve(XModule rootModule) throws XResolverException;
+      String att = getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+      if (att != null)
+         versionRange = XVersionRange.parse(att);
 
-   /**
-    * The the optional callback handler on the resolver
-    */
-   void setCallbackHandler(XResolverCallback callback);
+      String dir = getDirective(Constants.EXTENSION_DIRECTIVE);
+      if (dir != null)
+         extension = dir;
+   }
+
+   @Override
+   public XVersionRange getVersionRange()
+   {
+      return versionRange;
+   }
+
+   @Override
+   public String getExtension()
+   {
+      return extension;
+   }
 }

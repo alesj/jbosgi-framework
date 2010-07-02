@@ -26,7 +26,7 @@ package org.jboss.osgi.framework.deployers;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.resolver.XModule;
 
 /**
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata
@@ -39,9 +39,9 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 public class OSGiBundleClassLoadingDeployer extends AbstractClassLoadingDeployer
 {
    @Override
-   public void deploy(DeploymentUnit unit, OSGiMetaData osgiMetaData) throws DeploymentException
+   public void deploy(DeploymentUnit unit, XModule module) throws DeploymentException
    {
-      super.deploy(unit, osgiMetaData);
+      super.deploy(unit, module);
       
       // Return if this is not a real bundle (i.e. a fragment) 
       AbstractBundleState bundleState = unit.getAttachment(AbstractBundleState.class);

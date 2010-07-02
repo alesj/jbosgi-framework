@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 /**
  * The abstract implementation of an {@link XModule}.
@@ -38,9 +39,11 @@ import org.osgi.framework.Bundle;
 class AbstractModule implements XModule
 {
    private Bundle bundle;
+   private XResolver resolver;
    private XHostCapability hostCapability;
    private List<XCapability> capabilities;
    private List<XRequirement> requirements;
+   private XHostRequirement hostRequirement;
 
    AbstractModule(Bundle bundle)
    {
@@ -48,9 +51,44 @@ class AbstractModule implements XModule
    }
 
    @Override
+   public XResolver getResolver()
+   {
+      return resolver;
+   }
+
+   void setResolver(XResolver resolver)
+   {
+      this.resolver = resolver;
+   }
+
+   @Override
    public Bundle getBundle()
    {
       return bundle;
+   }
+
+   @Override
+   public String getName()
+   {
+      return bundle.getSymbolicName();
+   }
+
+   @Override
+   public Version getVersion()
+   {
+      return bundle.getVersion();
+   }
+
+   @Override
+   public List<XCapability> getCapabilities()
+   {
+      return Collections.unmodifiableList(capabilities);
+   }
+
+   @Override
+   public List<XRequirement> getRequirements()
+   {
+      return Collections.unmodifiableList(requirements);
    }
 
    @Override
@@ -116,6 +154,30 @@ class AbstractModule implements XModule
          }
       }
       return Collections.unmodifiableList(result);
+   }
+
+   @Override
+   public XHostRequirement getHostRequirement()
+   {
+      if (hostRequirement != null)
+         return hostRequirement;
+      
+      for (XRequirement aux : requirements)
+      {
+         if (aux instanceof XHostRequirement)
+         {
+            hostRequirement = (XHostRequirement)aux;
+            break;
+         }
+      }
+      
+      return hostRequirement;
+   }
+
+   @Override
+   public boolean isFragment()
+   {
+      return getHostRequirement() != null;
    }
 
    void addCapability(XCapability capability)

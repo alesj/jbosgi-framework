@@ -25,8 +25,6 @@ import java.util.Map;
 
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.metadata.Parameter;
-import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.osgi.framework.resolver.XBundleRequirement;
 import org.osgi.framework.Constants;
@@ -41,9 +39,6 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
 {
    private static final long serialVersionUID = 1L;
 
-   private String visibility;
-   private String resolution;
-
    public static OSGiRequiredBundleRequirement create(AbstractBundleState bundleState, XBundleRequirement metadata)
    {
       String name = metadata.getName();
@@ -51,28 +46,18 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
       String versionStr = metadata.getVersionRange().toString();
       AbstractVersionRange versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
 
-      String visibility = metadata.getVisibility();
-      String resolution = metadata.getResolution();
-
-      return new OSGiRequiredBundleRequirement(bundleState, name, versionRange, visibility, resolution, metadata);
+      return new OSGiRequiredBundleRequirement(bundleState, name, versionRange, metadata);
    }
 
-   private OSGiRequiredBundleRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, String visdir, String resdir,
-         ParameterizedAttribute metadata)
+   private OSGiRequiredBundleRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, XBundleRequirement metadata)
    {
       super(bundleState, name, versionRange, metadata);
 
-      visibility = visdir;
-      if (visibility == null)
-         visibility = Constants.VISIBILITY_PRIVATE;
-
-      resolution = resdir;
-      if (resolution == null)
-         resolution = Constants.RESOLUTION_MANDATORY;
-
+      String visibility = metadata.getVisibility();
       if (Constants.VISIBILITY_REEXPORT.equals(visibility))
          setReExport(true);
 
+      String resolution = metadata.getResolution();
       if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
          setOptional(true);
    }
@@ -94,10 +79,9 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
    protected void toString(StringBuffer buffer)
    {
       super.toString(buffer);
-      Map<String, Parameter> directives = getMetadata().getDirectives();
-      if (directives.containsKey(Constants.VISIBILITY_DIRECTIVE) == false)
-         buffer.append("," + Constants.VISIBILITY_DIRECTIVE + ":=" + visibility);
-      if (directives.containsKey(Constants.RESOLUTION_DIRECTIVE) == false)
-         buffer.append("," + Constants.RESOLUTION_DIRECTIVE + ":=" + resolution);
+      Map<String, String> directives = getMetadata().getDirectives();
+      buffer.append(";" + directives);
+      Map<String, String> attributes = getMetadata().getAttributes();
+      buffer.append(";" + attributes);
    }
 }

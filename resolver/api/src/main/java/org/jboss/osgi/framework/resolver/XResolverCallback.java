@@ -22,36 +22,16 @@
 package org.jboss.osgi.framework.resolver;
 
 /**
- * An OSGi resolver.
+ * The resolver callback
  * 
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XResolver 
+public interface XResolverCallback 
 {
-   /**
-    * Add a module to the resolver.
-    */
-   void addModule(XModule module);
+   boolean acquireGlobalLock();
 
-   /**
-    * Remove a module from the resolver.
-    */
-   void removeModule(XModule module);
+   void releaseGlobalLock();
 
-   /**
-    * Find the host module for a given fragment module.
-    */
-   XModule findHost(XModule fragModule);
-   
-   /**
-    * Resolve the given root module
-    * @throws XResolverException if the module cannot be resolved
-    */
-   void resolve(XModule rootModule) throws XResolverException;
-
-   /**
-    * The the optional callback handler on the resolver
-    */
-   void setCallbackHandler(XResolverCallback callback);
+   void markResolved(XModule module);
 }

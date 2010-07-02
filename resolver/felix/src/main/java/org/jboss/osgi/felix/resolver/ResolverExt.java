@@ -19,39 +19,41 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver;
+package org.jboss.osgi.felix.resolver;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.resolver.Module;
+import org.apache.felix.framework.resolver.Resolver;
+import org.apache.felix.framework.resolver.ResolverImpl;
+import org.apache.felix.framework.resolver.Wire;
 
 /**
- * An OSGi resolver.
- * 
+ * An extension to the Apache Felix Resolver.
+ *  
  * @author thomas.diesler@jboss.com
- * @since 02-Jul-2010
+ * @since 31-May-2010
  */
-public interface XResolver 
+class ResolverExt implements Resolver
 {
-   /**
-    * Add a module to the resolver.
-    */
-   void addModule(XModule module);
+   private Resolver delegate;
 
-   /**
-    * Remove a module from the resolver.
-    */
-   void removeModule(XModule module);
+   public ResolverExt(Logger logger)
+   {
+      this.delegate = new ResolverImpl(logger);
+   }
 
-   /**
-    * Find the host module for a given fragment module.
-    */
-   XModule findHost(XModule fragModule);
-   
-   /**
-    * Resolve the given root module
-    * @throws XResolverException if the module cannot be resolved
-    */
-   void resolve(XModule rootModule) throws XResolverException;
+   @Override
+   public Map<Module, List<Wire>> resolve(ResolverState state, Module module)
+   {
+      return delegate.resolve(state, module);
+   }
 
-   /**
-    * The the optional callback handler on the resolver
-    */
-   void setCallbackHandler(XResolverCallback callback);
+   @Override
+   public Map<Module, List<Wire>> resolve(ResolverState state, Module module, String pkgName)
+   {
+      return delegate.resolve(state, module, pkgName);
+   }
 }

@@ -31,9 +31,8 @@ import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
-import org.jboss.osgi.framework.metadata.PackageAttribute;
-import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
+import org.jboss.osgi.framework.resolver.XPackageRequirement;
 import org.osgi.framework.Constants;
 
 /**
@@ -53,59 +52,44 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
    private AbstractBundleState bundleState;
 
    /** The attributes */
-   private PackageAttribute metadata;
+   private XPackageRequirement metadata;
 
    /**
     * Create a new OSGiPackageRequirement.
     */
-   @SuppressWarnings("deprecation")
-   public static OSGiPackageRequirement create(AbstractBundleState bundleState, PackageAttribute metadata, boolean isDynamic)
+   public static OSGiPackageRequirement create(AbstractBundleState bundleState, XPackageRequirement metadata)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle");
       if (metadata == null)
          throw new IllegalArgumentException("Null require package");
 
-      String name = metadata.getAttribute();
+      String name = metadata.getName();
 
-      AbstractVersionRange range = null;
-      String versionString = metadata.getAttributeValue(Constants.VERSION_ATTRIBUTE, String.class);
-      if (versionString != null)
-      {
-         range = (AbstractVersionRange)AbstractVersionRange.valueOf(versionString);
-         String oldVersionString = metadata.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
-         if (oldVersionString != null && oldVersionString.equals(versionString) == false)
-            throw new IllegalStateException(Constants.VERSION_ATTRIBUTE + " of " + versionString + " does not match " + Constants.PACKAGE_SPECIFICATION_VERSION
-                  + " of " + oldVersionString);
-      }
-      else
-      {
-         versionString = metadata.getAttributeValue(Constants.PACKAGE_SPECIFICATION_VERSION, String.class);
-         if (versionString != null)
-            range = (AbstractVersionRange)AbstractVersionRange.valueOf(versionString);
-      }
+      String versionString = metadata.getVersionRange().toString();
+      AbstractVersionRange range = AbstractVersionRange.valueOf(versionString);
 
-      return new OSGiPackageRequirement(bundleState, name, range, metadata, isDynamic);
+      return new OSGiPackageRequirement(bundleState, name, range, metadata);
    }
 
-   private OSGiPackageRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, PackageAttribute packageAttribute, boolean isDynamic)
+   private OSGiPackageRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, XPackageRequirement metadata)
    {
       super(name, versionRange);
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
-      if (packageAttribute == null)
+      if (metadata == null)
          throw new IllegalArgumentException("Null packageAttribute");
 
       this.bundleState = bundleState;
-      this.metadata = packageAttribute;
+      this.metadata = metadata;
 
       // resolution:=optional
-      String resolution = packageAttribute.getDirectiveValue(Constants.RESOLUTION_DIRECTIVE, String.class);
+      String resolution = metadata.getResolution();
       if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
          setOptional(true);
 
       // DynamicImport-Package
-      if (isDynamic == true)
+      if (metadata.isDynamic() == true)
          setDynamic(true);
    }
 
@@ -118,7 +102,7 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
    /**
     * Get the metadata.
     */
-   public PackageAttribute getMetadata()
+   public XPackageRequirement getMetadata()
    {
       return metadata;
    }
@@ -170,12 +154,10 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, Parameter> attributes = metadata.getAttributes();
-         Map<String, Parameter> directives = metadata.getDirectives();
-         for (Map.Entry<String, Parameter> entry : directives.entrySet())
-            buffer.append(";" + entry.getKey() + ":=" + entry.getValue().getValue());
-         for (Map.Entry<String, Parameter> entry : attributes.entrySet())
-            buffer.append(";" + entry.getKey() + "=" + entry.getValue().getValue());
+         Map<String, String> attributes = metadata.getAttributes();
+         Map<String, String> directives = metadata.getDirectives();
+         buffer.append(";" + attributes);
+         buffer.append(";" + directives);
          buffer.append("]");
          shortString = buffer.toString();
       }

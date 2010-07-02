@@ -19,10 +19,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.framework.resolver;
+package org.jboss.osgi.felix.resolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,10 @@ import org.apache.felix.framework.resolver.ResolveException;
 import org.apache.felix.framework.resolver.Wire;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
-import org.osgi.framework.Bundle;
+import org.jboss.osgi.framework.resolver.XModule;
+import org.jboss.osgi.framework.resolver.XResolver;
+import org.jboss.osgi.framework.resolver.XResolverCallback;
+import org.jboss.osgi.framework.resolver.XResolverException;
 
 /**
  * An implementation of the Resolver.
@@ -50,57 +54,104 @@ import org.osgi.framework.Bundle;
  * @author thomas.diesler@jboss.com
  * @since 31-May-2010
  */
-public abstract class AbstractResolverPlugin
+public class FelixResolver implements XResolver
 {
-   // TODO abstract logging
    private Logger logger;
-   
-   private AbstractResolver resolver;
-   private AbstractResolverState resolverState;
 
-   public AbstractResolverPlugin()
+   private ResolverExt resolver;
+   private ResolverStateExt resolverState;
+   private XResolverCallback callback;
+   private Map<XModule, ModuleExt> moduleMap = new HashMap<XModule, ModuleExt>();
+
+   public FelixResolver()
    {
-      logger = getLogger();
-      resolver = getAbstractResolver(logger);
-      resolverState = getAbstractResolverState(logger);
+      // Initialize the noop callback
+      callback = new XResolverCallback()
+      {
+         @Override
+         public void releaseGlobalLock()
+         {
+         }
+         
+         @Override
+         public void markResolved(XModule module)
+         {
+         }
+         
+         @Override
+         public boolean acquireGlobalLock()
+         {
+            return true;
+         }
+      };
+      
+      logger = new LoggerDelegate();
+      resolver = new ResolverExt(logger);
+      resolverState = new ResolverStateExt(logger);
    }
 
-   protected Logger getLogger()
+   @Override
+   public void setCallbackHandler(XResolverCallback callback)
    {
-      return new LoggerDelegate();
+      this.callback = callback;
    }
 
-   protected AbstractResolver getAbstractResolver(Logger logger)
+   @Override
+   public void addModule(XModule module)
    {
-      return new AbstractResolver(logger);
+      ModuleExt fmod = new ModuleExt(module);
+      resolverState.addModule(fmod);
+      moduleMap.put(module, fmod);
    }
 
-   protected AbstractResolverState getAbstractResolverState(Logger logger)
+   @Override
+   public void removeModule(XModule module)
    {
-      return new AbstractResolverState(logger);
+      ModuleExt fmod = moduleMap.remove(module);
+      if (fmod != null)
+         resolverState.removeModule(fmod);
    }
 
-   public void addModule(AbstractModule module)
+   @Override
+   public XModule findHost(XModule fragModule)
    {
-      resolverState.addModule(module);
+      ModuleExt fmod = moduleMap.get(fragModule);
+      if (fmod == null)
+         return null;
+      
+      fmod = (ModuleExt)resolverState.findHost(fmod);
+      return fmod != null ? fmod.getModule() : null;
    }
 
-   public void removeModule(AbstractModule module)
+   public void resolve(XModule module) throws XResolverException
    {
-      resolverState.removeModule(module);
+      ModuleExt rootModule = moduleMap.get(module);
+      if (rootModule == null)
+         throw new IllegalStateException("Module not added: " + module);
+      
+      try
+      {
+         resolveInternal(rootModule);
+      }
+      catch (ResolveException ex)
+      {
+         String msg = ex.getMessage();
+         ModuleExt exmod = (ModuleExt)ex.getModule();
+         Requirement exreq = ex.getRequirement();
+         Throwable cause = ex.getCause();
+         
+         XResolverException resex = new XResolverException(msg, exmod.getModule(), exreq);
+         resex.initCause(cause);
+         throw resex;
+      }
    }
 
-   public AbstractModule findHost(AbstractModule fragModule)
-   {
-      return (AbstractModule)resolverState.findHost(fragModule);
-   }
-   
-   public void resolve(Module rootModule) throws ResolveException
+   private void resolveInternal(ModuleExt rootModule)
    {
       if (!rootModule.isResolved())
       {
          // Acquire global lock.
-         boolean locked = acquireGlobalLock();
+         boolean locked = callback.acquireGlobalLock();
          if (!locked)
             throw new ResolveException("Unable to acquire global lock for resolve.", rootModule, null);
 
@@ -148,12 +199,12 @@ public abstract class AbstractResolverPlugin
          finally
          {
             // Always release the global lock.
-            releaseGlobalLock();
+            callback.releaseGlobalLock();
          }
       }
    }
 
-   public Wire resolve(Module module, String pkgName) throws ResolveException
+   private Wire resolve(Module module, String pkgName) throws ResolveException
    {
       Wire candidateWire = null;
       // We cannot dynamically import if the module is not already resolved
@@ -164,7 +215,7 @@ public abstract class AbstractResolverPlugin
       if (module.isResolved() && isAllowedDynamicImport(module, pkgName))
       {
          // Acquire global lock.
-         boolean locked = acquireGlobalLock();
+         boolean locked = callback.acquireGlobalLock();
          if (!locked)
             throw new ResolveException("Unable to acquire global lock for resolve.", module, null);
 
@@ -207,21 +258,21 @@ public abstract class AbstractResolverPlugin
          finally
          {
             // Always release the global lock.
-            releaseGlobalLock();
+            callback.releaseGlobalLock();
          }
       }
 
       return candidateWire;
    }
 
-   public Set<Capability> getCandidates(Module reqModule, Requirement req, boolean obeyMandatory)
+   private Set<Capability> getCandidates(Module reqModule, Requirement req, boolean obeyMandatory)
    {
       return resolverState.getCandidates(reqModule, req, obeyMandatory);
    }
 
    // This method duplicates a lot of logic from:
    // ResolverImpl.getDynamicImportCandidates()
-   public boolean isAllowedDynamicImport(Module module, String pkgName)
+   private boolean isAllowedDynamicImport(Module module, String pkgName)
    {
       // Unresolved modules cannot dynamically import, nor can the default
       // package be dynamically imported.
@@ -286,7 +337,7 @@ public abstract class AbstractResolverPlugin
          while (iter.hasNext())
          {
             Entry<Module, List<Wire>> entry = iter.next();
-            Module module = entry.getKey();
+            ModuleExt module = (ModuleExt)entry.getKey();
             List<Wire> wires = entry.getValue();
 
             // Only add wires attribute if some exist; export
@@ -301,27 +352,18 @@ public abstract class AbstractResolverPlugin
             List<Module> fragments = module.getFragments();
             for (int i = 0; (fragments != null) && (i < fragments.size()); i++)
             {
-               fragments.get(i).setResolved();
+               ModuleExt frag = (ModuleExt)fragments.get(i);
+               frag.setResolved();
                // Update the state of the module's bundle to resolved as well.
-               markBundleResolved(fragments.get(i));
-               logger.log(Logger.LOG_DEBUG, "FRAGMENT WIRE: " + fragments.get(i) + " -> hosted by -> " + module);
+               callback.markResolved(frag.getModule());
+               logger.log(Logger.LOG_DEBUG, "FRAGMENT WIRE: " + frag + " -> hosted by -> " + module);
             }
             // Update the resolver state to show the module as resolved.
             module.setResolved();
             resolverState.moduleResolved(module);
             // Update the state of the module's bundle to resolved as well.
-            markBundleResolved(module);
+            callback.markResolved(module.getModule());
          }
       }
    }
-
-   public abstract boolean acquireGlobalLock();
-
-   public abstract void releaseGlobalLock();
-
-   public abstract AbstractModule createModule(Bundle bundle);
-
-   public abstract AbstractModule getModule(Bundle bundle);
-   
-   public abstract void markBundleResolved(Module module);
 }

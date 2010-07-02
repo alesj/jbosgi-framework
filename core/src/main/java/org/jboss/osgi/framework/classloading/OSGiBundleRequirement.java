@@ -26,8 +26,7 @@ import java.util.Map;
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.metadata.Parameter;
-import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
+import org.jboss.osgi.framework.resolver.XBundleRequirement;
 
 /**
  * OSGiBundleRequirement.
@@ -39,11 +38,11 @@ import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRequirement
 {
    private static final long serialVersionUID = 1L;
-   
-   private AbstractBundleState bundleState;
-   private ParameterizedAttribute metadata;
 
-   OSGiBundleRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, ParameterizedAttribute metadata)
+   private AbstractBundleState bundleState;
+   private XBundleRequirement metadata;
+
+   OSGiBundleRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, XBundleRequirement metadata)
    {
       super(name, versionRange);
 
@@ -62,11 +61,11 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
       return bundleState;
    }
 
-   public ParameterizedAttribute getMetadata()
+   public XBundleRequirement getMetadata()
    {
       return metadata;
    }
-   
+
    @Override
    public boolean equals(Object obj)
    {
@@ -84,8 +83,7 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
    protected void toString(StringBuffer buffer)
    {
       super.toString(buffer);
-      Map<String, Parameter> attributes = getMetadata().getAttributes();
-      if (attributes != null && attributes.isEmpty() == false)
-         buffer.append("," + attributes);
+      Map<String, String> attributes = getMetadata().getAttributes();
+      buffer.append(";" + attributes);
    }
 }
