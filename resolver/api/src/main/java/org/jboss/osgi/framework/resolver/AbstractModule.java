@@ -53,6 +53,10 @@ public class AbstractModule extends AbstractElement implements XModule
    AbstractModule(long moduleId, String name, Version version)
    {
       super(name);
+      
+      if (version == null)
+         throw new IllegalArgumentException("Null version");
+      
       this.moduleId = moduleId;
       this.version = version;
    }
@@ -268,5 +272,28 @@ public class AbstractModule extends AbstractElement implements XModule
          return null;
       
       return attachments.removeAttachment(clazz);
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return (getName() + ":" + getVersion()).hashCode();
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj instanceof AbstractModule == false)
+         return false;
+      if (obj == this)
+         return true;
+      AbstractModule other = (AbstractModule)obj;
+      return getName().equals(other.getName()) && getVersion().equals(other.getVersion());
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Module[" + getName() + ":" + getVersion() + "]";
    }
 }

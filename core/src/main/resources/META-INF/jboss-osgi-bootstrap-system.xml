@@ -57,7 +57,7 @@
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
   <bean name="OSGiResolver" class="org.jboss.osgi.resolver.felix.FelixResolver"/>
-  <bean name="OSGiResolverPlugin" class="org.jboss.osgi.framework.plugins.internal.ResolverPlugin">
+  <bean name="OSGiResolverPlugin" class="org.jboss.osgi.framework.plugins.internal.ResolverPluginImpl">
     <constructor>
       <parameter><inject bean="OSGiBundleManager" /></parameter>
       <parameter><inject bean="OSGiResolver" /></parameter>

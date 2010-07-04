@@ -23,18 +23,25 @@ package org.jboss.osgi.framework.plugins.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
+import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.osgi.framework.resolver.XCapability;
 import org.jboss.osgi.framework.resolver.XModule;
+import org.jboss.osgi.framework.resolver.XModuleBuilder;
 import org.jboss.osgi.framework.resolver.XRequirement;
 import org.jboss.osgi.framework.resolver.XResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 /**
  * The OSGi Resolver plugin.
@@ -58,8 +65,41 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    @Override
    public void addBundle(Bundle bundle)
    {
-      // TODO Auto-generated method stub
+      XModule module;
+      if (bundle.getBundleId() == 0)
+      {
+         XModuleBuilder builder = XModuleBuilder.newBuilder();
+         builder.createModule(0, bundle.getSymbolicName(), bundle.getVersion());
+         SystemPackagesPlugin plugin = getPlugin(SystemPackagesPlugin.class);
+         for (String packageSpec : plugin.getSystemPackages(true))
+         {
+            String packname = packageSpec;
+            Version version = null;
+
+            int versionIndex = packname.indexOf(";version=");
+            if (versionIndex > 0)
+            {
+               packname = packageSpec.substring(0, versionIndex);
+               version = Version.parseVersion(packageSpec.substring(versionIndex + 9));
+            }
+
+            Map<String, String> attrs = new HashMap<String, String>();
+            if (version != null)
+               attrs.put(Constants.VERSION_ATTRIBUTE, version.toString());
+            
+            builder.addPackageCapability(packname, null, attrs);
+         }
+         module = builder.getModule();
+      }
+      else
+      {
+         DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
+         module = bundleState.getDeploymentUnit().getAttachment(XModule.class);
+      }
       
+      // Attach the bundle to the module and add it to the resolver
+      module.addAttachment(Bundle.class, bundle);
+      resolver.addModule(module);
    }
 
    @Override

@@ -82,6 +82,17 @@ public class FelixResolver extends AbstractResolver implements XResolver
       return module;
    }
 
+   private void setResolved(XModule module)
+   {
+      //module.setResolved();
+      getCallbackHandler().markResolved(module);
+   }
+   
+   private void setModuleWires(XModule module, List<Wire> wires)
+   {
+      //module.setWires(wires);
+   }
+   
    @Override
    public XModule findHost(XModule fragModule)
    {
@@ -191,23 +202,19 @@ public class FelixResolver extends AbstractResolver implements XResolver
             {
                logger.log(Logger.LOG_DEBUG, "WIRE: " + wires.get(wireIdx));
             }
-            module.setWires(wires);
+            setModuleWires(module.getModule(), wires);
 
             // Resolve all attached fragments.
             List<Module> fragments = module.getFragments();
             for (int i = 0; (fragments != null) && (i < fragments.size()); i++)
             {
                ModuleExt frag = (ModuleExt)fragments.get(i);
-               frag.setResolved();
-               // Update the state of the module's bundle to resolved as well.
-               getCallbackHandler().markResolved(frag.getModule());
+               setResolved(frag.getModule());
                logger.log(Logger.LOG_DEBUG, "FRAGMENT WIRE: " + frag + " -> hosted by -> " + module);
             }
             // Update the resolver state to show the module as resolved.
-            module.setResolved();
+            setResolved(module.getModule());
             resolverState.moduleResolved(module);
-            // Update the state of the module's bundle to resolved as well.
-            getCallbackHandler().markResolved(module.getModule());
          }
       }
    }

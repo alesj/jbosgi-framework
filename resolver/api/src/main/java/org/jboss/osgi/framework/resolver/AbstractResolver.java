@@ -77,6 +77,7 @@ public abstract class AbstractResolver implements XResolver
    {
       synchronized (moduleMap)
       {
+         ((AbstractModule)module).setResolver(this);
          moduleMap.put(module.getModuleId(), module);
       }
    }
@@ -110,16 +111,17 @@ public abstract class AbstractResolver implements XResolver
    }
 
    @Override
-   public final void resolve(XModule rootModule) throws XResolverException
+   public final void resolve(XModule module) throws XResolverException
    {
       try
       {
-         resolveInternal(rootModule);
+         module.removeAttachment(XResolverException.class);
+         resolveInternal(module);
       }
       catch (XResolverException ex)
       {
          // Add the last resolver exception to the module
-         rootModule.addAttachment(XResolverException.class, ex);
+         module.addAttachment(XResolverException.class, ex);
       }
    }
 
@@ -136,6 +138,7 @@ public abstract class AbstractResolver implements XResolver
       {
          try
          {
+            module.removeAttachment(XResolverException.class);
             resolveInternal(module);
             result.add(module);
          }

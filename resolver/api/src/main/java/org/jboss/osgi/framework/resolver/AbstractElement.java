@@ -38,6 +38,8 @@ class AbstractElement implements XElement
 
    public AbstractElement(String name)
    {
+      if (name == null)
+         throw new IllegalArgumentException("Null name");
       this.name = name;
    }
 
