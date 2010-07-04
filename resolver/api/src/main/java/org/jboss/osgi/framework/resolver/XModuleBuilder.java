@@ -23,37 +23,44 @@ package org.jboss.osgi.framework.resolver;
 
 import java.util.Map;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 /**
- * A builder for resolver artefacts
+ * A builder for resolver modules
  * 
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public final class XResolverBuilder 
+public final class XModuleBuilder
 {
    private AbstractModule module;
-   
-   private XResolverBuilder(Bundle bundle)
+
+   private XModuleBuilder()
    {
-      module = new AbstractModule(bundle);
    }
 
    public XModule getModule()
    {
       return module;
    }
-   
+
    /**
-    * Get a new resolver builder
-    * @param bundle The bundle that this module is associated with.
+    * Get a new module builder
     */
-   public static XResolverBuilder newBuilder(Bundle bundle)
+   public static XModuleBuilder newBuilder()
    {
-      XResolverBuilder builder = new XResolverBuilder(bundle);
-      return builder;
+      return new XModuleBuilder();
+   }
+
+   /**
+    * Get a new module and associate it with this builder
+    * @param symbolicName The module symbolic name
+    * @param version The module version
+    */
+   public XModule createModule(long moduleId, String symbolicName, Version version)
+   {
+      module = new AbstractModule(moduleId, symbolicName, version);
+      return module;
    }
 
    /**
@@ -61,11 +68,11 @@ public final class XResolverBuilder
     * @param symbolicName The bundle symbolic name
     * @param version The bundle version
     */
-   public XResolverBuilder addHostCapability(String symbolicName, Version version)
+   public XHostCapability addHostCapability(String symbolicName, Version version)
    {
       XHostCapability cap = new AbstractHostCapability(module, symbolicName, version);
       module.addCapability(cap);
-      return this;
+      return cap;
    }
 
    /**
@@ -74,11 +81,11 @@ public final class XResolverBuilder
     * @param dirs The directives
     * @param atts The attributes
     */
-   public XResolverBuilder addBundleRequirement(String symbolicName, Map<String, String> dirs, Map<String, String> atts)
+   public XBundleRequirement addBundleRequirement(String symbolicName, Map<String, String> dirs, Map<String, String> atts)
    {
       XBundleRequirement req = new AbstractBundleRequirement(module, symbolicName, dirs, atts);
       module.addRequirement(req);
-      return this;
+      return req;
    }
 
    /**
@@ -87,11 +94,11 @@ public final class XResolverBuilder
     * @param dirs The directives
     * @param atts The attributes
     */
-   public XResolverBuilder addPackageCapability(String name, Map<String, String> dirs, Map<String, String> atts)
+   public XPackageCapability addPackageCapability(String name, Map<String, String> dirs, Map<String, String> atts)
    {
       XPackageCapability cap = new AbstractPackageCapability(module, name, dirs, atts);
       module.addCapability(cap);
-      return this;
+      return cap;
    }
 
    /**
@@ -100,11 +107,11 @@ public final class XResolverBuilder
     * @param dirs The directives
     * @param atts The attributes
     */
-   public XResolverBuilder addPackageRequirement(String name, Map<String, String> dirs, Map<String, String> atts)
+   public XPackageRequirement addPackageRequirement(String name, Map<String, String> dirs, Map<String, String> atts)
    {
       XPackageRequirement req = new AbstractPackageRequirement(module, name, dirs, atts, false);
       module.addRequirement(req);
-      return this;
+      return req;
    }
 
    /**
@@ -112,10 +119,10 @@ public final class XResolverBuilder
     * @param name The package name
     * @param atts The attributes
     */
-   public XResolverBuilder addDynamicPackageRequirement(String name, Map<String, String> atts)
+   public XPackageRequirement addDynamicPackageRequirement(String name, Map<String, String> atts)
    {
-      AbstractPackageRequirement req = new AbstractPackageRequirement(module, name, null, atts, true);
+      XPackageRequirement req = new AbstractPackageRequirement(module, name, null, atts, true);
       module.addRequirement(req);
-      return this;
+      return req;
    }
 }

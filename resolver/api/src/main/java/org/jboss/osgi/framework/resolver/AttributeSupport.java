@@ -21,57 +21,24 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import java.util.List;
+import java.util.Map;
 
 /**
- * An OSGi resolver.
- * 
+ * Adds support for attributes
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XResolver 
+public interface AttributeSupport 
 {
    /**
-    * Add a module to the resolver.
+    * Get the attributes
     */
-   void addModule(XModule module);
-
-   /**
-    * Remove a module from the resolver.
-    * @return The removed module or null
-    */
-   XModule removeModule(long moduleId);
-
-   /**
-    * Get the list of registered modules
-    */
-   List<XModule> getModules();
+   Map<String, String> getAttributes();
    
    /**
-    * Find the a module for a given id.
+    * Get the value of the given attribute 
+    * @return null if no such attribute is associated with this capability
     */
-   XModule findModuleById(long moduleId);
-   
-   /**
-    * Find the host module for a given fragment module.
-    */
-   XModule findHost(XModule fragModule);
-   
-   /**
-    * Resolve the given root module
-    * @throws XResolverException if the module cannot be resolved
-    */
-   void resolve(XModule rootModule) throws XResolverException;
-
-   /**
-    * Resolve the given list of modules
-    * @param modules The list of modules or null for all modules
-    * @return The list of modules that could be resolved
-    */
-   List<XModule> resolve(List<XModule> modules);
-
-   /**
-    * The the optional callback handler on the resolver
-    */
-   void setCallbackHandler(XResolverCallback callback);
+   String getAttribute(String key);
 }

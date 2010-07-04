@@ -35,6 +35,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
+import org.jboss.osgi.framework.resolver.XHostCapability;
 import org.osgi.framework.Version;
 
 /**
@@ -49,32 +50,37 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    /** The serialVersionUID */
    private static final long serialVersionUID = 2366716668262831380L;
 
-   /** The bundle state */
    private AbstractBundleState bundleState;
+   private XHostCapability bundleCap;
 
-   public static OSGiBundleCapability create(AbstractBundleState bundleState)
+   public static OSGiBundleCapability create(XHostCapability bundleCap, AbstractBundleState bundleState)
    {
+      if (bundleCap == null)
+         throw new IllegalArgumentException("Null module");
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
 
-      String symbolicName = bundleState.getSymbolicName();
-      Version version = bundleState.getVersion();
-
-      return new OSGiBundleCapability(symbolicName, version, bundleState);
+      return new OSGiBundleCapability(bundleCap, bundleState);
    }
 
-   private OSGiBundleCapability(String name, Version version, AbstractBundleState bundleState)
+   private OSGiBundleCapability(XHostCapability bundleCap, AbstractBundleState bundleState)
    {
-      super(name, version);
-      if (bundleState == null)
-         throw new IllegalArgumentException("Null bundleState");
+      super(bundleCap.getName(), bundleCap.getVersion());
       this.bundleState = bundleState;
+      this.bundleCap = bundleCap;
+      bundleCap.addAttachment(OSGiBundleCapability.class, this);
    }
 
    @Override
    public AbstractBundleState getBundleState()
    {
       return bundleState;
+   }
+
+   @Override
+   public XHostCapability getResolverElement()
+   {
+      return bundleCap;
    }
 
    public OSGiMetaData getMetaData()
@@ -109,7 +115,7 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
          boolean match = (osgicap == this);
          return match;
       }
-      
+
       // A fragment can potentially attach to multiple host bundles
       // The Felix resolver has not yet settled on an API that supports that notion 
       //if (osgireq instanceof OSGiFragmentHostRequirement)

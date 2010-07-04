@@ -39,25 +39,25 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
 {
    private static final long serialVersionUID = 1L;
 
-   public static OSGiRequiredBundleRequirement create(AbstractBundleState bundleState, XBundleRequirement metadata)
+   public static OSGiRequiredBundleRequirement create(XBundleRequirement metadata, AbstractBundleState bundleState)
    {
       String name = metadata.getName();
 
       String versionStr = metadata.getVersionRange().toString();
       AbstractVersionRange versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
 
-      return new OSGiRequiredBundleRequirement(bundleState, name, versionRange, metadata);
+      return new OSGiRequiredBundleRequirement(metadata, bundleState, name, versionRange);
    }
 
-   private OSGiRequiredBundleRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, XBundleRequirement metadata)
+   private OSGiRequiredBundleRequirement(XBundleRequirement bundleReq, AbstractBundleState bundleState, String name, VersionRange versionRange)
    {
-      super(bundleState, name, versionRange, metadata);
+      super(bundleReq, bundleState, name, versionRange);
 
-      String visibility = metadata.getVisibility();
+      String visibility = bundleReq.getVisibility();
       if (Constants.VISIBILITY_REEXPORT.equals(visibility))
          setReExport(true);
 
-      String resolution = metadata.getResolution();
+      String resolution = bundleReq.getResolution();
       if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
          setOptional(true);
    }

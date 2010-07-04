@@ -56,8 +56,12 @@
   <bean name="OSGiFrameworkEventsPlugin" class="org.jboss.osgi.framework.plugins.internal.FrameworkEventsPluginImpl">
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
   </bean>
-  <bean name="OSGiResolverPlugin" class="org.jboss.osgi.framework.resolver.felix.FelixResolverPlugin">
-    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+  <bean name="OSGiResolver" class="org.jboss.osgi.resolver.felix.FelixResolver"/>
+  <bean name="OSGiResolverPlugin" class="org.jboss.osgi.framework.plugins.internal.ResolverPlugin">
+    <constructor>
+      <parameter><inject bean="OSGiBundleManager" /></parameter>
+      <parameter><inject bean="OSGiResolver" /></parameter>
+    </constructor>
   </bean>
   <bean name="OSGiServiceManagerPlugin" class="org.jboss.osgi.framework.bundle.ServiceManagerPluginImpl">
     <constructor>

@@ -38,7 +38,8 @@ import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.resolver.XModule;
-import org.jboss.osgi.framework.resolver.XResolverBuilder;
+import org.jboss.osgi.framework.resolver.XModuleBuilder;
+import org.osgi.framework.Bundle;
 
 /**
  * A deployer, that maps {@link OSGiMetaData} into the resolver {@link XModule} metadata.
@@ -67,7 +68,9 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
       if (bundleState == null)
          throw new IllegalStateException("No bundle state");
 
-      XResolverBuilder builder = XResolverBuilder.newBuilder(bundleState);
+      XModuleBuilder builder = XModuleBuilder.newBuilder();
+      XModule module = builder.createModule(bundleState.getBundleId(), bundleState.getSymbolicName(), bundleState.getVersion());
+      module.addAttachment(Bundle.class, bundleState.getBundle());
       builder.addHostCapability(bundleState.getSymbolicName(), bundleState.getVersion());
 
       // Required Bundles

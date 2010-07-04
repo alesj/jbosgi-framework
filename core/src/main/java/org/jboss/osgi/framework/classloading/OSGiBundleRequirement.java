@@ -40,19 +40,20 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
    private static final long serialVersionUID = 1L;
 
    private AbstractBundleState bundleState;
-   private XBundleRequirement metadata;
+   private XBundleRequirement bundleReq;
 
-   OSGiBundleRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, XBundleRequirement metadata)
+   OSGiBundleRequirement(XBundleRequirement bundleReq, AbstractBundleState bundleState, String name, VersionRange versionRange)
    {
       super(name, versionRange);
 
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
-      if (metadata == null)
-         throw new IllegalArgumentException("Null metadata");
+      if (bundleReq == null)
+         throw new IllegalArgumentException("Null bundleReq");
 
       this.bundleState = bundleState;
-      this.metadata = metadata;
+      this.bundleReq = bundleReq;
+      bundleReq.addAttachment(OSGiBundleRequirement.class, this);
    }
 
    @Override
@@ -61,9 +62,15 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
       return bundleState;
    }
 
+   @Override
+   public XBundleRequirement getResolverElement()
+   {
+      return bundleReq;
+   }
+
    public XBundleRequirement getMetadata()
    {
-      return metadata;
+      return bundleReq;
    }
 
    @Override

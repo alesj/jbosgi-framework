@@ -59,45 +59,47 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    private AbstractBundleState bundleState;
 
    /** The export package */
-   private XPackageCapability metadata;
+   private XPackageCapability packageCap;
 
    /** The mandatory attributes */
    private List<String> mandatoryAttributes;
 
    /**
     * Create a new OSGiPackageCapability.
-    * 
+    * @param packageCap the export package metadata
     * @param bundleState the bundle state
-    * @param metadata the export package metadata
+    * 
     * @return the capability
     * @throws IllegalArgumentException for null metadata
     */
-   public static OSGiPackageCapability create(AbstractBundleState bundleState, XPackageCapability metadata)
+   public static OSGiPackageCapability create(XPackageCapability packageCap, AbstractBundleState bundleState)
    {
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundle");
 
-      String name = metadata.getName();
-      Version version = metadata.getVersion();
+      String name = packageCap.getName();
+      Version version = packageCap.getVersion();
 
-      OSGiPackageCapability capability = new OSGiPackageCapability(bundleState, name, version, metadata);
+      OSGiPackageCapability capability = new OSGiPackageCapability(packageCap, bundleState, name, version);
       capability.setSplitPackagePolicy(SplitPackagePolicy.First);
 
       return capability;
    }
 
-   private OSGiPackageCapability(AbstractBundleState bundleState, String name, Version version, XPackageCapability metadata)
+   private OSGiPackageCapability(XPackageCapability packageCap, AbstractBundleState bundleState, String name, Version version)
    {
       super(name, version);
       this.bundleState = bundleState;
-      this.metadata = metadata;
+      this.packageCap = packageCap;
 
-      mandatoryAttributes = metadata.getMandatory();
+      mandatoryAttributes = packageCap.getMandatory();
 
-      if (metadata.getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null)
+      if (packageCap.getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null)
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE + " on an Export-Package");
-      if (metadata.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null)
+      if (packageCap.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null)
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_VERSION_ATTRIBUTE + " on an Export-Package");
+      
+      packageCap.addAttachment(OSGiPackageCapability.class, this);
    }
 
    @Override
@@ -106,9 +108,10 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       return bundleState;
    }
 
-   public XPackageCapability getMetadata()
+   @Override
+   public XPackageCapability getResolverElement()
    {
-      return metadata;
+      return packageCap;
    }
 
    @Override
@@ -186,8 +189,8 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
    public boolean matchAttributes(OSGiPackageRequirement packageRequirement)
    {
       OSGiMetaData osgiMetaData = bundleState.getOSGiMetaData();
-      XPackageCapability cap = metadata;
-      XPackageRequirement req = packageRequirement.getMetadata();
+      XPackageCapability cap = packageCap;
+      XPackageRequirement req = packageRequirement.getResolverElement();
 
       boolean validMatch = true;
 
@@ -265,8 +268,8 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, String> attributes = metadata.getAttributes();
-         Map<String, String> directives = metadata.getDirectives();
+         Map<String, String> attributes = packageCap.getAttributes();
+         Map<String, String> directives = packageCap.getDirectives();
          buffer.append(";" + attributes);
          buffer.append(";" + directives);
          buffer.append("]");

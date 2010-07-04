@@ -27,6 +27,17 @@ package org.jboss.osgi.framework.resolver;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XRequirement extends XNamedElement
+public interface XRequirement extends XElement, AttributeSupport, DirectiveSupport, AttachmentSupport
 {
+   /**
+    * Get associated module.
+    */
+   XModule getModule();
+
+   /**
+    * Get the capability taht this requirement is wired to.
+    * @return the capabillity or null if the module is not resolved
+    */
+   XCapability getWiredCapability();
+   
 }

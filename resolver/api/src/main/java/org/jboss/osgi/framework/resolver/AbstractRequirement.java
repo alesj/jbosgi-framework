@@ -29,10 +29,111 @@ import java.util.Map;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-class AbstractRequirement extends AbstractElement implements XCapability
+class AbstractRequirement extends AbstractElement implements XRequirement
 {
+   private XModule module;
+   private DirectiveSupport directives;
+   private AttributeSupport attributes;
+   private AttachmentSupport attachments;
+   private XCapability wiredCapability;
+
    public AbstractRequirement(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts)
    {
-      super(module, name, dirs, atts);
+      super(name);
+      this.module = module;
+      
+      if (dirs != null)
+         directives = new DirectiveSupporter(dirs);
+      if (atts != null)
+         attributes = new AttributeSupporter(atts);
+   }
+
+   @Override
+   public XModule getModule()
+   {
+      return module;
+   }
+   
+   @Override
+   public String getAttribute(String key)
+   {
+      if (attributes == null)
+         return null;
+      
+      return attributes.getAttribute(key);
+   }
+
+   @Override
+   public Map<String, String> getAttributes()
+   {
+      if (attributes == null)
+         return null;
+      
+      return attributes.getAttributes();
+   }
+
+   @Override
+   public String getDirective(String key)
+   {
+      if (directives == null)
+         return null;
+
+      return directives.getDirective(key);
+   }
+
+   @Override
+   public Map<String, String> getDirectives()
+   {
+      if (directives == null)
+         return null;
+
+      return directives.getDirectives();
+   }
+
+   @Override
+   public <T> T addAttachment(Class<T> clazz, T value)
+   {
+      if (attachments  == null)
+         attachments = new AttachmentSupporter();
+      
+      return attachments.addAttachment(clazz, value);
+   }
+
+   @Override
+   public <T> T getAttachment(Class<T> clazz)
+   {
+      if (attachments  == null)
+         return null;
+      
+      return attachments.getAttachment(clazz);
+   }
+
+   @Override
+   public <T> T removeAttachment(Class<T> clazz)
+   {
+      if (attachments  == null)
+         return null;
+      
+      return attachments.removeAttachment(clazz);
+   }
+
+   @Override
+   public XCapability getWiredCapability()
+   {
+      if (module.getWires() == null)
+         return null;
+
+      if (wiredCapability == null)
+      {
+         for (XWire aux : module.getWires())
+         {
+            if (aux.getRequirement() == this)
+            {
+               wiredCapability = aux.getCapability();
+               break;
+            }
+         }
+      }
+      return wiredCapability;
    }
 }

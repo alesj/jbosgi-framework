@@ -21,45 +21,16 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import java.util.Map;
-
 /**
- * A named element
+ * The base of all resolver elements
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XNamedElement 
+public interface XElement
 {
-   /**
-    * Get associated module.
-    */
-   XModule getModule();
-   
    /**
     * Get the name for this capability.
     */
    String getName();
-
-   /**
-    * Get the attributes
-    */
-   Map<String, String> getAttributes();
-   
-   /**
-    * Get the value of the given attribute 
-    * @return null if no such attribute is associated with this capability
-    */
-   String getAttribute(String key);
-   
-   /**
-    * Get the directives
-    */
-   Map<String, String> getDirectives();
-   
-   /**
-    * Get the value of the given directive 
-    * @return null if no such directive is associated with this capability
-    */
-   String getDirective(String key);
 }

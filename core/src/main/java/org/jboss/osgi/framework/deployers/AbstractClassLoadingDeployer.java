@@ -45,6 +45,7 @@ import org.jboss.osgi.framework.classloading.OSGiRequiredBundleRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
 import org.jboss.osgi.framework.resolver.XBundleRequirement;
+import org.jboss.osgi.framework.resolver.XHostCapability;
 import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XPackageCapability;
 import org.jboss.osgi.framework.resolver.XPackageRequirement;
@@ -81,7 +82,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<XMo
    }
 
    @Override
-   public void deploy(DeploymentUnit unit, XModule resolverModule) throws DeploymentException
+   public void deploy(DeploymentUnit unit, XModule module) throws DeploymentException
    {
       if (unit.isAttachmentPresent(ClassLoadingMetaData.class))
          return;
@@ -103,27 +104,28 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<XMo
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
 
-      OSGiBundleCapability bundleCapability = OSGiBundleCapability.create(bundleState);
+      XHostCapability bundleCap = module.getHostCapability();
+      OSGiBundleCapability bundleCapability = OSGiBundleCapability.create(bundleCap, bundleState);
       capabilities.addCapability(bundleCapability);
 
       // Required Bundles
-      List<XBundleRequirement> bundleReqs = resolverModule.getBundleRequirements();
-      for (XBundleRequirement req : bundleReqs)
+      List<XBundleRequirement> bundleReqs = module.getBundleRequirements();
+      for (XBundleRequirement bundleReq : bundleReqs)
       {
-         OSGiRequiredBundleRequirement requirement = OSGiRequiredBundleRequirement.create(bundleState, req);
+         OSGiRequiredBundleRequirement requirement = OSGiRequiredBundleRequirement.create(bundleReq, bundleState);
          requirements.addRequirement(requirement);
       }
 
       // Export-Package
-      List<XPackageCapability> exports = resolverModule.getPackageCapabilities();
-      for (XPackageCapability metadata : exports)
+      List<XPackageCapability> exports = module.getPackageCapabilities();
+      for (XPackageCapability packageCap : exports)
       {
-         OSGiPackageCapability packageCapability = OSGiPackageCapability.create(bundleState, metadata);
+         OSGiPackageCapability packageCapability = OSGiPackageCapability.create(packageCap, bundleState);
          capabilities.addCapability(packageCapability);
       }
 
       // Import-Package
-      List<XPackageRequirement> imports = resolverModule.getPackageRequirements();
+      List<XPackageRequirement> imports = module.getPackageRequirements();
       for (XPackageRequirement metadata : imports)
       {
          String packageName = metadata.getName();
@@ -137,7 +139,7 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<XMo
       }
 
       // DynamicImport-Package
-      List<XPackageRequirement> dynamicImports = resolverModule.getDynamicPackageRequirements();
+      List<XPackageRequirement> dynamicImports = module.getDynamicPackageRequirements();
       for (XPackageRequirement packageAttribute : dynamicImports)
       {
          String packageName = packageAttribute.getName();

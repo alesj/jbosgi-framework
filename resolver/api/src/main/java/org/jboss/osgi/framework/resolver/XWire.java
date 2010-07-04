@@ -21,57 +21,34 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import java.util.List;
 
 /**
- * An OSGi resolver.
- * 
+ * Wires a requirement to a capability.
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XResolver 
+public interface XWire
 {
    /**
-    * Add a module to the resolver.
+    * Returns the importing module.
+    * @return The importing module.
     */
-   void addModule(XModule module);
+   XModule getImporter();
 
    /**
-    * Remove a module from the resolver.
-    * @return The removed module or null
-    */
-   XModule removeModule(long moduleId);
+    * Returns the associated requirement from the importing module that resulted in the creation of this wire.
+    **/
+   XRequirement getRequirement();
 
    /**
-    * Get the list of registered modules
+    * Returns the exporting module.
+    * @return The exporting module.
     */
-   List<XModule> getModules();
-   
-   /**
-    * Find the a module for a given id.
-    */
-   XModule findModuleById(long moduleId);
-   
-   /**
-    * Find the host module for a given fragment module.
-    */
-   XModule findHost(XModule fragModule);
-   
-   /**
-    * Resolve the given root module
-    * @throws XResolverException if the module cannot be resolved
-    */
-   void resolve(XModule rootModule) throws XResolverException;
+   XModule getExporter();
 
    /**
-    * Resolve the given list of modules
-    * @param modules The list of modules or null for all modules
-    * @return The list of modules that could be resolved
+    * Returns the associated capability from the exporting module that satisfies the requirement of the importing module.
     */
-   List<XModule> resolve(List<XModule> modules);
-
-   /**
-    * The the optional callback handler on the resolver
-    */
-   void setCallbackHandler(XResolverCallback callback);
+   XCapability getCapability();
 }

@@ -25,34 +25,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
- * The abstract implementation of a {@link XCapability}.
+ * The abstract implementation of an {@link XElement}.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-class AbstractElement implements XNamedElement
+class AbstractElement implements XElement
 {
-   private XModule module;
    private String name;
-   private Map<String, String> directives;
-   private Map<String, String> attributes;
 
-   public AbstractElement(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts)
+   public AbstractElement(String name)
    {
-      this.module = module;
       this.name = name;
-
-      if (dirs != null)
-         directives = new HashMap<String, String>(dirs);
-      if (atts != null)
-         attributes = new HashMap<String, String>(atts);
-   }
-
-   @Override
-   public XModule getModule()
-   {
-      return module;
    }
 
    @Override
@@ -60,28 +46,87 @@ class AbstractElement implements XNamedElement
    {
       return name;
    }
-
-   @Override
-   public String getAttribute(String key)
+   
+   static class AttachmentSupporter implements AttachmentSupport
    {
-      return attributes != null ? attributes.get(key) : null;
+      private Map<Class<?>, Object> attachments;
+
+      @Override
+      @SuppressWarnings("unchecked")
+      public <T> T addAttachment(Class<T> clazz, T value)
+      {
+         if (attachments == null)
+            attachments = new HashMap<Class<?>, Object>();
+         
+         T result = (T)attachments.get(clazz);
+         attachments.put(clazz, value);
+         return result;
+      }
+
+      @Override
+      @SuppressWarnings("unchecked")
+      public <T> T getAttachment(Class<T> clazz)
+      {
+         if (attachments == null)
+            return null;
+         
+         T result = (T)attachments.get(clazz);
+         return result;
+      }
+
+      @Override
+      @SuppressWarnings("unchecked")
+      public <T> T removeAttachment(Class<T> clazz)
+      {
+         if (attachments == null)
+            return null;
+         
+         T result = (T)attachments.remove(clazz);
+         return result;
+      }
    }
-
-   @Override
-   public String getDirective(String key)
+   
+   static class AttributeSupporter implements AttributeSupport
    {
-      return directives != null ? directives.get(key) : null;
+      private Map<String, String> attributes;
+
+      AttributeSupporter(Map<String, String> attributes)
+      {
+         this.attributes = attributes;
+      }
+
+      @Override
+      public String getAttribute(String key)
+      {
+         return attributes != null ? attributes.get(key) : null;
+      }
+
+      @Override
+      public Map<String, String> getAttributes()
+      {
+         return Collections.unmodifiableMap(attributes);
+      }
    }
-
-   @Override
-   public Map<String, String> getAttributes()
+   
+   static class DirectiveSupporter implements DirectiveSupport
    {
-      return Collections.unmodifiableMap(attributes);
-   }
+      private Map<String, String> directives;
 
-   @Override
-   public Map<String, String> getDirectives()
-   {
-      return Collections.unmodifiableMap(directives);
+      DirectiveSupporter(Map<String, String> directives)
+      {
+         this.directives = directives;
+      }
+
+      @Override
+      public String getDirective(String key)
+      {
+         return directives != null ? directives.get(key) : null;
+      }
+
+      @Override
+      public Map<String, String> getDirectives()
+      {
+         return Collections.unmodifiableMap(directives);
+      }
    }
 }

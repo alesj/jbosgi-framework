@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.osgi.felix.resolver;
+package org.jboss.osgi.resolver.felix;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +48,7 @@ import org.apache.felix.framework.util.manifestparser.CapabilityImpl;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.jboss.logging.Logger;
+import org.jboss.osgi.framework.resolver.AbstractModule;
 import org.jboss.osgi.framework.resolver.XBundleRequirement;
 import org.jboss.osgi.framework.resolver.XHostRequirement;
 import org.jboss.osgi.framework.resolver.XModule;
@@ -73,20 +74,17 @@ public class ModuleExt implements Module
    // Provide logging
    final Logger log = Logger.getLogger(ModuleExt.class);
 
-   private XModule module;
-   private Bundle bundle;
+   private AbstractModule module;
    private Map<String, String> headerMap;
    private List<Capability> capabilities;
    private List<Requirement> requirements;
    private List<Requirement> dynamicreqs;
    private List<Module> fragments;
    private List<Wire> wires;
-   private boolean resolved;
 
-   public ModuleExt(XModule module)
+   public ModuleExt(AbstractModule module)
    {
       this.module = module;
-      this.bundle = module.getBundle();
    }
 
    XModule getModule()
@@ -101,7 +99,7 @@ public class ModuleExt implements Module
       if (headerMap == null)
       {
          headerMap = new HashMap<String, String>();
-         Dictionary<String, String> headers = bundle.getHeaders();
+         Dictionary<String, String> headers = getBundle().getHeaders();
          Enumeration<String> keys = headers.keys();
          while (keys.hasMoreElements())
          {
@@ -122,13 +120,13 @@ public class ModuleExt implements Module
    @Override
    public String getSymbolicName()
    {
-      return bundle.getSymbolicName();
+      return module.getName();
    }
 
    @Override
    public Version getVersion()
    {
-      return bundle.getVersion();
+      return module.getVersion();
    }
 
    @Override
@@ -401,13 +399,16 @@ public class ModuleExt implements Module
    @Override
    public Bundle getBundle()
    {
+      Bundle bundle = module.getAttachment(Bundle.class);
+      if (bundle == null)
+         throw new IllegalStateException("Cannot obtain the associated bundle from: " + module);
       return bundle;
    }
 
    @Override
    public String getId()
    {
-      return bundle.getLocation();
+      return getBundle().getLocation();
    }
 
    @Override
@@ -456,13 +457,13 @@ public class ModuleExt implements Module
    @Override
    public boolean isResolved()
    {
-      return resolved;
+      return module.isResolved();
    }
 
    @Override
    public void setResolved()
    {
-      resolved = true;
+      module.setResolved();
    }
 
    @Override
@@ -486,13 +487,13 @@ public class ModuleExt implements Module
    @Override
    public Class<?> getClassByDelegation(String name) throws ClassNotFoundException
    {
-      return bundle.loadClass(name);
+      return getBundle().loadClass(name);
    }
 
    @Override
    public URL getResourceByDelegation(String name)
    {
-      return bundle.getResource(name);
+      return getBundle().getResource(name);
    }
 
    @Override
@@ -502,7 +503,7 @@ public class ModuleExt implements Module
       // TODO: why doesn't this throw an IOException
       try
       {
-         return bundle.getResources(name);
+         return getBundle().getResources(name);
       }
       catch (IOException ex)
       {
@@ -513,7 +514,7 @@ public class ModuleExt implements Module
    @Override
    public URL getEntry(String name)
    {
-      return bundle.getEntry(name);
+      return getBundle().getEntry(name);
    }
 
    @Override

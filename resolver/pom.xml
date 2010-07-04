@@ -67,6 +67,7 @@
   <!-- Modules -->
   <modules>
     <module>api</module>
+    <module>spi</module>
     <module>felix</module>
   </modules>
 

@@ -21,57 +21,33 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import java.util.List;
 
 /**
- * An OSGi resolver.
- * 
+ * Adds attachment support to an element
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XResolver 
+public interface AttachmentSupport 
 {
    /**
-    * Add a module to the resolver.
+    * Attach an arbirtary object with this element.
+    * @param clazz key for the attachment
+    * @return The previously attachment object or null
     */
-   void addModule(XModule module);
-
-   /**
-    * Remove a module from the resolver.
-    * @return The removed module or null
-    */
-   XModule removeModule(long moduleId);
-
-   /**
-    * Get the list of registered modules
-    */
-   List<XModule> getModules();
+   <T> T addAttachment(Class<T> clazz, T value);
    
    /**
-    * Find the a module for a given id.
+    * Get the attached object for a given key
+    * @param clazz key for the attachment
+    * @return The attached object or null
     */
-   XModule findModuleById(long moduleId);
+   <T> T getAttachment(Class<T> clazz);
    
    /**
-    * Find the host module for a given fragment module.
+    * Remove an attached object for a given key
+    * @param clazz key for the attachment
+    * @return The attached object or null
     */
-   XModule findHost(XModule fragModule);
-   
-   /**
-    * Resolve the given root module
-    * @throws XResolverException if the module cannot be resolved
-    */
-   void resolve(XModule rootModule) throws XResolverException;
-
-   /**
-    * Resolve the given list of modules
-    * @param modules The list of modules or null for all modules
-    * @return The list of modules that could be resolved
-    */
-   List<XModule> resolve(List<XModule> modules);
-
-   /**
-    * The the optional callback handler on the resolver
-    */
-   void setCallbackHandler(XResolverCallback callback);
+   <T> T removeAttachment(Class<T> clazz);
 }

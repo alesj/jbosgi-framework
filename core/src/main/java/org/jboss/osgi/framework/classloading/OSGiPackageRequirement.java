@@ -52,7 +52,7 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
    private AbstractBundleState bundleState;
 
    /** The attributes */
-   private XPackageRequirement metadata;
+   private XPackageRequirement packageReq;
 
    /**
     * Create a new OSGiPackageRequirement.
@@ -69,28 +69,30 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       String versionString = metadata.getVersionRange().toString();
       AbstractVersionRange range = AbstractVersionRange.valueOf(versionString);
 
-      return new OSGiPackageRequirement(bundleState, name, range, metadata);
+      return new OSGiPackageRequirement(metadata, bundleState, name, range);
    }
 
-   private OSGiPackageRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange, XPackageRequirement metadata)
+   private OSGiPackageRequirement(XPackageRequirement packageReq, AbstractBundleState bundleState, String name, VersionRange versionRange)
    {
       super(name, versionRange);
       if (bundleState == null)
          throw new IllegalArgumentException("Null bundleState");
-      if (metadata == null)
+      if (packageReq == null)
          throw new IllegalArgumentException("Null packageAttribute");
 
       this.bundleState = bundleState;
-      this.metadata = metadata;
+      this.packageReq = packageReq;
 
       // resolution:=optional
-      String resolution = metadata.getResolution();
+      String resolution = packageReq.getResolution();
       if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
          setOptional(true);
 
       // DynamicImport-Package
-      if (metadata.isDynamic() == true)
+      if (packageReq.isDynamic() == true)
          setDynamic(true);
+      
+      packageReq.addAttachment(OSGiPackageRequirement.class, this);
    }
 
    @Override
@@ -99,12 +101,10 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       return bundleState;
    }
 
-   /**
-    * Get the metadata.
-    */
-   public XPackageRequirement getMetadata()
+   @Override
+   public XPackageRequirement getResolverElement()
    {
-      return metadata;
+      return packageReq;
    }
 
    @Override
@@ -154,8 +154,8 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, String> attributes = metadata.getAttributes();
-         Map<String, String> directives = metadata.getDirectives();
+         Map<String, String> attributes = packageReq.getAttributes();
+         Map<String, String> directives = packageReq.getDirectives();
          buffer.append(";" + attributes);
          buffer.append(";" + directives);
          buffer.append("]");

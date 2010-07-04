@@ -22,9 +22,9 @@
 package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
-import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
+import org.jboss.osgi.framework.resolver.XHostRequirement;
 
 /**
  * A ModuleRequirement that is associated with Fragment-Host.
@@ -37,6 +37,7 @@ public class OSGiFragmentHostRequirement extends ModuleRequirement implements OS
    private static final long serialVersionUID = -1337312549822378204L;
 
    private AbstractBundleState bundleState;
+   private FragmentHostMetaData metadata;
 
    public static OSGiFragmentHostRequirement create(AbstractBundleState bundleState, FragmentHostMetaData metadata)
    {
@@ -45,21 +46,25 @@ public class OSGiFragmentHostRequirement extends ModuleRequirement implements OS
       if (metadata == null)
          throw new IllegalArgumentException("Null metadata");
 
-      String name = metadata.getSymbolicName();
-      VersionRange versionRange = metadata.getVersionRange();
-
-      return new OSGiFragmentHostRequirement(bundleState, name, versionRange);
+      return new OSGiFragmentHostRequirement(bundleState, metadata);
    }
 
-   private OSGiFragmentHostRequirement(AbstractBundleState bundleState, String name, VersionRange versionRange)
+   private OSGiFragmentHostRequirement(AbstractBundleState bundleState, FragmentHostMetaData metadata)
    {
-      super(name, versionRange);
+      super(metadata.getSymbolicName(), metadata.getVersionRange());
       this.bundleState = bundleState;
+      this.metadata = metadata;
    }
 
    @Override
    public AbstractBundleState getBundleState()
    {
       return bundleState;
+   }
+
+   @Override
+   public XHostRequirement getResolverElement()
+   {
+      return metadata.getResolverElement();
    }
 }

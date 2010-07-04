@@ -109,23 +109,23 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
    {
       private String symbolicName;
       private AbstractVersionRange versionRange;
-      private XHostRequirement metadata;
+      private XHostRequirement fragmentHostReq;
       
-      public FragmentHostMetaData(XHostRequirement metadata)
+      public FragmentHostMetaData(XHostRequirement fragmentHostReq)
       {
-         if (metadata == null)
-            throw new IllegalArgumentException("Null metadata");
+         if (fragmentHostReq == null)
+            throw new IllegalArgumentException("Null fragmentHostReq");
          
-         this.metadata = metadata;
-         this.symbolicName = metadata.getName();
+         this.fragmentHostReq = fragmentHostReq;
+         this.symbolicName = fragmentHostReq.getName();
          
-         String versionStr = metadata.getVersionRange().toString();
+         String versionStr = fragmentHostReq.getVersionRange().toString();
          versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
       }
 
-      public XHostRequirement getMetadata()
+      public XHostRequirement getResolverElement()
       {
-         return metadata;
+         return fragmentHostReq;
       }
 
       public String getSymbolicName()
@@ -152,7 +152,7 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
        */
       public String getExtension()
       {
-         return metadata.getExtension();
+         return fragmentHostReq.getExtension();
       }
    }
 }

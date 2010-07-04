@@ -23,6 +23,7 @@ package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.resolver.XRequirement;
 
 
 /**
@@ -33,5 +34,13 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
  */
 public interface OSGiRequirement extends Requirement
 {
+   /**
+    * Get the Bundle associated with this capability
+    */
    AbstractBundleState getBundleState();
+   
+   /**
+    * Get the associated resolver element
+    */
+   XRequirement getResolverElement();
 }

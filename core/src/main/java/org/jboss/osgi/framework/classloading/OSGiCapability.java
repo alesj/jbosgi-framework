@@ -23,6 +23,7 @@ package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloading.spi.metadata.Capability;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
+import org.jboss.osgi.framework.resolver.XCapability;
 
 
 /**
@@ -42,4 +43,9 @@ public interface OSGiCapability extends Capability
     * Get the Module associated with this capability
     */
    OSGiModule getModule();
+   
+   /**
+    * Get the associated resolver element
+    */
+   XCapability getResolverElement();
 }

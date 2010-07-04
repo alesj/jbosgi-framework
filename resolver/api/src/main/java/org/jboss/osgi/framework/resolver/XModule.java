@@ -35,7 +35,7 @@ import org.osgi.framework.Version;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XModule 
+public interface XModule extends XElement, AttachmentSupport
 {
    /**
     * Get the resover that this module has been added to 
@@ -43,14 +43,9 @@ public interface XModule
    XResolver getResolver();
    
    /**
-    * Get the bundle associated with this module.
+    * Get the module id
     */
-   Bundle getBundle();
-
-   /**
-    * Get the module name
-    */
-   String getName();
+   long getModuleId();
    
    /**
     * Get the module version
@@ -102,4 +97,15 @@ public interface XModule
     * True is this module represents a fragment
     */
    boolean isFragment();
+
+   /**
+    * True if this module is resolved
+    */
+   boolean isResolved();
+   
+   /**
+    * Get the list of wires for this module
+    * @return null if the module is not resolved
+    */
+   List<XWire> getWires();
 }
