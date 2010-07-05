@@ -213,7 +213,6 @@
 
   <!-- Modules -->
   <modules>
-    <module>resolver</module>
     <module>core</module>
     <module>metadata</module>
     <module>bundle</module>
