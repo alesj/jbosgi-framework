@@ -203,6 +203,9 @@ public class ModuleExt implements Module
       if (requirements == null)
          requirements = createRequirements();
 
+      if (dynamicreqs == null)
+         dynamicreqs = createDynamicRequirements();
+      
       return requirements;
    }
 
@@ -266,6 +269,7 @@ public class ModuleExt implements Module
       {
          // Add the package requirements
          Requirement freq = packageRequirement(req);
+         req.addAttachment(Requirement.class, freq);
          result.add(freq);
       }
 

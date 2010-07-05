@@ -21,6 +21,7 @@
  */
 package org.jboss.osgi.framework.resolver;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -88,7 +89,7 @@ class AbstractRequirement extends AbstractElement implements XRequirement
    public Map<String, Object> getAttributes()
    {
       if (attributes == null)
-         return null;
+         return Collections.emptyMap();
       
       return attributes.getAttributes();
    }
@@ -106,7 +107,7 @@ class AbstractRequirement extends AbstractElement implements XRequirement
    public Map<String, String> getDirectives()
    {
       if (directives == null)
-         return null;
+         return Collections.emptyMap();
 
       return directives.getDirectives();
    }
