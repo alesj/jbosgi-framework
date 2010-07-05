@@ -70,8 +70,8 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
 
       XModuleBuilder builder = XModuleBuilder.newBuilder();
       XModule module = builder.createModule(bundleState.getBundleId(), bundleState.getSymbolicName(), bundleState.getVersion());
-      module.addAttachment(Bundle.class, bundleState.getBundle());
-      builder.addHostCapability(bundleState.getSymbolicName(), bundleState.getVersion());
+      builder.addBundleCapability(bundleState.getSymbolicName(), bundleState.getVersion());
+      module.addAttachment(Bundle.class, bundleState);
 
       // Required Bundles
       List<ParameterizedAttribute> requireBundles = osgiMetaData.getRequireBundles();

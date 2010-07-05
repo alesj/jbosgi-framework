@@ -22,6 +22,7 @@
 package org.jboss.osgi.framework.resolver;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -32,22 +33,24 @@ import org.osgi.framework.Version;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-class AbstractPackageRequirement extends AbstractRequirement implements XPackageRequirement
+public class AbstractPackageRequirement extends AbstractRequirement implements XPackageRequirement
 {
    private XVersionRange versionRange = XVersionRange.infiniteRange;
    private String resolution;
-   private boolean dynamic;
 
    public AbstractPackageRequirement(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts, boolean dynamic)
    {
       super(module, name, dirs, atts);
 
-      this.dynamic = dynamic;
+      setDynamic(dynamic);
       if (dynamic == false)
       {
          String dir = getDirective(Constants.RESOLUTION_DIRECTIVE);
          resolution = (dir != null ? dir : Constants.RESOLUTION_MANDATORY);
       }
+      
+      // A dynamic requirement is also optional
+      setOptional(dynamic || resolution.equals(Constants.RESOLUTION_OPTIONAL));
       
       String att = getAttribute(Constants.VERSION_ATTRIBUTE);
       if (att != null)
@@ -79,8 +82,40 @@ class AbstractPackageRequirement extends AbstractRequirement implements XPackage
       return (att != null ? Version.parseVersion(att) : null);
    }
 
-   public boolean isDynamic()
+   public boolean match(XPackageCapability cap)
    {
-      return dynamic;
+      // Match the package name
+      if (getName().equals(cap.getName()) == false)
+         return false;
+      
+      // Match the version range
+      if (getVersionRange().isInRange(cap.getVersion()) == false)
+         return false;
+      
+      boolean validMatch = true;
+      
+      // Match attributes
+      for (Entry<String, String> entry : getAttributes().entrySet())
+      {
+         String key = entry.getKey();
+         String reqValue = entry.getValue();
+         if (key.equals("version") || key.equals("specification-version"))
+            continue;
+         
+         String capValue = cap.getAttribute(key);
+         if (capValue == null || capValue.equals(reqValue) == false)
+         {
+            validMatch = false;
+            break;
+         }
+      }
+      
+      return validMatch;
+   }
+   
+   @Override
+   public String toString()
+   {
+      return "[" + getName() + ":" + versionRange + ";resolution:=" + resolution + "]";
    }
 }

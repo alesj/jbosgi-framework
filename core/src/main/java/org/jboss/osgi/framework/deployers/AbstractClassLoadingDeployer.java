@@ -44,8 +44,8 @@ import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.classloading.OSGiRequiredBundleRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
-import org.jboss.osgi.framework.resolver.XBundleRequirement;
-import org.jboss.osgi.framework.resolver.XHostCapability;
+import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
+import org.jboss.osgi.framework.resolver.XBundleCapability;
 import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XPackageCapability;
 import org.jboss.osgi.framework.resolver.XPackageRequirement;
@@ -104,13 +104,13 @@ public class AbstractClassLoadingDeployer extends AbstractSimpleRealDeployer<XMo
       CapabilitiesMetaData capabilities = classLoadingMetaData.getCapabilities();
       RequirementsMetaData requirements = classLoadingMetaData.getRequirements();
 
-      XHostCapability bundleCap = module.getHostCapability();
+      XBundleCapability bundleCap = module.getBundleCapability();
       OSGiBundleCapability bundleCapability = OSGiBundleCapability.create(bundleCap, bundleState);
       capabilities.addCapability(bundleCapability);
 
       // Required Bundles
-      List<XBundleRequirement> bundleReqs = module.getBundleRequirements();
-      for (XBundleRequirement bundleReq : bundleReqs)
+      List<XRequireBundleRequirement> bundleReqs = module.getBundleRequirements();
+      for (XRequireBundleRequirement bundleReq : bundleReqs)
       {
          OSGiRequiredBundleRequirement requirement = OSGiRequiredBundleRequirement.create(bundleReq, bundleState);
          requirements.addRequirement(requirement);

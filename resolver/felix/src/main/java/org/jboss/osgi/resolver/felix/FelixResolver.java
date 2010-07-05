@@ -37,6 +37,7 @@ import org.jboss.osgi.framework.resolver.AbstractResolver;
 import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XResolver;
 import org.jboss.osgi.framework.resolver.XResolverException;
+import org.jboss.osgi.framework.resolver.XWire;
 
 /**
  * An implementation of the Resolver.
@@ -53,12 +54,14 @@ public class FelixResolver extends AbstractResolver implements XResolver
 
    private ResolverExt resolver;
    private ResolverStateExt resolverState;
+   private ResultProcessor resultProcessor;
 
    public FelixResolver()
    {
       logger = new LoggerDelegate();
       resolver = new ResolverExt(logger);
       resolverState = new ResolverStateExt(logger);
+      resultProcessor = new ResultProcessor(this);
    }
 
    @Override
@@ -82,23 +85,24 @@ public class FelixResolver extends AbstractResolver implements XResolver
       return module;
    }
 
-   private void setResolved(XModule module)
-   {
-      //module.setResolved();
-      getCallbackHandler().markResolved(module);
-   }
-   
-   private void setModuleWires(XModule module, List<Wire> wires)
-   {
-      //module.setWires(wires);
-   }
-   
    @Override
    public XModule findHost(XModule fragModule)
    {
       ModuleExt fmod = fragModule.getAttachment(ModuleExt.class);
       fmod = (ModuleExt)resolverState.findHost(fmod);
       return fmod != null ? fmod.getModule() : null;
+   }
+
+   @Override
+   protected void setWires(AbstractModule module, List<XWire> wires)
+   {
+      super.setWires(module, wires);
+   }
+
+   @Override
+   protected void setResolved(AbstractModule module)
+   {
+      super.setResolved(module);
    }
 
    @Override
@@ -193,7 +197,7 @@ public class FelixResolver extends AbstractResolver implements XResolver
          while (iter.hasNext())
          {
             Entry<Module, List<Wire>> entry = iter.next();
-            ModuleExt module = (ModuleExt)entry.getKey();
+            ModuleExt moduleExt = (ModuleExt)entry.getKey();
             List<Wire> wires = entry.getValue();
 
             // Only add wires attribute if some exist; export
@@ -202,19 +206,21 @@ public class FelixResolver extends AbstractResolver implements XResolver
             {
                logger.log(Logger.LOG_DEBUG, "WIRE: " + wires.get(wireIdx));
             }
-            setModuleWires(module.getModule(), wires);
+            
+            moduleExt.setWires(wires);
+            resultProcessor.setModuleWires(moduleExt.getModule(), wires);
 
             // Resolve all attached fragments.
-            List<Module> fragments = module.getFragments();
+            List<Module> fragments = moduleExt.getFragments();
             for (int i = 0; (fragments != null) && (i < fragments.size()); i++)
             {
                ModuleExt frag = (ModuleExt)fragments.get(i);
-               setResolved(frag.getModule());
-               logger.log(Logger.LOG_DEBUG, "FRAGMENT WIRE: " + frag + " -> hosted by -> " + module);
+               resultProcessor.setResolved(frag.getModule());
+               logger.log(Logger.LOG_DEBUG, "FRAGMENT WIRE: " + frag + " -> hosted by -> " + moduleExt);
             }
             // Update the resolver state to show the module as resolved.
-            setResolved(module.getModule());
-            resolverState.moduleResolved(module);
+            resultProcessor.setResolved(moduleExt.getModule());
+            resolverState.moduleResolved(moduleExt);
          }
       }
    }

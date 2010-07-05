@@ -151,4 +151,13 @@ public abstract class AbstractResolver implements XResolver
       return Collections.unmodifiableList(result);
    }
 
+   protected void setWires(AbstractModule module, List<XWire> wires)
+   {
+      module.setWires(wires);
+   }
+   
+   protected void setResolved(AbstractModule module)
+   {
+      module.setResolved();
+   }
 }

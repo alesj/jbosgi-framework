@@ -35,9 +35,18 @@ public interface XRequirement extends XElement, AttributeSupport, DirectiveSuppo
    XModule getModule();
 
    /**
-    * Get the capability taht this requirement is wired to.
-    * @return the capabillity or null if the module is not resolved
+    * True if this requirement is optional
     */
-   XCapability getWiredCapability();
+   boolean isOptional();
    
+   /**
+    * True if this is a dynamic requirement.
+    */
+   boolean isDynamic();
+   
+   /**
+    * Get the wire for this requirement.
+    * @return the wire or null
+    */
+   XWire getWire();
 }

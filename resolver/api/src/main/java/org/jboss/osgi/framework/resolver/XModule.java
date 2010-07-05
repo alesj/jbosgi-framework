@@ -55,7 +55,7 @@ public interface XModule extends XElement, AttachmentSupport
    /**
     * Get this modules host capability
     */
-   XHostCapability getHostCapability();
+   XBundleCapability getBundleCapability();
    
    /**
     * Get the package capabilities 
@@ -70,7 +70,7 @@ public interface XModule extends XElement, AttachmentSupport
    /**
     * Get the bundle requirements
     */
-   List<XBundleRequirement> getBundleRequirements();
+   List<XRequireBundleRequirement> getBundleRequirements();
 
    /**
     * Get the non-dynamic package requirements  
@@ -91,7 +91,7 @@ public interface XModule extends XElement, AttachmentSupport
     * Get the fragment host requirement if this module is a fragment
     * @return null if this module is not a fragment
     */
-   XHostRequirement getHostRequirement();
+   XFragmentHostRequirement getHostRequirement();
    
    /**
     * True is this module represents a fragment

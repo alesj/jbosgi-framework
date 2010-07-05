@@ -49,8 +49,8 @@ import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.resolver.AbstractModule;
-import org.jboss.osgi.framework.resolver.XBundleRequirement;
-import org.jboss.osgi.framework.resolver.XHostRequirement;
+import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
+import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
 import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XPackageCapability;
 import org.jboss.osgi.framework.resolver.XPackageRequirement;
@@ -87,7 +87,7 @@ public class ModuleExt implements Module
       this.module = module;
    }
 
-   XModule getModule()
+   AbstractModule getModule()
    {
       return module;
    }
@@ -165,19 +165,23 @@ public class ModuleExt implements Module
          List<Attribute> attrs = new ArrayList<Attribute>(2);
          attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, name, false));
          attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, version, false));
-         result.add(new CapabilityImpl(this, Capability.HOST_NAMESPACE, new ArrayList<Directive>(0), attrs));
+         Capability fcap = new CapabilityImpl(this, Capability.HOST_NAMESPACE, new ArrayList<Directive>(0), attrs);
+         result.add(fcap);
       }
 
       // Always add the module capability 
       List<Attribute> attrs = new ArrayList<Attribute>(2);
       attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, name, false));
       attrs.add(new Attribute(Constants.BUNDLE_VERSION_ATTRIBUTE, version, false));
-      result.add(new CapabilityImpl(this, Capability.MODULE_NAMESPACE, new ArrayList<Directive>(0), attrs));
+      Capability fcap = new CapabilityImpl(this, Capability.MODULE_NAMESPACE, new ArrayList<Directive>(0), attrs);
+      module.getBundleCapability().addAttachment(Capability.class, fcap);
+      result.add(fcap);
 
       for (XPackageCapability cap : module.getPackageCapabilities())
       {
          // Add the package capabilities
-         Capability fcap = packageCapability(cap);
+         fcap = packageCapability(cap);
+         cap.addAttachment(Capability.class, fcap);
          result.add(fcap);
       }
 
@@ -186,8 +190,8 @@ public class ModuleExt implements Module
       {
          for (Capability fragCap : aux.getCapabilities())
          {
-            CapabilityImpl cap = new CapabilityImpl(this, fragCap.getNamespace(), fragCap.getDirectives(), fragCap.getAttributes());
-            result.add(cap);
+            fcap = new CapabilityImpl(this, fragCap.getNamespace(), fragCap.getDirectives(), fragCap.getAttributes());
+            result.add(fcap);
          }
       }
 
@@ -208,14 +212,16 @@ public class ModuleExt implements Module
       List<Requirement> result = new ArrayList<Requirement>();
       for (XRequirement req : module.getRequirements())
       {
-         if (req instanceof XBundleRequirement)
+         if (req instanceof XRequireBundleRequirement)
          {
-            Requirement freq = requireBundleRequiment((XBundleRequirement)req);
+            Requirement freq = requireBundleRequiment((XRequireBundleRequirement)req);
+            req.addAttachment(Requirement.class, freq);
             result.add(freq);
          }
-         else if (req instanceof XHostRequirement)
+         else if (req instanceof XFragmentHostRequirement)
          {
-            Requirement freq = fragmentHostRequirement((XHostRequirement)req);
+            Requirement freq = fragmentHostRequirement((XFragmentHostRequirement)req);
+            req.addAttachment(Requirement.class, freq);
             result.add(freq);
          }
          else if (req instanceof XPackageRequirement)
@@ -223,6 +229,7 @@ public class ModuleExt implements Module
             if (((XPackageRequirement)req).isDynamic() == false)
             {
                Requirement freq = packageRequirement((XPackageRequirement)req);
+               req.addAttachment(Requirement.class, freq);
                result.add(freq);
             }
          }
@@ -336,7 +343,7 @@ public class ModuleExt implements Module
       return freq;
    }
 
-   private Requirement requireBundleRequiment(XBundleRequirement req)
+   private Requirement requireBundleRequiment(XRequireBundleRequirement req)
    {
       // Get the requirements attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
@@ -360,7 +367,7 @@ public class ModuleExt implements Module
       return freq;
    }
 
-   private Requirement fragmentHostRequirement(XHostRequirement req)
+   private Requirement fragmentHostRequirement(XFragmentHostRequirement req)
    {
       // Get the requirements attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
@@ -463,7 +470,7 @@ public class ModuleExt implements Module
    @Override
    public void setResolved()
    {
-      module.setResolved();
+      throw new IllegalAccessError("Should be called on the ResultProcessor");
    }
 
    @Override

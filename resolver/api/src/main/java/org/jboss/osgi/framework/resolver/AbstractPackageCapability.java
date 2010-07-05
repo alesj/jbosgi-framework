@@ -30,7 +30,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 /**
- * The abstract implementation of a {@link XHostCapability}.
+ * The abstract implementation of a {@link XBundleCapability}.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
@@ -96,5 +96,11 @@ class AbstractPackageCapability extends AbstractCapability implements XPackageCa
       
       String[] split = dir.split(",");
       return Arrays.asList(split);
+   }
+
+   @Override
+   public String toString()
+   {
+      return "[" + getName() + ":" + version + "]";
    }
 }

@@ -26,7 +26,7 @@ import java.util.Map;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
-import org.jboss.osgi.framework.resolver.XBundleRequirement;
+import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
 import org.osgi.framework.Constants;
 
 /**
@@ -39,7 +39,7 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
 {
    private static final long serialVersionUID = 1L;
 
-   public static OSGiRequiredBundleRequirement create(XBundleRequirement metadata, AbstractBundleState bundleState)
+   public static OSGiRequiredBundleRequirement create(XRequireBundleRequirement metadata, AbstractBundleState bundleState)
    {
       String name = metadata.getName();
 
@@ -49,7 +49,7 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
       return new OSGiRequiredBundleRequirement(metadata, bundleState, name, versionRange);
    }
 
-   private OSGiRequiredBundleRequirement(XBundleRequirement bundleReq, AbstractBundleState bundleState, String name, VersionRange versionRange)
+   private OSGiRequiredBundleRequirement(XRequireBundleRequirement bundleReq, AbstractBundleState bundleState, String name, VersionRange versionRange)
    {
       super(bundleReq, bundleState, name, versionRange);
 

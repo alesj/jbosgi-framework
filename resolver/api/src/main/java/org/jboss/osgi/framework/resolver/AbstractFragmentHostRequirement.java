@@ -26,12 +26,12 @@ import java.util.Map;
 import org.osgi.framework.Constants;
 
 /**
- * The abstract implementation of a {@link XHostRequirement}.
+ * The abstract implementation of a {@link XFragmentHostRequirement}.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-class AbstractFragmentHostRequirement extends AbstractRequirement implements XHostRequirement
+class AbstractFragmentHostRequirement extends AbstractRequirement implements XFragmentHostRequirement
 {
    private XVersionRange versionRange = XVersionRange.infiniteRange;
    private String extension;

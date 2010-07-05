@@ -21,15 +21,29 @@
  */
 package org.jboss.osgi.framework.resolver;
 
+import org.osgi.framework.Version;
+
 /**
- * A Fragment-Host requirement
+ * The abstract implementation of a {@link XBundleCapability}.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XHostRequirement extends XRequirement 
+class AbstractBundleCapability extends AbstractCapability implements XBundleCapability
 {
-   XVersionRange getVersionRange();
-   
-   String getExtension();
+   private Version version = Version.emptyVersion;
+
+   public AbstractBundleCapability(AbstractModule module, String symbolicName, Version version)
+   {
+      super(module, symbolicName, null, null);
+      
+      if (version != null)
+         this.version = version;
+   }
+
+   @Override
+   public Version getVersion()
+   {
+      return version;
+   }
 }

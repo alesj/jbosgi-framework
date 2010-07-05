@@ -26,7 +26,7 @@ import java.util.Map;
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.resolver.XBundleRequirement;
+import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
 
 /**
  * OSGiBundleRequirement.
@@ -40,9 +40,9 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
    private static final long serialVersionUID = 1L;
 
    private AbstractBundleState bundleState;
-   private XBundleRequirement bundleReq;
+   private XRequireBundleRequirement bundleReq;
 
-   OSGiBundleRequirement(XBundleRequirement bundleReq, AbstractBundleState bundleState, String name, VersionRange versionRange)
+   OSGiBundleRequirement(XRequireBundleRequirement bundleReq, AbstractBundleState bundleState, String name, VersionRange versionRange)
    {
       super(name, versionRange);
 
@@ -53,7 +53,7 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
 
       this.bundleState = bundleState;
       this.bundleReq = bundleReq;
-      bundleReq.addAttachment(OSGiBundleRequirement.class, this);
+      bundleReq.addAttachment(OSGiRequirement.class, this);
    }
 
    @Override
@@ -63,12 +63,12 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
    }
 
    @Override
-   public XBundleRequirement getResolverElement()
+   public XRequireBundleRequirement getResolverElement()
    {
       return bundleReq;
    }
 
-   public XBundleRequirement getMetadata()
+   public XRequireBundleRequirement getMetadata()
    {
       return bundleReq;
    }

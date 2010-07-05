@@ -99,7 +99,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       if (packageCap.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null)
          throw new IllegalStateException("You cannot specify " + Constants.BUNDLE_VERSION_ATTRIBUTE + " on an Export-Package");
       
-      packageCap.addAttachment(OSGiPackageCapability.class, this);
+      packageCap.addAttachment(OSGiCapability.class, this);
    }
 
    @Override

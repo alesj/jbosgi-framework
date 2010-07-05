@@ -31,7 +31,7 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
-import org.jboss.osgi.framework.resolver.XHostRequirement;
+import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
 import org.jboss.osgi.framework.resolver.XModule;
 
 /**
@@ -55,7 +55,7 @@ public class OSGiFragmentClassLoadingDeployer extends AbstractClassLoadingDeploy
          OSGiClassLoadingMetaData classLoadingMetaData = (OSGiClassLoadingMetaData)unit.getAttachment(ClassLoadingMetaData.class);
 
          // Initialize the Fragment-Host 
-         XHostRequirement hostReq = resolverModule.getHostRequirement();
+         XFragmentHostRequirement hostReq = resolverModule.getHostRequirement();
          FragmentHostMetaData hostMetaData = new FragmentHostMetaData(hostReq);
          classLoadingMetaData.setFragmentHost(hostMetaData);
 

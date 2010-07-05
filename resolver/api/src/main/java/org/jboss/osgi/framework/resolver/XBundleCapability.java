@@ -21,17 +21,18 @@
  */
 package org.jboss.osgi.framework.resolver;
 
+import org.osgi.framework.Version;
+
 /**
- * A bundle requirement
+ * A host bundle capability
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XBundleRequirement extends XRequirement 
+public interface XBundleCapability extends XCapability 
 {
-   XVersionRange getVersionRange();
-   
-   String getVisibility();
-   
-   String getResolution();
+   /**
+    * Get the bundle version
+    */
+   Version getVersion();
 }

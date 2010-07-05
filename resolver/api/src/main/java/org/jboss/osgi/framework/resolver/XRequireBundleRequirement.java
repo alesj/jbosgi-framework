@@ -21,29 +21,17 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import org.osgi.framework.Version;
-
 /**
- * The abstract implementation of a {@link XHostCapability}.
+ * A bundle requirement
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-class AbstractHostCapability extends AbstractCapability implements XHostCapability
+public interface XRequireBundleRequirement extends XRequirement 
 {
-   private Version version = Version.emptyVersion;
-
-   public AbstractHostCapability(AbstractModule module, String symbolicName, Version version)
-   {
-      super(module, symbolicName, null, null);
-      
-      if (version != null)
-         this.version = version;
-   }
-
-   @Override
-   public Version getVersion()
-   {
-      return version;
-   }
+   XVersionRange getVersionRange();
+   
+   String getVisibility();
+   
+   String getResolution();
 }

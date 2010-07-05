@@ -21,7 +21,8 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import java.util.Map;
+import org.jboss.osgi.framework.resolver.AbstractElement.AttachmentSupporter;
+
 
 /**
  * The abstract implementation of a {@link XCapability}.
@@ -29,86 +30,44 @@ import java.util.Map;
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-class AbstractRequirement extends AbstractElement implements XRequirement
+public class AbstractWire implements XWire, AttachmentSupport
 {
-   private XModule module;
-   private DirectiveSupport directives;
-   private AttributeSupport attributes;
+   private XModule importer;
+   private XRequirement requirement;
+   private XModule exporter;
+   private XCapability capability;
    private AttachmentSupport attachments;
-   private boolean optional, dynamic;
-   private XWire wire;
-
-   public AbstractRequirement(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts)
-   {
-      super(name);
-      this.module = module;
-      
-      if (dirs != null)
-         directives = new DirectiveSupporter(dirs);
-      if (atts != null)
-         attributes = new AttributeSupporter(atts);
-   }
-
-   @Override
-   public XModule getModule()
-   {
-      return module;
-   }
    
-   public boolean isOptional()
+   public AbstractWire(XModule importer, XRequirement requirement, XModule exporter, XCapability capability)
    {
-      return optional;
-   }
-
-   void setOptional(boolean optional)
-   {
-      this.optional = optional;
-   }
-
-   public boolean isDynamic()
-   {
-      return dynamic;
-   }
-
-   void setDynamic(boolean dynamic)
-   {
-      this.dynamic = dynamic;
+      this.importer = importer;
+      this.requirement = requirement;
+      this.exporter = exporter;
+      this.capability = capability;
    }
 
    @Override
-   public String getAttribute(String key)
+   public XModule getImporter()
    {
-      if (attributes == null)
-         return null;
-      
-      return attributes.getAttribute(key);
+      return importer;
    }
 
    @Override
-   public Map<String, String> getAttributes()
+   public XRequirement getRequirement()
    {
-      if (attributes == null)
-         return null;
-      
-      return attributes.getAttributes();
+      return requirement;
    }
 
    @Override
-   public String getDirective(String key)
+   public XModule getExporter()
    {
-      if (directives == null)
-         return null;
-
-      return directives.getDirective(key);
+      return exporter;
    }
 
    @Override
-   public Map<String, String> getDirectives()
+   public XCapability getCapability()
    {
-      if (directives == null)
-         return null;
-
-      return directives.getDirectives();
+      return capability;
    }
 
    @Override
@@ -139,22 +98,8 @@ class AbstractRequirement extends AbstractElement implements XRequirement
    }
 
    @Override
-   public XWire getWire()
+   public String toString()
    {
-      if (module.getWires() == null)
-         return null;
-
-      if (wire == null)
-      {
-         for (XWire aux : module.getWires())
-         {
-            if (aux.getRequirement() == this)
-            {
-               wire = aux;
-               break;
-            }
-         }
-      }
-      return wire;
+      return "Wire[" + importer + requirement + " --> " + exporter + capability + "]";
    }
 }

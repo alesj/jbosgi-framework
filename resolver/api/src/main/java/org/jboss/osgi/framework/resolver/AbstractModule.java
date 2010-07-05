@@ -42,10 +42,10 @@ public class AbstractModule extends AbstractElement implements XModule
    
    private long moduleId;
    private Version version;
-   private XHostCapability hostCapability;
+   private XBundleCapability bundleCapability;
    private List<XCapability> capabilities;
    private List<XRequirement> requirements;
-   private XHostRequirement hostRequirement;
+   private XFragmentHostRequirement hostRequirement;
    private AttachmentSupport attachments;
    private List<XWire> wires;
    private boolean resolved;
@@ -90,8 +90,7 @@ public class AbstractModule extends AbstractElement implements XModule
       return resolved;
    }
 
-   // [TODO] Better access restriction
-   public void setResolved()
+   void setResolved()
    {
       this.resolved = true;
    }
@@ -115,24 +114,24 @@ public class AbstractModule extends AbstractElement implements XModule
    }
 
    @Override
-   public List<XBundleRequirement> getBundleRequirements()
+   public List<XRequireBundleRequirement> getBundleRequirements()
    {
       if (requirements == null)
          return Collections.emptyList();
       
-      List<XBundleRequirement> result = new ArrayList<XBundleRequirement>();
+      List<XRequireBundleRequirement> result = new ArrayList<XRequireBundleRequirement>();
       for (XRequirement aux : requirements)
       {
-         if (aux instanceof XBundleRequirement)
-            result.add((XBundleRequirement)aux);
+         if (aux instanceof XRequireBundleRequirement)
+            result.add((XRequireBundleRequirement)aux);
       }
       return Collections.unmodifiableList(result);
    }
 
    @Override
-   public XHostCapability getHostCapability()
+   public XBundleCapability getBundleCapability()
    {
-      return hostCapability;
+      return bundleCapability;
    }
 
    @Override
@@ -192,7 +191,7 @@ public class AbstractModule extends AbstractElement implements XModule
    }
 
    @Override
-   public XHostRequirement getHostRequirement()
+   public XFragmentHostRequirement getHostRequirement()
    {
       if (hostRequirement != null)
          return hostRequirement;
@@ -201,9 +200,9 @@ public class AbstractModule extends AbstractElement implements XModule
       {
          for (XRequirement aux : requirements)
          {
-            if (aux instanceof XHostRequirement)
+            if (aux instanceof XFragmentHostRequirement)
             {
-               hostRequirement = (XHostRequirement)aux;
+               hostRequirement = (XFragmentHostRequirement)aux;
                break;
             }
          }
@@ -228,13 +227,18 @@ public class AbstractModule extends AbstractElement implements XModule
       return Collections.unmodifiableList(wires);
    }
 
+   void setWires(List<XWire> wires)
+   {
+      this.wires = wires;
+   }
+   
    void addCapability(XCapability capability)
    {
       if (capabilities == null)
          capabilities = new ArrayList<XCapability>();
 
-      if (capability instanceof XHostCapability)
-         hostCapability = (XHostCapability)capability;
+      if (capability instanceof XBundleCapability)
+         bundleCapability = (XBundleCapability)capability;
 
       capabilities.add(capability);
    }
@@ -294,6 +298,6 @@ public class AbstractModule extends AbstractElement implements XModule
    @Override
    public String toString()
    {
-      return "Module[" + getName() + ":" + getVersion() + "]";
+      return getName() + ":" + getVersion();
    }
 }

@@ -30,7 +30,7 @@ import java.util.List;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
-import org.jboss.osgi.framework.resolver.XHostRequirement;
+import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
 
 /**
  * An extension of {@link ClassLoadingMetaData} that captures OSGi specific 
@@ -109,9 +109,9 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
    {
       private String symbolicName;
       private AbstractVersionRange versionRange;
-      private XHostRequirement fragmentHostReq;
+      private XFragmentHostRequirement fragmentHostReq;
       
-      public FragmentHostMetaData(XHostRequirement fragmentHostReq)
+      public FragmentHostMetaData(XFragmentHostRequirement fragmentHostReq)
       {
          if (fragmentHostReq == null)
             throw new IllegalArgumentException("Null fragmentHostReq");
@@ -123,7 +123,7 @@ public class OSGiClassLoadingMetaData extends ClassLoadingMetaData
          versionRange = (AbstractVersionRange)AbstractVersionRange.valueOf(versionStr);
       }
 
-      public XHostRequirement getResolverElement()
+      public XFragmentHostRequirement getResolverElement()
       {
          return fragmentHostReq;
       }

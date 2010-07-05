@@ -39,6 +39,7 @@ import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XModuleBuilder;
 import org.jboss.osgi.framework.resolver.XRequirement;
 import org.jboss.osgi.framework.resolver.XResolver;
+import org.jboss.osgi.framework.resolver.XWire;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -69,7 +70,10 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       if (bundle.getBundleId() == 0)
       {
          XModuleBuilder builder = XModuleBuilder.newBuilder();
-         builder.createModule(0, bundle.getSymbolicName(), bundle.getVersion());
+         module = builder.createModule(0, bundle.getSymbolicName(), bundle.getVersion());
+         builder.addBundleCapability(bundle.getSymbolicName(), bundle.getVersion());
+         module.addAttachment(Bundle.class, bundle);
+         
          SystemPackagesPlugin plugin = getPlugin(SystemPackagesPlugin.class);
          for (String packageSpec : plugin.getSystemPackages(true))
          {
@@ -89,7 +93,6 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
             
             builder.addPackageCapability(packname, null, attrs);
          }
-         module = builder.getModule();
       }
       else
       {
@@ -146,11 +149,13 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    public OSGiCapability getWiredCapability(OSGiRequirement osgireq)
    {
       XRequirement req = osgireq.getResolverElement();
-      XCapability cap = req.getWiredCapability();
-      if (cap == null)
+      XWire wire = req.getWire();
+      if (wire == null || wire.getCapability() == null)
          return null;
       
-      return cap.getAttachment(OSGiCapability.class);
+      XCapability cap = wire.getCapability();
+      OSGiCapability osgicap = cap.getAttachment(OSGiCapability.class);
+      return osgicap;
    }
 
 }

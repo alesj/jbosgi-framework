@@ -92,7 +92,7 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       if (packageReq.isDynamic() == true)
          setDynamic(true);
       
-      packageReq.addAttachment(OSGiPackageRequirement.class, this);
+      packageReq.addAttachment(OSGiRequirement.class, this);
    }
 
    @Override

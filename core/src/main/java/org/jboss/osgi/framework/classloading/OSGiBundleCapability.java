@@ -35,7 +35,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
-import org.jboss.osgi.framework.resolver.XHostCapability;
+import org.jboss.osgi.framework.resolver.XBundleCapability;
 import org.osgi.framework.Version;
 
 /**
@@ -51,9 +51,9 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    private static final long serialVersionUID = 2366716668262831380L;
 
    private AbstractBundleState bundleState;
-   private XHostCapability bundleCap;
+   private XBundleCapability bundleCap;
 
-   public static OSGiBundleCapability create(XHostCapability bundleCap, AbstractBundleState bundleState)
+   public static OSGiBundleCapability create(XBundleCapability bundleCap, AbstractBundleState bundleState)
    {
       if (bundleCap == null)
          throw new IllegalArgumentException("Null module");
@@ -63,12 +63,12 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
       return new OSGiBundleCapability(bundleCap, bundleState);
    }
 
-   private OSGiBundleCapability(XHostCapability bundleCap, AbstractBundleState bundleState)
+   private OSGiBundleCapability(XBundleCapability bundleCap, AbstractBundleState bundleState)
    {
       super(bundleCap.getName(), bundleCap.getVersion());
       this.bundleState = bundleState;
       this.bundleCap = bundleCap;
-      bundleCap.addAttachment(OSGiBundleCapability.class, this);
+      bundleCap.addAttachment(OSGiCapability.class, this);
    }
 
    @Override
@@ -78,7 +78,7 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    }
 
    @Override
-   public XHostCapability getResolverElement()
+   public XBundleCapability getResolverElement()
    {
       return bundleCap;
    }

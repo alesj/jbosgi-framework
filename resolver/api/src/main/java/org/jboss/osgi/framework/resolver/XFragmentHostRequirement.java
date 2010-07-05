@@ -21,18 +21,15 @@
  */
 package org.jboss.osgi.framework.resolver;
 
-import org.osgi.framework.Version;
-
 /**
- * A host bundle capability
+ * A Fragment-Host requirement
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-public interface XHostCapability extends XCapability 
+public interface XFragmentHostRequirement extends XRequirement 
 {
-   /**
-    * Get the bundle version
-    */
-   Version getVersion();
+   XVersionRange getVersionRange();
+   
+   String getExtension();
 }

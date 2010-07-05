@@ -26,12 +26,12 @@ import java.util.Map;
 import org.osgi.framework.Constants;
 
 /**
- * The abstract implementation of a {@link XBundleRequirement}.
+ * The abstract implementation of a {@link XRequireBundleRequirement}.
  *
  * @author thomas.diesler@jboss.com
  * @since 02-Jul-2010
  */
-class AbstractBundleRequirement extends AbstractRequirement implements XBundleRequirement
+class AbstractBundleRequirement extends AbstractRequirement implements XRequireBundleRequirement
 {
    private XVersionRange versionRange = XVersionRange.infiniteRange;
    private String visibility = Constants.VISIBILITY_PRIVATE;
@@ -52,6 +52,8 @@ class AbstractBundleRequirement extends AbstractRequirement implements XBundleRe
       dir = getDirective(Constants.RESOLUTION_DIRECTIVE);
       if (dir != null)
          resolution = dir;
+      
+      setOptional(resolution.equals(Constants.RESOLUTION_OPTIONAL));
    }
 
    @Override

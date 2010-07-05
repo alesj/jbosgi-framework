@@ -64,13 +64,13 @@ public final class XModuleBuilder
    }
 
    /**
-    * Add a host bundle capability
+    * Add a bundle capability
     * @param symbolicName The bundle symbolic name
     * @param version The bundle version
     */
-   public XHostCapability addHostCapability(String symbolicName, Version version)
+   public XBundleCapability addBundleCapability(String symbolicName, Version version)
    {
-      XHostCapability cap = new AbstractHostCapability(module, symbolicName, version);
+      XBundleCapability cap = new AbstractBundleCapability(module, symbolicName, version);
       module.addCapability(cap);
       return cap;
    }
@@ -81,9 +81,9 @@ public final class XModuleBuilder
     * @param dirs The directives
     * @param atts The attributes
     */
-   public XBundleRequirement addBundleRequirement(String symbolicName, Map<String, String> dirs, Map<String, String> atts)
+   public XRequireBundleRequirement addBundleRequirement(String symbolicName, Map<String, String> dirs, Map<String, String> atts)
    {
-      XBundleRequirement req = new AbstractBundleRequirement(module, symbolicName, dirs, atts);
+      XRequireBundleRequirement req = new AbstractBundleRequirement(module, symbolicName, dirs, atts);
       module.addRequirement(req);
       return req;
    }
