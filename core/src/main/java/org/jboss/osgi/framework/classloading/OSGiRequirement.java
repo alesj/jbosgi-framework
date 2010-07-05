@@ -23,7 +23,7 @@ package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloading.spi.metadata.Requirement;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.resolver.XRequirement;
+import org.jboss.osgi.resolver.XRequirement;
 
 
 /**

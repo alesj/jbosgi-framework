@@ -26,7 +26,7 @@ package org.jboss.osgi.framework.deployers;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.resolver.XModule;
+import org.jboss.osgi.resolver.XModule;
 
 /**
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata

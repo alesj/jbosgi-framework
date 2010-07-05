@@ -31,8 +31,8 @@ import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.classloading.OSGiFragmentHostRequirement;
-import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
-import org.jboss.osgi.framework.resolver.XModule;
+import org.jboss.osgi.resolver.XFragmentHostRequirement;
+import org.jboss.osgi.resolver.XModule;
 
 /**
  * An OSGi classloading deployer, that maps osgi metadata into classloading metadata

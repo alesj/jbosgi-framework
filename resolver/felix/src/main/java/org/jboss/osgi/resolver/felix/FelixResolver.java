@@ -32,12 +32,14 @@ import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.ResolveException;
 import org.apache.felix.framework.resolver.Wire;
 import org.apache.felix.framework.util.Util;
-import org.jboss.osgi.framework.resolver.AbstractModule;
-import org.jboss.osgi.framework.resolver.AbstractResolver;
-import org.jboss.osgi.framework.resolver.XModule;
-import org.jboss.osgi.framework.resolver.XResolver;
-import org.jboss.osgi.framework.resolver.XResolverException;
-import org.jboss.osgi.framework.resolver.XWire;
+import org.jboss.osgi.resolver.XCapability;
+import org.jboss.osgi.resolver.XModule;
+import org.jboss.osgi.resolver.XRequirement;
+import org.jboss.osgi.resolver.XResolver;
+import org.jboss.osgi.resolver.XResolverException;
+import org.jboss.osgi.resolver.XWire;
+import org.jboss.osgi.resolver.spi.AbstractModule;
+import org.jboss.osgi.resolver.spi.AbstractResolver;
 
 /**
  * An implementation of the Resolver.
@@ -65,7 +67,7 @@ public class FelixResolver extends AbstractResolver implements XResolver
    }
 
    @Override
-   public void addModule(XModule module)
+   public void addModule(org.jboss.osgi.resolver.XModule module)
    {
       super.addModule(module);
       ModuleExt fmod = new ModuleExt((AbstractModule)module);
@@ -74,9 +76,9 @@ public class FelixResolver extends AbstractResolver implements XResolver
    }
 
    @Override
-   public XModule removeModule(long moduleId)
+   public org.jboss.osgi.resolver.XModule removeModule(long moduleId)
    {
-      XModule module = super.removeModule(moduleId);
+      org.jboss.osgi.resolver.XModule module = super.removeModule(moduleId);
       if (module == null)
          return null;
 
@@ -92,19 +94,13 @@ public class FelixResolver extends AbstractResolver implements XResolver
    }
 
    @Override
-   protected void setWires(AbstractModule module, List<XWire> wires)
-   {
-      super.setWires(module, wires);
-   }
-
-   @Override
    protected void setResolved(AbstractModule module)
    {
       super.setResolved(module);
    }
 
    @Override
-   protected void resolveInternal(XModule module) throws XResolverException
+   protected void resolveInternal(org.jboss.osgi.resolver.XModule module) throws XResolverException
    {
       ModuleExt rootModule = module.getAttachment(ModuleExt.class);
       try
@@ -223,5 +219,10 @@ public class FelixResolver extends AbstractResolver implements XResolver
             resolverState.moduleResolved(moduleExt);
          }
       }
+   }
+
+   protected XWire addWire(AbstractModule importer, XRequirement requirement, XModule exporter, XCapability capability)
+   {
+      return super.addWire(importer, requirement, exporter, capability);
    }
 }

@@ -26,7 +26,7 @@ import java.util.Map;
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
 import org.jboss.classloading.spi.version.VersionRange;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
+import org.jboss.osgi.resolver.XRequireBundleRequirement;
 
 /**
  * OSGiBundleRequirement.

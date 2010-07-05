@@ -23,7 +23,7 @@ package org.jboss.osgi.framework.classloading;
 
 import org.jboss.classloading.spi.metadata.Capability;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
-import org.jboss.osgi.framework.resolver.XCapability;
+import org.jboss.osgi.resolver.XCapability;
 
 
 /**

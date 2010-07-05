@@ -28,28 +28,21 @@ import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.resolver.FragmentRequirement;
 import org.apache.felix.framework.resolver.Wire;
-import org.jboss.osgi.framework.resolver.AbstractModule;
-import org.jboss.osgi.framework.resolver.AbstractPackageRequirement;
-import org.jboss.osgi.framework.resolver.AbstractWire;
-import org.jboss.osgi.framework.resolver.XBundleCapability;
-import org.jboss.osgi.framework.resolver.XCapability;
-import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
-import org.jboss.osgi.framework.resolver.XModule;
-import org.jboss.osgi.framework.resolver.XPackageCapability;
-import org.jboss.osgi.framework.resolver.XPackageRequirement;
-import org.jboss.osgi.framework.resolver.XRequirement;
-import org.jboss.osgi.framework.resolver.XWire;
+import org.jboss.osgi.resolver.XBundleCapability;
+import org.jboss.osgi.resolver.XCapability;
+import org.jboss.osgi.resolver.XFragmentHostRequirement;
+import org.jboss.osgi.resolver.XModule;
+import org.jboss.osgi.resolver.XPackageCapability;
+import org.jboss.osgi.resolver.XPackageRequirement;
+import org.jboss.osgi.resolver.XRequirement;
+import org.jboss.osgi.resolver.XWire;
+import org.jboss.osgi.resolver.spi.AbstractModule;
+import org.jboss.osgi.resolver.spi.AbstractPackageRequirement;
 
 /**
  * A processor for the resolver results.
  * 
- * The resolver API esablishes rules about the wiring results.
- * 
- * These are
- *
- *  <ul>
- *    <li>A mandatory {@link XRequirement} in a resoved {@link XModule} must have a {@link XWire}</li>
- *  </ul>
+ * A mandatory {@link XRequirement} in a resoved {@link XModule} must have a {@link XWire}</li>
  *  
  * @author thomas.diesler@jboss.com
  * @since 05-Jul-2010
@@ -73,7 +66,7 @@ public class ResultProcessor
       AbstractModule module = moduleExt.getModule();
       for (XRequirement req : module.getRequirements())
       {
-         XModule importer = req.getModule();
+         AbstractModule importer = (AbstractModule)req.getModule();
 
          // Get the associated felix requirement
          Requirement freq = req.getAttachment(Requirement.class);
@@ -95,12 +88,8 @@ public class ResultProcessor
 
          // Find the coresponding capability
          XCapability cap = findCapability(exporter, fcap);
-
-         AbstractWire wire = new AbstractWire(importer, req, exporter, cap);
-         result.add(wire);
+         resolver.addWire(importer, req, exporter, cap);
       }
-
-      resolver.setWires(module, result);
    }
 
    private void handleNullWire(List<XWire> result, XRequirement req)
@@ -110,7 +99,7 @@ public class ResultProcessor
       // Felix does not maintain wires to capabilies provided by the same bundle
       if (req instanceof XPackageRequirement)
       {
-         XModule importer = req.getModule();
+         AbstractModule importer = (AbstractModule)req.getModule();
          XPackageCapability cap = getMatchingPackageCapability(importer, req);
          
          // If the importer is a fragment, scan the host's wires
@@ -132,19 +121,17 @@ public class ResultProcessor
          if (cap != null)
          {
             XModule exporter = cap.getModule();
-            wire = new AbstractWire(importer, req, exporter, cap);
-            result.add(wire);
+            wire = resolver.addWire(importer, req, exporter, cap);
          }
       }
       
       // Provide a wire to the Fragment-Host bundle capability 
       else if (req instanceof XFragmentHostRequirement)
       {
-         XModule fragModule = req.getModule();
+         AbstractModule fragModule = (AbstractModule)req.getModule();
          XModule hostModule = getFragmentHost(fragModule);
          XBundleCapability hostCap = hostModule.getBundleCapability();
-         wire = new AbstractWire(fragModule, req, hostModule, hostCap);
-         result.add(wire);
+         wire = resolver.addWire(fragModule, req, hostModule, hostCap);
       }
       
       if (wire == null && req.isOptional() == false)

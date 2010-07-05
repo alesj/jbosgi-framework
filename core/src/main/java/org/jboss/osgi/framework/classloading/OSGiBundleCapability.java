@@ -35,7 +35,7 @@ import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.Parameter;
 import org.jboss.osgi.framework.metadata.ParameterizedAttribute;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
-import org.jboss.osgi.framework.resolver.XBundleCapability;
+import org.jboss.osgi.resolver.XBundleCapability;
 import org.osgi.framework.Version;
 
 /**

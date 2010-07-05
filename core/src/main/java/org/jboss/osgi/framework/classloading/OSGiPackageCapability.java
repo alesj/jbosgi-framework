@@ -36,8 +36,8 @@ import org.jboss.osgi.framework.bundle.OSGiBundleManager;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
-import org.jboss.osgi.framework.resolver.XPackageCapability;
-import org.jboss.osgi.framework.resolver.XPackageRequirement;
+import org.jboss.osgi.resolver.XPackageCapability;
+import org.jboss.osgi.resolver.XPackageRequirement;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 

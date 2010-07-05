@@ -34,12 +34,13 @@ import org.jboss.osgi.framework.classloading.OSGiCapability;
 import org.jboss.osgi.framework.classloading.OSGiRequirement;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
-import org.jboss.osgi.framework.resolver.XCapability;
-import org.jboss.osgi.framework.resolver.XModule;
-import org.jboss.osgi.framework.resolver.XModuleBuilder;
-import org.jboss.osgi.framework.resolver.XRequirement;
-import org.jboss.osgi.framework.resolver.XResolver;
-import org.jboss.osgi.framework.resolver.XWire;
+import org.jboss.osgi.resolver.XCapability;
+import org.jboss.osgi.resolver.XModule;
+import org.jboss.osgi.resolver.XModuleBuilder;
+import org.jboss.osgi.resolver.XRequirement;
+import org.jboss.osgi.resolver.XResolver;
+import org.jboss.osgi.resolver.XResolverFactory;
+import org.jboss.osgi.resolver.XWire;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -69,7 +70,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       XModule module;
       if (bundle.getBundleId() == 0)
       {
-         XModuleBuilder builder = XModuleBuilder.newBuilder();
+         XModuleBuilder builder = XResolverFactory.getModuleBuilder();
          module = builder.createModule(0, bundle.getSymbolicName(), bundle.getVersion());
          builder.addBundleCapability(bundle.getSymbolicName(), bundle.getVersion());
          module.addAttachment(Bundle.class, bundle);

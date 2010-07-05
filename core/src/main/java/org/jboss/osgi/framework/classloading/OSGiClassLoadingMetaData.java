@@ -30,7 +30,7 @@ import java.util.List;
 import org.jboss.classloading.spi.metadata.ClassLoadingMetaData;
 import org.jboss.osgi.framework.metadata.NativeLibraryMetaData;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
-import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
+import org.jboss.osgi.resolver.XFragmentHostRequirement;
 
 /**
  * An extension of {@link ClassLoadingMetaData} that captures OSGi specific 

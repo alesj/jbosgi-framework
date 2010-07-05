@@ -32,7 +32,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
 import org.jboss.osgi.framework.metadata.internal.AbstractVersionRange;
-import org.jboss.osgi.framework.resolver.XPackageRequirement;
+import org.jboss.osgi.resolver.XPackageRequirement;
 import org.osgi.framework.Constants;
 
 /**

@@ -44,11 +44,11 @@ import org.jboss.osgi.framework.classloading.OSGiPackageRequirement;
 import org.jboss.osgi.framework.classloading.OSGiRequiredBundleRequirement;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
 import org.jboss.osgi.framework.plugins.SystemPackagesPlugin;
-import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
-import org.jboss.osgi.framework.resolver.XBundleCapability;
-import org.jboss.osgi.framework.resolver.XModule;
-import org.jboss.osgi.framework.resolver.XPackageCapability;
-import org.jboss.osgi.framework.resolver.XPackageRequirement;
+import org.jboss.osgi.resolver.XBundleCapability;
+import org.jboss.osgi.resolver.XModule;
+import org.jboss.osgi.resolver.XPackageCapability;
+import org.jboss.osgi.resolver.XPackageRequirement;
+import org.jboss.osgi.resolver.XRequireBundleRequirement;
 
 /**
  * An abstract OSGi classloading deployer, that maps {@link OSGiMetaData} into {@link ClassLoadingMetaData}.

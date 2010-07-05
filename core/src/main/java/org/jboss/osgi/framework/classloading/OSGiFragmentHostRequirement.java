@@ -24,7 +24,7 @@ package org.jboss.osgi.framework.classloading;
 import org.jboss.classloading.plugins.metadata.ModuleRequirement;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
-import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
+import org.jboss.osgi.resolver.XFragmentHostRequirement;
 
 /**
  * A ModuleRequirement that is associated with Fragment-Host.
