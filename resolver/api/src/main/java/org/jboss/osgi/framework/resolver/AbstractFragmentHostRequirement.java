@@ -36,13 +36,13 @@ class AbstractFragmentHostRequirement extends AbstractRequirement implements XFr
    private XVersionRange versionRange = XVersionRange.infiniteRange;
    private String extension;
 
-   public AbstractFragmentHostRequirement(AbstractModule module, String symbolicName, Map<String, String> dirs, Map<String, String> atts)
+   public AbstractFragmentHostRequirement(AbstractModule module, String symbolicName, Map<String, String> dirs, Map<String, Object> atts)
    {
       super(module, symbolicName, dirs, atts);
 
-      String att = getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+      Object att = getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
       if (att != null)
-         versionRange = XVersionRange.parse(att);
+         versionRange = XVersionRange.parse(att.toString());
 
       String dir = getDirective(Constants.EXTENSION_DIRECTIVE);
       if (dir != null)

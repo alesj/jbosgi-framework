@@ -81,7 +81,7 @@ public class OSGiRequiredBundleRequirement extends OSGiBundleRequirement
       super.toString(buffer);
       Map<String, String> directives = getMetadata().getDirectives();
       buffer.append(";" + directives);
-      Map<String, String> attributes = getMetadata().getAttributes();
+      Map<String, Object> attributes = getMetadata().getAttributes();
       buffer.append(";" + attributes);
    }
 }

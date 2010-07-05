@@ -90,21 +90,21 @@ class AbstractElement implements XElement
    
    static class AttributeSupporter implements AttributeSupport
    {
-      private Map<String, String> attributes;
+      private Map<String, Object> attributes;
 
-      AttributeSupporter(Map<String, String> attributes)
+      AttributeSupporter(Map<String, Object> attributes)
       {
          this.attributes = attributes;
       }
 
       @Override
-      public String getAttribute(String key)
+      public Object getAttribute(String key)
       {
          return attributes != null ? attributes.get(key) : null;
       }
 
       @Override
-      public Map<String, String> getAttributes()
+      public Map<String, Object> getAttributes()
       {
          return Collections.unmodifiableMap(attributes);
       }

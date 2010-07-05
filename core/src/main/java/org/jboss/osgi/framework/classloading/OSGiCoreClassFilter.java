@@ -47,15 +47,15 @@ public final class OSGiCoreClassFilter extends PackageClassFilter
    public static String[] getCorePackages()
    {
       return new String[] {
-         "org.osgi.framework",
-         "org.osgi.framework.hooks",
-         "org.osgi.framework.hooks.service",
-         "org.osgi.framework.launch",
-         "org.osgi.service.condpermadmin",
-         "org.osgi.service.packageadmin",
-         "org.osgi.service.permissionadmin",
-         "org.osgi.service.startlevel",
-         "org.osgi.service.url"
+         "org.osgi.framework;version=1.5",
+         "org.osgi.framework.hooks;version=1.0",
+         "org.osgi.framework.hooks.service;version=1.0",
+         "org.osgi.framework.launch;version=1.0",
+         "org.osgi.service.condpermadmin;version=1.1",
+         "org.osgi.service.packageadmin;version=1.2",
+         "org.osgi.service.permissionadmin;version=1.2",
+         "org.osgi.service.startlevel;version=1.1",
+         "org.osgi.service.url;version=1.0"
       };
    }
 

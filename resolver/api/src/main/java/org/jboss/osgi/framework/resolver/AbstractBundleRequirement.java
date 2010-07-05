@@ -37,13 +37,13 @@ class AbstractBundleRequirement extends AbstractRequirement implements XRequireB
    private String visibility = Constants.VISIBILITY_PRIVATE;
    private String resolution = Constants.RESOLUTION_MANDATORY;
 
-   public AbstractBundleRequirement(AbstractModule module, String symbolicName, Map<String, String> dirs, Map<String, String> atts)
+   public AbstractBundleRequirement(AbstractModule module, String symbolicName, Map<String, String> dirs, Map<String, Object> atts)
    {
       super(module, symbolicName, dirs, atts);
 
-      String att = getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+      Object att = getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
       if (att != null)
-         versionRange = XVersionRange.parse(att);
+         versionRange = XVersionRange.parse(att.toString());
 
       String dir = getDirective(Constants.VISIBILITY_DIRECTIVE);
       if (dir != null)

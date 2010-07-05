@@ -60,11 +60,14 @@ public class ResultProcessor
       this.resolver = resolver;
    }
 
-   public void setModuleWires(AbstractModule module, List<Wire> fwires)
+   public void setModuleWires(ModuleExt moduleExt, List<Wire> fwires)
    {
-      List<XWire> result = new ArrayList<XWire>();
+      // Set the wires on the felix module
+      moduleExt.setWires(fwires);
 
       // Iterate over all standard requirements
+      List<XWire> result = new ArrayList<XWire>();
+      AbstractModule module = moduleExt.getModule();
       for (XRequirement req : module.getRequirements())
       {
          XModule importer = req.getModule();
@@ -81,7 +84,7 @@ public class ResultProcessor
             handleNullWire(result, req);
             continue;
          }
-
+         
          // Get the exporter
          Capability fcap = fwire.getCapability();
          ModuleExt fexporter = (ModuleExt)fwire.getExporter();
@@ -108,7 +111,7 @@ public class ResultProcessor
    private void handleNullWire(List<XWire> result, XRequirement req)
    {
       XWire wire = null;
-
+      
       // Felix does not maintain wires to capabilies provided by the same bundle
       if (req instanceof XPackageRequirement)
       {
@@ -119,20 +122,20 @@ public class ResultProcessor
             if (((AbstractPackageRequirement)req).match(cap))
             {
                wire = new AbstractWire(module, req, module, cap);
+               result.add(wire);
                break;
             }
          }
       }
-
+      
       if (wire == null && req.isOptional() == false)
          throw new IllegalStateException("Cannot find a wire for mandatory requirement: " + req);
-
-      result.add(wire);
    }
 
-   public void setResolved(AbstractModule module)
+   public void setResolved(ModuleExt moduleExt)
    {
-      resolver.setResolved(module);
+      moduleExt.setResolved();
+      resolver.setResolved(moduleExt.getModule());
    }
 
    private Wire getWireForRequirement(List<Wire> fwires, Requirement freq)

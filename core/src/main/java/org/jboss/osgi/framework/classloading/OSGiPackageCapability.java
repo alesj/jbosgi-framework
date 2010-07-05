@@ -199,7 +199,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       {
          for (String mand : mandatoryAttributes)
          {
-            String reqAttributeValue = req.getAttribute(mand);
+            Object reqAttributeValue = req.getAttribute(mand);
             if (req == null || reqAttributeValue == null)
             {
                validMatch = false;
@@ -210,13 +210,13 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
 
       if (validMatch == true && req != null)
       {
-         Map<String, String> params = req.getAttributes();
+         Map<String, Object> params = req.getAttributes();
          if (params != null && params.isEmpty() == false)
          {
             for (String name : params.keySet())
             {
-               String otherValue = req.getAttribute(name);
-               String ourValue = cap.getAttribute(name);
+               Object otherValue = req.getAttribute(name);
+               Object ourValue = cap.getAttribute(name);
 
                if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(name))
                {
@@ -225,7 +225,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
                }
                else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(name))
                {
-                  VersionRange range = (VersionRange)AbstractVersionRange.valueOf(otherValue);
+                  VersionRange range = (VersionRange)AbstractVersionRange.valueOf(otherValue.toString());
                   if (range.isInRange(osgiMetaData.getBundleVersion()) == false)
                      validMatch = false;
                }
@@ -268,7 +268,7 @@ public class OSGiPackageCapability extends PackageCapability implements OSGiCapa
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, String> attributes = packageCap.getAttributes();
+         Map<String, Object> attributes = packageCap.getAttributes();
          Map<String, String> directives = packageCap.getDirectives();
          buffer.append(";" + attributes);
          buffer.append(";" + directives);

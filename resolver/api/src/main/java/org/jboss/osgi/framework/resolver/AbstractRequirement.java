@@ -38,7 +38,7 @@ class AbstractRequirement extends AbstractElement implements XRequirement
    private boolean optional, dynamic;
    private XWire wire;
 
-   public AbstractRequirement(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts)
+   public AbstractRequirement(AbstractModule module, String name, Map<String, String> dirs, Map<String, Object> atts)
    {
       super(name);
       this.module = module;
@@ -76,7 +76,7 @@ class AbstractRequirement extends AbstractElement implements XRequirement
    }
 
    @Override
-   public String getAttribute(String key)
+   public Object getAttribute(String key)
    {
       if (attributes == null)
          return null;
@@ -85,7 +85,7 @@ class AbstractRequirement extends AbstractElement implements XRequirement
    }
 
    @Override
-   public Map<String, String> getAttributes()
+   public Map<String, Object> getAttributes()
    {
       if (attributes == null)
          return null;

@@ -26,6 +26,7 @@ package org.jboss.test.osgi.resolver;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.felix.framework.util.VersionRange;
 import org.jboss.osgi.framework.plugins.ResolverPlugin;
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.shrinkwrap.api.Archive;
@@ -33,6 +34,7 @@ import org.jboss.test.osgi.classloader.support.a.A;
 import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
@@ -1113,7 +1115,7 @@ public abstract class AbstractResolverTest extends OSGiFrameworkTest
    public void testSystemPackageImport() throws Exception
    {
       //Bundle-SymbolicName: systempackageimport
-      //Import-Package: org.osgi.framework;version=1.4
+      //Import-Package: org.osgi.framework;version=[1.4,2.0)
       Archive<?> assemblyA = assembleArchive("bundleA", "/bundles/resolver/systempackageimport");
       Bundle bundleA = installBundle(assemblyA);
       try

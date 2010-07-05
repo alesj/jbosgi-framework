@@ -78,7 +78,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
          for (String packageSpec : plugin.getSystemPackages(true))
          {
             String packname = packageSpec;
-            Version version = null;
+            Version version = Version.emptyVersion;
 
             int versionIndex = packname.indexOf(";version=");
             if (versionIndex > 0)
@@ -87,9 +87,8 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
                version = Version.parseVersion(packageSpec.substring(versionIndex + 9));
             }
 
-            Map<String, String> attrs = new HashMap<String, String>();
-            if (version != null)
-               attrs.put(Constants.VERSION_ATTRIBUTE, version.toString());
+            Map<String, Object> attrs = new HashMap<String, Object>();
+            attrs.put(Constants.VERSION_ATTRIBUTE, version);
             
             builder.addPackageCapability(packname, null, attrs);
          }

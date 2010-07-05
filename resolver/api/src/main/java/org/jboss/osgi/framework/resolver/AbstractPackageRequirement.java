@@ -38,7 +38,7 @@ public class AbstractPackageRequirement extends AbstractRequirement implements X
    private XVersionRange versionRange = XVersionRange.infiniteRange;
    private String resolution;
 
-   public AbstractPackageRequirement(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts, boolean dynamic)
+   public AbstractPackageRequirement(AbstractModule module, String name, Map<String, String> dirs, Map<String, Object> atts, boolean dynamic)
    {
       super(module, name, dirs, atts);
 
@@ -52,9 +52,9 @@ public class AbstractPackageRequirement extends AbstractRequirement implements X
       // A dynamic requirement is also optional
       setOptional(dynamic || resolution.equals(Constants.RESOLUTION_OPTIONAL));
       
-      String att = getAttribute(Constants.VERSION_ATTRIBUTE);
+      Object att = getAttribute(Constants.VERSION_ATTRIBUTE);
       if (att != null)
-         versionRange = XVersionRange.parse(att);
+         versionRange = XVersionRange.parse(att.toString());
    }
 
    @Override
@@ -72,14 +72,14 @@ public class AbstractPackageRequirement extends AbstractRequirement implements X
    @Override
    public String getBundleSymbolicName()
    {
-      return getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
+      return (String)getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
    }
 
    @Override
    public Version getBundleVersion()
    {
-      String att = getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
-      return (att != null ? Version.parseVersion(att) : null);
+      Object att = getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+      return (att != null ? Version.parseVersion(att.toString()) : null);
    }
 
    public boolean match(XPackageCapability cap)
@@ -95,14 +95,14 @@ public class AbstractPackageRequirement extends AbstractRequirement implements X
       boolean validMatch = true;
       
       // Match attributes
-      for (Entry<String, String> entry : getAttributes().entrySet())
+      for (Entry<String, Object> entry : getAttributes().entrySet())
       {
          String key = entry.getKey();
-         String reqValue = entry.getValue();
+         Object reqValue = entry.getValue();
          if (key.equals("version") || key.equals("specification-version"))
             continue;
          
-         String capValue = cap.getAttribute(key);
+         Object capValue = cap.getAttribute(key);
          if (capValue == null || capValue.equals(reqValue) == false)
          {
             validMatch = false;

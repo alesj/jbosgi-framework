@@ -39,13 +39,13 @@ class AbstractPackageCapability extends AbstractCapability implements XPackageCa
 {
    private Version version = Version.emptyVersion;
 
-   public AbstractPackageCapability(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts)
+   public AbstractPackageCapability(AbstractModule module, String name, Map<String, String> dirs, Map<String, Object> atts)
    {
       super(module, name, dirs, atts);
       
-      String att = getAttribute(Constants.VERSION_ATTRIBUTE);
+      Object att = getAttribute(Constants.VERSION_ATTRIBUTE);
       if (att != null)
-         version = Version.parseVersion(att);
+         version = Version.parseVersion(att.toString());
    }
 
    @Override

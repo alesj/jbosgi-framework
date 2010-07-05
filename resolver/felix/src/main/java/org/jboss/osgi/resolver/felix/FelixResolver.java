@@ -207,19 +207,20 @@ public class FelixResolver extends AbstractResolver implements XResolver
                logger.log(Logger.LOG_DEBUG, "WIRE: " + wires.get(wireIdx));
             }
             
-            moduleExt.setWires(wires);
-            resultProcessor.setModuleWires(moduleExt.getModule(), wires);
+            resultProcessor.setModuleWires(moduleExt, wires);
 
             // Resolve all attached fragments.
             List<Module> fragments = moduleExt.getFragments();
             for (int i = 0; (fragments != null) && (i < fragments.size()); i++)
             {
                ModuleExt frag = (ModuleExt)fragments.get(i);
-               resultProcessor.setResolved(frag.getModule());
+               frag.setResolved();
+               
+               resultProcessor.setResolved(frag);
                logger.log(Logger.LOG_DEBUG, "FRAGMENT WIRE: " + frag + " -> hosted by -> " + moduleExt);
             }
             // Update the resolver state to show the module as resolved.
-            resultProcessor.setResolved(moduleExt.getModule());
+            resultProcessor.setResolved(moduleExt);
             resolverState.moduleResolved(moduleExt);
          }
       }

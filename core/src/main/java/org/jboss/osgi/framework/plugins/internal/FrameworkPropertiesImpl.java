@@ -81,7 +81,7 @@ public class FrameworkPropertiesImpl implements FrameworkProperties
             OSGi_FRAMEWORK_OS_VERSION = System.getProperty("os.version");
             OSGi_FRAMEWORK_PROCESSOR = System.getProperty("os.arch");
 
-            System.setProperty("org.osgi.vendor.framework", "org.jboss.osgi.plugins.framework");
+            System.setProperty("org.osgi.vendor.framework", "org.jboss.osgi.framework");
             return null;
          }
       });

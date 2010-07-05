@@ -37,7 +37,7 @@ class AbstractCapability extends AbstractElement implements XCapability
    private AttributeSupport attributes;
    private AttachmentSupport attachments;
 
-   public AbstractCapability(AbstractModule module, String name, Map<String, String> dirs, Map<String, String> atts)
+   public AbstractCapability(AbstractModule module, String name, Map<String, String> dirs, Map<String, Object> atts)
    {
       super(name);
       this.module = module;
@@ -55,7 +55,7 @@ class AbstractCapability extends AbstractElement implements XCapability
    }
    
    @Override
-   public String getAttribute(String key)
+   public Object getAttribute(String key)
    {
       if (attributes == null)
          return null;
@@ -64,7 +64,7 @@ class AbstractCapability extends AbstractElement implements XCapability
    }
 
    @Override
-   public Map<String, String> getAttributes()
+   public Map<String, Object> getAttributes()
    {
       if (attributes == null)
          return Collections.emptyMap();

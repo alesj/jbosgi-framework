@@ -81,7 +81,7 @@ public final class XModuleBuilder
     * @param dirs The directives
     * @param atts The attributes
     */
-   public XRequireBundleRequirement addBundleRequirement(String symbolicName, Map<String, String> dirs, Map<String, String> atts)
+   public XRequireBundleRequirement addBundleRequirement(String symbolicName, Map<String, String> dirs, Map<String, Object> atts)
    {
       XRequireBundleRequirement req = new AbstractBundleRequirement(module, symbolicName, dirs, atts);
       module.addRequirement(req);
@@ -94,7 +94,7 @@ public final class XModuleBuilder
     * @param dirs The directives
     * @param atts The attributes
     */
-   public XPackageCapability addPackageCapability(String name, Map<String, String> dirs, Map<String, String> atts)
+   public XPackageCapability addPackageCapability(String name, Map<String, String> dirs, Map<String, Object> atts)
    {
       XPackageCapability cap = new AbstractPackageCapability(module, name, dirs, atts);
       module.addCapability(cap);
@@ -107,7 +107,7 @@ public final class XModuleBuilder
     * @param dirs The directives
     * @param atts The attributes
     */
-   public XPackageRequirement addPackageRequirement(String name, Map<String, String> dirs, Map<String, String> atts)
+   public XPackageRequirement addPackageRequirement(String name, Map<String, String> dirs, Map<String, Object> atts)
    {
       XPackageRequirement req = new AbstractPackageRequirement(module, name, dirs, atts, false);
       module.addRequirement(req);
@@ -119,7 +119,7 @@ public final class XModuleBuilder
     * @param name The package name
     * @param atts The attributes
     */
-   public XPackageRequirement addDynamicPackageRequirement(String name, Map<String, String> atts)
+   public XPackageRequirement addDynamicPackageRequirement(String name, Map<String, Object> atts)
    {
       XPackageRequirement req = new AbstractPackageRequirement(module, name, null, atts, true);
       module.addRequirement(req);

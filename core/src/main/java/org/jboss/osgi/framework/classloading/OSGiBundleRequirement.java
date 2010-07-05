@@ -90,7 +90,7 @@ abstract class OSGiBundleRequirement extends ModuleRequirement implements OSGiRe
    protected void toString(StringBuffer buffer)
    {
       super.toString(buffer);
-      Map<String, String> attributes = getMetadata().getAttributes();
+      Map<String, Object> attributes = getMetadata().getAttributes();
       buffer.append(";" + attributes);
    }
 }

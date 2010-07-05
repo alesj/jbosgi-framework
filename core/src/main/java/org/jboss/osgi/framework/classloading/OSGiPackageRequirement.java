@@ -154,7 +154,7 @@ public class OSGiPackageRequirement extends PackageRequirement implements Requir
       if (shortString == null)
       {
          StringBuffer buffer = new StringBuffer(bundleState.getCanonicalName() + "[" + getName());
-         Map<String, String> attributes = packageReq.getAttributes();
+         Map<String, Object> attributes = packageReq.getAttributes();
          Map<String, String> directives = packageReq.getDirectives();
          buffer.append(";" + attributes);
          buffer.append(";" + directives);

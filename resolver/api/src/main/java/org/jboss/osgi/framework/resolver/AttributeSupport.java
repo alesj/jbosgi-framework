@@ -34,11 +34,11 @@ public interface AttributeSupport
    /**
     * Get the attributes
     */
-   Map<String, String> getAttributes();
+   Map<String, Object> getAttributes();
    
    /**
     * Get the value of the given attribute 
     * @return null if no such attribute is associated with this capability
     */
-   String getAttribute(String key);
+   Object getAttribute(String key);
 }

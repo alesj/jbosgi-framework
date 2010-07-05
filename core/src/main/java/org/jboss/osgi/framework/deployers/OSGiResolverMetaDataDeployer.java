@@ -81,7 +81,7 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
          {
             String name = metadata.getAttribute();
             Map<String, String> dirs = getDirectives(metadata);
-            Map<String, String> atts = getAttributes(metadata);
+            Map<String, Object> atts = getAttributes(metadata);
             builder.addBundleRequirement(name, dirs, atts);
          }
       }
@@ -94,7 +94,7 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
          {
             String name = metadata.getAttribute();
             Map<String, String> dirs = getDirectives(metadata);
-            Map<String, String> atts = getAttributes(metadata);
+            Map<String, Object> atts = getAttributes(metadata);
             builder.addPackageCapability(name, dirs, atts);
          }
       }
@@ -107,7 +107,7 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
          {
             String name = metadata.getAttribute();
             Map<String, String> dirs = getDirectives(metadata);
-            Map<String, String> atts = getAttributes(metadata);
+            Map<String, Object> atts = getAttributes(metadata);
             builder.addPackageRequirement(name, dirs, atts);
          }
       }
@@ -119,7 +119,7 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
          for (PackageAttribute metadata : dynamicImports)
          {
             String name = metadata.getAttribute();
-            Map<String, String> atts = getAttributes(metadata);
+            Map<String, Object> atts = getAttributes(metadata);
             builder.addDynamicPackageRequirement(name, atts);
          }
       }
@@ -138,9 +138,9 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
       return dirs;
    }
 
-   private Map<String, String> getAttributes(ParameterizedAttribute metadata)
+   private Map<String, Object> getAttributes(ParameterizedAttribute metadata)
    {
-      Map<String, String> atts = new HashMap<String, String>();
+      Map<String, Object> atts = new HashMap<String, Object>();
       for(String key : metadata.getAttributes().keySet())
       {
          Parameter param = metadata.getAttribute(key);

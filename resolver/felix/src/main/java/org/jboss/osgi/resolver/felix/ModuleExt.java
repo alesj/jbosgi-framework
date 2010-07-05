@@ -49,11 +49,10 @@ import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.resolver.AbstractModule;
-import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
 import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
-import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XPackageCapability;
 import org.jboss.osgi.framework.resolver.XPackageRequirement;
+import org.jboss.osgi.framework.resolver.XRequireBundleRequirement;
 import org.jboss.osgi.framework.resolver.XRequirement;
 import org.jboss.osgi.spi.NotImplementedException;
 import org.osgi.framework.Bundle;
@@ -281,12 +280,12 @@ public class ModuleExt implements Module
       // Get the capabiliy attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
       attrs.add(new Attribute(Capability.PACKAGE_ATTR, cap.getName(), false));
-      for (Entry<String, String> entry : cap.getAttributes().entrySet())
+      for (Entry<String, Object> entry : cap.getAttributes().entrySet())
       {
          String key = entry.getKey();
          Object value = entry.getValue();
          if (Capability.VERSION_ATTR.equals(key))
-            value = Version.parseVersion((String)value);
+            value = Version.parseVersion(value.toString());
          else if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(key))
             symbolicName = (String)value;
          else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
@@ -322,7 +321,7 @@ public class ModuleExt implements Module
       // Get the requirements attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
       attrs.add(new Attribute(Capability.PACKAGE_ATTR, req.getName(), false));
-      for (Entry<String, String> entry : req.getAttributes().entrySet())
+      for (Entry<String, Object> entry : req.getAttributes().entrySet())
       {
          String key = entry.getKey();
          Object value = entry.getValue();
@@ -348,7 +347,7 @@ public class ModuleExt implements Module
       // Get the requirements attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
       attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, req.getName(), false));
-      for (Entry<String, String> entry : req.getAttributes().entrySet())
+      for (Entry<String, Object> entry : req.getAttributes().entrySet())
       {
          String key = entry.getKey();
          Object value = entry.getValue();
@@ -372,7 +371,7 @@ public class ModuleExt implements Module
       // Get the requirements attributes
       List<Attribute> attrs = new ArrayList<Attribute>();
       attrs.add(new Attribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, req.getName(), false));
-      for (Entry<String, String> entry : req.getAttributes().entrySet())
+      for (Entry<String, Object> entry : req.getAttributes().entrySet())
       {
          String key = entry.getKey();
          Object value = entry.getValue();
@@ -470,7 +469,7 @@ public class ModuleExt implements Module
    @Override
    public void setResolved()
    {
-      throw new IllegalAccessError("Should be called on the ResultProcessor");
+      // do nothing
    }
 
    @Override
