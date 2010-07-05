@@ -124,13 +124,23 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
          }
       }
 
+      // Fragment-Host
+      ParameterizedAttribute fragmentHost = osgiMetaData.getFragmentHost();
+      if (fragmentHost != null)
+      {
+         String symbolicName = fragmentHost.getAttribute();
+         Map<String, String> dirs = getDirectives(fragmentHost);
+         Map<String, Object> atts = getAttributes(fragmentHost);
+         builder.addFragmentHostRequirement(symbolicName, dirs, atts);
+      }
+
       unit.addAttachment(XModule.class, builder.getModule());
    }
 
    private Map<String, String> getDirectives(ParameterizedAttribute metadata)
    {
       Map<String, String> dirs = new HashMap<String, String>();
-      for(String key : metadata.getDirectives().keySet())
+      for (String key : metadata.getDirectives().keySet())
       {
          Parameter param = metadata.getDirective(key);
          dirs.put(key, param.getValue().toString());
@@ -141,7 +151,7 @@ public class OSGiResolverMetaDataDeployer extends AbstractSimpleRealDeployer<OSG
    private Map<String, Object> getAttributes(ParameterizedAttribute metadata)
    {
       Map<String, Object> atts = new HashMap<String, Object>();
-      for(String key : metadata.getAttributes().keySet())
+      for (String key : metadata.getAttributes().keySet())
       {
          Parameter param = metadata.getAttribute(key);
          atts.put(key, param.getValue().toString());

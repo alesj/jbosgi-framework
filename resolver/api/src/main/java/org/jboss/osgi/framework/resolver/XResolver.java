@@ -53,11 +53,6 @@ public interface XResolver
    XModule findModuleById(long moduleId);
    
    /**
-    * Find the host module for a given fragment module.
-    */
-   XModule findHost(XModule fragModule);
-   
-   /**
     * Resolve the given root module
     * @throws XResolverException if the module cannot be resolved
     */

@@ -91,40 +91,30 @@ public class OSGiBundleCapability extends ModuleCapability implements OSGiCapabi
    @Override
    public boolean resolves(Module reqModule, Requirement mcreq)
    {
-      if (mcreq instanceof OSGiBundleRequirement == false)
-         return false;
-
-      OSGiBundleRequirement osgireq = (OSGiBundleRequirement)mcreq;
-
-      // Get the optional resolver
-      OSGiBundleManager bundleManager = bundleState.getBundleManager();
-      ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
-
-      // If there is no resolver, match bundle name and version
-      if (resolver == null)
+      if (mcreq instanceof OSGiBundleRequirement || mcreq instanceof OSGiFragmentHostRequirement)
       {
-         boolean match = super.resolves(reqModule, mcreq);
-         match &= matchAttributes(mcreq);
-         return match;
+         OSGiRequirement osgireq = (OSGiRequirement)mcreq;
+
+         // Get the optional resolver
+         OSGiBundleManager bundleManager = bundleState.getBundleManager();
+         ResolverPlugin resolver = bundleManager.getOptionalPlugin(ResolverPlugin.class);
+
+         // If there is no resolver, match bundle name and version
+         if (resolver == null)
+         {
+            boolean match = super.resolves(reqModule, mcreq);
+            match &= matchAttributes(mcreq);
+            return match;
+         }
+
+         // Get the wired capability from the resolver
+         OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
+         if (osgicap != null)
+         {
+            boolean match = (osgicap == this);
+            return match;
+         }
       }
-
-      // Get the wired capability from the resolver
-      OSGiCapability osgicap = resolver.getWiredCapability(osgireq);
-      if (osgicap != null)
-      {
-         boolean match = (osgicap == this);
-         return match;
-      }
-
-      // A fragment can potentially attach to multiple host bundles
-      // The Felix resolver has not yet settled on an API that supports that notion 
-      //if (osgireq instanceof OSGiFragmentHostRequirement)
-      //{
-      //   boolean match = super.resolves(reqModule, mcreq);
-      //   match &= matchAttributes(mcreq);
-      //   return match;
-      //}
-
       return false;
    }
 

@@ -89,6 +89,19 @@ public final class XModuleBuilder
    }
 
    /**
+    * Add a fragment host requirement
+    * @param symbolicName The bundle symbolic name
+    * @param dirs The directives
+    * @param atts The attributes
+    */
+   public XFragmentHostRequirement addFragmentHostRequirement(String symbolicName, Map<String, String> dirs, Map<String, Object> atts)
+   {
+      XFragmentHostRequirement req = new AbstractFragmentHostRequirement(module, symbolicName, dirs, atts);
+      module.addRequirement(req);
+      return req;
+   }
+
+   /**
     * Add a package capability
     * @param name The package name
     * @param dirs The directives
@@ -102,7 +115,7 @@ public final class XModuleBuilder
    }
 
    /**
-    * Add a package capability
+    * Add a package requirement
     * @param name The package name
     * @param dirs The directives
     * @param atts The attributes
@@ -115,7 +128,7 @@ public final class XModuleBuilder
    }
 
    /**
-    * Add a package capability
+    * Add a dynamic package requirement
     * @param name The package name
     * @param atts The attributes
     */

@@ -26,11 +26,14 @@ import java.util.List;
 
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.resolver.FragmentRequirement;
 import org.apache.felix.framework.resolver.Wire;
 import org.jboss.osgi.framework.resolver.AbstractModule;
 import org.jboss.osgi.framework.resolver.AbstractPackageRequirement;
 import org.jboss.osgi.framework.resolver.AbstractWire;
+import org.jboss.osgi.framework.resolver.XBundleCapability;
 import org.jboss.osgi.framework.resolver.XCapability;
+import org.jboss.osgi.framework.resolver.XFragmentHostRequirement;
 import org.jboss.osgi.framework.resolver.XModule;
 import org.jboss.osgi.framework.resolver.XPackageCapability;
 import org.jboss.osgi.framework.resolver.XPackageRequirement;
@@ -78,7 +81,7 @@ public class ResultProcessor
             throw new IllegalStateException("Cannot obtain felix requirement from: " + req);
 
          // Find the wire that corresponds to the felix requirement
-         Wire fwire = getWireForRequirement(fwires, freq);
+         Wire fwire = findWireForRequirement(fwires, freq);
          if (fwire == null)
          {
             handleNullWire(result, req);
@@ -91,15 +94,7 @@ public class ResultProcessor
          XModule exporter = fexporter.getModule();
 
          // Find the coresponding capability
-         XCapability cap = null;
-         for (XCapability aux : exporter.getCapabilities())
-         {
-            if (aux.getAttachment(Capability.class) == fcap)
-            {
-               cap = aux;
-               break;
-            }
-         }
+         XCapability cap = findCapability(exporter, fcap);
 
          AbstractWire wire = new AbstractWire(importer, req, exporter, cap);
          result.add(wire);
@@ -115,21 +110,64 @@ public class ResultProcessor
       // Felix does not maintain wires to capabilies provided by the same bundle
       if (req instanceof XPackageRequirement)
       {
-         XModule module = req.getModule();
-         for (XPackageCapability cap : module.getPackageCapabilities())
+         XModule importer = req.getModule();
+         XPackageCapability cap = getMatchingPackageCapability(importer, req);
+         
+         // If the importer is a fragment, scan the host's wires
+         if (cap == null && importer.isFragment())
          {
-            // Add a wire if there is a match to a capability provided by the same module 
-            if (((AbstractPackageRequirement)req).match(cap))
+            Requirement freq = req.getAttachment(Requirement.class);
+            
+            XModule host = getFragmentHost(importer);
+            ModuleExt hostExt = host.getAttachment(ModuleExt.class);
+            Wire fwire = findWireForRequirement(hostExt.getWires(), freq);
+            if (fwire != null)
             {
-               wire = new AbstractWire(module, req, module, cap);
-               result.add(wire);
-               break;
+               XModule exporter = ((ModuleExt)fwire.getExporter()).getModule();
+               cap = (XPackageCapability)findCapability(exporter, fwire.getCapability());
             }
          }
+         
+         // Add the additional wire
+         if (cap != null)
+         {
+            XModule exporter = cap.getModule();
+            wire = new AbstractWire(importer, req, exporter, cap);
+            result.add(wire);
+         }
+      }
+      
+      // Provide a wire to the Fragment-Host bundle capability 
+      else if (req instanceof XFragmentHostRequirement)
+      {
+         XModule fragModule = req.getModule();
+         XModule hostModule = getFragmentHost(fragModule);
+         XBundleCapability hostCap = hostModule.getBundleCapability();
+         wire = new AbstractWire(fragModule, req, hostModule, hostCap);
+         result.add(wire);
       }
       
       if (wire == null && req.isOptional() == false)
          throw new IllegalStateException("Cannot find a wire for mandatory requirement: " + req);
+   }
+
+   private XPackageCapability getMatchingPackageCapability(XModule module, XRequirement req)
+   {
+      for (XPackageCapability cap : module.getPackageCapabilities())
+      {
+         // Add a wire if there is a match to a capability provided by the same module 
+         if (((AbstractPackageRequirement)req).match(cap))
+            return cap;
+      }
+      return null;
+   }
+
+   private XModule getFragmentHost(XModule fragModule)
+   {
+      ModuleExt ffrag = fragModule.getAttachment(ModuleExt.class);
+      ModuleExt fHost = resolver.findHost(ffrag);
+      XModule hostModule = fHost.getModule();
+      return hostModule;
    }
 
    public void setResolved(ModuleExt moduleExt)
@@ -138,12 +176,40 @@ public class ResultProcessor
       resolver.setResolved(moduleExt.getModule());
    }
 
-   private Wire getWireForRequirement(List<Wire> fwires, Requirement freq)
+   private Wire findWireForRequirement(List<Wire> fwires, Requirement freq)
    {
-      for (Wire fwire : fwires)
+      Wire fwire = null;
+      if (fwires != null)
       {
-         if (fwire.getRequirement() == freq)
-            return fwire;
+         for (Wire aux : fwires)
+         {
+            Requirement auxreq = aux.getRequirement();
+            if (auxreq == freq)
+            {
+               fwire = aux;
+               break;
+            }
+            
+            if (auxreq instanceof FragmentRequirement)
+            {
+               auxreq = ((FragmentRequirement)auxreq).getRequirement();
+               if (auxreq == freq)
+               {
+                  fwire = aux;
+                  break;
+               }
+            }
+         }
+      }
+      return fwire;
+   }
+
+   private XCapability findCapability(XModule exporter, Capability fcap)
+   {
+      for (XCapability aux : exporter.getCapabilities())
+      {
+         if (aux.getAttachment(Capability.class) == fcap)
+            return aux;
       }
       return null;
    }

@@ -85,12 +85,10 @@ public class FelixResolver extends AbstractResolver implements XResolver
       return module;
    }
 
-   @Override
-   public XModule findHost(XModule fragModule)
+   public ModuleExt findHost(ModuleExt fragModule)
    {
-      ModuleExt fmod = fragModule.getAttachment(ModuleExt.class);
-      fmod = (ModuleExt)resolverState.findHost(fmod);
-      return fmod != null ? fmod.getModule() : null;
+      ModuleExt hostModule = (ModuleExt)resolverState.findHost(fragModule);
+      return hostModule;
    }
 
    @Override
@@ -216,6 +214,7 @@ public class FelixResolver extends AbstractResolver implements XResolver
                ModuleExt frag = (ModuleExt)fragments.get(i);
                frag.setResolved();
                
+               resultProcessor.setModuleWires(frag, null);
                resultProcessor.setResolved(frag);
                logger.log(Logger.LOG_DEBUG, "FRAGMENT WIRE: " + frag + " -> hosted by -> " + moduleExt);
             }
