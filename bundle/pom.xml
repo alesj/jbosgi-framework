@@ -110,7 +110,7 @@
     <!-- Test Dependencies -->
     <dependency>
       <groupId>org.jboss.osgi.resolver</groupId>
-      <artifactId>jboss-osgi-resolver-felix</artifactId>
+      <artifactId>jbosgi-resolver-felix</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
