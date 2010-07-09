@@ -108,7 +108,9 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    @Override
    public void removeBundle(Bundle bundle)
    {
-      resolver.removeModule(bundle.getBundleId());
+      DeployedBundleState bundleState = DeployedBundleState.assertBundleState(bundle);
+      XModule module = bundleState.getDeploymentUnit().getAttachment(XModule.class);
+      resolver.removeModule(module);
    }
 
    @Override
