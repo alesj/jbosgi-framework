@@ -98,9 +98,6 @@ public class SystemPackagesPluginImpl extends AbstractPlugin implements SystemPa
          allPackages.add("javax.xml.transform.sax");
          allPackages.add("javax.xml.transform.stream");
          
-         allPackages.add("org.jboss.osgi.deployment.deployer");
-         allPackages.add("org.jboss.osgi.deployment.interceptor");
-
          String[] corePackages = OSGiCoreClassFilter.getCorePackages();
          allPackages.addAll(Arrays.asList(corePackages));
          
