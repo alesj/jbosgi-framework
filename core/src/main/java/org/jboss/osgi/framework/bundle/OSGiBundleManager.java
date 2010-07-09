@@ -1257,20 +1257,20 @@ public class OSGiBundleManager
       if (systemBundle.getState() != Bundle.STARTING)
          initFramework();
 
-      // All installed bundles must be started
-      AutoInstallPlugin autoInstall = getOptionalPlugin(AutoInstallPlugin.class);
-      if (autoInstall != null)
-      {
-         autoInstall.installBundles();
-         autoInstall.startBundles();
-      }
-
       // Add the system bundle to the resolver
       ResolverPlugin resolver = getOptionalPlugin(ResolverPlugin.class);
       if (resolver != null)
       {
          resolver.addBundle(systemBundle);
          resolver.resolve(Collections.singletonList(systemBundle.getBundleInternal()));
+      }
+
+      // All installed bundles must be started
+      AutoInstallPlugin autoInstall = getOptionalPlugin(AutoInstallPlugin.class);
+      if (autoInstall != null)
+      {
+         autoInstall.installBundles();
+         autoInstall.startBundles();
       }
 
       StartLevelPlugin startLevel = getOptionalPlugin(StartLevelPlugin.class);
