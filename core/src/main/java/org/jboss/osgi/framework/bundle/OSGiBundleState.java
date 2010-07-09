@@ -37,6 +37,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData;
 import org.jboss.osgi.framework.classloading.OSGiClassLoadingMetaData.FragmentHostMetaData;
 import org.jboss.osgi.framework.metadata.OSGiMetaData;
+import org.jboss.osgi.framework.metadata.PackageAttribute;
 import org.jboss.osgi.framework.metadata.VersionRange;
 import org.jboss.osgi.framework.plugins.ServiceManagerPlugin;
 import org.jboss.osgi.framework.plugins.StartLevelPlugin;
@@ -183,22 +184,37 @@ public class OSGiBundleState extends DeployedBundleState
       checkAdminPermission(AdminPermission.CLASS);
 
       // If this bundle's state is INSTALLED, this method must attempt to resolve this bundle 
-      // [TODO] If this bundle cannot be resolved, a Framework event of type FrameworkEvent.ERROR is fired containing a BundleException with details of the reason this bundle could not be resolved. 
+      // [TODO] If this bundle cannot be resolved, a Framework event of type FrameworkEvent.ERROR is fired 
+      // containing a BundleException with details of the reason this bundle could not be resolved. 
       // This method must then throw a ClassNotFoundException.
       if (getState() == Bundle.INSTALLED)
       {
          // Attempt to resolve all installed bundles
          // This should make packages visible to dynamic imports
          // [TODO] Review this approach for getResource and other usages of resolveBundle 
-         getBundleManager().resolveBundle(null);
-         
+         getBundleManager().resolveBundle(this);
+
          if (getState() == Bundle.INSTALLED)
             throw new ClassNotFoundException("Cannot load class: " + name);
       }
-      
+
       ClassLoader classLoader = getDeploymentUnit().getClassLoader();
-      Class<?>  clazz = classLoader.loadClass(name);
-      
+      Class<?> clazz;
+      try
+      {
+         clazz = classLoader.loadClass(name);
+      }
+      catch (ClassNotFoundException ex)
+      {
+         List<PackageAttribute> dynamicImports = getOSGiMetaData().getDynamicImports();
+         if (dynamicImports == null || dynamicImports.isEmpty())
+            throw ex;
+
+         // If we have dynamic imports, resolve all bundles and try again 
+         getBundleManager().resolveBundle(null);
+         clazz = classLoader.loadClass(name);
+      }
+
       return clazz;
    }
 
@@ -265,7 +281,8 @@ public class OSGiBundleState extends DeployedBundleState
          setPersistentlyStarted(true);
       }
 
-      if (isPersistentlyStarted()) {
+      if (isPersistentlyStarted())
+      {
          StartLevelPlugin sls = getBundleManager().getOptionalPlugin(StartLevelPlugin.class);
          if (sls == null || sls.getStartLevel() >= getStartLevel())
             getBundleManager().startBundle(this);
