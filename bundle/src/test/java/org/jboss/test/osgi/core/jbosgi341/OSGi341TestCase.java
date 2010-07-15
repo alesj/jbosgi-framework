@@ -27,8 +27,8 @@ import java.io.InputStream;
 
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.osgi.testing.OSGiManifestBuilder;
-import org.jboss.shrinkwrap.api.Archives;
-import org.jboss.shrinkwrap.api.Asset;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.After;
 import org.junit.Test;
@@ -93,7 +93,7 @@ public class OSGi341TestCase extends OSGiFrameworkTest
 
    private Bundle installCompendium() throws Exception
    {
-      final JavaArchive archive = Archives.create("jbosgi341-compendium", JavaArchive.class);
+      final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "jbosgi341-compendium");
       archive.addClass(ConfigurationAdmin.class);
       archive.addClass(EventAdmin.class);
       archive.setManifest(new Asset()
@@ -117,7 +117,7 @@ public class OSGi341TestCase extends OSGiFrameworkTest
 
    private Bundle installEventAdmin() throws Exception
    {
-      final JavaArchive archive = Archives.create("jbosgi341-eventadmin", JavaArchive.class);
+      final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "jbosgi341-eventadmin");
       archive.addClass(EventAdmin.class);
       archive.setManifest(new Asset()
       {

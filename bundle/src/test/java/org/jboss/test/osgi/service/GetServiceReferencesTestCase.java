@@ -34,8 +34,8 @@ import java.util.Hashtable;
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.osgi.testing.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.Archives;
-import org.jboss.shrinkwrap.api.Asset;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.service.support.a.A;
 import org.jboss.test.osgi.service.support.b.B;
@@ -170,7 +170,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
    @Test
    public void testGetServiceReferencesNoWire() throws Exception
    {
-      JavaArchive archiveA = Archives.create("bundleA", JavaArchive.class);
+      JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "bundleA");
       archiveA.setManifest(new Asset()
       {
          public InputStream openStream()
@@ -221,7 +221,7 @@ public class GetServiceReferencesTestCase extends OSGiFrameworkTest
          assertEquals(1, srefs.length);
          assertEquals(sref1, srefs[0]);
          
-         JavaArchive archiveB = Archives.create("bundleB", JavaArchive.class);
+         JavaArchive archiveB = ShrinkWrap.create(JavaArchive.class, "bundleB");
          archiveB.setManifest(new Asset()
          {
             public InputStream openStream()

@@ -29,7 +29,6 @@ import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.osgi.framework.bundle.AbstractBundleState;
 import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
-import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.osgi.framework.Bundle;
 
 /**

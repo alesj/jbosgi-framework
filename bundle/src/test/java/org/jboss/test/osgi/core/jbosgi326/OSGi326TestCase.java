@@ -34,8 +34,8 @@ import java.util.Arrays;
 import org.jboss.deployers.client.spi.Deployment;
 import org.jboss.osgi.framework.testing.AbstractFrameworkTest;
 import org.jboss.osgi.testing.OSGiManifestBuilder;
-import org.jboss.shrinkwrap.api.Archives;
-import org.jboss.shrinkwrap.api.Asset;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -232,7 +232,7 @@ public class OSGi326TestCase extends AbstractFrameworkTest
    {
       // Bundle-SymbolicName: jbosgi326-bundleA
       // Bundle-Activator: org.jboss.test.osgi.core.jbosgi326.OSGi326Activator
-      final JavaArchive archiveA = Archives.create("jbosgi326-bundleA", JavaArchive.class);
+      final JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "jbosgi326-bundleA");
       archiveA.addClasses(OSGi326Activator.class, SomeService.class, SomeServiceA.class);
       archiveA.setManifest(new Asset()
       {

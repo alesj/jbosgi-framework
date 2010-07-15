@@ -25,8 +25,8 @@ import java.io.InputStream;
 
 import org.jboss.osgi.testing.OSGiFrameworkTest;
 import org.jboss.osgi.testing.OSGiManifestBuilder;
-import org.jboss.shrinkwrap.api.Archives;
-import org.jboss.shrinkwrap.api.Asset;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.classloader.support.a.A;
 import org.jboss.test.osgi.classloader.support.b.B;
@@ -53,7 +53,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
    {
       // Bundle-SymbolicName: dynamic-log-service
       // DynamicImport-Package: org.osgi.service.log
-      archiveC = Archives.create("dynamic-log-service", JavaArchive.class);
+      archiveC = ShrinkWrap.create(JavaArchive.class, "dynamic-log-service");
       archiveC.setManifest(new Asset()
       {
          public InputStream openStream()
@@ -88,7 +88,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // Import-Package: org.jboss.test.osgi.classloader.support.b
       // DynamicImport-Package: *
-      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      final JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-a");
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
@@ -106,7 +106,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 
       // Bundle-SymbolicName: dynamic-wildcard-bc
       // Export-Package: org.jboss.test.osgi.classloader.support.b, org.jboss.test.osgi.classloader.support.c
-      final JavaArchive archiveB = Archives.create("dynamic-wildcard-bc", JavaArchive.class);
+      final JavaArchive archiveB = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-bc");
       archiveB.addClasses(B.class, C.class);
       archiveB.setManifest(new Asset()
       {
@@ -153,7 +153,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       // Bundle-SymbolicName: dynamic-wildcard-a
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // DynamicImport-Package: *
-      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      final JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-a");
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
@@ -170,7 +170,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 
       // Bundle-SymbolicName: dynamic-wildcard-c
       // Export-Package: org.jboss.test.osgi.classloader.support.c
-      final JavaArchive archiveC = Archives.create("dynamic-wildcard-c", JavaArchive.class);
+      final JavaArchive archiveC = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-c");
       archiveC.addClasses(C.class);
       archiveC.setManifest(new Asset()
       {
@@ -215,7 +215,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       // Bundle-SymbolicName: dynamic-wildcard-a
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // DynamicImport-Package: *
-      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      final JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-a");
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
@@ -253,7 +253,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // Import-Package: org.jboss.test.osgi.classloader.support.b
       // DynamicImport-Package: org.jboss.test.osgi.classloader.*
-      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      final JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-a");
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
@@ -271,7 +271,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 
       // Bundle-SymbolicName: dynamic-wildcard-bc
       // Export-Package: org.jboss.test.osgi.classloader.support.b, org.jboss.test.osgi.classloader.support.c
-      final JavaArchive archiveB = Archives.create("dynamic-wildcard-bc", JavaArchive.class);
+      final JavaArchive archiveB = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-bc");
       archiveB.addClasses(B.class, C.class);
       archiveB.setManifest(new Asset()
       {
@@ -318,7 +318,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       // Bundle-SymbolicName: dynamic-wildcard-a
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // DynamicImport-Package: org.jboss.test.osgi.classloader.*
-      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      final JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-a");
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
@@ -335,7 +335,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
 
       // Bundle-SymbolicName: dynamic-wildcard-c
       // Export-Package: org.jboss.test.osgi.classloader.support.c
-      final JavaArchive archiveC = Archives.create("dynamic-wildcard-c", JavaArchive.class);
+      final JavaArchive archiveC = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-c");
       archiveC.addClasses(C.class);
       archiveC.setManifest(new Asset()
       {
@@ -380,7 +380,7 @@ public class DynamicImportPackageTestCase extends OSGiFrameworkTest
       // Bundle-SymbolicName: dynamic-wildcard-a
       // Export-Package: org.jboss.test.osgi.classloader.support.a 
       // DynamicImport-Package: org.jboss.test.osgi.classloader.*
-      final JavaArchive archiveA = Archives.create("dynamic-wildcard-a", JavaArchive.class);
+      final JavaArchive archiveA = ShrinkWrap.create(JavaArchive.class, "dynamic-wildcard-a");
       archiveA.addClass(A.class);
       archiveA.setManifest(new Asset()
       {
