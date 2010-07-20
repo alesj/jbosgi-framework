@@ -84,6 +84,11 @@
   ********************************
   -->
   
+  <bean name="DeployerService" class="org.jboss.osgi.framework.service.internal.DeployerServiceImpl">
+    <related-class name="org.jboss.osgi.deployment.deployer.DeployerService">OSGi</related-class>
+    <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
+    <demand state="PreInstall">MDRService</demand>
+  </bean>
   <bean name="PackageAdminService" class="org.jboss.osgi.framework.packageadmin.PackageAdminImpl">
     <related-class name="org.osgi.service.packageadmin.PackageAdmin">OSGi</related-class>
     <constructor><parameter><inject bean="OSGiBundleManager" /></parameter></constructor>
