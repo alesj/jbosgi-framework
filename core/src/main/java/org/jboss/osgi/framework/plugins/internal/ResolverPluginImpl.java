@@ -24,8 +24,10 @@ package org.jboss.osgi.framework.plugins.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jboss.logging.Logger;
 import org.jboss.osgi.framework.bundle.DeployedBundleState;
@@ -40,7 +42,6 @@ import org.jboss.osgi.resolver.XModuleBuilder;
 import org.jboss.osgi.resolver.XRequirement;
 import org.jboss.osgi.resolver.XResolver;
 import org.jboss.osgi.resolver.XResolverFactory;
-import org.jboss.osgi.resolver.XWire;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -116,7 +117,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    @Override
    public List<Bundle> resolve(List<Bundle> bundles)
    {
-      List<XModule> modules = new ArrayList<XModule>();
+      Set<XModule> modules = new LinkedHashSet<XModule>();
       if (bundles == null)
       {
          modules = resolver.getModules();
@@ -134,7 +135,7 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
       }
       
       List<Bundle> result = new ArrayList<Bundle>();
-      modules = resolver.resolve(modules);
+      modules = resolver.resolveAll(modules);
       for (XModule module : modules)
       {
          Bundle bundle = module.getAttachment(Bundle.class);
@@ -151,11 +152,10 @@ public class ResolverPluginImpl extends AbstractPlugin implements ResolverPlugin
    public OSGiCapability getWiredCapability(OSGiRequirement osgireq)
    {
       XRequirement req = osgireq.getResolverElement();
-      XWire wire = req.getWire();
-      if (wire == null || wire.getCapability() == null)
+      XCapability cap = req.getWiredCapability();
+      if (cap == null)
          return null;
       
-      XCapability cap = wire.getCapability();
       OSGiCapability osgicap = cap.getAttachment(OSGiCapability.class);
       return osgicap;
    }
