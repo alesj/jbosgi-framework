@@ -251,11 +251,11 @@ public class FrameworkState extends SystemBundle implements Framework
       // Increase to initial start level
       StartLevelPlugin startLevel = getBundleManager().getOptionalPlugin(StartLevelPlugin.class);
       if (startLevel != null)
-         startLevel.increaseStartLevel(getBeginningStartLevel());
-
-      // A framework event of type STARTED is fired
-      FrameworkEventsPlugin plugin = getBundleManager().getPlugin(FrameworkEventsPlugin.class);
-      plugin.fireFrameworkEvent(this, FrameworkEvent.STARTED, null);
+         // This sets the start level asynchronously to the beginning start level.
+         // Let the Start Level Plugin manage the thread that does this as you want to serialize start
+         // level changes in case a user calls startLevel.setStartLevel() concurrently.
+         // The start level plugin will fire FrameworkEvent.STARTED when the start level is reached
+         startLevel.setStartLevel(getBeginningStartLevel(), true);
    }
 
    private int getBeginningStartLevel()

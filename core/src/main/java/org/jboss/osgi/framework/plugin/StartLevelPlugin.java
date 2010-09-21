@@ -45,4 +45,17 @@ public interface StartLevelPlugin extends Plugin, StartLevel
     * @param level the target start level.
     */
    void decreaseStartLevel(int level);
+
+   /**
+    * This method does the same as {@link StartLevel#setStartLevel(int)}
+    * with an additional parameter to indicate whether this is triggered from 
+    * framework start. The additional parameter only influences the event sent 
+    * when the start level change is finished. 
+    * @param startLevel The requested start level for the framework.
+    * @param frameworkStart <tt>true</tt> if this start level change is initiated
+    *  from a framework start operation. If so the Start Level Plugin with emit a
+    *  FrameworkEvent.STARTED event when finished, otherwise it will emit a 
+    *  FrameworkEvent.STARTLEVEL_CHANGED event.
+    */
+   void setStartLevel(int startLevel, boolean frameworkStart);
 }
